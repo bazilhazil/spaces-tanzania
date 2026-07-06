@@ -105,7 +105,7 @@ function PropertyDetailPage() {
                 </div>
               </div>
             </div>
-            {property.images.slice(0, 4).map((img, i) => (
+            {property.images.slice(0, 4).map((img: string, i: number) => (
               <button
                 key={i}
                 onClick={() => setActiveImage(i)}
@@ -173,7 +173,7 @@ function PropertyDetailPage() {
             <div className="mt-8">
               <h2 className="font-display text-xl font-semibold text-foreground">Amenities</h2>
               <div className="mt-3 flex flex-wrap gap-2">
-                {property.amenities.map((a) => (
+                {property.amenities.map((a: string) => (
                   <span
                     key={a}
                     className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground"

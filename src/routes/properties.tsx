@@ -110,7 +110,7 @@ function PropertiesPage() {
               onValueChange={(v) =>
                 navigate({
                   to: "/properties",
-                  search: (prev) => ({ ...prev, sort: v as never }),
+                  search: (prev: Record<string, unknown>) => ({ ...prev, sort: v as never }),
                 })
               }
             >
