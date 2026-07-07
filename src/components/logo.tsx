@@ -1,23 +1,37 @@
+import logoAsset from "@/assets/spaces-logo.jpeg.asset.json";
+
 interface LogoProps {
   className?: string;
+  /** When true, shows only the mark (crops out the "Spaces" wordmark below). */
+  markOnly?: boolean;
 }
 
-/** SPACES mark — deep blue circle with gold roofline notch. */
-export function Logo({ className }: LogoProps) {
-  return (
-    <svg viewBox="0 0 40 40" className={className} aria-hidden="true">
-      <defs>
-        <linearGradient id="spaces-grad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="oklch(0.42 0.11 250)" />
-          <stop offset="100%" stopColor="oklch(0.55 0.14 250)" />
-        </linearGradient>
-      </defs>
-      <circle cx="20" cy="20" r="18" fill="url(#spaces-grad)" />
-      <path
-        d="M11 27 L20 17 L29 27 Z"
-        fill="oklch(0.74 0.12 82)"
+/** SPACES brand logo — uses the uploaded brand image from the CDN. */
+export function Logo({ className, markOnly = true }: LogoProps) {
+  if (markOnly) {
+    // Crop to the top mark area of the square logo image.
+    return (
+      <span
+        className={className}
+        role="img"
+        aria-label="SPACES"
+        style={{
+          display: "inline-block",
+          backgroundImage: `url(${logoAsset.url})`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center 22%",
+          backgroundSize: "170% auto",
+        }}
       />
-      <circle cx="20" cy="20" r="18" fill="none" stroke="oklch(1 0 0 / 0.15)" />
-    </svg>
+    );
+  }
+  return (
+    <img
+      src={logoAsset.url}
+      alt="SPACES"
+      className={className}
+      loading="eager"
+      decoding="async"
+    />
   );
 }
