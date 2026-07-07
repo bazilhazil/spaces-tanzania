@@ -176,27 +176,29 @@ export function SiteHeader() {
               </Link>
             ))}
             <div className="mt-3 grid gap-2">
+              <div className="flex justify-center pb-1"><LanguageSwitcher /></div>
               <Button onClick={() => { setOpen(false); onUpload(); }} className="w-full gap-2 rounded-full">
-                <Upload className="h-4 w-4" /> Upload Property
+                <Upload className="h-4 w-4" /> {t("nav.upload")}
               </Button>
               {user ? (
                 <>
                   <Link to="/dashboard" onClick={() => setOpen(false)}>
-                    <Button variant="outline" className="w-full rounded-full">Dashboard</Button>
+                    <Button variant="outline" className="w-full rounded-full">{t("nav.dashboard")}</Button>
                   </Link>
-                  <Button variant="ghost" onClick={handleSignOut} className="w-full rounded-full">Sign out</Button>
+                  <Button variant="ghost" onClick={handleSignOut} className="w-full rounded-full">{t("nav.logout")}</Button>
                 </>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   <Link to="/login" onClick={() => setOpen(false)}>
-                    <Button variant="outline" className="w-full rounded-full">Login</Button>
+                    <Button variant="outline" className="w-full rounded-full">{t("nav.login")}</Button>
                   </Link>
                   <Link to="/register" onClick={() => setOpen(false)}>
-                    <Button variant="outline" className="w-full rounded-full border-primary/20 text-primary">Register</Button>
+                    <Button variant="outline" className="w-full rounded-full border-primary/20 text-primary">{t("nav.register")}</Button>
                   </Link>
                 </div>
               )}
             </div>
+
           </div>
         </div>
       )}
