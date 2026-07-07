@@ -20,6 +20,7 @@ const searchSchema = z.object({
   type: fallback(z.enum(["rent", "sale", "commercial"]).optional(), undefined),
   city: fallback(z.string().optional(), undefined),
   category: fallback(z.string().optional(), undefined),
+  minPrice: fallback(z.number().optional(), undefined),
   maxPrice: fallback(z.number().optional(), undefined),
   q: fallback(z.string().optional(), undefined),
   sort: fallback(z.enum(["newest", "popular", "price-asc", "price-desc"]).optional(), undefined),
