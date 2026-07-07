@@ -414,14 +414,16 @@ const categoryItems = [
 ];
 
 function Categories() {
+  const { t } = useI18n();
   return (
     <section>
       <div className="container-page py-16 md:py-20">
         <SectionHeader
           eyebrow="Browse by category"
-          title="Featured Categories"
-          subtitle="Every kind of space you might need — all in one trusted marketplace."
+          title={t("home.categories")}
+          subtitle={t("home.categories.sub")}
         />
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {categoryItems.map((c) => (
             <Link
