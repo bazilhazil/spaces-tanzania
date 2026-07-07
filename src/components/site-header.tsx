@@ -120,16 +120,16 @@ export function SiteHeader() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard</Link>
+                  <Link to="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" /> {t("nav.dashboard")}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/dashboard/$section" params={{ section: "settings" }}>
-                    <UserIcon className="mr-2 h-4 w-4" /> Profile
+                    <UserIcon className="mr-2 h-4 w-4" /> {t("nav.profile")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={handleSignOut}>
-                  <LogOut className="mr-2 h-4 w-4" /> Sign out
+                  <LogOut className="mr-2 h-4 w-4" /> {t("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -137,16 +137,17 @@ export function SiteHeader() {
             <>
               <Link to="/login" className="hidden md:inline-flex">
                 <Button variant="ghost" size="sm" className="rounded-full text-foreground/80 hover:text-primary">
-                  Login
+                  {t("nav.login")}
                 </Button>
               </Link>
               <Link to="/register" className="hidden md:inline-flex">
                 <Button variant="outline" size="sm" className="rounded-full border-primary/20 text-primary hover:bg-primary/5">
-                  Register
+                  {t("nav.register")}
                 </Button>
               </Link>
             </>
           )}
+
 
           <Button
             variant="ghost"
