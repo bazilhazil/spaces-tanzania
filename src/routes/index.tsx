@@ -24,10 +24,12 @@ import { PropertyCard } from "@/components/property-card";
 import { Button } from "@/components/ui/button";
 import heroVilla from "@/assets/hero-villa.jpg";
 import { agents, locations, properties, stats, testimonials } from "@/lib/mock-data";
+import { useI18n } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
 });
+
 
 function HomePage() {
   const featured = properties.filter((p) => p.featured);
