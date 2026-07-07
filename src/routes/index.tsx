@@ -397,3 +397,99 @@ function CTA() {
     </section>
   );
 }
+
+const categoryItems = [
+  { label: "Houses", icon: HomeIcon, category: "House", count: "3,200+ listings", tint: "from-primary/10 to-primary/0" },
+  { label: "Apartments", icon: Building2, category: "Apartment", count: "2,140+ listings", tint: "from-gold/15 to-gold/0" },
+  { label: "Offices", icon: Landmark, category: "Office", count: "540+ listings", tint: "from-primary/10 to-primary/0" },
+  { label: "Commercial", icon: Store, category: "Shop", count: "310+ listings", tint: "from-gold/15 to-gold/0" },
+  { label: "Land", icon: Trees, category: "Land", count: "980+ listings", tint: "from-primary/10 to-primary/0" },
+  { label: "Warehouses", icon: Warehouse, category: "Warehouse", count: "120+ listings", tint: "from-gold/15 to-gold/0" },
+];
+
+function Categories() {
+  return (
+    <section>
+      <div className="container-page py-16 md:py-20">
+        <SectionHeader
+          eyebrow="Browse by category"
+          title="Featured Categories"
+          subtitle="Every kind of space you might need — all in one trusted marketplace."
+        />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {categoryItems.map((c) => (
+            <Link
+              key={c.label}
+              to="/properties"
+              search={{ category: c.category }}
+              className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[var(--shadow-elevated)]"
+            >
+              <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${c.tint} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
+              <div className="relative flex items-start justify-between">
+                <div>
+                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/8 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                    <c.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-4 font-display text-lg font-semibold text-foreground">{c.label}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">{c.count}</p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-primary" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const whyItems = [
+  {
+    icon: ShieldCheck,
+    title: "Verified Listings",
+    body: "Every verified property is physically inspected and title-checked by our team.",
+  },
+  {
+    icon: Users,
+    title: "Trusted Agents",
+    body: "Licensed local agents with proven track records and transparent reviews.",
+  },
+  {
+    icon: SearchIcon,
+    title: "Fast Search",
+    body: "Filter by city, price, and amenities in seconds. Save searches for later.",
+  },
+  {
+    icon: Headphones,
+    title: "Professional Support",
+    body: "Real humans on WhatsApp, phone, and email — 7 days a week.",
+  },
+];
+
+function WhyChooseUs() {
+  return (
+    <section>
+      <div className="container-page py-16 md:py-20">
+        <SectionHeader
+          eyebrow="Why SPACES"
+          title="Built on trust, designed for you"
+          subtitle="Tanzania's most reliable place to find, list, and manage property."
+        />
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {whyItems.map((w) => (
+            <div
+              key={w.title}
+              className="group rounded-2xl border border-border/70 bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-[var(--shadow-elevated)]"
+            >
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-[var(--shadow-soft)]">
+                <w.icon className="h-5 w-5" />
+              </div>
+              <h3 className="mt-5 font-display text-lg font-semibold text-foreground">{w.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{w.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
