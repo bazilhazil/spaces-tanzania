@@ -1,8 +1,20 @@
-import { Link } from "@tanstack/react-router";
-import { Menu, Upload, X } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { LayoutDashboard, LogOut, Menu, Upload, User as UserIcon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
+import { useAuth } from "@/hooks/use-auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { AuthGateDialog } from "@/components/auth-gate-dialog";
+import { toast } from "sonner";
 
 const nav = [
   { to: "/", label: "Home", exact: true },
@@ -15,6 +27,9 @@ const nav = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  const { user, profile, primaryRole, signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -22,6 +37,20 @@ export function SiteHeader() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  function onUpload() {
+    if (user) navigate({ to: "/dashboard/$section", params: { section: "upload" } });
+    else setGateOpen(true);
+  }
+
+  async function handleSignOut() {
+    await signOut();
+    toast.success("Signed out");
+    navigate({ to: "/" });
+  }
+
+  const initials = (profile?.full_name || user?.email || "S")
+    .split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
 
   return (
     <header
@@ -56,21 +85,62 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link to="/auth" className="hidden md:inline-flex">
-            <Button size="sm" className="gap-2 rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-soft)] hover:bg-primary/90">
-              <Upload className="h-4 w-4" /> Upload Property
-            </Button>
-          </Link>
-          <Link to="/auth" className="hidden md:inline-flex">
-            <Button variant="ghost" size="sm" className="rounded-full text-foreground/80 hover:text-primary">
-              Login
-            </Button>
-          </Link>
-          <Link to="/auth" className="hidden md:inline-flex">
-            <Button variant="outline" size="sm" className="rounded-full border-primary/20 text-primary hover:bg-primary/5">
-              Register
-            </Button>
-          </Link>
+          <Button
+            size="sm"
+            onClick={onUpload}
+            className="hidden gap-2 rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-soft)] hover:bg-primary/90 md:inline-flex"
+          >
+            <Upload className="h-4 w-4" /> Upload Property
+          </Button>
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 rounded-full border border-border/60 bg-background p-1 pr-3 transition hover:bg-accent">
+                  <Avatar className="h-7 w-7">
+                    <AvatarImage src={profile?.avatar_url ?? undefined} />
+                    <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">{initials}</AvatarFallback>
+                  </Avatar>
+                  <span className="hidden max-w-[110px] truncate text-sm font-medium text-foreground md:inline">
+                    {profile?.full_name || user.email?.split("@")[0]}
+                  </span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="text-sm font-semibold">{profile?.full_name || "SPACES account"}</div>
+                  <div className="text-xs font-normal text-muted-foreground capitalize">{primaryRole}</div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard/$section" params={{ section: "settings" }}>
+                    <UserIcon className="mr-2 h-4 w-4" /> Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" /> Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Link to="/login" className="hidden md:inline-flex">
+                <Button variant="ghost" size="sm" className="rounded-full text-foreground/80 hover:text-primary">
+                  Login
+                </Button>
+              </Link>
+              <Link to="/register" className="hidden md:inline-flex">
+                <Button variant="outline" size="sm" className="rounded-full border-primary/20 text-primary hover:bg-primary/5">
+                  Register
+                </Button>
+              </Link>
+            </>
+          )}
+
           <Button
             variant="ghost"
             size="icon"
@@ -98,23 +168,32 @@ export function SiteHeader() {
               </Link>
             ))}
             <div className="mt-3 grid gap-2">
-              <Link to="/auth" onClick={() => setOpen(false)}>
-                <Button className="w-full gap-2 rounded-full">
-                  <Upload className="h-4 w-4" /> Upload Property
-                </Button>
-              </Link>
-              <div className="grid grid-cols-2 gap-2">
-                <Link to="/auth" onClick={() => setOpen(false)}>
-                  <Button variant="outline" className="w-full rounded-full">Login</Button>
-                </Link>
-                <Link to="/auth" onClick={() => setOpen(false)}>
-                  <Button variant="outline" className="w-full rounded-full border-primary/20 text-primary">Register</Button>
-                </Link>
-              </div>
+              <Button onClick={() => { setOpen(false); onUpload(); }} className="w-full gap-2 rounded-full">
+                <Upload className="h-4 w-4" /> Upload Property
+              </Button>
+              {user ? (
+                <>
+                  <Link to="/dashboard" onClick={() => setOpen(false)}>
+                    <Button variant="outline" className="w-full rounded-full">Dashboard</Button>
+                  </Link>
+                  <Button variant="ghost" onClick={handleSignOut} className="w-full rounded-full">Sign out</Button>
+                </>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  <Link to="/login" onClick={() => setOpen(false)}>
+                    <Button variant="outline" className="w-full rounded-full">Login</Button>
+                  </Link>
+                  <Link to="/register" onClick={() => setOpen(false)}>
+                    <Button variant="outline" className="w-full rounded-full border-primary/20 text-primary">Register</Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
+
+      <AuthGateDialog open={gateOpen} onOpenChange={setGateOpen} />
     </header>
   );
 }
