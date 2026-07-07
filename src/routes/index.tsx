@@ -172,6 +172,7 @@ function FeaturedSection({
   items: typeof properties;
   tone?: "default" | "muted";
 }) {
+  const { t } = useI18n();
   return (
     <section className={tone === "muted" ? "bg-secondary/40" : ""}>
       <div className="container-page py-16 md:py-20">
@@ -182,11 +183,12 @@ function FeaturedSection({
           action={
             <Link to="/properties">
               <Button variant="ghost" className="gap-1 text-primary hover:bg-primary/5">
-                View all <ArrowRight className="h-4 w-4" />
+                {t("home.viewAll")} <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           }
         />
+
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {items.map((p) => (
             <PropertyCard key={p.id} property={p} />
