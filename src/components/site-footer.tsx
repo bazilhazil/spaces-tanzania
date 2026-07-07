@@ -43,7 +43,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-border/60">
         <div className="container-page flex flex-col items-center justify-between gap-2 py-6 text-xs text-muted-foreground md:flex-row">
-          <p>© {new Date().getFullYear()} SPACES Group Ltd. All rights reserved. Dar es Salaam, Tanzania.</p>
+          <p>© 2025 SPACES Group Ltd. All rights reserved. Dar es Salaam, Tanzania.</p>
           <p>Find Your Perfect Space.</p>
         </div>
       </div>

@@ -10,20 +10,35 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PropertiesRouteImport } from './routes/properties'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AgentsRouteImport } from './routes/agents'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PropertiesSlugRouteImport } from './routes/properties.$slug'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_authenticated/dashboard.$section'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PropertiesRoute = PropertiesRouteImport.update({
   id: '/properties',
   path: '/properties',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -36,6 +51,10 @@ const AgentsRoute = AgentsRouteImport.update({
   path: '/agents',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -46,31 +65,55 @@ const PropertiesSlugRoute = PropertiesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => PropertiesRoute,
 } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardSectionRoute =
+  AuthenticatedDashboardSectionRouteImport.update({
+    id: '/$section',
+    path: '/$section',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/login': typeof LoginRoute
   '/properties': typeof PropertiesRouteWithChildren
+  '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/login': typeof LoginRoute
   '/properties': typeof PropertiesRouteWithChildren
+  '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/login': typeof LoginRoute
   '/properties': typeof PropertiesRouteWithChildren
+  '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/_authenticated/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -78,32 +121,48 @@ export interface FileRouteTypes {
     | '/'
     | '/agents'
     | '/auth'
+    | '/login'
     | '/properties'
+    | '/register'
     | '/sitemap.xml'
+    | '/dashboard'
     | '/properties/$slug'
+    | '/dashboard/$section'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/agents'
     | '/auth'
+    | '/login'
     | '/properties'
+    | '/register'
     | '/sitemap.xml'
+    | '/dashboard'
     | '/properties/$slug'
+    | '/dashboard/$section'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/agents'
     | '/auth'
+    | '/login'
     | '/properties'
+    | '/register'
     | '/sitemap.xml'
+    | '/_authenticated/dashboard'
     | '/properties/$slug'
+    | '/_authenticated/dashboard/$section'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AgentsRoute: typeof AgentsRoute
   AuthRoute: typeof AuthRoute
+  LoginRoute: typeof LoginRoute
   PropertiesRoute: typeof PropertiesRouteWithChildren
+  RegisterRoute: typeof RegisterRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
@@ -116,11 +175,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/properties': {
       id: '/properties'
       path: '/properties'
       fullPath: '/properties'
       preLoaderRoute: typeof PropertiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -137,6 +210,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -151,8 +231,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PropertiesSlugRouteImport
       parentRoute: typeof PropertiesRoute
     }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/$section': {
+      id: '/_authenticated/dashboard/$section'
+      path: '/$section'
+      fullPath: '/dashboard/$section'
+      preLoaderRoute: typeof AuthenticatedDashboardSectionRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
   }
 }
+
+interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardSectionRoute: typeof AuthenticatedDashboardSectionRoute
+}
+
+const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
+  {
+    AuthenticatedDashboardSectionRoute: AuthenticatedDashboardSectionRoute,
+  }
+
+const AuthenticatedDashboardRouteWithChildren =
+  AuthenticatedDashboardRoute._addFileChildren(
+    AuthenticatedDashboardRouteChildren,
+  )
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface PropertiesRouteChildren {
   PropertiesSlugRoute: typeof PropertiesSlugRoute
@@ -168,9 +287,12 @@ const PropertiesRouteWithChildren = PropertiesRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AgentsRoute: AgentsRoute,
   AuthRoute: AuthRoute,
+  LoginRoute: LoginRoute,
   PropertiesRoute: PropertiesRouteWithChildren,
+  RegisterRoute: RegisterRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
