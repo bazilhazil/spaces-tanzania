@@ -62,10 +62,13 @@ function useRoleNav(): Record<AppRole, Item[]> {
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const { profile, user, primaryRole, signOut } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const NAV = useRoleNav();
   const items = NAV[primaryRole];
+
 
   async function handleSignOut() {
     await signOut();
