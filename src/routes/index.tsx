@@ -42,6 +42,7 @@ function HomePage() {
       <main className="flex-1">
         <Hero />
         <Stats />
+        <Categories />
         <FeaturedSection
           eyebrow="Handpicked"
           title="Featured Properties"
@@ -56,6 +57,7 @@ function HomePage() {
           items={latest}
           tone="muted"
         />
+        <WhyChooseUs />
         <Verified verified={verified} />
         <Agents />
         <Testimonials />
