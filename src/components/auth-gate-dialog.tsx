@@ -2,9 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable";
+import { useI18n } from "@/hooks/use-i18n";
 import { Sparkles } from "lucide-react";
 
 export function AuthGateDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const { t } = useI18n();
+
   async function google() {
     await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
   }
@@ -17,27 +20,28 @@ export function AuthGateDialog({ open, onOpenChange }: { open: boolean; onOpenCh
           </div>
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle className="font-display text-2xl text-primary-foreground">
-              Create your free account
+              {t("gate.title")}
             </DialogTitle>
             <DialogDescription className="text-primary-foreground/85">
-              Upload your property and reach thousands of buyers across Tanzania.
+              {t("gate.sub")}
             </DialogDescription>
           </DialogHeader>
         </div>
         <div className="space-y-3 p-6">
           <Button onClick={google} variant="outline" className="h-11 w-full gap-2 rounded-xl">
-            <GoogleIcon /> Continue with Google
+            <GoogleIcon /> {t("gate.google")}
           </Button>
           <Link to="/register" onClick={() => onOpenChange(false)}>
-            <Button className="h-11 w-full rounded-xl">Register with Email</Button>
+            <Button className="h-11 w-full rounded-xl">{t("gate.email")}</Button>
           </Link>
           <p className="pt-2 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
+            {t("gate.have")}{" "}
             <Link to="/login" onClick={() => onOpenChange(false)} className="font-medium text-primary hover:underline">
-              Login
+              {t("nav.login")}
             </Link>
           </p>
         </div>
+
       </DialogContent>
     </Dialog>
   );

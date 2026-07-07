@@ -24,12 +24,15 @@ import { PropertyCard } from "@/components/property-card";
 import { Button } from "@/components/ui/button";
 import heroVilla from "@/assets/hero-villa.jpg";
 import { agents, locations, properties, stats, testimonials } from "@/lib/mock-data";
+import { useI18n } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
+
 function HomePage() {
+  const { t } = useI18n();
   const featured = properties.filter((p) => p.featured);
   const latest = [...properties]
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
@@ -45,15 +48,15 @@ function HomePage() {
         <Categories />
         <FeaturedSection
           eyebrow="Handpicked"
-          title="Featured Properties"
-          subtitle="Extraordinary spaces curated by our team."
+          title={t("home.featured")}
+          subtitle={t("home.featured.sub")}
           items={featured}
         />
         <Locations />
         <FeaturedSection
           eyebrow="Fresh listings"
-          title="Latest Properties"
-          subtitle="Just added by owners and agents across Tanzania."
+          title={t("home.latest")}
+          subtitle={t("home.latest.sub")}
           items={latest}
           tone="muted"
         />
@@ -67,6 +70,7 @@ function HomePage() {
     </div>
   );
 }
+
 
 function Hero() {
   return (
@@ -168,6 +172,7 @@ function FeaturedSection({
   items: typeof properties;
   tone?: "default" | "muted";
 }) {
+  const { t } = useI18n();
   return (
     <section className={tone === "muted" ? "bg-secondary/40" : ""}>
       <div className="container-page py-16 md:py-20">
@@ -178,11 +183,12 @@ function FeaturedSection({
           action={
             <Link to="/properties">
               <Button variant="ghost" className="gap-1 text-primary hover:bg-primary/5">
-                View all <ArrowRight className="h-4 w-4" />
+                {t("home.viewAll")} <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           }
         />
+
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {items.map((p) => (
             <PropertyCard key={p.id} property={p} />
@@ -408,14 +414,16 @@ const categoryItems = [
 ];
 
 function Categories() {
+  const { t } = useI18n();
   return (
     <section>
       <div className="container-page py-16 md:py-20">
         <SectionHeader
           eyebrow="Browse by category"
-          title="Featured Categories"
-          subtitle="Every kind of space you might need — all in one trusted marketplace."
+          title={t("home.categories")}
+          subtitle={t("home.categories.sub")}
         />
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {categoryItems.map((c) => (
             <Link

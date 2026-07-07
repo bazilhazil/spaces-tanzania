@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 import { Logo } from "@/components/logo";
+import { useI18n } from "@/hooks/use-i18n";
 
 export function SiteFooter() {
+  const { t } = useI18n();
   return (
     <footer className="mt-24 border-t border-border/60 bg-secondary/40">
       <div className="container-page grid gap-10 py-14 md:grid-cols-4">
@@ -22,19 +24,19 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <FooterCol title="Explore" links={[
-          { to: "/properties", label: "Buy" },
-          { to: "/properties", label: "Rent" },
-          { to: "/properties", label: "Commercial" },
-          { to: "/agents", label: "Agents" },
+        <FooterCol title={t("footer.explore")} links={[
+          { to: "/properties", label: t("nav.buy") },
+          { to: "/properties", label: t("nav.rent") },
+          { to: "/properties", label: t("nav.commercial") },
+          { to: "/agents", label: t("nav.agents") },
         ]} />
-        <FooterCol title="Company" links={[
+        <FooterCol title={t("footer.company")} links={[
           { to: "/", label: "About" },
           { to: "/", label: "Careers" },
           { to: "/", label: "Press" },
           { to: "/", label: "Contact" },
         ]} />
-        <FooterCol title="Support" links={[
+        <FooterCol title={t("footer.support")} links={[
           { to: "/", label: "Help center" },
           { to: "/", label: "Verification" },
           { to: "/", label: "Terms" },
@@ -43,13 +45,14 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-border/60">
         <div className="container-page flex flex-col items-center justify-between gap-2 py-6 text-xs text-muted-foreground md:flex-row">
-          <p>© 2025 SPACES Group Ltd. All rights reserved. Dar es Salaam, Tanzania.</p>
-          <p>Find Your Perfect Space.</p>
+          <p>© 2025 SPACES Group Ltd. {t("footer.rights")}</p>
+          <p>{t("footer.tagline")}</p>
         </div>
       </div>
     </footer>
   );
 }
+
 
 function FooterCol({ title, links }: { title: string; links: { to: string; label: string }[] }) {
   return (

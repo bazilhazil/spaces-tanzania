@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -16,20 +18,23 @@ import {
 import { AuthGateDialog } from "@/components/auth-gate-dialog";
 import { toast } from "sonner";
 
-const nav = [
-  { to: "/", label: "Home", exact: true },
-  { to: "/properties", label: "Buy", search: { type: "sale" as const } },
-  { to: "/properties", label: "Rent", search: { type: "rent" as const } },
-  { to: "/properties", label: "Commercial", search: { type: "commercial" as const } },
-  { to: "/agents", label: "Agents" },
-];
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const { user, profile, primaryRole, signOut } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
+
+  const nav = [
+    { to: "/" as const, label: t("nav.home"), exact: true },
+    { to: "/properties" as const, label: t("nav.buy"), search: { type: "sale" as const } },
+    { to: "/properties" as const, label: t("nav.rent"), search: { type: "rent" as const } },
+    { to: "/properties" as const, label: t("nav.commercial"), search: { type: "commercial" as const } },
+    { to: "/agents" as const, label: t("nav.agents") },
+  ];
+
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -85,13 +90,15 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <LanguageSwitcher className="hidden md:inline-flex" />
           <Button
             size="sm"
             onClick={onUpload}
             className="hidden gap-2 rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-soft)] hover:bg-primary/90 md:inline-flex"
           >
-            <Upload className="h-4 w-4" /> Upload Property
+            <Upload className="h-4 w-4" /> {t("nav.upload")}
           </Button>
+
 
           {user ? (
             <DropdownMenu>
@@ -113,16 +120,16 @@ export function SiteHeader() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard</Link>
+                  <Link to="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" /> {t("nav.dashboard")}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/dashboard/$section" params={{ section: "settings" }}>
-                    <UserIcon className="mr-2 h-4 w-4" /> Profile
+                    <UserIcon className="mr-2 h-4 w-4" /> {t("nav.profile")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={handleSignOut}>
-                  <LogOut className="mr-2 h-4 w-4" /> Sign out
+                  <LogOut className="mr-2 h-4 w-4" /> {t("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -130,16 +137,17 @@ export function SiteHeader() {
             <>
               <Link to="/login" className="hidden md:inline-flex">
                 <Button variant="ghost" size="sm" className="rounded-full text-foreground/80 hover:text-primary">
-                  Login
+                  {t("nav.login")}
                 </Button>
               </Link>
               <Link to="/register" className="hidden md:inline-flex">
                 <Button variant="outline" size="sm" className="rounded-full border-primary/20 text-primary hover:bg-primary/5">
-                  Register
+                  {t("nav.register")}
                 </Button>
               </Link>
             </>
           )}
+
 
           <Button
             variant="ghost"
@@ -168,27 +176,29 @@ export function SiteHeader() {
               </Link>
             ))}
             <div className="mt-3 grid gap-2">
+              <div className="flex justify-center pb-1"><LanguageSwitcher /></div>
               <Button onClick={() => { setOpen(false); onUpload(); }} className="w-full gap-2 rounded-full">
-                <Upload className="h-4 w-4" /> Upload Property
+                <Upload className="h-4 w-4" /> {t("nav.upload")}
               </Button>
               {user ? (
                 <>
                   <Link to="/dashboard" onClick={() => setOpen(false)}>
-                    <Button variant="outline" className="w-full rounded-full">Dashboard</Button>
+                    <Button variant="outline" className="w-full rounded-full">{t("nav.dashboard")}</Button>
                   </Link>
-                  <Button variant="ghost" onClick={handleSignOut} className="w-full rounded-full">Sign out</Button>
+                  <Button variant="ghost" onClick={handleSignOut} className="w-full rounded-full">{t("nav.logout")}</Button>
                 </>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   <Link to="/login" onClick={() => setOpen(false)}>
-                    <Button variant="outline" className="w-full rounded-full">Login</Button>
+                    <Button variant="outline" className="w-full rounded-full">{t("nav.login")}</Button>
                   </Link>
                   <Link to="/register" onClick={() => setOpen(false)}>
-                    <Button variant="outline" className="w-full rounded-full border-primary/20 text-primary">Register</Button>
+                    <Button variant="outline" className="w-full rounded-full border-primary/20 text-primary">{t("nav.register")}</Button>
                   </Link>
                 </div>
               )}
             </div>
+
           </div>
         </div>
       )}

@@ -9,57 +9,66 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth, type AppRole } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 type Item = { label: string; to: string; icon: React.ComponentType<{ className?: string }> };
 
-const NAV: Record<AppRole, Item[]> = {
-  owner: [
-    { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
-    { label: "My Properties", to: "/dashboard/properties", icon: Home },
-    { label: "Upload Property", to: "/dashboard/upload", icon: Upload },
-    { label: "Messages", to: "/dashboard/messages", icon: MessageSquare },
-    { label: "Viewing Requests", to: "/dashboard/viewings", icon: Calendar },
-    { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
-    { label: "Subscription", to: "/dashboard/subscription", icon: CreditCard },
-    { label: "Settings", to: "/dashboard/settings", icon: Settings },
-  ],
-  buyer: [
-    { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
-    { label: "Favorites", to: "/dashboard/favorites", icon: Heart },
-    { label: "Saved Searches", to: "/dashboard/searches", icon: Search },
-    { label: "Viewing Requests", to: "/dashboard/viewings", icon: Calendar },
-    { label: "Messages", to: "/dashboard/messages", icon: MessageSquare },
-    { label: "Profile", to: "/dashboard/settings", icon: UserIcon },
-  ],
-  agent: [
-    { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
-    { label: "Clients", to: "/dashboard/clients", icon: Users },
-    { label: "Properties", to: "/dashboard/properties", icon: Briefcase },
-    { label: "Viewing Requests", to: "/dashboard/viewings", icon: Calendar },
-    { label: "Messages", to: "/dashboard/messages", icon: MessageSquare },
-    { label: "Performance", to: "/dashboard/analytics", icon: BarChart3 },
-    { label: "Settings", to: "/dashboard/settings", icon: Settings },
-  ],
-  admin: [
-    { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
-    { label: "Users", to: "/dashboard/users", icon: Users },
-    { label: "Properties", to: "/dashboard/properties", icon: Home },
-    { label: "Verification", to: "/dashboard/verification", icon: ShieldCheck },
-    { label: "Reports", to: "/dashboard/reports", icon: FileText },
-    { label: "Payments", to: "/dashboard/payments", icon: DollarSign },
-    { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
-    { label: "Settings", to: "/dashboard/settings", icon: Settings },
-  ],
-};
+function useRoleNav(): Record<AppRole, Item[]> {
+  const { t } = useI18n();
+  return {
+    owner: [
+      { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
+      { label: t("side.myProperties"), to: "/dashboard/properties", icon: Home },
+      { label: t("nav.upload"), to: "/dashboard/upload", icon: Upload },
+      { label: t("side.messages"), to: "/dashboard/messages", icon: MessageSquare },
+      { label: t("side.viewings"), to: "/dashboard/viewings", icon: Calendar },
+      { label: t("side.analytics"), to: "/dashboard/analytics", icon: BarChart3 },
+      { label: t("side.subscription"), to: "/dashboard/subscription", icon: CreditCard },
+      { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
+    ],
+    buyer: [
+      { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
+      { label: t("side.favorites"), to: "/dashboard/favorites", icon: Heart },
+      { label: t("side.savedSearches"), to: "/dashboard/searches", icon: Search },
+      { label: t("side.viewings"), to: "/dashboard/viewings", icon: Calendar },
+      { label: t("side.messages"), to: "/dashboard/messages", icon: MessageSquare },
+      { label: t("nav.profile"), to: "/dashboard/settings", icon: UserIcon },
+    ],
+    agent: [
+      { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
+      { label: t("side.clients"), to: "/dashboard/clients", icon: Users },
+      { label: t("side.properties"), to: "/dashboard/properties", icon: Briefcase },
+      { label: t("side.viewings"), to: "/dashboard/viewings", icon: Calendar },
+      { label: t("side.messages"), to: "/dashboard/messages", icon: MessageSquare },
+      { label: t("side.performance"), to: "/dashboard/analytics", icon: BarChart3 },
+      { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
+    ],
+    admin: [
+      { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
+      { label: t("side.users"), to: "/dashboard/users", icon: Users },
+      { label: t("side.properties"), to: "/dashboard/properties", icon: Home },
+      { label: t("side.verification"), to: "/dashboard/verification", icon: ShieldCheck },
+      { label: t("side.reports"), to: "/dashboard/reports", icon: FileText },
+      { label: t("side.payments"), to: "/dashboard/payments", icon: DollarSign },
+      { label: t("side.analytics"), to: "/dashboard/analytics", icon: BarChart3 },
+      { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
+    ],
+  };
+}
+
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const { profile, user, primaryRole, signOut } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const NAV = useRoleNav();
   const items = NAV[primaryRole];
+
 
   async function handleSignOut() {
     await signOut();
@@ -136,11 +145,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          <div className="border-t border-border/60 p-3">
+          <div className="space-y-2 border-t border-border/60 p-3">
+            <div className="px-1"><LanguageSwitcher /></div>
             <Button variant="ghost" onClick={handleSignOut} className="w-full justify-start gap-3 text-foreground/75 hover:text-foreground">
-              <LogOut className="h-4 w-4" /> Sign out
+              <LogOut className="h-4 w-4" /> {t("nav.logout")}
             </Button>
           </div>
+
         </aside>
 
         {open && <div onClick={() => setOpen(false)} className="fixed inset-0 z-20 bg-black/30 lg:hidden" />}
