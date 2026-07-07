@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import brandAsset from "@/assets/spaces-logo-brand.png.asset.json";
 import {
   Outlet,
   Link,
@@ -7,6 +8,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
@@ -109,7 +111,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap",
       },
-      { rel: "icon", href: "/__l5e/assets-v1/ce2be605-3df0-44e9-906c-3222488dcea4/spaces-logo.jpeg", type: "image/jpeg" },
+      { rel: "icon", href: brandAsset.url, type: "image/png" },
     ],
   }),
   shellComponent: RootShell,
