@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -16,13 +18,6 @@ import {
 import { AuthGateDialog } from "@/components/auth-gate-dialog";
 import { toast } from "sonner";
 
-const nav = [
-  { to: "/", label: "Home", exact: true },
-  { to: "/properties", label: "Buy", search: { type: "sale" as const } },
-  { to: "/properties", label: "Rent", search: { type: "rent" as const } },
-  { to: "/properties", label: "Commercial", search: { type: "commercial" as const } },
-  { to: "/agents", label: "Agents" },
-];
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
