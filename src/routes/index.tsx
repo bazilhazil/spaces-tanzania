@@ -3,12 +3,19 @@ import {
   ArrowRight,
   BadgeCheck,
   Building2,
+  Headphones,
   Home as HomeIcon,
+  Landmark,
   Quote,
+  Search as SearchIcon,
   ShieldCheck,
   Sparkles,
   Star,
+  Store,
+  Trees,
   Upload,
+  Users,
+  Warehouse,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
