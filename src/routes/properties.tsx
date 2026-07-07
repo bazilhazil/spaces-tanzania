@@ -54,6 +54,7 @@ function PropertiesPage() {
     if (search.type && p.listingType !== search.type) return false;
     if (search.city && p.city !== search.city) return false;
     if (search.category && p.category !== search.category) return false;
+    if (search.minPrice && p.price < search.minPrice) return false;
     if (search.maxPrice && p.price > search.maxPrice) return false;
     if (search.q) {
       const q = search.q.toLowerCase();
