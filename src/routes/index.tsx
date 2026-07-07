@@ -32,6 +32,7 @@ export const Route = createFileRoute("/")({
 
 
 function HomePage() {
+  const { t } = useI18n();
   const featured = properties.filter((p) => p.featured);
   const latest = [...properties]
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
@@ -47,15 +48,15 @@ function HomePage() {
         <Categories />
         <FeaturedSection
           eyebrow="Handpicked"
-          title="Featured Properties"
-          subtitle="Extraordinary spaces curated by our team."
+          title={t("home.featured")}
+          subtitle={t("home.featured.sub")}
           items={featured}
         />
         <Locations />
         <FeaturedSection
           eyebrow="Fresh listings"
-          title="Latest Properties"
-          subtitle="Just added by owners and agents across Tanzania."
+          title={t("home.latest")}
+          subtitle={t("home.latest.sub")}
           items={latest}
           tone="muted"
         />
@@ -69,6 +70,7 @@ function HomePage() {
     </div>
   );
 }
+
 
 function Hero() {
   return (
