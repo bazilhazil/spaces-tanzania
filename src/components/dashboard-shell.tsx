@@ -145,11 +145,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          <div className="border-t border-border/60 p-3">
+          <div className="space-y-2 border-t border-border/60 p-3">
+            <div className="px-1"><LanguageSwitcher /></div>
             <Button variant="ghost" onClick={handleSignOut} className="w-full justify-start gap-3 text-foreground/75 hover:text-foreground">
-              <LogOut className="h-4 w-4" /> Sign out
+              <LogOut className="h-4 w-4" /> {t("nav.logout")}
             </Button>
           </div>
+
         </aside>
 
         {open && <div onClick={() => setOpen(false)} className="fixed inset-0 z-20 bg-black/30 lg:hidden" />}
