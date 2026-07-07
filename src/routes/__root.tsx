@@ -143,10 +143,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Outlet />
-        <Toaster richColors position="top-right" />
-      </AuthProvider>
+      <I18nProvider>
+        <AuthProvider>
+          <Outlet />
+          <LanguageWelcome />
+          <Toaster richColors position="top-right" />
+        </AuthProvider>
+      </I18nProvider>
     </QueryClientProvider>
   );
 }
