@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BadgeCheck, Bath, BedDouble, Car, Heart, MapPin, Ruler, Sparkles } from "lucide-react";
+import { BadgeCheck, Bath, BedDouble, Car, Eye, Heart, MapPin, Ruler, Sparkles } from "lucide-react";
 import { formatPrice, type Property } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -55,13 +55,23 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
             <Heart className="h-4 w-4" />
           </button>
         </div>
-        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/70 to-transparent p-3">
+        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/75 via-black/20 to-transparent p-3">
           <span className="text-[11px] font-medium uppercase tracking-widest text-white/90">
             For {property.listingType === "sale" ? "Sale" : property.listingType === "rent" ? "Rent" : "Lease"}
           </span>
           <span className="rounded-md bg-background/95 px-2 py-1 text-xs font-medium text-foreground">
             {property.category}
           </span>
+        </div>
+        <div className="pointer-events-none absolute inset-x-3 bottom-3 translate-y-3 opacity-0 transition-all duration-300 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-background/95 px-3 py-2 text-xs font-semibold text-foreground shadow-[var(--shadow-soft)] backdrop-blur">
+              <Eye className="h-3.5 w-3.5" /> Quick view
+            </span>
+            <span className="inline-flex items-center justify-center rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-[var(--shadow-soft)]">
+              View details
+            </span>
+          </div>
         </div>
       </div>
 

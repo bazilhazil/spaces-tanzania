@@ -20,6 +20,7 @@ const searchSchema = z.object({
   type: fallback(z.enum(["rent", "sale", "commercial"]).optional(), undefined),
   city: fallback(z.string().optional(), undefined),
   category: fallback(z.string().optional(), undefined),
+  minPrice: fallback(z.number().optional(), undefined),
   maxPrice: fallback(z.number().optional(), undefined),
   q: fallback(z.string().optional(), undefined),
   sort: fallback(z.enum(["newest", "popular", "price-asc", "price-desc"]).optional(), undefined),
@@ -53,6 +54,7 @@ function PropertiesPage() {
     if (search.type && p.listingType !== search.type) return false;
     if (search.city && p.city !== search.city) return false;
     if (search.category && p.category !== search.category) return false;
+    if (search.minPrice && p.price < search.minPrice) return false;
     if (search.maxPrice && p.price > search.maxPrice) return false;
     if (search.q) {
       const q = search.q.toLowerCase();
