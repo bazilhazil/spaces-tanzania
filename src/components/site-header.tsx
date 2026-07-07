@@ -90,13 +90,15 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <LanguageSwitcher className="hidden md:inline-flex" />
           <Button
             size="sm"
             onClick={onUpload}
             className="hidden gap-2 rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-soft)] hover:bg-primary/90 md:inline-flex"
           >
-            <Upload className="h-4 w-4" /> Upload Property
+            <Upload className="h-4 w-4" /> {t("nav.upload")}
           </Button>
+
 
           {user ? (
             <DropdownMenu>
