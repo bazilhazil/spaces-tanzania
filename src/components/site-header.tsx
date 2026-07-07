@@ -24,7 +24,17 @@ export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const { user, profile, primaryRole, signOut } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
+
+  const nav = [
+    { to: "/" as const, label: t("nav.home"), exact: true },
+    { to: "/properties" as const, label: t("nav.buy"), search: { type: "sale" as const } },
+    { to: "/properties" as const, label: t("nav.rent"), search: { type: "rent" as const } },
+    { to: "/properties" as const, label: t("nav.commercial"), search: { type: "commercial" as const } },
+    { to: "/agents" as const, label: t("nav.agents") },
+  ];
+
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
