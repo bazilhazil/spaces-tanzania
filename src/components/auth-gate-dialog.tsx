@@ -2,9 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable";
+import { useI18n } from "@/hooks/use-i18n";
 import { Sparkles } from "lucide-react";
 
 export function AuthGateDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const { t } = useI18n();
+
   async function google() {
     await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
   }
