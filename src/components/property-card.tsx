@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BadgeCheck, Bath, BedDouble, Car, Heart, MapPin, Ruler, Sparkles } from "lucide-react";
+import { BadgeCheck, Bath, BedDouble, Car, Eye, Heart, MapPin, Ruler, Sparkles } from "lucide-react";
 import { formatPrice, type Property } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
