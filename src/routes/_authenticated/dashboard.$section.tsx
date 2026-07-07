@@ -69,13 +69,13 @@ function EmptyPanel() {
 
 function SettingsIndex() {
   const { t, lang } = useI18n();
-  const items = [
-    { icon: Globe, label: t("settings.language"), to: "/dashboard/language", value: lang === "sw" ? "🇹🇿 Kiswahili" : "🇬🇧 English" },
-    { icon: Palette, label: t("settings.theme"), to: "/dashboard/settings", value: "Default" },
-    { icon: Bell, label: t("settings.notifications"), to: "/dashboard/settings", value: "On" },
-    { icon: Lock, label: t("settings.privacy"), to: "/dashboard/settings", value: "" },
-    { icon: LifeBuoy, label: t("settings.support"), to: "/dashboard/settings", value: "" },
-    { icon: Info, label: t("settings.about"), to: "/dashboard/settings", value: "v1.0" },
+  const items: { icon: typeof Globe; label: string; section: string; value: string }[] = [
+    { icon: Globe, label: t("settings.language"), section: "language", value: lang === "sw" ? "🇹🇿 Kiswahili" : "🇬🇧 English" },
+    { icon: Palette, label: t("settings.theme"), section: "settings", value: "Default" },
+    { icon: Bell, label: t("settings.notifications"), section: "settings", value: "On" },
+    { icon: Lock, label: t("settings.privacy"), section: "settings", value: "" },
+    { icon: LifeBuoy, label: t("settings.support"), section: "settings", value: "" },
+    { icon: Info, label: t("settings.about"), section: "settings", value: "v1.0" },
   ];
   return (
     <div className="grid gap-3 sm:grid-cols-2">
@@ -84,7 +84,8 @@ function SettingsIndex() {
         return (
           <Link
             key={it.label}
-            to={it.to as "/dashboard/settings" | "/dashboard/language"}
+            to="/dashboard/$section"
+            params={{ section: it.section }}
             className="group flex items-center justify-between rounded-2xl border border-border/60 bg-background p-5 shadow-[var(--shadow-soft)] transition-all hover:-translate-y-0.5 hover:border-primary/30"
           >
             <div className="flex items-center gap-4">
@@ -103,6 +104,7 @@ function SettingsIndex() {
     </div>
   );
 }
+
 
 function LanguagePanel() {
   const { t, lang, setLang } = useI18n();
