@@ -330,6 +330,8 @@ function UploadWizardPage() {
               submitting={submitting}
               onPublish={() => submit("publish")}
               onDraft={() => submit("draft")}
+              score={listingScore.total}
+              breakdown={listingScore.breakdown}
             />
           )}
         </div>
