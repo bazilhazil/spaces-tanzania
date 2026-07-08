@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
   Heart, Search, User as UserIcon, Users, Briefcase, ShieldCheck, FileText, DollarSign,
-  Menu, X, LogOut,
+  Menu, X, LogOut, FileEdit, LifeBuoy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
