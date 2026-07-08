@@ -21,7 +21,7 @@ import { loadDraft, saveDraft, clearDraft, type WizardDraft } from "@/lib/proper
 import { compressImageFile, uploadMediaFile } from "@/lib/property-media";
 import { watermarkImage } from "@/lib/image-watermark";
 import { generateVideoThumbnail } from "@/lib/video-utils";
-import { LocationMapPicker } from "@/components/upload-wizard/location-map-picker";
+import { TzLocationPicker } from "@/components/location/tz-location-picker";
 import {
   PhotoManager, type MediaItem,
   computeListingScore, ListingScoreBadge, ListingScorePanel,
@@ -519,52 +519,35 @@ function StepLocation({ draft, setField }: { draft: WizardDraft; setField: <K ex
     <section className="space-y-6">
       <div>
         <h1 className="font-display text-3xl font-semibold sm:text-4xl">Pin the location 📍</h1>
-        <p className="mt-2 text-muted-foreground">Drop a pin or use your current location.</p>
+        <p className="mt-2 text-muted-foreground">Search, choose from the list, or drop a pin on the map.</p>
       </div>
 
-      <LocationMapPicker
-        latitude={draft.latitude}
-        longitude={draft.longitude}
-        onChange={(v) => {
-          setField("latitude", v.latitude);
-          setField("longitude", v.longitude);
-          if (v.address) setField("address", v.address);
+      <TzLocationPicker
+        value={{
+          region: draft.region,
+          district: draft.district,
+          ward: draft.ward,
+          street: draft.street,
+          landmark: draft.landmark,
+          address: draft.address,
+          latitude: draft.latitude,
+          longitude: draft.longitude,
+        }}
+        onChange={(patch) => {
+          if ("region" in patch) setField("region", patch.region);
+          if ("district" in patch) setField("district", patch.district);
+          if ("ward" in patch) setField("ward", patch.ward);
+          if ("street" in patch) setField("street", patch.street);
+          if ("landmark" in patch) setField("landmark", patch.landmark);
+          if ("address" in patch) setField("address", patch.address);
+          if ("latitude" in patch) setField("latitude", patch.latitude);
+          if ("longitude" in patch) setField("longitude", patch.longitude);
         }}
       />
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Region *">
-          <Input value={draft.region ?? ""} onChange={(e) => setField("region", e.target.value)} placeholder="Dar es Salaam" className="h-12" />
-        </Field>
-        <Field label="District *">
-          <Input value={draft.district ?? ""} onChange={(e) => setField("district", e.target.value)} placeholder="Kinondoni" className="h-12" />
-        </Field>
-        <Field label="Ward (optional)">
-          <Input value={draft.ward ?? ""} onChange={(e) => setField("ward", e.target.value)} placeholder="Mikocheni" className="h-12" />
-        </Field>
-        <Field label="Street (optional)">
-          <Input value={draft.street ?? ""} onChange={(e) => setField("street", e.target.value)} placeholder="Chole Road" className="h-12" />
-        </Field>
-      </div>
-
-      <Field label="Nearby landmark (optional)">
-        <Input
-          value={draft.landmark ?? ""}
-          onChange={(e) => setField("landmark", e.target.value)}
-          placeholder="Opposite Mlimani City"
-          className="h-12"
-        />
-      </Field>
-
-      {draft.address && (
-        <div className="flex items-start gap-2 rounded-xl bg-primary/5 p-3 text-sm">
-          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-          <span className="text-foreground/80">{draft.address}</span>
-        </div>
-      )}
     </section>
   );
 }
+
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
