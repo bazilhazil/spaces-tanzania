@@ -2,20 +2,12 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Building2, Home, Warehouse, Store, Briefcase, LandPlot, Building,
-  ArrowLeft, ArrowRight, Camera, Image as ImageIcon, X, Crop, Star,
-  Loader2, Check, MapPin, Sparkles, Video, Trash2, Save,
+  ArrowLeft, ArrowRight, X, Star,
+  Loader2, Check, MapPin, Sparkles, Save,
   Zap, Droplet, ParkingCircle, Fence, Shield, Cctv, Waves, Trees,
   Sun, Fuel, Wind, PawPrint, Accessibility, Wifi, Phone, MessageCircle,
-  User, GripVertical, Pencil,
+  User, Pencil,
 } from "lucide-react";
-import {
-  DndContext, PointerSensor, TouchSensor, useSensor, useSensors,
-  closestCenter, type DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext, arrayMove, useSortable, rectSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,8 +19,13 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { loadDraft, saveDraft, clearDraft, type WizardDraft } from "@/lib/property-draft";
 import { compressImageFile, uploadMediaFile } from "@/lib/property-media";
+import { watermarkImage } from "@/lib/image-watermark";
+import { generateVideoThumbnail } from "@/lib/video-utils";
 import { LocationMapPicker } from "@/components/upload-wizard/location-map-picker";
-import { ImageEditorDialog } from "@/components/upload-wizard/image-editor-dialog";
+import {
+  PhotoManager, type MediaItem,
+  computeListingScore, ListingScoreBadge, ListingScorePanel,
+} from "@/components/upload-wizard/photo-manager";
 
 export const Route = createFileRoute("/_authenticated/upload")({
   component: UploadWizardPage,
@@ -65,13 +62,6 @@ const AMENITIES = [
 const STEP_LABELS = ["Photos", "Type", "Details", "Location", "Amenities", "Contact", "Preview", "Publish"];
 const TOTAL = 8;
 
-type MediaItem = {
-  id: string;
-  file: File;
-  previewUrl: string;
-  kind: "image" | "video";
-  isCover: boolean;
-};
 
 function UploadWizardPage() {
   const navigate = useNavigate();
@@ -177,6 +167,21 @@ function UploadWizardPage() {
     return place ? `${beds}${type} in ${place}` : `${beds}${type}`;
   }, [draft.property_type, draft.ward, draft.district, draft.region, draft.bedrooms]);
 
+  const listingScore = useMemo(() => {
+    const imgs = media.filter((m) => m.kind === "image");
+    const qs = imgs.map((m) => m.quality?.score).filter((n): n is number => typeof n === "number");
+    const avgQ = qs.length ? qs.reduce((a, b) => a + b, 0) / qs.length : null;
+    return computeListingScore({
+      photos: imgs.length,
+      photoAvgQuality: avgQ,
+      descriptionLen: (draft.description ?? "").trim().length,
+      amenities: (draft.amenities ?? []).length,
+      hasLocation: !!(draft.region && draft.district),
+      hasContact: !!(draft.contact_name && draft.contact_phone),
+      hasVideo: media.some((m) => m.kind === "video"),
+    });
+  }, [media, draft]);
+
   async function submit(mode: "publish" | "draft") {
     if (!user) return toast.error("Please sign in");
     if (mode === "publish" && !media.some((m) => m.kind === "image")) return toast.error("Add at least one photo");
@@ -220,17 +225,51 @@ function UploadWizardPage() {
       if (pErr) throw pErr;
       const propertyId = prop.id as string;
 
-      for (let i = 0; i < media.length; i++) {
-        const m = media[i];
-        const finalFile = m.kind === "image" ? await compressImageFile(m.file) : m.file;
+      const wantWatermark = !!draft.watermark;
+      const images = media.filter((m) => m.kind === "image");
+      const video = media.find((m) => m.kind === "video");
+
+      // Photos — position by cover-first, then original order
+      const ordered = [
+        ...images.filter((m) => m.isCover),
+        ...images.filter((m) => !m.isCover),
+      ];
+      for (let i = 0; i < ordered.length; i++) {
+        const m = ordered[i];
+        const base = wantWatermark ? await watermarkImage(m.file, "SPACES") : m.file;
+        const finalFile = await compressImageFile(base);
         const { path } = await uploadMediaFile(user.id, propertyId, finalFile);
         await supabase.from("property_media").insert({
           property_id: propertyId,
           storage_path: path,
-          media_type: m.kind,
+          media_type: "image",
           position: i,
           is_cover: m.isCover,
         });
+      }
+
+      // Video (+ thumbnail as an extra image, if we can build one)
+      if (video) {
+        const { path } = await uploadMediaFile(user.id, propertyId, video.file);
+        await supabase.from("property_media").insert({
+          property_id: propertyId,
+          storage_path: path,
+          media_type: "video",
+          position: ordered.length,
+          is_cover: false,
+        });
+        try {
+          const thumb = await generateVideoThumbnail(video.file);
+          const compressed = await compressImageFile(thumb);
+          const { path: thumbPath } = await uploadMediaFile(user.id, propertyId, compressed);
+          await supabase.from("property_media").insert({
+            property_id: propertyId,
+            storage_path: thumbPath,
+            media_type: "image",
+            position: ordered.length + 1,
+            is_cover: false,
+          });
+        } catch { /* thumbnail is best-effort */ }
       }
 
       clearDraft();
@@ -249,8 +288,8 @@ function UploadWizardPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl items-center gap-4 px-4 py-3">
-          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">← Exit</Link>
+        <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
+          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground shrink-0">← Exit</Link>
           <div className="min-w-0 flex-1">
             <div className="mb-1 flex items-center justify-between text-xs">
               <span className="truncate font-semibold text-foreground">
@@ -266,12 +305,20 @@ function UploadWizardPage() {
             </div>
             <Progress value={(step / TOTAL) * 100} className="h-1.5" />
           </div>
+          <ListingScoreBadge score={listingScore.total} />
         </div>
       </header>
 
       <main className="mx-auto max-w-2xl px-4 pb-36 pt-6 sm:pt-10">
         <div key={step} className="animate-fade-in">
-          {step === 1 && <StepPhotos media={media} setMedia={setMedia} />}
+          {step === 1 && (
+            <PhotoManager
+              media={media}
+              setMedia={setMedia}
+              watermark={!!draft.watermark}
+              onWatermarkChange={(v) => setField("watermark", v)}
+            />
+          )}
           {step === 2 && <StepType value={draft.property_type} onChange={(v) => setField("property_type", v)} />}
           {step === 3 && <StepInfo draft={draft} setField={setField} />}
           {step === 4 && <StepLocation draft={draft} setField={setField} />}
@@ -283,6 +330,8 @@ function UploadWizardPage() {
               submitting={submitting}
               onPublish={() => submit("publish")}
               onDraft={() => submit("draft")}
+              score={listingScore.total}
+              breakdown={listingScore.breakdown}
             />
           )}
         </div>
@@ -304,251 +353,6 @@ function UploadWizardPage() {
           )}
         </div>
       </footer>
-    </div>
-  );
-}
-
-// ============================================================
-// STEP 1 — Photos with drag-to-reorder, cover, crop/rotate, video
-// ============================================================
-function StepPhotos({ media, setMedia }: { media: MediaItem[]; setMedia: React.Dispatch<React.SetStateAction<MediaItem[]>> }) {
-  const [editing, setEditing] = useState<MediaItem | null>(null);
-  const cameraRef = useRef<HTMLInputElement>(null);
-  const galleryRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLInputElement>(null);
-
-  const images = media.filter((m) => m.kind === "image");
-  const video = media.find((m) => m.kind === "video");
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
-  );
-
-  function addFiles(files: FileList | null, kind: "image" | "video" = "image") {
-    if (!files) return;
-    if (kind === "video") {
-      const f = files[0];
-      if (!f) return;
-      if (f.size > 60 * 1024 * 1024) return toast.error("Video must be under 60 MB");
-      // Replace existing video
-      setMedia((prev) => {
-        const withoutVideo = prev.filter((m) => m.kind !== "video");
-        return [...withoutVideo, {
-          id: crypto.randomUUID(),
-          file: f,
-          previewUrl: URL.createObjectURL(f),
-          kind: "video",
-          isCover: false,
-        }];
-      });
-      return;
-    }
-    const remaining = 30 - images.length;
-    const arr = Array.from(files).slice(0, remaining);
-    if (arr.length === 0) {
-      toast.info("You've reached the 30 photo limit");
-      return;
-    }
-    const items: MediaItem[] = arr.map((f, i) => ({
-      id: crypto.randomUUID(),
-      file: f,
-      previewUrl: URL.createObjectURL(f),
-      kind: "image",
-      isCover: images.length === 0 && i === 0,
-    }));
-    setMedia((prev) => [...prev, ...items]);
-  }
-
-  function remove(id: string) {
-    setMedia((prev) => {
-      const removed = prev.find((m) => m.id === id);
-      if (removed) URL.revokeObjectURL(removed.previewUrl);
-      const rest = prev.filter((m) => m.id !== id);
-      if (removed?.isCover) {
-        const firstImg = rest.find((m) => m.kind === "image");
-        if (firstImg) firstImg.isCover = true;
-      }
-      return rest;
-    });
-  }
-  function makeCover(id: string) {
-    setMedia((prev) => prev.map((m) => ({ ...m, isCover: m.id === id && m.kind === "image" })));
-  }
-
-  function onDragEnd(e: DragEndEvent) {
-    const { active, over } = e;
-    if (!over || active.id === over.id) return;
-    setMedia((prev) => {
-      const imgs = prev.filter((m) => m.kind === "image");
-      const oldIdx = imgs.findIndex((m) => m.id === active.id);
-      const newIdx = imgs.findIndex((m) => m.id === over.id);
-      if (oldIdx < 0 || newIdx < 0) return prev;
-      const reordered = arrayMove(imgs, oldIdx, newIdx);
-      const others = prev.filter((m) => m.kind !== "image");
-      return [...reordered, ...others];
-    });
-  }
-
-  return (
-    <section>
-      <h1 className="font-display text-3xl font-semibold sm:text-4xl">Snap your space 📸</h1>
-      <p className="mt-2 text-muted-foreground">
-        Add up to 30 photos. Drag to reorder. The first one is your cover.
-      </p>
-
-      {images.length === 0 ? (
-        <div className="mt-8 space-y-3">
-          <button
-            type="button"
-            onClick={() => cameraRef.current?.click()}
-            className="relative flex aspect-[4/5] w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl border-2 border-dashed border-primary/40 bg-gradient-to-br from-primary/5 via-background to-primary/10 transition hover:border-primary hover:from-primary/10"
-          >
-            <div className="grid h-20 w-20 place-items-center rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-soft)]">
-              <Camera className="h-9 w-9" />
-            </div>
-            <div className="text-center">
-              <div className="font-display text-xl font-semibold">Open camera</div>
-              <div className="mt-1 text-sm text-muted-foreground">Take photos of every room</div>
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => galleryRef.current?.click()}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-background py-3 text-sm font-medium text-foreground/80 transition hover:bg-accent"
-          >
-            <ImageIcon className="h-4 w-4" /> Choose from gallery
-          </button>
-        </div>
-      ) : (
-        <>
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-            <SortableContext items={images.map((m) => m.id)} strategy={rectSortingStrategy}>
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {images.map((m) => (
-                  <SortablePhoto
-                    key={m.id}
-                    item={m}
-                    onRemove={() => remove(m.id)}
-                    onEdit={() => setEditing(m)}
-                    onCover={() => makeCover(m.id)}
-                  />
-                ))}
-                <button
-                  type="button"
-                  onClick={() => cameraRef.current?.click()}
-                  className="flex aspect-square items-center justify-center rounded-2xl border-2 border-dashed border-border bg-muted/40 text-primary transition hover:border-primary hover:bg-primary/5"
-                  aria-label="Add more photos"
-                >
-                  <Camera className="h-8 w-8" />
-                </button>
-              </div>
-            </SortableContext>
-          </DndContext>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => galleryRef.current?.click()}
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground/80 hover:bg-accent"
-            >
-              <ImageIcon className="h-4 w-4" /> Add from gallery
-            </button>
-            <button
-              type="button"
-              onClick={() => videoRef.current?.click()}
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground/80 hover:bg-accent"
-            >
-              <Video className="h-4 w-4" /> {video ? "Replace video" : "Add a video (optional)"}
-            </button>
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {images.length} of 30 photos · tap ★ to change cover · drag to reorder · auto-compressed
-          </p>
-
-          {video && (
-            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
-              <video src={video.previewUrl} className="h-16 w-24 rounded-lg object-cover" muted />
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold">{video.file.name}</div>
-                <div className="text-xs text-muted-foreground">Optional walkthrough video</div>
-              </div>
-              <button
-                type="button"
-                onClick={() => remove(video.id)}
-                className="rounded-full p-2 text-destructive hover:bg-destructive/10"
-                aria-label="Remove video"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          )}
-        </>
-      )}
-
-      <input ref={cameraRef} type="file" accept="image/*" capture="environment" multiple className="hidden" onChange={(e) => { addFiles(e.target.files, "image"); e.target.value = ""; }} />
-      <input ref={galleryRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { addFiles(e.target.files, "image"); e.target.value = ""; }} />
-      <input ref={videoRef} type="file" accept="video/*" className="hidden" onChange={(e) => { addFiles(e.target.files, "video"); e.target.value = ""; }} />
-
-      {editing && (
-        <ImageEditorDialog
-          src={editing.previewUrl}
-          open={!!editing}
-          onOpenChange={(o) => !o && setEditing(null)}
-          onDone={(file) => {
-            const url = URL.createObjectURL(file);
-            setMedia((prev) => prev.map((m) => (m.id === editing.id ? { ...m, file, previewUrl: url } : m)));
-          }}
-        />
-      )}
-    </section>
-  );
-}
-
-function SortablePhoto({
-  item, onRemove, onEdit, onCover,
-}: {
-  item: MediaItem; onRemove: () => void; onEdit: () => void; onCover: () => void;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
-  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 20 : undefined };
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={cn(
-        "group relative overflow-hidden rounded-2xl border border-border bg-muted",
-        isDragging && "shadow-2xl ring-2 ring-primary",
-      )}
-    >
-      <img src={item.previewUrl} alt="" className="aspect-square w-full object-cover" />
-      {item.isCover && (
-        <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground shadow">
-          COVER
-        </span>
-      )}
-      <button
-        type="button"
-        {...attributes}
-        {...listeners}
-        className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-white/95 text-foreground/70 shadow touch-none"
-        aria-label="Drag to reorder"
-      >
-        <GripVertical className="h-3.5 w-3.5" />
-      </button>
-      <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 to-transparent p-2 opacity-100 transition sm:opacity-0 group-hover:opacity-100">
-        <div className="flex gap-1">
-          <button type="button" onClick={onCover} className="rounded-full bg-white/95 p-1.5 text-primary hover:bg-white" aria-label="Set as cover">
-            <Star className={cn("h-3.5 w-3.5", item.isCover && "fill-current")} />
-          </button>
-          <button type="button" onClick={onEdit} className="rounded-full bg-white/95 p-1.5 text-primary hover:bg-white" aria-label="Edit">
-            <Crop className="h-3.5 w-3.5" />
-          </button>
-        </div>
-        <button type="button" onClick={onRemove} className="rounded-full bg-white/95 p-1.5 text-destructive hover:bg-white" aria-label="Remove">
-          <X className="h-3.5 w-3.5" />
-        </button>
-      </div>
     </div>
   );
 }
@@ -1013,19 +817,25 @@ function StepPreview({
 // STEP 8 — Publish
 // ============================================================
 function StepPublish({
-  submitting, onPublish, onDraft,
+  submitting, onPublish, onDraft, score, breakdown,
 }: {
-  submitting: boolean; onPublish: () => void; onDraft: () => void;
+  submitting: boolean;
+  onPublish: () => void;
+  onDraft: () => void;
+  score: number;
+  breakdown: { key: string; got: number; max: number }[];
 }) {
   return (
-    <section className="space-y-6 text-center">
-      <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-primary/10 text-primary">
-        <Sparkles className="h-9 w-9" />
-      </div>
-      <div>
-        <h1 className="font-display text-3xl font-semibold sm:text-4xl">Ready to go live? 🚀</h1>
+    <section className="space-y-6">
+      <div className="text-center">
+        <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-primary/10 text-primary">
+          <Sparkles className="h-9 w-9" />
+        </div>
+        <h1 className="mt-4 font-display text-3xl font-semibold sm:text-4xl">Ready to go live? 🚀</h1>
         <p className="mt-2 text-muted-foreground">Publish now and reach thousands of buyers today.</p>
       </div>
+
+      <ListingScorePanel score={score} breakdown={breakdown} />
 
       <div className="space-y-3 pt-2">
         <Button onClick={onPublish} disabled={submitting} size="lg" className="h-14 w-full rounded-full text-base">
@@ -1036,7 +846,7 @@ function StepPublish({
         </Button>
       </div>
 
-      <p className="pt-2 text-xs text-muted-foreground">
+      <p className="pt-2 text-center text-xs text-muted-foreground">
         By publishing you confirm the information is accurate and the property is yours to list.
       </p>
     </section>
