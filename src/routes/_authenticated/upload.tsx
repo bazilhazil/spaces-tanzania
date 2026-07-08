@@ -2,20 +2,12 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Building2, Home, Warehouse, Store, Briefcase, LandPlot, Building,
-  ArrowLeft, ArrowRight, Camera, Image as ImageIcon, X, Crop, Star,
-  Loader2, Check, MapPin, Sparkles, Video, Trash2, Save,
+  ArrowLeft, ArrowRight, X, Star,
+  Loader2, Check, MapPin, Sparkles, Save,
   Zap, Droplet, ParkingCircle, Fence, Shield, Cctv, Waves, Trees,
   Sun, Fuel, Wind, PawPrint, Accessibility, Wifi, Phone, MessageCircle,
-  User, GripVertical, Pencil,
+  User, Pencil,
 } from "lucide-react";
-import {
-  DndContext, PointerSensor, TouchSensor, useSensor, useSensors,
-  closestCenter, type DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext, arrayMove, useSortable, rectSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,8 +19,13 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { loadDraft, saveDraft, clearDraft, type WizardDraft } from "@/lib/property-draft";
 import { compressImageFile, uploadMediaFile } from "@/lib/property-media";
+import { watermarkImage } from "@/lib/image-watermark";
+import { generateVideoThumbnail } from "@/lib/video-utils";
 import { LocationMapPicker } from "@/components/upload-wizard/location-map-picker";
-import { ImageEditorDialog } from "@/components/upload-wizard/image-editor-dialog";
+import {
+  PhotoManager, type MediaItem,
+  computeListingScore, ListingScoreBadge, ListingScorePanel,
+} from "@/components/upload-wizard/photo-manager";
 
 export const Route = createFileRoute("/_authenticated/upload")({
   component: UploadWizardPage,
