@@ -296,7 +296,7 @@ export function PropertyMiniCard({ p }: { p: RecentProperty }) {
   );
 }
 
-function NonOwnerHome({ role }: { role: AppRole }) {
+function NonOwnerHome({ role }: { role: SpacesMode }) {
   const items = role === "agent"
     ? [
         { label: "Clients", value: 0, icon: Users, delta: "+0", tone: "primary" },
