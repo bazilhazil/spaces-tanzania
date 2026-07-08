@@ -304,14 +304,8 @@ function NonOwnerHome({ role }: { role: SpacesMode }) {
         { label: "Deals", value: 0, icon: DollarSign, delta: "+0", tone: "amber" },
         { label: "Rating", value: "—", icon: BarChart3, delta: "—", tone: "violet" },
       ]
-    : role === "admin"
-    ? [
-        { label: "Total Users", value: 0, icon: Users, delta: "+0", tone: "primary" },
-        { label: "Listings", value: 0, icon: Home, delta: "+0", tone: "emerald" },
-        { label: "Verifications", value: 0, icon: ShieldCheck, delta: "0 pending", tone: "amber" },
-        { label: "Revenue", value: 0, icon: DollarSign, delta: "+0%", tone: "violet" },
-      ]
     : [
+
         { label: "Favorites", value: 0, icon: Heart, delta: "+0", tone: "primary" },
         { label: "Saved Searches", value: 0, icon: BarChart3, delta: "+0", tone: "emerald" },
         { label: "Viewings", value: 0, icon: Calendar, delta: "0 upcoming", tone: "amber" },
