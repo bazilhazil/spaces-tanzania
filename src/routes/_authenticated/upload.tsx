@@ -817,19 +817,25 @@ function StepPreview({
 // STEP 8 — Publish
 // ============================================================
 function StepPublish({
-  submitting, onPublish, onDraft,
+  submitting, onPublish, onDraft, score, breakdown,
 }: {
-  submitting: boolean; onPublish: () => void; onDraft: () => void;
+  submitting: boolean;
+  onPublish: () => void;
+  onDraft: () => void;
+  score: number;
+  breakdown: { key: string; got: number; max: number }[];
 }) {
   return (
-    <section className="space-y-6 text-center">
-      <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-primary/10 text-primary">
-        <Sparkles className="h-9 w-9" />
-      </div>
-      <div>
-        <h1 className="font-display text-3xl font-semibold sm:text-4xl">Ready to go live? 🚀</h1>
+    <section className="space-y-6">
+      <div className="text-center">
+        <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-primary/10 text-primary">
+          <Sparkles className="h-9 w-9" />
+        </div>
+        <h1 className="mt-4 font-display text-3xl font-semibold sm:text-4xl">Ready to go live? 🚀</h1>
         <p className="mt-2 text-muted-foreground">Publish now and reach thousands of buyers today.</p>
       </div>
+
+      <ListingScorePanel score={score} breakdown={breakdown} />
 
       <div className="space-y-3 pt-2">
         <Button onClick={onPublish} disabled={submitting} size="lg" className="h-14 w-full rounded-full text-base">
