@@ -39,9 +39,6 @@ function RegisterPage() {
   const [agree, setAgree] = useState(false);
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [agree, setAgree] = useState(false);
-  const [show, setShow] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   function set<K extends keyof typeof form>(k: K, v: string) {
     setForm((p) => ({ ...p, [k]: v }));
@@ -57,18 +54,17 @@ function RegisterPage() {
       email: form.email,
       password: form.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/welcome`,
         data: {
           full_name: form.full_name,
           phone: form.phone,
-          role,
         },
       },
     });
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success(t("auth.register.toastWelcome"));
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/welcome" });
   }
 
   async function google() {
