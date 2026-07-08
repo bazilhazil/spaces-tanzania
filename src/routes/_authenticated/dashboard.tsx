@@ -234,7 +234,7 @@ function QuickActions() {
               </div>
             </div>
           );
-          return "params" in a ? (
+          return a.params ? (
             <Link key={a.label} to={a.to} params={a.params}>{inner}</Link>
           ) : (
             <Link key={a.label} to={a.to}>{inner}</Link>
