@@ -25,6 +25,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_authenticated/dashboard.$section'
+import { Route as AuthenticatedAdminSectionRouteImport } from './routes/_authenticated/admin.$section'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -106,6 +107,12 @@ const AuthenticatedDashboardSectionRoute =
     path: '/$section',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedAdminSectionRoute =
+  AuthenticatedAdminSectionRouteImport.update({
+    id: '/$section',
+    path: '/$section',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/upload': typeof AuthenticatedUploadRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -137,6 +145,7 @@ export interface FileRoutesByTo {
   '/upload': typeof AuthenticatedUploadRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
@@ -156,6 +165,7 @@ export interface FileRoutesById {
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/_authenticated/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/_authenticated/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/upload'
     | '/welcome'
     | '/properties/$slug'
+    | '/admin/$section'
     | '/dashboard/$section'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/upload'
     | '/welcome'
     | '/properties/$slug'
+    | '/admin/$section'
     | '/dashboard/$section'
     | '/admin'
   id:
@@ -209,6 +221,7 @@ export interface FileRouteTypes {
     | '/_authenticated/upload'
     | '/_authenticated/welcome'
     | '/properties/$slug'
+    | '/_authenticated/admin/$section'
     | '/_authenticated/dashboard/$section'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
@@ -339,14 +352,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardSectionRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/admin/$section': {
+      id: '/_authenticated/admin/$section'
+      path: '/$section'
+      fullPath: '/admin/$section'
+      preLoaderRoute: typeof AuthenticatedAdminSectionRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminSectionRoute: typeof AuthenticatedAdminSectionRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminSectionRoute: AuthenticatedAdminSectionRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 

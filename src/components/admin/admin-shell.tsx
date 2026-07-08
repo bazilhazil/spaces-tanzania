@@ -12,57 +12,66 @@ import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type Item = { label: string; to: string; icon: React.ComponentType<{ className?: string }>; badge?: string };
+type Item = {
+  label: string;
+  section?: string; // maps to /admin/$section; if undefined → /admin
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
+};
 
-const NAV: { section: string; items: Item[] }[] = [
+const NAV: { group: string; items: Item[] }[] = [
   {
-    section: "Overview",
+    group: "Overview",
     items: [
-      { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
-      { label: "Analytics", to: "/admin/analytics", icon: BarChart3 },
-      { label: "Audit Logs", to: "/admin/audit", icon: FileClock },
+      { label: "Dashboard", icon: LayoutDashboard },
+      { label: "Analytics", section: "analytics", icon: BarChart3 },
+      { label: "Audit Logs", section: "audit", icon: FileClock },
     ],
   },
   {
-    section: "Operations",
+    group: "Operations",
     items: [
-      { label: "Properties", to: "/admin/properties", icon: Home, badge: "27" },
-      { label: "Verification", to: "/admin/verification", icon: ShieldCheck, badge: "4" },
-      { label: "Reports", to: "/admin/reports", icon: Flag, badge: "14" },
-      { label: "Bookings", to: "/admin/bookings", icon: Calendar },
-      { label: "Messages", to: "/admin/messages", icon: MessageSquare },
-      { label: "Support", to: "/admin/support", icon: LifeBuoy },
+      { label: "Properties", section: "properties", icon: Home, badge: "27" },
+      { label: "Verification", section: "verification", icon: ShieldCheck, badge: "4" },
+      { label: "Reports", section: "reports", icon: Flag, badge: "14" },
+      { label: "Bookings", section: "bookings", icon: Calendar },
+      { label: "Messages", section: "messages", icon: MessageSquare },
+      { label: "Support", section: "support", icon: LifeBuoy },
     ],
   },
   {
-    section: "Community",
+    group: "Community",
     items: [
-      { label: "Users", to: "/admin/users", icon: Users },
-      { label: "Agents", to: "/admin/agents", icon: UserCheck },
+      { label: "Users", section: "users", icon: Users },
+      { label: "Agents", section: "agents", icon: UserCheck },
     ],
   },
   {
-    section: "Revenue",
+    group: "Revenue",
     items: [
-      { label: "Payments", to: "/admin/payments", icon: CreditCard },
-      { label: "Subscriptions", to: "/admin/subscriptions", icon: Receipt },
+      { label: "Payments", section: "payments", icon: CreditCard },
+      { label: "Subscriptions", section: "subscriptions", icon: Receipt },
     ],
   },
   {
-    section: "Growth",
+    group: "Growth",
     items: [
-      { label: "Marketing", to: "/admin/marketing", icon: Megaphone },
-      { label: "Notifications", to: "/admin/notifications", icon: Bell },
+      { label: "Marketing", section: "marketing", icon: Megaphone },
+      { label: "Notifications", section: "notifications", icon: Bell },
     ],
   },
   {
-    section: "System",
+    group: "System",
     items: [
-      { label: "System Settings", to: "/admin/settings", icon: Settings },
-      { label: "Super Admin", to: "/admin/superadmin", icon: ShieldAlert },
+      { label: "System Settings", section: "settings", icon: Settings },
+      { label: "Super Admin", section: "superadmin", icon: ShieldAlert },
     ],
   },
 ];
+
+function itemHref(item: Item) {
+  return item.section ? `/admin/${item.section}` : "/admin";
+}
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const { profile, user, signOut } = useAuth();
