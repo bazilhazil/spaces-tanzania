@@ -145,27 +145,8 @@ function RegisterPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>{t("auth.register.roleLabel")}</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {ROLE_KEYS.map((r) => (
-                  <button
-                    type="button"
-                    key={r}
-                    onClick={() => setRole(r)}
-                    className={cn(
-                      "rounded-xl border p-3 text-left transition-all",
-                      role === r
-                        ? "border-primary bg-primary/5 shadow-[0_0_0_1px_var(--color-primary)]"
-                        : "border-border hover:border-primary/40 hover:bg-accent",
-                    )}
-                  >
-                    <div className="text-sm font-semibold text-foreground">{t(`auth.register.roles.${r}.label`)}</div>
-                    <div className="text-[11px] text-muted-foreground">{t(`auth.register.roles.${r}.desc`)}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
+
+
 
             <label className="flex cursor-pointer items-start gap-2 text-sm text-foreground/80">
               <Checkbox checked={agree} onCheckedChange={(v) => setAgree(!!v)} className="mt-0.5" />
