@@ -38,6 +38,8 @@ export function HeroSearch() {
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [q, setQ] = useState("");
+  const [showHits, setShowHits] = useState(false);
+  const hits = useMemo(() => searchLocations(q, 6), [q]);
 
   return (
     <div className="w-full">
