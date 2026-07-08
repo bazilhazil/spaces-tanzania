@@ -177,10 +177,10 @@ function PropertyDetail() {
 
         {/* Metrics */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard icon={Eye} label="Total views" value={row.view_count?.toLocaleString() ?? "0"} trend="+12% wk" />
-          <StatCard icon={Heart} label="Saves" value={12} trend="+3 wk" />
-          <StatCard icon={MessageSquare} label="Messages" value={4} trend="+1 wk" />
-          <StatCard icon={Calendar} label="Viewings" value={2} trend="1 upcoming" />
+          <StatCard icon={Eye} label="Total views" value={row.view_count?.toLocaleString() ?? "0"}  />
+          <StatCard icon={Heart} label="Saves" value={12}  />
+          <StatCard icon={MessageSquare} label="Messages" value={4}  />
+          <StatCard icon={Calendar} label="Viewings" value={2}  />
         </div>
 
         {/* Tabs */}
