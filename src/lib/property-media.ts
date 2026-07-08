@@ -1,18 +1,32 @@
 import imageCompression from "browser-image-compression";
 import { supabase } from "@/integrations/supabase/client";
 
+let _webpSupport: boolean | null = null;
+function supportsWebP(): boolean {
+  if (_webpSupport !== null) return _webpSupport;
+  try {
+    const c = document.createElement("canvas");
+    c.width = c.height = 1;
+    _webpSupport = c.toDataURL("image/webp").startsWith("data:image/webp");
+  } catch { _webpSupport = false; }
+  return _webpSupport!;
+}
+
 export async function compressImageFile(file: File): Promise<File> {
   if (!file.type.startsWith("image/")) return file;
+  const useWebP = supportsWebP();
+  const targetType = useWebP ? "image/webp" : "image/jpeg";
+  const ext = useWebP ? ".webp" : ".jpg";
   try {
     const compressed = await imageCompression(file, {
       maxSizeMB: 1.2,
-      maxWidthOrHeight: 2000,
+      maxWidthOrHeight: 2200,
       useWebWorker: true,
-      fileType: "image/jpeg",
-      initialQuality: 0.82,
+      fileType: targetType,
+      initialQuality: useWebP ? 0.82 : 0.85,
     });
-    return new File([compressed], file.name.replace(/\.[^.]+$/, ".jpg"), {
-      type: "image/jpeg",
+    return new File([compressed], file.name.replace(/\.[^.]+$/, ext), {
+      type: targetType,
     });
   } catch {
     return file;
