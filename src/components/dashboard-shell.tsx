@@ -56,13 +56,17 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
 
 
 export function DashboardShell({ children }: { children: ReactNode }) {
-  const { profile, user, primaryRole, signOut } = useAuth();
+  const { profile, user, signOut } = useAuth();
+  const { mode, setMode } = useMode();
+  const activeMode: SpacesMode = mode ?? "buyer";
   const { t } = useI18n();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const NAV = useRoleNav();
-  const items = NAV[primaryRole];
+  const items = NAV[activeMode];
+
+
 
 
   async function handleSignOut() {
@@ -110,12 +114,33 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 <p className="truncate text-sm font-semibold text-foreground">
                   {profile?.full_name || t("common.welcome")}
                 </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {primaryRole.charAt(0).toUpperCase() + primaryRole.slice(1)}
-                </p>
+                <div className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  {activeMode} mode
+                </div>
               </div>
             </div>
+            <div className="mt-3 grid grid-cols-3 gap-1 rounded-xl border border-border/60 bg-secondary/50 p-1">
+              {(["buyer", "owner", "agent"] as SpacesMode[]).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => {
+                    setMode(m);
+                    toast.success(`Switched to ${m.charAt(0).toUpperCase() + m.slice(1)} mode`);
+                    navigate({ to: "/dashboard" });
+                  }}
+                  className={cn(
+                    "rounded-lg py-1.5 text-[11px] font-semibold capitalize transition-all",
+                    activeMode === m
+                      ? "bg-primary text-primary-foreground shadow-[var(--shadow-soft)]"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
           </div>
+
 
           <nav className="flex-1 space-y-1 overflow-y-auto p-3">
             {items.map((item) => {
