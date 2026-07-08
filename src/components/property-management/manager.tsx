@@ -700,12 +700,12 @@ function EmptyPropertiesIllustration() {
 function statusToKind(s: string): any {
   switch (s) {
     case "live": return "live";
-    case "draft": return "draft";
-    case "archived": return "archived";
     case "pending": return "pending";
-    case "paused": return "paused";
     case "sold": return "sold";
     case "rented": return "rented";
+    case "paused": return "draft";
+    case "archived": return "draft";
+    case "draft":
     default: return "draft";
   }
 }
