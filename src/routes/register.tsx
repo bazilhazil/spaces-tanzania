@@ -10,7 +10,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
 import { GoogleIcon } from "@/components/auth-gate-dialog";
-import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/register")({
@@ -23,8 +22,7 @@ export const Route = createFileRoute("/register")({
   }),
 });
 
-type Role = "buyer" | "owner" | "agent";
-const ROLE_KEYS: Role[] = ["buyer", "owner", "agent"];
+
 
 function RegisterPage() {
   const navigate = useNavigate();
