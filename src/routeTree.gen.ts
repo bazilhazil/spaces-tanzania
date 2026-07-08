@@ -22,6 +22,7 @@ import { Route as PropertiesSlugRouteImport } from './routes/properties.$slug'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_authenticated/dashboard.$section'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -88,6 +89,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardSectionRoute =
   AuthenticatedDashboardSectionRouteImport.update({
     id: '/$section',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/upload': typeof AuthenticatedUploadRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/upload': typeof AuthenticatedUploadRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/properties'
     | '/register'
     | '/sitemap.xml'
+    | '/admin'
     | '/dashboard'
     | '/upload'
     | '/welcome'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/properties'
     | '/register'
     | '/sitemap.xml'
+    | '/admin'
     | '/dashboard'
     | '/upload'
     | '/welcome'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/properties'
     | '/register'
     | '/sitemap.xml'
+    | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/upload'
     | '/_authenticated/welcome'
@@ -296,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/$section': {
       id: '/_authenticated/dashboard/$section'
       path: '/$section'
@@ -321,12 +340,14 @@ const AuthenticatedDashboardRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
