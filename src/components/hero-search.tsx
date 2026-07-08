@@ -11,25 +11,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/hooks/use-i18n";
 
 type Tab = "rent" | "sale" | "commercial";
 
-const tabs: { id: Tab; label: string }[] = [
-  { id: "rent", label: "Rent" },
-  { id: "sale", label: "Buy" },
-  { id: "commercial", label: "Commercial" },
-];
+const tabIds: Tab[] = ["rent", "sale", "commercial"];
 
 const shortcuts = [
-  { label: "Houses", icon: Home, category: "House" },
-  { label: "Apartments", icon: Building2, category: "Apartment" },
-  { label: "Offices", icon: Landmark, category: "Office" },
-  { label: "Commercial", icon: Store, category: "Shop" },
-  { label: "Land", icon: Trees, category: "Land" },
-  { label: "Warehouse", icon: Warehouse, category: "Warehouse" },
+  { icon: Home, category: "House" },
+  { icon: Building2, category: "Apartment" },
+  { icon: Landmark, category: "Office" },
+  { icon: Store, category: "Shop" },
+  { icon: Trees, category: "Land" },
+  { icon: Warehouse, category: "Warehouse" },
 ];
 
+const CATEGORIES = ["House", "Apartment", "Office", "Shop", "Warehouse", "Land"] as const;
+
 export function HeroSearch() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("rent");
   const [city, setCity] = useState<string>("");
@@ -41,18 +41,18 @@ export function HeroSearch() {
   return (
     <div className="w-full">
       <div className="inline-flex rounded-t-2xl bg-background/95 p-1 backdrop-blur">
-        {tabs.map((t) => (
+        {tabIds.map((id) => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
+            key={id}
+            onClick={() => setTab(id)}
             className={cn(
               "rounded-xl px-5 py-2.5 text-sm font-medium transition-all",
-              tab === t.id
+              tab === id
                 ? "bg-primary text-primary-foreground shadow-[var(--shadow-soft)]"
                 : "text-foreground/70 hover:text-foreground",
             )}
           >
-            {t.label}
+            {t(`search.tab.${id}`)}
           </button>
         ))}
       </div>
@@ -79,13 +79,13 @@ export function HeroSearch() {
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="City, area, street…"
+            placeholder={t("search.placeholder")}
             className="h-12 border-transparent bg-secondary/60 pl-10 text-sm focus-visible:border-ring"
           />
         </div>
         <Select value={city} onValueChange={setCity}>
           <SelectTrigger className="h-12 border-transparent bg-secondary/60 md:col-span-2">
-            <SelectValue placeholder="City" />
+            <SelectValue placeholder={t("search.city")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="Dar es Salaam">Dar es Salaam</SelectItem>
@@ -97,20 +97,17 @@ export function HeroSearch() {
         </Select>
         <Select value={category} onValueChange={setCategory}>
           <SelectTrigger className="h-12 border-transparent bg-secondary/60 md:col-span-2">
-            <SelectValue placeholder="Type" />
+            <SelectValue placeholder={t("search.type")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="House">House</SelectItem>
-            <SelectItem value="Apartment">Apartment</SelectItem>
-            <SelectItem value="Office">Office</SelectItem>
-            <SelectItem value="Shop">Shop</SelectItem>
-            <SelectItem value="Warehouse">Warehouse</SelectItem>
-            <SelectItem value="Land">Land</SelectItem>
+            {CATEGORIES.map((c) => (
+              <SelectItem key={c} value={c}>{t(`search.types.${c}`)}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select value={minPrice} onValueChange={setMinPrice}>
           <SelectTrigger className="h-12 border-transparent bg-secondary/60 md:col-span-1">
-            <SelectValue placeholder="Min" />
+            <SelectValue placeholder={t("search.min")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="200000">TZS 200K</SelectItem>
@@ -122,7 +119,7 @@ export function HeroSearch() {
         </Select>
         <Select value={maxPrice} onValueChange={setMaxPrice}>
           <SelectTrigger className="h-12 border-transparent bg-secondary/60 md:col-span-1">
-            <SelectValue placeholder="Max" />
+            <SelectValue placeholder={t("search.max")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="500000">TZS 500K</SelectItem>
@@ -138,20 +135,20 @@ export function HeroSearch() {
           size="lg"
           className="h-12 gap-2 bg-primary px-6 text-primary-foreground hover:bg-primary/90 md:col-span-2"
         >
-          <Search className="h-4 w-4" /> Search
+          <Search className="h-4 w-4" /> {t("search.submit")}
         </Button>
       </form>
 
       <div className="mt-4 flex flex-wrap gap-2">
         {shortcuts.map((s) => (
           <Link
-            key={s.label}
+            key={s.category}
             to="/properties"
             search={{ category: s.category }}
             className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white backdrop-blur transition hover:bg-white/20"
           >
             <s.icon className="h-3.5 w-3.5 text-gold" />
-            {s.label}
+            {t(`search.shortcuts.${s.category}`)}
           </Link>
         ))}
       </div>

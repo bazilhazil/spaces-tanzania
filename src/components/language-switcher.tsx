@@ -5,13 +5,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useI18n, type Lang } from "@/hooks/use-i18n";
+import { useI18n, AVAILABLE_LANGS } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
-
-const LANGS: { code: Lang; flag: string; label: string }[] = [
-  { code: "en", flag: "🇬🇧", label: "English" },
-  { code: "sw", flag: "🇹🇿", label: "Kiswahili" },
-];
 
 interface Props {
   variant?: "full" | "icon";
@@ -19,14 +14,14 @@ interface Props {
 }
 
 export function LanguageSwitcher({ variant = "full", className }: Props) {
-  const { lang, setLang } = useI18n();
-  const current = LANGS.find((l) => l.code === lang) ?? LANGS[0];
+  const { lang, setLang, t } = useI18n();
+  const current = AVAILABLE_LANGS.find((l) => l.code === lang) ?? AVAILABLE_LANGS[0];
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          aria-label="Change language"
+          aria-label={t("lang.change")}
           className={cn(
             "inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-medium text-foreground/80 transition hover:border-primary/30 hover:text-primary",
             variant === "icon" && "px-2",
@@ -45,7 +40,7 @@ export function LanguageSwitcher({ variant = "full", className }: Props) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
-        {LANGS.map((l) => (
+        {AVAILABLE_LANGS.map((l) => (
           <DropdownMenuItem
             key={l.code}
             onSelect={() => setLang(l.code)}
