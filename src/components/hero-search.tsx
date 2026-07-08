@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Building2, Home, Landmark, Search, Store, Trees, Warehouse } from "lucide-react";
-import { useState } from "react";
+import { Building2, Home, Landmark, MapPin, Search, Store, Trees, Warehouse } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
+import { TZ_REGION_NAMES, searchLocations } from "@/lib/tz-locations";
 
 type Tab = "rent" | "sale" | "commercial";
 
