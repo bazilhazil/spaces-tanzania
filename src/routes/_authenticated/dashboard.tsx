@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ProfileCompletionCard } from "@/components/profile-completion-card";
-import { useAuth, type AppRole } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
+import { useMode, type SpacesMode } from "@/hooks/use-mode";
 import {
   Home, Upload, MessageSquare, Calendar, Heart, Users, ShieldCheck, DollarSign,
   BarChart3, Eye, Sparkles, ArrowUpRight, TrendingUp, Crown,
@@ -24,9 +25,16 @@ type RecentProperty = {
 };
 
 function DashboardPage() {
-  const { profile, user, primaryRole } = useAuth();
+  const { profile, user } = useAuth();
+  const { mode, ready } = useMode();
   const { t } = useI18n();
   const name = (profile?.full_name || user?.email || t("common.welcome")).split(" ")[0];
+
+  if (ready && !mode) {
+    if (typeof window !== "undefined") window.location.replace("/welcome");
+    return null;
+  }
+  const activeMode: SpacesMode = mode ?? "buyer";
 
   return (
     <DashboardShell>
@@ -45,7 +53,7 @@ function DashboardPage() {
 
         <ProfileCompletionCard />
 
-        {primaryRole === "owner" ? <OwnerHome /> : <NonOwnerHome role={primaryRole} />}
+        {activeMode === "owner" ? <OwnerHome /> : <NonOwnerHome role={activeMode} />}
       </div>
     </DashboardShell>
   );
@@ -288,7 +296,7 @@ export function PropertyMiniCard({ p }: { p: RecentProperty }) {
   );
 }
 
-function NonOwnerHome({ role }: { role: AppRole }) {
+function NonOwnerHome({ role }: { role: SpacesMode }) {
   const items = role === "agent"
     ? [
         { label: "Clients", value: 0, icon: Users, delta: "+0", tone: "primary" },
@@ -296,14 +304,8 @@ function NonOwnerHome({ role }: { role: AppRole }) {
         { label: "Deals", value: 0, icon: DollarSign, delta: "+0", tone: "amber" },
         { label: "Rating", value: "—", icon: BarChart3, delta: "—", tone: "violet" },
       ]
-    : role === "admin"
-    ? [
-        { label: "Total Users", value: 0, icon: Users, delta: "+0", tone: "primary" },
-        { label: "Listings", value: 0, icon: Home, delta: "+0", tone: "emerald" },
-        { label: "Verifications", value: 0, icon: ShieldCheck, delta: "0 pending", tone: "amber" },
-        { label: "Revenue", value: 0, icon: DollarSign, delta: "+0%", tone: "violet" },
-      ]
     : [
+
         { label: "Favorites", value: 0, icon: Heart, delta: "+0", tone: "primary" },
         { label: "Saved Searches", value: 0, icon: BarChart3, delta: "+0", tone: "emerald" },
         { label: "Viewings", value: 0, icon: Calendar, delta: "0 upcoming", tone: "amber" },

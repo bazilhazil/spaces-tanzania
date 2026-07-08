@@ -2,13 +2,14 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
-  Heart, Search, User as UserIcon, Users, Briefcase, ShieldCheck, FileText, DollarSign,
+  Heart, Search, User as UserIcon, Users, Briefcase,
   Menu, X, LogOut, FileEdit, LifeBuoy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth, type AppRole } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
+import { useMode, type SpacesMode } from "@/hooks/use-mode";
 import { useI18n } from "@/hooks/use-i18n";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
@@ -16,7 +17,7 @@ import { toast } from "sonner";
 
 type Item = { label: string; to: string; icon: React.ComponentType<{ className?: string }> };
 
-function useRoleNav(): Record<AppRole, Item[]> {
+function useRoleNav(): Record<SpacesMode, Item[]> {
   const { t } = useI18n();
   return {
     owner: [
@@ -49,28 +50,23 @@ function useRoleNav(): Record<AppRole, Item[]> {
       { label: t("dashboard.side.performance"), to: "/dashboard/analytics", icon: BarChart3 },
       { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
     ],
-    admin: [
-      { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
-      { label: t("dashboard.side.users"), to: "/dashboard/users", icon: Users },
-      { label: t("dashboard.side.properties"), to: "/dashboard/properties", icon: Home },
-      { label: t("dashboard.side.verification"), to: "/dashboard/verification", icon: ShieldCheck },
-      { label: t("dashboard.side.reports"), to: "/dashboard/reports", icon: FileText },
-      { label: t("dashboard.side.payments"), to: "/dashboard/payments", icon: DollarSign },
-      { label: t("dashboard.side.analytics"), to: "/dashboard/analytics", icon: BarChart3 },
-      { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
-    ],
   };
 }
 
 
+
 export function DashboardShell({ children }: { children: ReactNode }) {
-  const { profile, user, primaryRole, signOut } = useAuth();
+  const { profile, user, signOut } = useAuth();
+  const { mode, setMode } = useMode();
+  const activeMode: SpacesMode = mode ?? "buyer";
   const { t } = useI18n();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const NAV = useRoleNav();
-  const items = NAV[primaryRole];
+  const items = NAV[activeMode];
+
+
 
 
   async function handleSignOut() {
@@ -118,12 +114,33 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 <p className="truncate text-sm font-semibold text-foreground">
                   {profile?.full_name || t("common.welcome")}
                 </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {primaryRole.charAt(0).toUpperCase() + primaryRole.slice(1)}
-                </p>
+                <div className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  {activeMode} mode
+                </div>
               </div>
             </div>
+            <div className="mt-3 grid grid-cols-3 gap-1 rounded-xl border border-border/60 bg-secondary/50 p-1">
+              {(["buyer", "owner", "agent"] as SpacesMode[]).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => {
+                    setMode(m);
+                    toast.success(`Switched to ${m.charAt(0).toUpperCase() + m.slice(1)} mode`);
+                    navigate({ to: "/dashboard" });
+                  }}
+                  className={cn(
+                    "rounded-lg py-1.5 text-[11px] font-semibold capitalize transition-all",
+                    activeMode === m
+                      ? "bg-primary text-primary-foreground shadow-[var(--shadow-soft)]"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
           </div>
+
 
           <nav className="flex-1 space-y-1 overflow-y-auto p-3">
             {items.map((item) => {

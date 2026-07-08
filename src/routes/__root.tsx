@@ -14,6 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/use-auth";
+import { ModeProvider } from "@/hooks/use-mode";
 import { I18nProvider } from "@/hooks/use-i18n";
 import { LanguageWelcome } from "@/components/language-welcome";
 import { Toaster } from "@/components/ui/sonner";
@@ -150,9 +151,11 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <AuthProvider>
-          <Outlet />
-          <LanguageWelcome />
-          <Toaster richColors position="top-right" />
+          <ModeProvider>
+            <Outlet />
+            <LanguageWelcome />
+            <Toaster richColors position="top-right" />
+          </ModeProvider>
         </AuthProvider>
       </I18nProvider>
     </QueryClientProvider>

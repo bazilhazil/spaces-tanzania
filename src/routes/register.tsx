@@ -10,7 +10,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
 import { GoogleIcon } from "@/components/auth-gate-dialog";
-import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/register")({
@@ -23,8 +22,7 @@ export const Route = createFileRoute("/register")({
   }),
 });
 
-type Role = "buyer" | "owner" | "agent";
-const ROLE_KEYS: Role[] = ["buyer", "owner", "agent"];
+
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -36,7 +34,6 @@ function RegisterPage() {
     password: "",
     confirm: "",
   });
-  const [role, setRole] = useState<Role>("buyer");
   const [agree, setAgree] = useState(false);
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -55,18 +52,17 @@ function RegisterPage() {
       email: form.email,
       password: form.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/welcome`,
         data: {
           full_name: form.full_name,
           phone: form.phone,
-          role,
         },
       },
     });
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success(t("auth.register.toastWelcome"));
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/welcome" });
   }
 
   async function google() {
@@ -147,27 +143,8 @@ function RegisterPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>{t("auth.register.roleLabel")}</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {ROLE_KEYS.map((r) => (
-                  <button
-                    type="button"
-                    key={r}
-                    onClick={() => setRole(r)}
-                    className={cn(
-                      "rounded-xl border p-3 text-left transition-all",
-                      role === r
-                        ? "border-primary bg-primary/5 shadow-[0_0_0_1px_var(--color-primary)]"
-                        : "border-border hover:border-primary/40 hover:bg-accent",
-                    )}
-                  >
-                    <div className="text-sm font-semibold text-foreground">{t(`auth.register.roles.${r}.label`)}</div>
-                    <div className="text-[11px] text-muted-foreground">{t(`auth.register.roles.${r}.desc`)}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
+
+
 
             <label className="flex cursor-pointer items-start gap-2 text-sm text-foreground/80">
               <Checkbox checked={agree} onCheckedChange={(v) => setAgree(!!v)} className="mt-0.5" />
