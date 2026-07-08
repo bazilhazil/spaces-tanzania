@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PropertiesRouteImport } from './routes/properties'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DesignSystemRouteImport } from './routes/design-system'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -41,6 +42,11 @@ const PropertiesRoute = PropertiesRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesignSystemRoute = DesignSystemRouteImport.update({
+  id: '/design-system',
+  path: '/design-system',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/design-system': typeof DesignSystemRoute
   '/login': typeof LoginRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/design-system': typeof DesignSystemRoute
   '/login': typeof LoginRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/design-system': typeof DesignSystemRoute
   '/login': typeof LoginRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agents'
     | '/auth'
+    | '/design-system'
     | '/login'
     | '/properties'
     | '/register'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agents'
     | '/auth'
+    | '/design-system'
     | '/login'
     | '/properties'
     | '/register'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/agents'
     | '/auth'
+    | '/design-system'
     | '/login'
     | '/properties'
     | '/register'
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AgentsRoute: typeof AgentsRoute
   AuthRoute: typeof AuthRoute
+  DesignSystemRoute: typeof DesignSystemRoute
   LoginRoute: typeof LoginRoute
   PropertiesRoute: typeof PropertiesRouteWithChildren
   RegisterRoute: typeof RegisterRoute
@@ -218,6 +231,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/design-system': {
+      id: '/design-system'
+      path: '/design-system'
+      fullPath: '/design-system'
+      preLoaderRoute: typeof DesignSystemRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -332,6 +352,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AgentsRoute: AgentsRoute,
   AuthRoute: AuthRoute,
+  DesignSystemRoute: DesignSystemRoute,
   LoginRoute: LoginRoute,
   PropertiesRoute: PropertiesRouteWithChildren,
   RegisterRoute: RegisterRoute,
