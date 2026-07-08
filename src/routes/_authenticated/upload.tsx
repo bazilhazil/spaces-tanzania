@@ -288,8 +288,8 @@ function UploadWizardPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl items-center gap-4 px-4 py-3">
-          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">← Exit</Link>
+        <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
+          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground shrink-0">← Exit</Link>
           <div className="min-w-0 flex-1">
             <div className="mb-1 flex items-center justify-between text-xs">
               <span className="truncate font-semibold text-foreground">
@@ -305,6 +305,7 @@ function UploadWizardPage() {
             </div>
             <Progress value={(step / TOTAL) * 100} className="h-1.5" />
           </div>
+          <ListingScoreBadge score={listingScore.total} />
         </div>
       </header>
 
