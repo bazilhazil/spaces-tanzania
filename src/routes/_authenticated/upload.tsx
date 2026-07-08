@@ -295,7 +295,14 @@ function UploadWizardPage() {
 
       <main className="mx-auto max-w-2xl px-4 pb-36 pt-6 sm:pt-10">
         <div key={step} className="animate-fade-in">
-          {step === 1 && <StepPhotos media={media} setMedia={setMedia} />}
+          {step === 1 && (
+            <PhotoManager
+              media={media}
+              setMedia={setMedia}
+              watermark={!!draft.watermark}
+              onWatermarkChange={(v) => setField("watermark", v)}
+            />
+          )}
           {step === 2 && <StepType value={draft.property_type} onChange={(v) => setField("property_type", v)} />}
           {step === 3 && <StepInfo draft={draft} setField={setField} />}
           {step === 4 && <StepLocation draft={draft} setField={setField} />}
