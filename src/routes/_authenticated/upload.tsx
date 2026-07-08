@@ -167,6 +167,21 @@ function UploadWizardPage() {
     return place ? `${beds}${type} in ${place}` : `${beds}${type}`;
   }, [draft.property_type, draft.ward, draft.district, draft.region, draft.bedrooms]);
 
+  const listingScore = useMemo(() => {
+    const imgs = media.filter((m) => m.kind === "image");
+    const qs = imgs.map((m) => m.quality?.score).filter((n): n is number => typeof n === "number");
+    const avgQ = qs.length ? qs.reduce((a, b) => a + b, 0) / qs.length : null;
+    return computeListingScore({
+      photos: imgs.length,
+      photoAvgQuality: avgQ,
+      descriptionLen: (draft.description ?? "").trim().length,
+      amenities: (draft.amenities ?? []).length,
+      hasLocation: !!(draft.region && draft.district),
+      hasContact: !!(draft.contact_name && draft.contact_phone),
+      hasVideo: media.some((m) => m.kind === "video"),
+    });
+  }, [media, draft]);
+
   async function submit(mode: "publish" | "draft") {
     if (!user) return toast.error("Please sign in");
     if (mode === "publish" && !media.some((m) => m.kind === "image")) return toast.error("Add at least one photo");
