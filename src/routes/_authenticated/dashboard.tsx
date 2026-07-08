@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ProfileCompletionCard } from "@/components/profile-completion-card";
-import { useAuth, type AppRole } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
+import { useMode, type SpacesMode } from "@/hooks/use-mode";
 import {
   Home, Upload, MessageSquare, Calendar, Heart, Users, ShieldCheck, DollarSign,
   BarChart3, Eye, Sparkles, ArrowUpRight, TrendingUp, Crown,
