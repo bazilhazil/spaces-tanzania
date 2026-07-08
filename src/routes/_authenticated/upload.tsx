@@ -62,13 +62,6 @@ const AMENITIES = [
 const STEP_LABELS = ["Photos", "Type", "Details", "Location", "Amenities", "Contact", "Preview", "Publish"];
 const TOTAL = 8;
 
-type MediaItem = {
-  id: string;
-  file: File;
-  previewUrl: string;
-  kind: "image" | "video";
-  isCover: boolean;
-};
 
 function UploadWizardPage() {
   const navigate = useNavigate();
