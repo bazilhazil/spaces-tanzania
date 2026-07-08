@@ -17,7 +17,7 @@ import { toast } from "sonner";
 
 type Item = { label: string; to: string; icon: React.ComponentType<{ className?: string }> };
 
-function useRoleNav(): Record<AppRole, Item[]> {
+function useRoleNav(): Record<SpacesMode, Item[]> {
   const { t } = useI18n();
   return {
     owner: [
@@ -50,18 +50,9 @@ function useRoleNav(): Record<AppRole, Item[]> {
       { label: t("dashboard.side.performance"), to: "/dashboard/analytics", icon: BarChart3 },
       { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
     ],
-    admin: [
-      { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
-      { label: t("dashboard.side.users"), to: "/dashboard/users", icon: Users },
-      { label: t("dashboard.side.properties"), to: "/dashboard/properties", icon: Home },
-      { label: t("dashboard.side.verification"), to: "/dashboard/verification", icon: ShieldCheck },
-      { label: t("dashboard.side.reports"), to: "/dashboard/reports", icon: FileText },
-      { label: t("dashboard.side.payments"), to: "/dashboard/payments", icon: DollarSign },
-      { label: t("dashboard.side.analytics"), to: "/dashboard/analytics", icon: BarChart3 },
-      { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
-    ],
   };
 }
+
 
 
 export function DashboardShell({ children }: { children: ReactNode }) {
