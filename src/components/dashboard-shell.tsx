@@ -22,7 +22,7 @@ function useRoleNav(): Record<AppRole, Item[]> {
     owner: [
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
       { label: "My Properties", to: "/dashboard/properties", icon: Home },
-      { label: "Upload Property", to: "/dashboard/upload", icon: Upload },
+      { label: "Upload Property", to: "/upload", icon: Upload },
       { label: "Viewings", to: "/dashboard/viewings", icon: Calendar },
       { label: "Messages", to: "/dashboard/messages", icon: MessageSquare },
       { label: "Saved Drafts", to: "/dashboard/drafts", icon: FileEdit },
