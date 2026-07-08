@@ -18,6 +18,7 @@ import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PropertiesSlugRouteImport } from './routes/properties.$slug'
+import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_authenticated/dashboard.$section'
 
@@ -65,6 +66,11 @@ const PropertiesSlugRoute = PropertiesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => PropertiesRoute,
 } as any)
+const AuthenticatedUploadRoute = AuthenticatedUploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/upload': typeof AuthenticatedUploadRoute
   '/properties/$slug': typeof PropertiesSlugRoute
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
 }
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/upload': typeof AuthenticatedUploadRoute
   '/properties/$slug': typeof PropertiesSlugRoute
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
 }
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/properties/$slug': typeof PropertiesSlugRoute
   '/_authenticated/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
 }
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/sitemap.xml'
     | '/dashboard'
+    | '/upload'
     | '/properties/$slug'
     | '/dashboard/$section'
   fileRoutesByTo: FileRoutesByTo
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/sitemap.xml'
     | '/dashboard'
+    | '/upload'
     | '/properties/$slug'
     | '/dashboard/$section'
   id:
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/sitemap.xml'
     | '/_authenticated/dashboard'
+    | '/_authenticated/upload'
     | '/properties/$slug'
     | '/_authenticated/dashboard/$section'
   fileRoutesById: FileRoutesById
@@ -231,6 +243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PropertiesSlugRouteImport
       parentRoute: typeof PropertiesRoute
     }
+    '/_authenticated/upload': {
+      id: '/_authenticated/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof AuthenticatedUploadRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -264,10 +283,12 @@ const AuthenticatedDashboardRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
+  AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
+  AuthenticatedUploadRoute: AuthenticatedUploadRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

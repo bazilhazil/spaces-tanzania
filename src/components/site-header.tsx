@@ -44,7 +44,7 @@ export function SiteHeader() {
   }, []);
 
   function onUpload() {
-    if (user) navigate({ to: "/dashboard/$section", params: { section: "upload" } });
+    if (user) navigate({ to: "/upload" });
     else setGateOpen(true);
   }
 
