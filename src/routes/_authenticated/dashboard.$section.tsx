@@ -33,6 +33,7 @@ const META: Record<string, { title: string; desc: string }> = {
   profile:      { title: "Profile",         desc: "Your public identity on SPACES." },
   support:      { title: "Support",         desc: "We're here to help, 24/7." },
   settings:     { title: "Settings",        desc: "Preferences, language and privacy." },
+  mode:         { title: "My Mode",          desc: "Switch between Buyer, Owner and Agent anytime." },
   language:     { title: "Language",        desc: "Choose your preferred language." },
   favorites:    { title: "Favorites",       desc: "Homes you loved." },
   searches:     { title: "Saved Searches",  desc: "Get alerts when matching homes appear." },
