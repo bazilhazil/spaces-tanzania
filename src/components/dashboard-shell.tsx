@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
   Heart, Search, User as UserIcon, Users, Briefcase, ShieldCheck, FileText, DollarSign,
-  Menu, X, LogOut,
+  Menu, X, LogOut, FileEdit, LifeBuoy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -21,13 +21,16 @@ function useRoleNav(): Record<AppRole, Item[]> {
   return {
     owner: [
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
-      { label: t("dashboard.side.myProperties"), to: "/dashboard/properties", icon: Home },
-      { label: t("nav.upload"), to: "/dashboard/upload", icon: Upload },
-      { label: t("dashboard.side.messages"), to: "/dashboard/messages", icon: MessageSquare },
-      { label: t("dashboard.side.viewings"), to: "/dashboard/viewings", icon: Calendar },
-      { label: t("dashboard.side.analytics"), to: "/dashboard/analytics", icon: BarChart3 },
-      { label: t("dashboard.side.subscription"), to: "/dashboard/subscription", icon: CreditCard },
-      { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
+      { label: "My Properties", to: "/dashboard/properties", icon: Home },
+      { label: "Upload Property", to: "/upload", icon: Upload },
+      { label: "Viewings", to: "/dashboard/viewings", icon: Calendar },
+      { label: "Messages", to: "/dashboard/messages", icon: MessageSquare },
+      { label: "Saved Drafts", to: "/dashboard/drafts", icon: FileEdit },
+      { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
+      { label: "Subscription", to: "/dashboard/subscription", icon: CreditCard },
+      { label: "Profile", to: "/dashboard/profile", icon: UserIcon },
+      { label: "Settings", to: "/dashboard/settings", icon: Settings },
+      { label: "Support", to: "/dashboard/support", icon: LifeBuoy },
     ],
     buyer: [
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
