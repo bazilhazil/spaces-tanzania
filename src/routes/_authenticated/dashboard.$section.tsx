@@ -69,6 +69,7 @@ function SectionPage() {
          section === "support"      ? <SupportPanel /> :
          section === "settings"     ? <SettingsIndex /> :
          section === "language"     ? <LanguagePanel /> :
+         section === "mode"         ? <ModePanel /> :
          <EmptyPanel />}
       </div>
     </DashboardShell>
