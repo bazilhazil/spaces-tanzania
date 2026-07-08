@@ -8,7 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth, type AppRole } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
+import { useMode, type SpacesMode } from "@/hooks/use-mode";
 import { useI18n } from "@/hooks/use-i18n";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";

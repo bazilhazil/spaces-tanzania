@@ -34,11 +34,13 @@ function LoginPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success(t("auth.login.welcomeToast"));
-    navigate({ to: "/dashboard" });
+    const hasMode = data.user && typeof window !== "undefined"
+      && !!window.localStorage.getItem(`spaces:mode:${data.user.id}`);
+    navigate({ to: hasMode ? "/dashboard" : "/welcome" });
   }
 
   async function google() {
