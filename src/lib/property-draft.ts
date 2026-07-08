@@ -27,6 +27,7 @@ export type WizardDraft = {
   contact_phone?: string;
   contact_whatsapp?: string;
   preferred_contact?: "phone" | "whatsapp" | "both";
+  watermark?: boolean;
 };
 
 const KEY = "spaces:upload-draft:v2";
