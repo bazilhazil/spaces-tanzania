@@ -66,17 +66,23 @@ export type Database = {
           area_sqm: number | null
           bathrooms: number | null
           bedrooms: number | null
+          contact_name: string | null
+          contact_phone: string | null
+          contact_whatsapp: string | null
           created_at: string
           currency: string
           description: string | null
           district: string | null
+          floor: number | null
           id: string
+          landmark: string | null
           latitude: number | null
           listing_type: Database["public"]["Enums"]["listing_type"]
           longitude: number | null
           negotiable: boolean
           owner_id: string
           parking: number | null
+          preferred_contact: string | null
           price: number
           property_type: Database["public"]["Enums"]["property_type"]
           region: string | null
@@ -86,6 +92,7 @@ export type Database = {
           updated_at: string
           view_count: number
           ward: string | null
+          year_built: number | null
         }
         Insert: {
           address?: string | null
@@ -93,17 +100,23 @@ export type Database = {
           area_sqm?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
           created_at?: string
           currency?: string
           description?: string | null
           district?: string | null
+          floor?: number | null
           id?: string
+          landmark?: string | null
           latitude?: number | null
           listing_type: Database["public"]["Enums"]["listing_type"]
           longitude?: number | null
           negotiable?: boolean
           owner_id: string
           parking?: number | null
+          preferred_contact?: string | null
           price?: number
           property_type: Database["public"]["Enums"]["property_type"]
           region?: string | null
@@ -113,6 +126,7 @@ export type Database = {
           updated_at?: string
           view_count?: number
           ward?: string | null
+          year_built?: number | null
         }
         Update: {
           address?: string | null
@@ -120,17 +134,23 @@ export type Database = {
           area_sqm?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
           created_at?: string
           currency?: string
           description?: string | null
           district?: string | null
+          floor?: number | null
           id?: string
+          landmark?: string | null
           latitude?: number | null
           listing_type?: Database["public"]["Enums"]["listing_type"]
           longitude?: number | null
           negotiable?: boolean
           owner_id?: string
           parking?: number | null
+          preferred_contact?: string | null
           price?: number
           property_type?: Database["public"]["Enums"]["property_type"]
           region?: string | null
@@ -140,6 +160,7 @@ export type Database = {
           updated_at?: string
           view_count?: number
           ward?: string | null
+          year_built?: number | null
         }
         Relationships: []
       }

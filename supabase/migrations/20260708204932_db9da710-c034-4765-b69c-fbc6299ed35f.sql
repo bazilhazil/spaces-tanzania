@@ -1,0 +1,8 @@
+ALTER TABLE public.properties
+  ADD COLUMN IF NOT EXISTS floor INTEGER,
+  ADD COLUMN IF NOT EXISTS year_built INTEGER,
+  ADD COLUMN IF NOT EXISTS landmark TEXT,
+  ADD COLUMN IF NOT EXISTS contact_name TEXT,
+  ADD COLUMN IF NOT EXISTS contact_phone TEXT,
+  ADD COLUMN IF NOT EXISTS contact_whatsapp TEXT,
+  ADD COLUMN IF NOT EXISTS preferred_contact TEXT;
