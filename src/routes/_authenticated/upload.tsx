@@ -21,7 +21,6 @@ import { loadDraft, saveDraft, clearDraft, type WizardDraft } from "@/lib/proper
 import { compressImageFile, uploadMediaFile } from "@/lib/property-media";
 import { watermarkImage } from "@/lib/image-watermark";
 import { generateVideoThumbnail } from "@/lib/video-utils";
-import { LocationMapPicker } from "@/components/upload-wizard/location-map-picker";
 import { TzLocationPicker } from "@/components/location/tz-location-picker";
 import {
   PhotoManager, type MediaItem,
