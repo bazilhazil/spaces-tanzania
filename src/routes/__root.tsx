@@ -19,6 +19,11 @@ import { LanguageWelcome } from "@/components/language-welcome";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
+  return <NotFoundView />;
+}
+
+function NotFoundView() {
+  // Not using useI18n here — root can render outside providers during boundaries.
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
