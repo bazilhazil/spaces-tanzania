@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMode, type SpacesMode } from "@/hooks/use-mode";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -754,9 +755,9 @@ function LanguagePanel() {
 /* ============================ MY MODE ============================ */
 
 function ModePanel() {
-  const { mode, setMode } = useModeHook();
-  const navigate = useNavigateHook();
-  const options: { key: ModeKey; emoji: string; title: string; desc: string; unlocks: string[] }[] = [
+  const { mode, setMode } = useMode();
+  const navigate = useNavigate();
+  const options: { key: SpacesMode; emoji: string; title: string; desc: string; unlocks: string[] }[] = [
     { key: "buyer", emoji: "🏠", title: "Buyer", desc: "Find your next home.", unlocks: ["Favorites", "Viewing Requests", "Saved Searches"] },
     { key: "owner", emoji: "🏡", title: "Owner", desc: "List and manage your properties.", unlocks: ["Upload Property", "My Properties", "Analytics", "Bookings"] },
     { key: "agent", emoji: "🤝", title: "Agent", desc: "Manage clients and listings.", unlocks: ["Clients", "Listings", "Commission", "Performance"] },
