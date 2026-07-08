@@ -339,7 +339,7 @@ export function PropertiesManager() {
           <EmptyState
             icon={Search}
             title="No matches"
-            body="Try clearing filters or searching for a different term."
+            description="Try clearing filters or searching for a different term."
           />
         )
       ) : view === "grid" ? (
@@ -427,7 +427,7 @@ function PropertyManageCard({
         </div>
 
         <div className="absolute bottom-3 left-3">
-          <StatusBadge kind={statusToKind(p.status)}>{statusLabel(p.status)}</StatusBadge>
+          <StatusBadge kind={statusToKind(p.status)} label={statusLabel(p.status)} />
         </div>
         <div className="absolute bottom-3 right-3 rounded-full bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur">
           <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" /> {p.view_count.toLocaleString()}</span>
@@ -558,7 +558,7 @@ function PropertyManageTable({
               <p className="text-[11px] text-muted-foreground">{p.public_id} • {[p.district, p.region].filter(Boolean).join(", ") || "TZ"}</p>
             </div>
           </div>
-          <StatusBadge kind={statusToKind(p.status)}>{statusLabel(p.status)}</StatusBadge>
+          <StatusBadge kind={statusToKind(p.status)} label={statusLabel(p.status)} />
           <span className="text-sm font-medium">{p.currency} {p.price.toLocaleString()}</span>
           <span className="text-right text-sm">{p.view_count}</span>
           <span className="text-right text-sm">{p.quality}</span>
