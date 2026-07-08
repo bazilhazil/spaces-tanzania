@@ -141,16 +141,20 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
           <nav className="flex-1 space-y-4 overflow-y-auto p-3">
             {NAV.map((group) => (
-              <div key={group.section}>
-                <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{group.section}</div>
+              <div key={group.group}>
+                <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{group.group}</div>
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
-                    const active = pathname === item.to || (item.to !== "/admin" && pathname.startsWith(item.to));
+                    const href = itemHref(item);
+                    const active = item.section
+                      ? pathname === href
+                      : pathname === "/admin" || pathname === "/admin/";
                     const Icon = item.icon;
                     return (
                       <Link
-                        key={item.to}
-                        to={item.to}
+                        key={href}
+                        to={item.section ? "/admin/$section" : "/admin"}
+                        params={item.section ? { section: item.section } : undefined}
                         onClick={() => setOpen(false)}
                         className={cn(
                           "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
