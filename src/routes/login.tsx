@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
 import { GoogleIcon } from "@/components/auth-gate-dialog";
+import { useI18n } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
@@ -35,7 +37,7 @@ function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Welcome back!");
+    toast.success(t("auth.login.welcomeToast"));
     navigate({ to: "/dashboard" });
   }
 
@@ -55,11 +57,10 @@ function LoginPage() {
           </Link>
           <div className="max-w-md">
             <h2 className="font-display text-4xl font-semibold leading-tight">
-              Find your perfect space in Tanzania.
+              {t("auth.login.heroTitle")}
             </h2>
             <p className="mt-4 text-primary-foreground/85">
-              Verified listings. Trusted agents. From Dar es Salaam to Zanzibar — your next home is
-              one login away.
+              {t("auth.login.heroBody")}
             </p>
           </div>
           <p className="text-sm text-primary-foreground/70">
@@ -75,14 +76,12 @@ function LoginPage() {
             <Logo className="h-9 w-9" />
             <span className="font-display text-xl font-semibold text-primary">SPACES</span>
           </Link>
-          <h1 className="font-display text-3xl font-semibold text-foreground">Welcome back</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Sign in to continue your search.
-          </p>
+          <h1 className="font-display text-3xl font-semibold text-foreground">{t("auth.login.title")}</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">{t("auth.login.subtitle")}</p>
 
           <form onSubmit={onSubmit} className="mt-8 space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.login.email")}</Label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -92,13 +91,13 @@ function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder={t("auth.login.emailPlaceholder")}
                   className="h-11 rounded-xl pl-10"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("auth.login.password")}</Label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -108,14 +107,14 @@ function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={t("auth.login.passwordPlaceholder")}
                   className="h-11 rounded-xl pl-10 pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShow((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  aria-label={show ? "Hide password" : "Show password"}
+                  aria-label={show ? t("auth.login.hidePassword") : t("auth.login.showPassword")}
                 >
                   {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -125,30 +124,30 @@ function LoginPage() {
             <div className="flex items-center justify-between text-sm">
               <label className="flex cursor-pointer items-center gap-2 text-foreground/80">
                 <Checkbox checked={remember} onCheckedChange={(v) => setRemember(!!v)} />
-                Remember me
+                {t("auth.login.remember")}
               </label>
               <Link to="/login" className="font-medium text-primary hover:underline">
-                Forgot password?
+                {t("auth.login.forgot")}
               </Link>
             </div>
 
             <Button type="submit" disabled={loading} className="h-11 w-full rounded-xl text-base">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Login"}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("auth.login.submit")}
             </Button>
           </form>
 
           <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-widest text-muted-foreground">
-            <div className="h-px flex-1 bg-border" /> or <div className="h-px flex-1 bg-border" />
+            <div className="h-px flex-1 bg-border" /> {t("common.or")} <div className="h-px flex-1 bg-border" />
           </div>
 
           <Button variant="outline" onClick={google} className="h-11 w-full gap-2 rounded-xl">
-            <GoogleIcon /> Continue with Google
+            <GoogleIcon /> {t("auth.login.continueGoogle")}
           </Button>
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            New to SPACES?{" "}
+            {t("auth.login.noAccount")}{" "}
             <Link to="/register" className="font-semibold text-primary hover:underline">
-              Create an account
+              {t("auth.login.createAccount")}
             </Link>
           </p>
         </div>

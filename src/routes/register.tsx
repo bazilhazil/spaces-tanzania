@@ -11,6 +11,7 @@ import { Logo } from "@/components/logo";
 import { toast } from "sonner";
 import { GoogleIcon } from "@/components/auth-gate-dialog";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/register")({
   component: RegisterPage,
@@ -23,14 +24,11 @@ export const Route = createFileRoute("/register")({
 });
 
 type Role = "buyer" | "owner" | "agent";
-const roles: { value: Role; label: string; desc: string }[] = [
-  { value: "buyer", label: "Buyer", desc: "Rent or buy a home" },
-  { value: "owner", label: "Owner", desc: "List your property" },
-  { value: "agent", label: "Agent", desc: "Grow your portfolio" },
-];
+const ROLE_KEYS: Role[] = ["buyer", "owner", "agent"];
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [form, setForm] = useState({
     full_name: "",
     phone: "",
@@ -49,9 +47,9 @@ function RegisterPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (form.password !== form.confirm) return toast.error("Passwords do not match");
-    if (form.password.length < 6) return toast.error("Password must be at least 6 characters");
-    if (!agree) return toast.error("Please accept the Terms and Privacy Policy");
+    if (form.password !== form.confirm) return toast.error(t("auth.register.errors.passwordMismatch"));
+    if (form.password.length < 6) return toast.error(t("auth.register.errors.passwordShort"));
+    if (!agree) return toast.error(t("auth.register.errors.acceptTerms"));
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email: form.email,
@@ -67,7 +65,7 @@ function RegisterPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Welcome to SPACES! 🎉");
+    toast.success(t("auth.register.toastWelcome"));
     navigate({ to: "/dashboard" });
   }
 
@@ -86,10 +84,10 @@ function RegisterPage() {
           </Link>
           <div className="max-w-md">
             <h2 className="font-display text-4xl font-semibold leading-tight">
-              Join Tanzania's most trusted real estate marketplace.
+              {t("auth.register.heroTitle")}
             </h2>
             <p className="mt-4 text-primary-foreground/85">
-              Only a few details to get started. Complete your profile whenever you're ready.
+              {t("auth.register.heroBody")}
             </p>
           </div>
           <p className="text-sm text-primary-foreground/70">© 2025 SPACES Group Ltd.</p>
@@ -102,70 +100,70 @@ function RegisterPage() {
             <Logo className="h-9 w-9" />
             <span className="font-display text-xl font-semibold text-primary">SPACES</span>
           </Link>
-          <h1 className="font-display text-3xl font-semibold text-foreground">Create your account</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">Takes less than a minute.</p>
+          <h1 className="font-display text-3xl font-semibold text-foreground">{t("auth.register.title")}</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">{t("auth.register.subtitle")}</p>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name">Full name</Label>
+              <Label htmlFor="name">{t("auth.register.fullName")}</Label>
               <div className="relative">
                 <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="name" required value={form.full_name} onChange={(e) => set("full_name", e.target.value)} placeholder="Amina Hassan" className="h-11 rounded-xl pl-10" />
+                <Input id="name" required value={form.full_name} onChange={(e) => set("full_name", e.target.value)} placeholder={t("auth.register.fullNamePlaceholder")} className="h-11 rounded-xl pl-10" />
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">{t("auth.register.phone")}</Label>
                 <div className="relative">
                   <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input id="phone" required type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+255 7…" className="h-11 rounded-xl pl-10" />
+                  <Input id="phone" required type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder={t("auth.register.phonePlaceholder")} className="h-11 rounded-xl pl-10" />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.register.email")}</Label>
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input id="email" required type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="you@example.com" className="h-11 rounded-xl pl-10" />
+                  <Input id="email" required type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder={t("auth.register.emailPlaceholder")} className="h-11 rounded-xl pl-10" />
                 </div>
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="pw">Password</Label>
+                <Label htmlFor="pw">{t("auth.register.password")}</Label>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input id="pw" required type={show ? "text" : "password"} value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="At least 6 chars" className="h-11 rounded-xl pl-10 pr-10" />
-                  <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" aria-label="Toggle password">
+                  <Input id="pw" required type={show ? "text" : "password"} value={form.password} onChange={(e) => set("password", e.target.value)} placeholder={t("auth.register.passwordPlaceholder")} className="h-11 rounded-xl pl-10 pr-10" />
+                  <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" aria-label={show ? t("auth.login.hidePassword") : t("auth.login.showPassword")}>
                     {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="cpw">Confirm password</Label>
+                <Label htmlFor="cpw">{t("auth.register.confirm")}</Label>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input id="cpw" required type={show ? "text" : "password"} value={form.confirm} onChange={(e) => set("confirm", e.target.value)} placeholder="Repeat" className="h-11 rounded-xl pl-10" />
+                  <Input id="cpw" required type={show ? "text" : "password"} value={form.confirm} onChange={(e) => set("confirm", e.target.value)} placeholder={t("auth.register.confirmPlaceholder")} className="h-11 rounded-xl pl-10" />
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>I am a…</Label>
+              <Label>{t("auth.register.roleLabel")}</Label>
               <div className="grid grid-cols-3 gap-2">
-                {roles.map((r) => (
+                {ROLE_KEYS.map((r) => (
                   <button
                     type="button"
-                    key={r.value}
-                    onClick={() => setRole(r.value)}
+                    key={r}
+                    onClick={() => setRole(r)}
                     className={cn(
                       "rounded-xl border p-3 text-left transition-all",
-                      role === r.value
+                      role === r
                         ? "border-primary bg-primary/5 shadow-[0_0_0_1px_var(--color-primary)]"
                         : "border-border hover:border-primary/40 hover:bg-accent",
                     )}
                   >
-                    <div className="text-sm font-semibold text-foreground">{r.label}</div>
-                    <div className="text-[11px] text-muted-foreground">{r.desc}</div>
+                    <div className="text-sm font-semibold text-foreground">{t(`auth.register.roles.${r}.label`)}</div>
+                    <div className="text-[11px] text-muted-foreground">{t(`auth.register.roles.${r}.desc`)}</div>
                   </button>
                 ))}
               </div>
@@ -174,28 +172,29 @@ function RegisterPage() {
             <label className="flex cursor-pointer items-start gap-2 text-sm text-foreground/80">
               <Checkbox checked={agree} onCheckedChange={(v) => setAgree(!!v)} className="mt-0.5" />
               <span>
-                I agree to the{" "}
-                <a href="#" className="text-primary hover:underline">Terms</a> and{" "}
-                <a href="#" className="text-primary hover:underline">Privacy Policy</a>.
+                {t("auth.register.agreePre")}{" "}
+                <a href="#" className="text-primary hover:underline">{t("auth.register.terms")}</a>{" "}
+                {t("auth.register.and")}{" "}
+                <a href="#" className="text-primary hover:underline">{t("auth.register.privacy")}</a>.
               </span>
             </label>
 
             <Button type="submit" disabled={loading} className="h-11 w-full rounded-xl text-base">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Account"}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("auth.register.submit")}
             </Button>
           </form>
 
           <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-widest text-muted-foreground">
-            <div className="h-px flex-1 bg-border" /> or <div className="h-px flex-1 bg-border" />
+            <div className="h-px flex-1 bg-border" /> {t("common.or")} <div className="h-px flex-1 bg-border" />
           </div>
           <Button variant="outline" onClick={google} className="h-11 w-full gap-2 rounded-xl">
-            <GoogleIcon /> Continue with Google
+            <GoogleIcon /> {t("auth.register.continueGoogle")}
           </Button>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
+            {t("auth.register.haveAccount")}{" "}
             <Link to="/login" className="font-semibold text-primary hover:underline">
-              Login
+              {t("auth.register.login")}
             </Link>
           </p>
         </div>

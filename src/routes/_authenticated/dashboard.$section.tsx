@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { useI18n, type Lang } from "@/hooks/use-i18n";
+import { useI18n, type Lang, AVAILABLE_LANGS } from "@/hooks/use-i18n";
 import { Bell, Globe, Inbox, Info, LifeBuoy, Lock, Palette, ChevronRight, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,21 +14,21 @@ function SectionPage() {
   const { t } = useI18n();
 
   const TITLES: Record<string, { title: string; desc: string }> = {
-    properties: { title: t("side.properties"), desc: "Your listings will appear here." },
-    upload: { title: t("nav.upload"), desc: "Full property upload flow coming next." },
-    messages: { title: t("side.messages"), desc: "Chats with buyers, tenants, and agents." },
-    viewings: { title: t("side.viewings"), desc: "Scheduled tours and requests." },
-    analytics: { title: t("side.analytics"), desc: "Insights into your listings and performance." },
-    subscription: { title: t("side.subscription"), desc: "Manage your plan and billing." },
-    settings: { title: t("nav.settings"), desc: "Update your profile, security, and preferences." },
+    properties: { title: t("dashboard.side.properties"), desc: t("dashboard.sections.propertiesDesc") },
+    upload: { title: t("nav.upload"), desc: t("dashboard.sections.uploadDesc") },
+    messages: { title: t("dashboard.side.messages"), desc: t("dashboard.sections.messagesDesc") },
+    viewings: { title: t("dashboard.side.viewings"), desc: t("dashboard.sections.viewingsDesc") },
+    analytics: { title: t("dashboard.side.analytics"), desc: t("dashboard.sections.analyticsDesc") },
+    subscription: { title: t("dashboard.side.subscription"), desc: t("dashboard.sections.subscriptionDesc") },
+    settings: { title: t("nav.settings"), desc: t("dashboard.sections.settingsDesc") },
     language: { title: t("lang.title"), desc: t("lang.desc") },
-    favorites: { title: t("side.favorites"), desc: "Properties you've saved." },
-    searches: { title: t("side.savedSearches"), desc: "Get alerts when new matches go live." },
-    clients: { title: t("side.clients"), desc: "Manage your client pipeline." },
-    users: { title: t("side.users"), desc: "Everyone on SPACES." },
-    verification: { title: t("side.verification"), desc: "Approve listings and owner IDs." },
-    reports: { title: t("side.reports"), desc: "Flagged content and platform reports." },
-    payments: { title: t("side.payments"), desc: "Revenue and payouts." },
+    favorites: { title: t("dashboard.side.favorites"), desc: t("dashboard.sections.favoritesDesc") },
+    searches: { title: t("dashboard.side.savedSearches"), desc: t("dashboard.sections.searchesDesc") },
+    clients: { title: t("dashboard.side.clients"), desc: t("dashboard.sections.clientsDesc") },
+    users: { title: t("dashboard.side.users"), desc: t("dashboard.sections.usersDesc") },
+    verification: { title: t("dashboard.side.verification"), desc: t("dashboard.sections.verificationDesc") },
+    reports: { title: t("dashboard.side.reports"), desc: t("dashboard.sections.reportsDesc") },
+    payments: { title: t("dashboard.side.payments"), desc: t("dashboard.sections.paymentsDesc") },
   };
 
   const meta = TITLES[section] ?? { title: section, desc: "" };
@@ -54,14 +54,15 @@ function SectionPage() {
 }
 
 function EmptyPanel() {
+  const { t } = useI18n();
   return (
     <div className="rounded-3xl border border-dashed border-border bg-background/60 p-16 text-center">
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <Inbox className="h-6 w-6" />
       </div>
-      <h3 className="mt-4 font-display text-lg font-semibold text-foreground">Nothing here yet</h3>
+      <h3 className="mt-4 font-display text-lg font-semibold text-foreground">{t("dashboard.empty.sectionNoneTitle")}</h3>
       <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-        This section is being wired up. Your data will populate automatically as you use SPACES.
+        {t("dashboard.empty.sectionNoneBody")}
       </p>
     </div>
   );
@@ -69,13 +70,14 @@ function EmptyPanel() {
 
 function SettingsIndex() {
   const { t, lang } = useI18n();
+  const current = AVAILABLE_LANGS.find((l) => l.code === lang) ?? AVAILABLE_LANGS[0];
   const items: { icon: typeof Globe; label: string; section: string; value: string }[] = [
-    { icon: Globe, label: t("settings.language"), section: "language", value: lang === "sw" ? "🇹🇿 Kiswahili" : "🇬🇧 English" },
-    { icon: Palette, label: t("settings.theme"), section: "settings", value: "Default" },
-    { icon: Bell, label: t("settings.notifications"), section: "settings", value: "On" },
+    { icon: Globe, label: t("settings.language"), section: "language", value: `${current.flag} ${current.label}` },
+    { icon: Palette, label: t("settings.theme"), section: "settings", value: t("settings.themeDefault") },
+    { icon: Bell, label: t("settings.notifications"), section: "settings", value: t("settings.notificationsOn") },
     { icon: Lock, label: t("settings.privacy"), section: "settings", value: "" },
     { icon: LifeBuoy, label: t("settings.support"), section: "settings", value: "" },
-    { icon: Info, label: t("settings.about"), section: "settings", value: "v1.0" },
+    { icon: Info, label: t("settings.about"), section: "settings", value: t("settings.aboutVersion") },
   ];
   return (
     <div className="grid gap-3 sm:grid-cols-2">
@@ -108,16 +110,17 @@ function SettingsIndex() {
 
 function LanguagePanel() {
   const { t, lang, setLang } = useI18n();
+  const current = AVAILABLE_LANGS.find((l) => l.code === lang) ?? AVAILABLE_LANGS[0];
 
   function choose(l: Lang) {
     setLang(l);
     toast.success(t("lang.saved"));
   }
 
-  const options: { code: Lang; flag: string; label: string; sub: string }[] = [
-    { code: "en", flag: "🇬🇧", label: "English", sub: "Default language" },
-    { code: "sw", flag: "🇹🇿", label: "Kiswahili", sub: "Lugha ya Tanzania" },
-  ];
+  const options = AVAILABLE_LANGS.map((l) => ({
+    ...l,
+    sub: l.code === "en" ? t("lang.defaultLabel") : t("lang.swSub"),
+  }));
 
   return (
     <div className="space-y-4">
@@ -129,7 +132,7 @@ function LanguagePanel() {
           <div>
             <p className="text-sm text-muted-foreground">{t("lang.title")}</p>
             <p className="font-display text-base font-semibold text-foreground">
-              {lang === "sw" ? "🇹🇿 Kiswahili" : "🇬🇧 English"}
+              {current.flag} {current.label}
             </p>
           </div>
         </div>
