@@ -36,7 +36,9 @@ function RegisterPage() {
     password: "",
     confirm: "",
   });
-  const [role, setRole] = useState<Role>("buyer");
+  const [agree, setAgree] = useState(false);
+  const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [agree, setAgree] = useState(false);
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
