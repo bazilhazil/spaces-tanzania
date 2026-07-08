@@ -750,3 +750,55 @@ function LanguagePanel() {
     </div>
   );
 }
+
+/* ============================ MY MODE ============================ */
+
+function ModePanel() {
+  const { mode, setMode } = useModeHook();
+  const navigate = useNavigateHook();
+  const options: { key: ModeKey; emoji: string; title: string; desc: string; unlocks: string[] }[] = [
+    { key: "buyer", emoji: "🏠", title: "Buyer", desc: "Find your next home.", unlocks: ["Favorites", "Viewing Requests", "Saved Searches"] },
+    { key: "owner", emoji: "🏡", title: "Owner", desc: "List and manage your properties.", unlocks: ["Upload Property", "My Properties", "Analytics", "Bookings"] },
+    { key: "agent", emoji: "🤝", title: "Agent", desc: "Manage clients and listings.", unlocks: ["Clients", "Listings", "Commission", "Performance"] },
+  ];
+  return (
+    <div className="grid gap-4 md:grid-cols-3">
+      {options.map((o) => {
+        const active = mode === o.key;
+        return (
+          <button
+            key={o.key}
+            onClick={() => {
+              setMode(o.key);
+              toast.success(`Switched to ${o.title} mode`);
+              navigate({ to: "/dashboard" });
+            }}
+            className={cn(
+              "group relative overflow-hidden rounded-3xl border bg-background p-6 text-left shadow-[var(--shadow-soft)] transition-all hover:-translate-y-1",
+              active ? "border-primary shadow-[0_0_0_2px_var(--color-primary),var(--shadow-elevated)]" : "border-border/60 hover:border-primary/30",
+            )}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-3xl">{o.emoji}</div>
+              {active && (
+                <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
+                  Current
+                </span>
+              )}
+            </div>
+            <h3 className="mt-5 font-display text-xl font-semibold text-foreground">{o.title}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{o.desc}</p>
+            <ul className="mt-4 space-y-1.5 border-t border-border/50 pt-4">
+              {o.unlocks.map((u) => (
+                <li key={u} className="flex items-center gap-2 text-xs font-medium text-foreground/70">
+                  <span className="h-1 w-1 rounded-full bg-primary" />
+                  {u}
+                </li>
+              ))}
+            </ul>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
