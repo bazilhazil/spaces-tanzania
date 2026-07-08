@@ -42,13 +42,94 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  /* --- SPACES color scales (50-900) --- */
+  --color-brand-50:  oklch(0.98 0.012 250);
+  --color-brand-100: oklch(0.95 0.025 250);
+  --color-brand-200: oklch(0.89 0.045 250);
+  --color-brand-300: oklch(0.80 0.070 250);
+  --color-brand-400: oklch(0.65 0.100 250);
+  --color-brand-500: oklch(0.55 0.130 250);
+  --color-brand-600: oklch(0.48 0.120 250);
+  --color-brand-700: oklch(0.42 0.110 250);
+  --color-brand-800: oklch(0.33 0.090 250);
+  --color-brand-900: oklch(0.22 0.060 250);
+
+  --color-gold-50:  oklch(0.98 0.015 82);
+  --color-gold-100: oklch(0.95 0.035 82);
+  --color-gold-200: oklch(0.90 0.060 82);
+  --color-gold-300: oklch(0.84 0.090 82);
+  --color-gold-400: oklch(0.79 0.110 82);
+  --color-gold-500: oklch(0.74 0.120 82);
+  --color-gold-600: oklch(0.66 0.115 78);
+  --color-gold-700: oklch(0.55 0.100 75);
+  --color-gold-800: oklch(0.42 0.080 72);
+  --color-gold-900: oklch(0.30 0.055 70);
+
+  --color-gray-50:  oklch(0.985 0.003 250);
+  --color-gray-100: oklch(0.965 0.006 250);
+  --color-gray-200: oklch(0.92  0.010 250);
+  --color-gray-300: oklch(0.86  0.014 250);
+  --color-gray-400: oklch(0.72  0.020 250);
+  --color-gray-500: oklch(0.58  0.028 250);
+  --color-gray-600: oklch(0.45  0.032 250);
+  --color-gray-700: oklch(0.35  0.035 250);
+  --color-gray-800: oklch(0.25  0.038 250);
+  --color-gray-900: oklch(0.16  0.040 255);
+
+  --color-success-50:  oklch(0.97 0.03 155);
+  --color-success-100: oklch(0.93 0.06 155);
+  --color-success-200: oklch(0.86 0.10 155);
+  --color-success-300: oklch(0.78 0.13 155);
+  --color-success-400: oklch(0.70 0.15 155);
+  --color-success-500: oklch(0.62 0.15 155);
+  --color-success-600: oklch(0.54 0.14 155);
+  --color-success-700: oklch(0.44 0.12 155);
+  --color-success-800: oklch(0.34 0.09 155);
+  --color-success-900: oklch(0.24 0.06 155);
+
+  --color-warning-50:  oklch(0.98 0.03 75);
+  --color-warning-100: oklch(0.95 0.06 75);
+  --color-warning-200: oklch(0.90 0.10 70);
+  --color-warning-300: oklch(0.84 0.14 68);
+  --color-warning-400: oklch(0.78 0.16 62);
+  --color-warning-500: oklch(0.72 0.18 55);
+  --color-warning-600: oklch(0.63 0.18 50);
+  --color-warning-700: oklch(0.52 0.16 45);
+  --color-warning-800: oklch(0.40 0.12 42);
+  --color-warning-900: oklch(0.28 0.08 40);
+
+  --color-danger-50:  oklch(0.97 0.03 27);
+  --color-danger-100: oklch(0.93 0.06 27);
+  --color-danger-200: oklch(0.87 0.11 27);
+  --color-danger-300: oklch(0.79 0.16 27);
+  --color-danger-400: oklch(0.70 0.20 27);
+  --color-danger-500: oklch(0.62 0.22 27);
+  --color-danger-600: oklch(0.55 0.22 27);
+  --color-danger-700: oklch(0.45 0.19 27);
+  --color-danger-800: oklch(0.34 0.14 27);
+  --color-danger-900: oklch(0.24 0.09 27);
+
+  /* --- Elevation --- */
+  --shadow-xs: 0 1px 2px 0 color-mix(in oklab, var(--primary) 8%, transparent);
+  --shadow-sm: 0 2px 6px -2px color-mix(in oklab, var(--primary) 12%, transparent);
+  --shadow-md: 0 8px 24px -8px color-mix(in oklab, var(--primary) 18%, transparent);
+  --shadow-lg: 0 20px 50px -20px color-mix(in oklab, var(--primary) 28%, transparent);
   --shadow-soft: 0 4px 20px -8px color-mix(in oklab, var(--primary) 18%, transparent);
   --shadow-elevated: 0 20px 50px -20px color-mix(in oklab, var(--primary) 28%, transparent);
   --shadow-gold: 0 10px 30px -12px color-mix(in oklab, var(--gold) 45%, transparent);
+
+  /* --- Motion --- */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 360ms;
 }
 
 :root {
@@ -85,6 +166,8 @@
   --destructive-foreground: oklch(0.99 0.003 250);
   --success: oklch(0.62 0.15 155);
   --success-foreground: oklch(0.99 0.003 250);
+  --warning: oklch(0.72 0.18 55);
+  --warning-foreground: oklch(0.22 0.05 255);
 
   --border: oklch(0.92 0.01 250);
   --input: oklch(0.92 0.01 250);
@@ -122,6 +205,8 @@
   --destructive-foreground: oklch(0.98 0.003 250);
   --success: oklch(0.7 0.15 155);
   --success-foreground: oklch(0.16 0.03 255);
+  --warning: oklch(0.78 0.17 60);
+  --warning-foreground: oklch(0.16 0.03 255);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 14%);
   --ring: oklch(0.68 0.13 250);
@@ -153,4 +238,88 @@
   padding-inline: 1.25rem;
   max-width: 80rem;
   @media (min-width: 768px) { padding-inline: 2rem; }
+}
+
+/* ========================================================================
+ * SPACES Design System — utilities, typography, motion
+ * ======================================================================== */
+
+/* Typography scale */
+@utility ds-h-xl   { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.25rem, 4vw, 3.5rem); line-height: 1.05; letter-spacing: -0.03em; }
+@utility ds-h-lg   { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.75rem, 3vw, 2.5rem); line-height: 1.1;  letter-spacing: -0.025em; }
+@utility ds-h-md   { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem;  line-height: 1.2;  letter-spacing: -0.02em; }
+@utility ds-h-sm   { font-family: var(--font-display); font-weight: 600; font-size: 1.125rem; line-height: 1.3;  letter-spacing: -0.015em; }
+@utility ds-body-lg{ font-family: var(--font-sans);    font-weight: 400; font-size: 1.0625rem; line-height: 1.6; }
+@utility ds-body   { font-family: var(--font-sans);    font-weight: 400; font-size: 0.9375rem; line-height: 1.55; }
+@utility ds-caption{ font-family: var(--font-sans);    font-weight: 500; font-size: 0.75rem;  line-height: 1.4; letter-spacing: 0.01em; color: var(--color-muted-foreground); }
+@utility ds-button-text { font-family: var(--font-sans); font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.005em; }
+
+/* Elevation helpers */
+@utility ds-shadow-sm { box-shadow: var(--shadow-sm); }
+@utility ds-shadow-md { box-shadow: var(--shadow-md); }
+@utility ds-shadow-lg { box-shadow: var(--shadow-lg); }
+
+/* Surfaces */
+@utility ds-card {
+  background-color: var(--color-card);
+  color: var(--color-card-foreground);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--duration-base) var(--ease-standard),
+              transform var(--duration-base) var(--ease-standard);
+}
+@utility ds-card-hover {
+  &:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+}
+
+/* Focus ring */
+@utility ds-focus-ring {
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-ring) 35%, transparent);
+  }
+}
+
+/* Motion keyframes */
+@keyframes ds-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes ds-pop {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes ds-modal-in {
+  0%   { transform: scale(0.96) translateY(6px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes ds-checkmark {
+  0%   { stroke-dashoffset: 48; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@utility ds-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-muted) 0%,
+    color-mix(in oklab, var(--color-muted) 60%, white 40%) 50%,
+    var(--color-muted) 100%
+  );
+  background-size: 800px 100%;
+  animation: ds-shimmer 1.6s linear infinite;
+  border-radius: var(--radius-md);
+}
+@utility ds-animate-pop { animation: ds-pop 340ms var(--ease-emphasized) both; }
+@utility ds-animate-modal-in { animation: ds-modal-in 220ms var(--ease-emphasized) both; }
+@utility ds-hover-lift {
+  transition: transform var(--duration-base) var(--ease-standard),
+              box-shadow var(--duration-base) var(--ease-standard);
+  &:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  &:active { transform: translateY(0); }
+}
+@utility ds-press {
+  transition: transform 120ms var(--ease-standard);
+  &:active { transform: scale(0.97); }
 }
