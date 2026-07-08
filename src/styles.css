@@ -239,3 +239,87 @@
   max-width: 80rem;
   @media (min-width: 768px) { padding-inline: 2rem; }
 }
+
+/* ========================================================================
+ * SPACES Design System — utilities, typography, motion
+ * ======================================================================== */
+
+/* Typography scale */
+@utility ds-h-xl   { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.25rem, 4vw, 3.5rem); line-height: 1.05; letter-spacing: -0.03em; }
+@utility ds-h-lg   { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.75rem, 3vw, 2.5rem); line-height: 1.1;  letter-spacing: -0.025em; }
+@utility ds-h-md   { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem;  line-height: 1.2;  letter-spacing: -0.02em; }
+@utility ds-h-sm   { font-family: var(--font-display); font-weight: 600; font-size: 1.125rem; line-height: 1.3;  letter-spacing: -0.015em; }
+@utility ds-body-lg{ font-family: var(--font-sans);    font-weight: 400; font-size: 1.0625rem; line-height: 1.6; }
+@utility ds-body   { font-family: var(--font-sans);    font-weight: 400; font-size: 0.9375rem; line-height: 1.55; }
+@utility ds-caption{ font-family: var(--font-sans);    font-weight: 500; font-size: 0.75rem;  line-height: 1.4; letter-spacing: 0.01em; color: var(--color-muted-foreground); }
+@utility ds-button-text { font-family: var(--font-sans); font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.005em; }
+
+/* Elevation helpers */
+@utility ds-shadow-sm { box-shadow: var(--shadow-sm); }
+@utility ds-shadow-md { box-shadow: var(--shadow-md); }
+@utility ds-shadow-lg { box-shadow: var(--shadow-lg); }
+
+/* Surfaces */
+@utility ds-card {
+  background-color: var(--color-card);
+  color: var(--color-card-foreground);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--duration-base) var(--ease-standard),
+              transform var(--duration-base) var(--ease-standard);
+}
+@utility ds-card-hover {
+  &:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+}
+
+/* Focus ring */
+@utility ds-focus-ring {
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-ring) 35%, transparent);
+  }
+}
+
+/* Motion keyframes */
+@keyframes ds-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes ds-pop {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes ds-modal-in {
+  0%   { transform: scale(0.96) translateY(6px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes ds-checkmark {
+  0%   { stroke-dashoffset: 48; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@utility ds-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-muted) 0%,
+    color-mix(in oklab, var(--color-muted) 60%, white 40%) 50%,
+    var(--color-muted) 100%
+  );
+  background-size: 800px 100%;
+  animation: ds-shimmer 1.6s linear infinite;
+  border-radius: var(--radius-md);
+}
+@utility ds-animate-pop { animation: ds-pop 340ms var(--ease-emphasized) both; }
+@utility ds-animate-modal-in { animation: ds-modal-in 220ms var(--ease-emphasized) both; }
+@utility ds-hover-lift {
+  transition: transform var(--duration-base) var(--ease-standard),
+              box-shadow var(--duration-base) var(--ease-standard);
+  &:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  &:active { transform: translateY(0); }
+}
+@utility ds-press {
+  transition: transform 120ms var(--ease-standard);
+  &:active { transform: scale(0.97); }
+}
