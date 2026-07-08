@@ -650,6 +650,7 @@ function SettingsIndex() {
   const { t, lang } = useI18n();
   const current = AVAILABLE_LANGS.find((l) => l.code === lang) ?? AVAILABLE_LANGS[0];
   const items: { icon: typeof Globe; label: string; section: string; value: string }[] = [
+    { icon: Sparkles, label: "My Mode", section: "mode", value: "Switch role" },
     { icon: Globe, label: t("settings.language"), section: "language", value: `${current.flag} ${current.label}` },
     { icon: Palette, label: t("settings.theme"), section: "settings", value: t("settings.themeDefault") },
     { icon: Bell, label: t("settings.notifications"), section: "settings", value: t("settings.notificationsOn") },
