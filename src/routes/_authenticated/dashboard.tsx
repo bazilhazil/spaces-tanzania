@@ -25,9 +25,16 @@ type RecentProperty = {
 };
 
 function DashboardPage() {
-  const { profile, user, primaryRole } = useAuth();
+  const { profile, user } = useAuth();
+  const { mode, ready } = useMode();
   const { t } = useI18n();
   const name = (profile?.full_name || user?.email || t("common.welcome")).split(" ")[0];
+
+  if (ready && !mode) {
+    if (typeof window !== "undefined") window.location.replace("/welcome");
+    return null;
+  }
+  const activeMode: SpacesMode = mode ?? "buyer";
 
   return (
     <DashboardShell>
@@ -46,7 +53,7 @@ function DashboardPage() {
 
         <ProfileCompletionCard />
 
-        {primaryRole === "owner" ? <OwnerHome /> : <NonOwnerHome role={primaryRole} />}
+        {activeMode === "owner" ? <OwnerHome /> : <NonOwnerHome role={activeMode} />}
       </div>
     </DashboardShell>
   );
