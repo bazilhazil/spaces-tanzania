@@ -50,7 +50,7 @@ export function SiteHeader() {
 
   async function handleSignOut() {
     await signOut();
-    toast.success("Signed out");
+    toast.success(t("common.signedOut"));
     navigate({ to: "/" });
   }
 
@@ -115,7 +115,7 @@ export function SiteHeader() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
-                  <div className="text-sm font-semibold">{profile?.full_name || "SPACES account"}</div>
+                  <div className="text-sm font-semibold">{profile?.full_name || t("nav.account")}</div>
                   <div className="text-xs font-normal text-muted-foreground capitalize">{primaryRole}</div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -153,7 +153,7 @@ export function SiteHeader() {
             variant="ghost"
             size="icon"
             className="lg:hidden"
-            aria-label={open ? "Close menu" : "Open menu"}
+            aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
             onClick={() => setOpen((v) => !v)}
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

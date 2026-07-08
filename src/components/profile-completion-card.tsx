@@ -6,10 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 
 export function ProfileCompletionCard() {
   const { user, profile, refresh } = useAuth();
+  const { t } = useI18n();
   const [open, setOpen] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -31,14 +33,14 @@ export function ProfileCompletionCard() {
     const { error } = await supabase.from("profiles").update(form).eq("id", user.id);
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("Profile updated");
+    toast.success(t("profileCard.saved"));
     await refresh();
     setOpen(false);
   }
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/5 via-background to-background p-6 shadow-[var(--shadow-soft)]">
-      <button onClick={() => setOpen(false)} className="absolute right-4 top-4 text-muted-foreground hover:text-foreground" aria-label="Dismiss">
+      <button onClick={() => setOpen(false)} className="absolute right-4 top-4 text-muted-foreground hover:text-foreground" aria-label={t("profileCard.dismiss")}>
         <X className="h-4 w-4" />
       </button>
       <div className="flex items-center gap-3">
@@ -46,35 +48,35 @@ export function ProfileCompletionCard() {
           <Sparkles className="h-5 w-5" />
         </div>
         <div>
-          <h3 className="font-display text-lg font-semibold text-foreground">Complete your profile</h3>
-          <p className="text-sm text-muted-foreground">Optional — helps you stand out and unlock features.</p>
+          <h3 className="font-display text-lg font-semibold text-foreground">{t("profileCard.title")}</h3>
+          <p className="text-sm text-muted-foreground">{t("profileCard.subtitle")}</p>
         </div>
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2">
-        <Field icon={Camera} label="Profile photo URL">
-          <Input value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} placeholder="https://…" className="h-10 rounded-xl" />
+        <Field icon={Camera} label={t("profileCard.photo")}>
+          <Input value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} placeholder={t("profileCard.photoPlaceholder")} className="h-10 rounded-xl" />
         </Field>
-        <Field icon={IdCard} label="National ID (optional)">
-          <Input value={form.national_id} onChange={(e) => setForm({ ...form, national_id: e.target.value })} placeholder="e.g. 1234567" className="h-10 rounded-xl" />
+        <Field icon={IdCard} label={t("profileCard.nationalId")}>
+          <Input value={form.national_id} onChange={(e) => setForm({ ...form, national_id: e.target.value })} placeholder={t("profileCard.nationalIdPlaceholder")} className="h-10 rounded-xl" />
         </Field>
-        <Field icon={Briefcase} label="Business name (optional)">
-          <Input value={form.business_name} onChange={(e) => setForm({ ...form, business_name: e.target.value })} placeholder="Business Ltd" className="h-10 rounded-xl" />
+        <Field icon={Briefcase} label={t("profileCard.business")}>
+          <Input value={form.business_name} onChange={(e) => setForm({ ...form, business_name: e.target.value })} placeholder={t("profileCard.businessPlaceholder")} className="h-10 rounded-xl" />
         </Field>
-        <Field icon={Briefcase} label="Agency name (optional)">
-          <Input value={form.agency_name} onChange={(e) => setForm({ ...form, agency_name: e.target.value })} placeholder="Agency Co." className="h-10 rounded-xl" />
+        <Field icon={Briefcase} label={t("profileCard.agency")}>
+          <Input value={form.agency_name} onChange={(e) => setForm({ ...form, agency_name: e.target.value })} placeholder={t("profileCard.agencyPlaceholder")} className="h-10 rounded-xl" />
         </Field>
-        <Field icon={MapPin} label="Location">
-          <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Dar es Salaam" className="h-10 rounded-xl" />
+        <Field icon={MapPin} label={t("profileCard.location")}>
+          <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder={t("profileCard.locationPlaceholder")} className="h-10 rounded-xl" />
         </Field>
-        <Field icon={Sparkles} label="Bio">
-          <Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder="A short introduction…" className="min-h-10 rounded-xl" rows={1} />
+        <Field icon={Sparkles} label={t("profileCard.bio")}>
+          <Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder={t("profileCard.bioPlaceholder")} className="min-h-10 rounded-xl" rows={1} />
         </Field>
       </div>
 
       <div className="mt-5 flex gap-2">
-        <Button onClick={save} disabled={saving} className="rounded-xl">Save profile</Button>
-        <Button variant="ghost" onClick={() => setOpen(false)} className="rounded-xl">Skip for now</Button>
+        <Button onClick={save} disabled={saving} className="rounded-xl">{t("profileCard.save")}</Button>
+        <Button variant="ghost" onClick={() => setOpen(false)} className="rounded-xl">{t("profileCard.skip")}</Button>
       </div>
     </div>
   );

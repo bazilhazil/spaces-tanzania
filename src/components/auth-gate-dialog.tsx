@@ -20,22 +20,22 @@ export function AuthGateDialog({ open, onOpenChange }: { open: boolean; onOpenCh
           </div>
           <DialogHeader className="space-y-2 text-left">
             <DialogTitle className="font-display text-2xl text-primary-foreground">
-              {t("gate.title")}
+              {t("auth.gate.title")}
             </DialogTitle>
             <DialogDescription className="text-primary-foreground/85">
-              {t("gate.sub")}
+              {t("auth.gate.sub")}
             </DialogDescription>
           </DialogHeader>
         </div>
         <div className="space-y-3 p-6">
           <Button onClick={google} variant="outline" className="h-11 w-full gap-2 rounded-xl">
-            <GoogleIcon /> {t("gate.google")}
+            <GoogleIcon /> {t("auth.gate.google")}
           </Button>
           <Link to="/register" onClick={() => onOpenChange(false)}>
-            <Button className="h-11 w-full rounded-xl">{t("gate.email")}</Button>
+            <Button className="h-11 w-full rounded-xl">{t("auth.gate.email")}</Button>
           </Link>
           <p className="pt-2 text-center text-sm text-muted-foreground">
-            {t("gate.have")}{" "}
+            {t("auth.gate.haveAccount")}{" "}
             <Link to="/login" onClick={() => onOpenChange(false)} className="font-medium text-primary hover:underline">
               {t("nav.login")}
             </Link>

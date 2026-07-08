@@ -13,9 +13,7 @@ export function SiteFooter() {
             <Logo className="h-8 w-8" />
             <span className="font-display text-xl font-semibold text-primary">SPACES</span>
           </div>
-          <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-            Tanzania's most trusted real estate marketplace. Find your perfect space to rent, buy, or grow.
-          </p>
+          <p className="mt-3 max-w-xs text-sm text-muted-foreground">{t("footer.brandBlurb")}</p>
           <div className="mt-5 flex gap-3 text-muted-foreground">
             <a href="#" aria-label="Facebook" className="hover:text-primary"><Facebook className="h-4 w-4" /></a>
             <a href="#" aria-label="Instagram" className="hover:text-primary"><Instagram className="h-4 w-4" /></a>
@@ -31,21 +29,21 @@ export function SiteFooter() {
           { to: "/agents", label: t("nav.agents") },
         ]} />
         <FooterCol title={t("footer.company")} links={[
-          { to: "/", label: "About" },
-          { to: "/", label: "Careers" },
-          { to: "/", label: "Press" },
-          { to: "/", label: "Contact" },
+          { to: "/", label: t("footer.companyLinks.about") },
+          { to: "/", label: t("footer.companyLinks.careers") },
+          { to: "/", label: t("footer.companyLinks.press") },
+          { to: "/", label: t("footer.companyLinks.contact") },
         ]} />
         <FooterCol title={t("footer.support")} links={[
-          { to: "/", label: "Help center" },
-          { to: "/", label: "Verification" },
-          { to: "/", label: "Terms" },
-          { to: "/", label: "Privacy" },
+          { to: "/", label: t("footer.supportLinks.help") },
+          { to: "/", label: t("footer.supportLinks.verification") },
+          { to: "/", label: t("footer.supportLinks.terms") },
+          { to: "/", label: t("footer.supportLinks.privacy") },
         ]} />
       </div>
       <div className="border-t border-border/60">
         <div className="container-page flex flex-col items-center justify-between gap-2 py-6 text-xs text-muted-foreground md:flex-row">
-          <p>© 2025 SPACES Group Ltd. {t("footer.rights")}</p>
+          <p>{t("footer.copyright")} {t("footer.rights")}</p>
           <p>{t("footer.tagline")}</p>
         </div>
       </div>

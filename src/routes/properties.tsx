@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useNavigate } from "@tanstack/react-router";
+import { useI18n } from "@/hooks/use-i18n";
 
 const searchSchema = z.object({
   type: fallback(z.enum(["rent", "sale", "commercial"]).optional(), undefined),
@@ -49,6 +50,7 @@ export const Route = createFileRoute("/properties")({
 function PropertiesPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const filtered = properties.filter((p) => {
     if (search.type && p.listingType !== search.type) return false;
@@ -78,6 +80,8 @@ function PropertiesPage() {
     }
   });
 
+  const noun = sorted.length === 1 ? t("common.listing") : t("common.listings");
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
@@ -85,15 +89,15 @@ function PropertiesPage() {
         <section className="border-b border-border/60 bg-secondary/40">
           <div className="container-page py-8">
             <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1 text-xs text-muted-foreground">
-              <Link to="/" className="hover:text-primary">Home</Link>
+              <Link to="/" className="hover:text-primary">{t("properties.breadcrumbHome")}</Link>
               <ChevronRight className="h-3.5 w-3.5" />
-              <span className="text-foreground">Properties</span>
+              <span className="text-foreground">{t("properties.breadcrumbProperties")}</span>
             </nav>
             <h1 className="font-display text-3xl font-semibold text-foreground md:text-4xl">
-              {search.city ? `Properties in ${search.city}` : "All Properties"}
+              {search.city ? t("properties.titleIn", { city: search.city }) : t("properties.titleAll")}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {sorted.length} {sorted.length === 1 ? "listing" : "listings"} matching your search
+              {t("properties.matchCount", { count: sorted.length, noun })}
             </p>
             <div className="mt-6">
               <HeroSearch />
@@ -105,7 +109,7 @@ function PropertiesPage() {
           <div className="mb-6 flex items-center justify-between gap-4">
             <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
               <SlidersHorizontal className="h-4 w-4" />
-              Showing {sorted.length} results
+              {t("properties.showing", { count: sorted.length })}
             </div>
             <Select
               value={search.sort ?? "newest"}
@@ -120,10 +124,10 @@ function PropertiesPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="newest">Newest first</SelectItem>
-                <SelectItem value="popular">Most popular</SelectItem>
-                <SelectItem value="price-asc">Price: low to high</SelectItem>
-                <SelectItem value="price-desc">Price: high to low</SelectItem>
+                <SelectItem value="newest">{t("properties.sort.newest")}</SelectItem>
+                <SelectItem value="popular">{t("properties.sort.popular")}</SelectItem>
+                <SelectItem value="price-asc">{t("properties.sort.priceAsc")}</SelectItem>
+                <SelectItem value="price-desc">{t("properties.sort.priceDesc")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -131,16 +135,16 @@ function PropertiesPage() {
           {sorted.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border p-16 text-center">
               <h3 className="font-display text-lg font-semibold text-foreground">
-                No properties match your search
+                {t("properties.emptyTitle")}
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Try broadening your filters or searching a different city.
+                {t("properties.emptyBody")}
               </p>
               <Link
                 to="/properties"
                 className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
               >
-                Reset filters
+                {t("properties.reset")}
               </Link>
             </div>
           ) : (

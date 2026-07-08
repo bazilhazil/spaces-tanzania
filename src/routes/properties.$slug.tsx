@@ -24,6 +24,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { PropertyCard } from "@/components/property-card";
 import { formatPrice, getAgent, getProperty, properties } from "@/lib/mock-data";
+import { useI18n } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/properties/$slug")({
   loader: ({ params }) => {
@@ -32,16 +33,7 @@ export const Route = createFileRoute("/properties/$slug")({
     return property;
   },
   component: PropertyDetailPage,
-  notFoundComponent: () => (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="font-display text-3xl">Property not found</h1>
-        <Link to="/properties" className="mt-4 inline-block text-primary underline">
-          Back to properties
-        </Link>
-      </div>
-    </div>
-  ),
+  notFoundComponent: NotFoundPanel,
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
@@ -57,11 +49,34 @@ export const Route = createFileRoute("/properties/$slug")({
   }),
 });
 
+function NotFoundPanel() {
+  const { t } = useI18n();
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="text-center">
+        <h1 className="font-display text-3xl">{t("properties.notFoundTitle")}</h1>
+        <Link to="/properties" className="mt-4 inline-block text-primary underline">
+          {t("properties.notFoundBack")}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 function PropertyDetailPage() {
   const property = Route.useLoaderData();
+  const { t } = useI18n();
   const agent = getAgent(property.agentId);
   const [activeImage, setActiveImage] = useState(0);
   const similar = properties.filter((p) => p.id !== property.id && p.category === property.category).slice(0, 4);
+
+  const listingLabel =
+    property.listingType === "sale"
+      ? t("card.forSale")
+      : property.listingType === "rent"
+      ? t("card.forRent")
+      : t("card.forLease");
+  const categoryLabel = t(`search.types.${property.category}`);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -69,9 +84,9 @@ function PropertyDetailPage() {
       <main className="flex-1">
         <div className="container-page pt-6">
           <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Link to="/" className="hover:text-primary">Home</Link>
+            <Link to="/" className="hover:text-primary">{t("properties.breadcrumbHome")}</Link>
             <ChevronRight className="h-3.5 w-3.5" />
-            <Link to="/properties" className="hover:text-primary">Properties</Link>
+            <Link to="/properties" className="hover:text-primary">{t("properties.breadcrumbProperties")}</Link>
             <ChevronRight className="h-3.5 w-3.5" />
             <span className="line-clamp-1 text-foreground">{property.title}</span>
           </nav>
@@ -94,12 +109,12 @@ function PropertyDetailPage() {
                 <div className="flex flex-wrap gap-2">
                   {property.verified && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-primary/95 px-3 py-1 text-xs font-semibold text-primary-foreground">
-                      <BadgeCheck className="h-3.5 w-3.5" /> Verified by SPACES
+                      <BadgeCheck className="h-3.5 w-3.5" /> {t("properties.detail.verifiedBadge")}
                     </span>
                   )}
                   {property.premium && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-gold px-3 py-1 text-xs font-semibold text-gold-foreground">
-                      <Sparkles className="h-3.5 w-3.5" /> Premium
+                      <Sparkles className="h-3.5 w-3.5" /> {t("common.premium")}
                     </span>
                   )}
                 </div>
@@ -132,7 +147,7 @@ function PropertyDetailPage() {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-gold">
-                  For {property.listingType === "sale" ? "Sale" : property.listingType === "rent" ? "Rent" : "Lease"} · {property.category}
+                  {listingLabel} · {categoryLabel}
                 </p>
                 <h1 className="mt-2 font-display text-3xl font-semibold text-foreground md:text-4xl">
                   {property.title}
@@ -147,31 +162,31 @@ function PropertyDetailPage() {
                 </p>
                 <div className="mt-2 flex gap-2">
                   <Button variant="outline" size="sm" className="gap-1.5">
-                    <Heart className="h-4 w-4" /> Save
+                    <Heart className="h-4 w-4" /> {t("common.save")}
                   </Button>
                   <Button variant="outline" size="sm" className="gap-1.5">
-                    <Share2 className="h-4 w-4" /> Share
+                    <Share2 className="h-4 w-4" /> {t("common.share")}
                   </Button>
                 </div>
               </div>
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3 rounded-2xl border border-border bg-secondary/40 p-4 sm:grid-cols-4">
-              <Fact icon={<BedDouble className="h-4 w-4" />} label="Bedrooms" value={property.bedrooms || "—"} />
-              <Fact icon={<Bath className="h-4 w-4" />} label="Bathrooms" value={property.bathrooms} />
-              <Fact icon={<Car className="h-4 w-4" />} label="Parking" value={property.parking} />
-              <Fact icon={<Ruler className="h-4 w-4" />} label="Size" value={`${property.size} m²`} />
+              <Fact icon={<BedDouble className="h-4 w-4" />} label={t("card.bedrooms")} value={property.bedrooms || "—"} />
+              <Fact icon={<Bath className="h-4 w-4" />} label={t("card.bathrooms")} value={property.bathrooms} />
+              <Fact icon={<Car className="h-4 w-4" />} label={t("card.parking")} value={property.parking} />
+              <Fact icon={<Ruler className="h-4 w-4" />} label={t("card.size")} value={`${property.size} m²`} />
             </div>
 
             <div className="mt-8">
-              <h2 className="font-display text-xl font-semibold text-foreground">About this space</h2>
+              <h2 className="font-display text-xl font-semibold text-foreground">{t("properties.detail.about")}</h2>
               <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground md:text-base">
                 {property.description}
               </p>
             </div>
 
             <div className="mt-8">
-              <h2 className="font-display text-xl font-semibold text-foreground">Amenities</h2>
+              <h2 className="font-display text-xl font-semibold text-foreground">{t("properties.detail.amenities")}</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {property.amenities.map((a: string) => (
                   <span
@@ -185,14 +200,14 @@ function PropertyDetailPage() {
             </div>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <InfoBlock label="Year built" value={property.yearBuilt.toString()} icon={<Calendar className="h-4 w-4" />} />
-              <InfoBlock label="Furnished" value={property.furnished ? "Yes" : "No"} icon={<Sparkles className="h-4 w-4" />} />
-              <InfoBlock label="Property type" value={property.category} icon={<Building2 className="h-4 w-4" />} />
-              <InfoBlock label="Property ID" value={property.id.toUpperCase()} icon={<BadgeCheck className="h-4 w-4" />} />
+              <InfoBlock label={t("properties.detail.yearBuilt")} value={property.yearBuilt.toString()} icon={<Calendar className="h-4 w-4" />} />
+              <InfoBlock label={t("properties.detail.furnished")} value={property.furnished ? t("common.yes") : t("common.no")} icon={<Sparkles className="h-4 w-4" />} />
+              <InfoBlock label={t("properties.detail.propertyType")} value={categoryLabel} icon={<Building2 className="h-4 w-4" />} />
+              <InfoBlock label={t("properties.detail.propertyId")} value={property.id.toUpperCase()} icon={<BadgeCheck className="h-4 w-4" />} />
             </div>
 
             <div className="mt-8">
-              <h2 className="font-display text-xl font-semibold text-foreground">Location</h2>
+              <h2 className="font-display text-xl font-semibold text-foreground">{t("properties.detail.location")}</h2>
               <div className="mt-3 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-border">
                 <iframe
                   title={`Map of ${property.title}`}
@@ -202,10 +217,10 @@ function PropertyDetailPage() {
                 />
               </div>
               <div className="mt-4 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
-                <NearbyItem label="Schools" />
-                <NearbyItem label="Hospitals" />
-                <NearbyItem label="Supermarkets" />
-                <NearbyItem label="Bus stops" />
+                <NearbyItem label={t("properties.detail.nearbySchools")} />
+                <NearbyItem label={t("properties.detail.nearbyHospitals")} />
+                <NearbyItem label={t("properties.detail.nearbySupermarkets")} />
+                <NearbyItem label={t("properties.detail.nearbyBusStops")} />
               </div>
             </div>
           </div>
@@ -241,32 +256,32 @@ function PropertyDetailPage() {
 
                 <div className="mt-5 grid gap-2">
                   <a
-                    href={`https://wa.me/${agent.whatsapp}?text=${encodeURIComponent(`Hello, I'm interested in ${property.title} on SPACES.`)}`}
+                    href={`https://wa.me/${agent.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <Button className="w-full gap-2 bg-success text-success-foreground hover:bg-success/90">
-                      <MessageCircle className="h-4 w-4" /> WhatsApp
+                      <MessageCircle className="h-4 w-4" /> {t("properties.detail.whatsapp")}
                     </Button>
                   </a>
                   <a href={`tel:${agent.phone.replace(/\s/g, "")}`}>
                     <Button variant="outline" className="w-full gap-2">
-                      <Phone className="h-4 w-4" /> Call {agent.phone}
+                      <Phone className="h-4 w-4" /> {t("properties.detail.call", { phone: agent.phone })}
                     </Button>
                   </a>
                   <a href={`mailto:${agent.email}`}>
                     <Button variant="outline" className="w-full gap-2">
-                      <Mail className="h-4 w-4" /> Email
+                      <Mail className="h-4 w-4" /> {t("properties.detail.email")}
                     </Button>
                   </a>
                   <Button className="mt-1 w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Calendar className="h-4 w-4" /> Book a viewing
+                    <Calendar className="h-4 w-4" /> {t("properties.detail.bookViewing")}
                   </Button>
                 </div>
 
                 <div className="mt-5 flex items-center gap-2 rounded-lg bg-primary/5 p-3 text-xs text-primary">
                   <ShieldCheck className="h-4 w-4" />
-                  <span>Verified agent. Response within 24 hours.</span>
+                  <span>{t("properties.detail.trustLine")}</span>
                 </div>
               </div>
             )}
@@ -277,7 +292,7 @@ function PropertyDetailPage() {
           <section className="bg-secondary/40 mt-16">
             <div className="container-page py-16">
               <h2 className="font-display text-2xl font-semibold text-foreground md:text-3xl">
-                Similar spaces
+                {t("properties.detail.similar")}
               </h2>
               <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {similar.map((p) => (
@@ -322,10 +337,11 @@ function InfoBlock({ icon, label, value }: { icon: React.ReactNode; label: strin
 }
 
 function NearbyItem({ label }: { label: string }) {
+  const { t } = useI18n();
   return (
     <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
       <MapPin className="h-3.5 w-3.5 text-primary" />
-      <span>Nearby {label}</span>
+      <span>{t("properties.detail.nearby", { label })}</span>
     </div>
   );
 }

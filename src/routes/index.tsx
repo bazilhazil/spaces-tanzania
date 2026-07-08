@@ -47,16 +47,16 @@ function HomePage() {
         <Stats />
         <Categories />
         <FeaturedSection
-          eyebrow="Handpicked"
+          eyebrow={t("home.featuredEyebrow")}
           title={t("home.featured")}
-          subtitle={t("home.featured.sub")}
+          subtitle={t("home.featuredSub")}
           items={featured}
         />
         <Locations />
         <FeaturedSection
-          eyebrow="Fresh listings"
+          eyebrow={t("home.latestEyebrow")}
           title={t("home.latest")}
-          subtitle={t("home.latest.sub")}
+          subtitle={t("home.latestSub")}
           items={latest}
           tone="muted"
         />
@@ -73,6 +73,7 @@ function HomePage() {
 
 
 function Hero() {
+  const { t } = useI18n();
   return (
     <section className="relative isolate overflow-hidden">
       <div className="absolute inset-0 -z-10">
@@ -87,27 +88,26 @@ function Hero() {
       </div>
       <div className="container-page flex min-h-[640px] flex-col justify-center py-20 md:min-h-[720px] md:py-28">
         <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-white backdrop-blur">
-          <Sparkles className="h-3.5 w-3.5 text-gold" /> Tanzania · Est. 2026
+          <Sparkles className="h-3.5 w-3.5 text-gold" /> {t("home.hero.badge")}
         </span>
         <h1 className="mt-5 max-w-3xl font-display text-4xl font-semibold leading-tight text-white sm:text-5xl md:text-6xl">
-          Find your perfect <span className="text-gold">space</span> in Tanzania.
+          {t("home.hero.titleLead")} <span className="text-gold">{t("home.hero.titleAccent")}</span> {t("home.hero.titleTail")}
         </h1>
         <p className="mt-4 max-w-xl text-base text-white/85 md:text-lg">
-          Verified homes, apartments, and commercial properties to rent or buy —
-          from Masaki penthouses to Zanzibari beach villas.
+          {t("home.hero.subtitle")}
         </p>
         <div className="mt-8 max-w-4xl">
           <HeroSearch />
         </div>
         <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-white/80">
           <span className="inline-flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-gold" /> Verified by SPACES
+            <ShieldCheck className="h-4 w-4 text-gold" /> {t("home.hero.verifiedBadge")}
           </span>
           <span className="inline-flex items-center gap-2">
-            <BadgeCheck className="h-4 w-4 text-gold" /> Trusted agents
+            <BadgeCheck className="h-4 w-4 text-gold" /> {t("home.hero.trustedBadge")}
           </span>
           <span className="inline-flex items-center gap-2">
-            <Star className="h-4 w-4 text-gold" /> 4.9 average rating
+            <Star className="h-4 w-4 text-gold" /> {t("home.hero.ratingBadge")}
           </span>
         </div>
       </div>
@@ -200,13 +200,14 @@ function FeaturedSection({
 }
 
 function Locations() {
+  const { t } = useI18n();
   return (
     <section>
       <div className="container-page py-16 md:py-20">
         <SectionHeader
-          eyebrow="Popular locations"
-          title="Where Tanzania lives, works, and unwinds"
-          subtitle="Explore listings in the country's most sought-after neighbourhoods."
+          eyebrow={t("home.locationsEyebrow")}
+          title={t("home.locationsTitle")}
+          subtitle={t("home.locationsSub")}
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {locations.map((l) => (
@@ -228,7 +229,7 @@ function Locations() {
               <div className="absolute inset-x-0 bottom-0 p-5 text-white">
                 <p className="text-[10px] uppercase tracking-widest text-white/70">{l.region}</p>
                 <h3 className="mt-1 font-display text-2xl font-semibold">{l.name}</h3>
-                <p className="mt-1 text-sm text-white/80">{l.listings.toLocaleString()} listings</p>
+                <p className="mt-1 text-sm text-white/80">{l.listings.toLocaleString()} {t("common.listings")}</p>
               </div>
             </Link>
           ))}
@@ -239,27 +240,28 @@ function Locations() {
 }
 
 function Verified({ verified }: { verified: typeof properties }) {
+  const { t } = useI18n();
+  const points = [
+    t("home.verifiedPoints.title"),
+    t("home.verifiedPoints.photos"),
+    t("home.verifiedPoints.direct"),
+    t("home.verifiedPoints.response"),
+  ];
   return (
     <section className="relative overflow-hidden">
       <div className="container-page grid gap-10 py-16 md:grid-cols-[1.1fr_1.6fr] md:py-20">
         <div className="rounded-3xl bg-primary p-8 text-primary-foreground md:p-10">
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-gold">
-            <ShieldCheck className="h-3.5 w-3.5" /> Verified by SPACES
+            <ShieldCheck className="h-3.5 w-3.5" /> {t("home.verifiedEyebrow")}
           </span>
           <h2 className="mt-5 font-display text-3xl font-semibold md:text-4xl">
-            Every verified listing is inspected. That's the SPACES promise.
+            {t("home.verifiedTitle")}
           </h2>
           <p className="mt-4 text-primary-foreground/85">
-            We physically visit or vet every verified property. Real photos.
-            Real prices. Real owners.
+            {t("home.verifiedBody")}
           </p>
           <ul className="mt-6 space-y-3 text-sm text-primary-foreground/90">
-            {[
-              "Owner and title document check",
-              "On-site photos & video walkthrough",
-              "Direct contact — no middlemen fees",
-              "48-hour response guarantee",
-            ].map((item) => (
+            {points.map((item) => (
               <li key={item} className="flex items-start gap-2">
                 <BadgeCheck className="mt-0.5 h-4 w-4 text-gold" />
                 <span>{item}</span>
@@ -268,7 +270,7 @@ function Verified({ verified }: { verified: typeof properties }) {
           </ul>
           <Link to="/properties" className="mt-8 inline-block">
             <Button className="bg-gold text-gold-foreground hover:bg-gold/90">
-              Browse verified listings
+              {t("home.verifiedCta")}
             </Button>
           </Link>
         </div>
@@ -283,13 +285,14 @@ function Verified({ verified }: { verified: typeof properties }) {
 }
 
 function Agents() {
+  const { t } = useI18n();
   return (
     <section className="bg-secondary/40">
       <div className="container-page py-16 md:py-20">
         <SectionHeader
-          eyebrow="Trusted people"
-          title="Featured Agents"
-          subtitle="Local experts who know every corner of Tanzania."
+          eyebrow={t("home.agentsEyebrow")}
+          title={t("home.agentsTitle")}
+          subtitle={t("home.agentsSub")}
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {agents.map((a) => (
@@ -319,7 +322,7 @@ function Agents() {
               <p className="mt-1 text-xs text-muted-foreground">{a.city}</p>
               <div className="mt-3 inline-flex items-center gap-1 text-xs text-gold">
                 <Star className="h-3.5 w-3.5 fill-current" /> {a.rating.toFixed(1)}
-                <span className="text-muted-foreground">· {a.listings} listings</span>
+                <span className="text-muted-foreground">· {a.listings} {t("common.listings")}</span>
               </div>
             </div>
           ))}
@@ -330,32 +333,33 @@ function Agents() {
 }
 
 function Testimonials() {
+  const { t } = useI18n();
   return (
     <section>
       <div className="container-page py-16 md:py-20">
         <SectionHeader
-          eyebrow="Customer stories"
-          title="Loved by owners and renters alike"
+          eyebrow={t("home.testimonialsEyebrow")}
+          title={t("home.testimonialsTitle")}
         />
         <div className="grid gap-6 md:grid-cols-3">
-          {testimonials.map((t) => (
+          {testimonials.map((ti) => (
             <figure
-              key={t.id}
+              key={ti.id}
               className="relative rounded-2xl border border-border/70 bg-card p-6 shadow-[var(--shadow-soft)]"
             >
               <Quote className="h-6 w-6 text-gold" />
               <blockquote className="mt-3 font-display text-lg leading-snug text-foreground">
-                “{t.quote}”
+                “{ti.quote}”
               </blockquote>
               <figcaption className="mt-5 flex items-center justify-between text-sm">
                 <div>
-                  <p className="font-semibold text-foreground">{t.name}</p>
+                  <p className="font-semibold text-foreground">{ti.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {t.role} · {t.city}
+                    {ti.role} · {ti.city}
                   </p>
                 </div>
                 <div className="flex text-gold">
-                  {Array.from({ length: t.rating }).map((_, i) => (
+                  {Array.from({ length: ti.rating }).map((_, i) => (
                     <Star key={i} className="h-3.5 w-3.5 fill-current" />
                   ))}
                 </div>
@@ -369,6 +373,7 @@ function Testimonials() {
 }
 
 function CTA() {
+  const { t } = useI18n();
   return (
     <section className="container-page py-16 md:py-20">
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary to-primary-glow p-10 text-primary-foreground md:p-14">
@@ -376,25 +381,24 @@ function CTA() {
         <div className="relative grid gap-8 md:grid-cols-[1.6fr_1fr] md:items-center">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs uppercase tracking-widest text-gold">
-              <Upload className="h-3.5 w-3.5" /> For owners & agents
+              <Upload className="h-3.5 w-3.5" /> {t("home.cta.eyebrow")}
             </span>
             <h2 className="mt-4 font-display text-3xl font-semibold md:text-4xl">
-              Have a space? List it in minutes.
+              {t("home.cta.title")}
             </h2>
             <p className="mt-3 max-w-xl text-primary-foreground/85">
-              Reach thousands of qualified buyers and renters across Tanzania.
-              Free basic listings, premium placement available.
+              {t("home.cta.body")}
             </p>
           </div>
           <div className="flex flex-col gap-3 md:items-end">
             <Link to="/auth">
               <Button size="lg" className="bg-gold text-gold-foreground hover:bg-gold/90">
-                <HomeIcon className="mr-2 h-4 w-4" /> Upload your property
+                <HomeIcon className="mr-2 h-4 w-4" /> {t("home.cta.upload")}
               </Button>
             </Link>
             <Link to="/auth">
               <Button size="lg" variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10">
-                <Building2 className="mr-2 h-4 w-4" /> Become an agent
+                <Building2 className="mr-2 h-4 w-4" /> {t("home.cta.becomeAgent")}
               </Button>
             </Link>
           </div>
@@ -405,13 +409,22 @@ function CTA() {
 }
 
 const categoryItems = [
-  { label: "Houses", icon: HomeIcon, category: "House", count: "3,200+ listings", tint: "from-primary/10 to-primary/0" },
-  { label: "Apartments", icon: Building2, category: "Apartment", count: "2,140+ listings", tint: "from-gold/15 to-gold/0" },
-  { label: "Offices", icon: Landmark, category: "Office", count: "540+ listings", tint: "from-primary/10 to-primary/0" },
-  { label: "Commercial", icon: Store, category: "Shop", count: "310+ listings", tint: "from-gold/15 to-gold/0" },
-  { label: "Land", icon: Trees, category: "Land", count: "980+ listings", tint: "from-primary/10 to-primary/0" },
-  { label: "Warehouses", icon: Warehouse, category: "Warehouse", count: "120+ listings", tint: "from-gold/15 to-gold/0" },
-];
+  { key: "houses", icon: HomeIcon, category: "House", count: "3,200+" },
+  { key: "apartments", icon: Building2, category: "Apartment", count: "2,140+" },
+  { key: "offices", icon: Landmark, category: "Office", count: "540+" },
+  { key: "commercial", icon: Store, category: "Shop", count: "310+" },
+  { key: "land", icon: Trees, category: "Land", count: "980+" },
+  { key: "warehouses", icon: Warehouse, category: "Warehouse", count: "120+" },
+] as const;
+
+const tints: Record<string, string> = {
+  houses: "from-primary/10 to-primary/0",
+  apartments: "from-gold/15 to-gold/0",
+  offices: "from-primary/10 to-primary/0",
+  commercial: "from-gold/15 to-gold/0",
+  land: "from-primary/10 to-primary/0",
+  warehouses: "from-gold/15 to-gold/0",
+};
 
 function Categories() {
   const { t } = useI18n();
@@ -419,27 +432,27 @@ function Categories() {
     <section>
       <div className="container-page py-16 md:py-20">
         <SectionHeader
-          eyebrow="Browse by category"
+          eyebrow={t("home.categoriesEyebrow")}
           title={t("home.categories")}
-          subtitle={t("home.categories.sub")}
+          subtitle={t("home.categoriesSub")}
         />
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {categoryItems.map((c) => (
             <Link
-              key={c.label}
+              key={c.key}
               to="/properties"
               search={{ category: c.category }}
               className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[var(--shadow-elevated)]"
             >
-              <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${c.tint} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
+              <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tints[c.key]} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
               <div className="relative flex items-start justify-between">
                 <div>
                   <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/8 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                     <c.icon className="h-5 w-5" />
                   </div>
-                  <h3 className="mt-4 font-display text-lg font-semibold text-foreground">{c.label}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">{c.count}</p>
+                  <h3 className="mt-4 font-display text-lg font-semibold text-foreground">{t(`categories.${c.key}`)}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">{c.count} {t("categories.countSuffix")}</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-primary" />
               </div>
@@ -452,48 +465,33 @@ function Categories() {
 }
 
 const whyItems = [
-  {
-    icon: ShieldCheck,
-    title: "Verified Listings",
-    body: "Every verified property is physically inspected and title-checked by our team.",
-  },
-  {
-    icon: Users,
-    title: "Trusted Agents",
-    body: "Licensed local agents with proven track records and transparent reviews.",
-  },
-  {
-    icon: SearchIcon,
-    title: "Fast Search",
-    body: "Filter by city, price, and amenities in seconds. Save searches for later.",
-  },
-  {
-    icon: Headphones,
-    title: "Professional Support",
-    body: "Real humans on WhatsApp, phone, and email — 7 days a week.",
-  },
-];
+  { icon: ShieldCheck, key: "verified" },
+  { icon: Users, key: "trusted" },
+  { icon: SearchIcon, key: "fast" },
+  { icon: Headphones, key: "support" },
+] as const;
 
 function WhyChooseUs() {
+  const { t } = useI18n();
   return (
     <section>
       <div className="container-page py-16 md:py-20">
         <SectionHeader
-          eyebrow="Why SPACES"
-          title="Built on trust, designed for you"
-          subtitle="Tanzania's most reliable place to find, list, and manage property."
+          eyebrow={t("home.whyEyebrow")}
+          title={t("home.whyTitle")}
+          subtitle={t("home.whySub")}
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {whyItems.map((w) => (
             <div
-              key={w.title}
+              key={w.key}
               className="group rounded-2xl border border-border/70 bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-[var(--shadow-elevated)]"
             >
               <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-[var(--shadow-soft)]">
                 <w.icon className="h-5 w-5" />
               </div>
-              <h3 className="mt-5 font-display text-lg font-semibold text-foreground">{w.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{w.body}</p>
+              <h3 className="mt-5 font-display text-lg font-semibold text-foreground">{t(`home.whyItems.${w.key}.title`)}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t(`home.whyItems.${w.key}.body`)}</p>
             </div>
           ))}
         </div>

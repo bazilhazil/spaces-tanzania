@@ -21,39 +21,39 @@ function useRoleNav(): Record<AppRole, Item[]> {
   return {
     owner: [
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
-      { label: t("side.myProperties"), to: "/dashboard/properties", icon: Home },
+      { label: t("dashboard.side.myProperties"), to: "/dashboard/properties", icon: Home },
       { label: t("nav.upload"), to: "/dashboard/upload", icon: Upload },
-      { label: t("side.messages"), to: "/dashboard/messages", icon: MessageSquare },
-      { label: t("side.viewings"), to: "/dashboard/viewings", icon: Calendar },
-      { label: t("side.analytics"), to: "/dashboard/analytics", icon: BarChart3 },
-      { label: t("side.subscription"), to: "/dashboard/subscription", icon: CreditCard },
+      { label: t("dashboard.side.messages"), to: "/dashboard/messages", icon: MessageSquare },
+      { label: t("dashboard.side.viewings"), to: "/dashboard/viewings", icon: Calendar },
+      { label: t("dashboard.side.analytics"), to: "/dashboard/analytics", icon: BarChart3 },
+      { label: t("dashboard.side.subscription"), to: "/dashboard/subscription", icon: CreditCard },
       { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
     ],
     buyer: [
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
-      { label: t("side.favorites"), to: "/dashboard/favorites", icon: Heart },
-      { label: t("side.savedSearches"), to: "/dashboard/searches", icon: Search },
-      { label: t("side.viewings"), to: "/dashboard/viewings", icon: Calendar },
-      { label: t("side.messages"), to: "/dashboard/messages", icon: MessageSquare },
+      { label: t("dashboard.side.favorites"), to: "/dashboard/favorites", icon: Heart },
+      { label: t("dashboard.side.savedSearches"), to: "/dashboard/searches", icon: Search },
+      { label: t("dashboard.side.viewings"), to: "/dashboard/viewings", icon: Calendar },
+      { label: t("dashboard.side.messages"), to: "/dashboard/messages", icon: MessageSquare },
       { label: t("nav.profile"), to: "/dashboard/settings", icon: UserIcon },
     ],
     agent: [
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
-      { label: t("side.clients"), to: "/dashboard/clients", icon: Users },
-      { label: t("side.properties"), to: "/dashboard/properties", icon: Briefcase },
-      { label: t("side.viewings"), to: "/dashboard/viewings", icon: Calendar },
-      { label: t("side.messages"), to: "/dashboard/messages", icon: MessageSquare },
-      { label: t("side.performance"), to: "/dashboard/analytics", icon: BarChart3 },
+      { label: t("dashboard.side.clients"), to: "/dashboard/clients", icon: Users },
+      { label: t("dashboard.side.properties"), to: "/dashboard/properties", icon: Briefcase },
+      { label: t("dashboard.side.viewings"), to: "/dashboard/viewings", icon: Calendar },
+      { label: t("dashboard.side.messages"), to: "/dashboard/messages", icon: MessageSquare },
+      { label: t("dashboard.side.performance"), to: "/dashboard/analytics", icon: BarChart3 },
       { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
     ],
     admin: [
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
-      { label: t("side.users"), to: "/dashboard/users", icon: Users },
-      { label: t("side.properties"), to: "/dashboard/properties", icon: Home },
-      { label: t("side.verification"), to: "/dashboard/verification", icon: ShieldCheck },
-      { label: t("side.reports"), to: "/dashboard/reports", icon: FileText },
-      { label: t("side.payments"), to: "/dashboard/payments", icon: DollarSign },
-      { label: t("side.analytics"), to: "/dashboard/analytics", icon: BarChart3 },
+      { label: t("dashboard.side.users"), to: "/dashboard/users", icon: Users },
+      { label: t("dashboard.side.properties"), to: "/dashboard/properties", icon: Home },
+      { label: t("dashboard.side.verification"), to: "/dashboard/verification", icon: ShieldCheck },
+      { label: t("dashboard.side.reports"), to: "/dashboard/reports", icon: FileText },
+      { label: t("dashboard.side.payments"), to: "/dashboard/payments", icon: DollarSign },
+      { label: t("dashboard.side.analytics"), to: "/dashboard/analytics", icon: BarChart3 },
       { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
     ],
   };
@@ -72,7 +72,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   async function handleSignOut() {
     await signOut();
-    toast.success("Signed out");
+    toast.success(t("common.signedOut"));
     navigate({ to: "/" });
   }
 
@@ -87,7 +87,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           <Logo className="h-8 w-8" />
           <span className="font-display font-semibold text-primary">SPACES</span>
         </Link>
-        <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} aria-label="Menu">
+        <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} aria-label={t("nav.openMenu")}>
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       </div>
@@ -113,7 +113,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               </Avatar>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-foreground">
-                  {profile?.full_name || "Welcome"}
+                  {profile?.full_name || t("common.welcome")}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
                   {primaryRole.charAt(0).toUpperCase() + primaryRole.slice(1)}

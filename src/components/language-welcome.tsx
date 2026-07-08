@@ -2,7 +2,7 @@ import { useI18n, type Lang } from "@/hooks/use-i18n";
 import { Logo } from "@/components/logo";
 
 export function LanguageWelcome() {
-  const { chosen, setLang } = useI18n();
+  const { chosen, setLang, t } = useI18n();
   if (chosen) return null;
 
   function choose(l: Lang) {
@@ -15,8 +15,8 @@ export function LanguageWelcome() {
         <div className="mx-auto flex h-16 w-16 items-center justify-center">
           <Logo className="h-16 w-16 object-contain" />
         </div>
-        <h1 className="mt-5 font-display text-3xl font-semibold text-primary">Karibu SPACES</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Chagua lugha unayotaka kutumia.</p>
+        <h1 className="mt-5 font-display text-3xl font-semibold text-primary">{t("welcome.title")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t("welcome.sub")}</p>
 
         <div className="mt-7 grid gap-3">
           <button
@@ -27,7 +27,7 @@ export function LanguageWelcome() {
               <span className="text-2xl leading-none">🇹🇿</span>
               <span>
                 <span className="block font-display text-base font-semibold text-foreground">Kiswahili</span>
-                <span className="block text-xs text-muted-foreground">Endelea kwa Kiswahili</span>
+                <span className="block text-xs text-muted-foreground">{t("welcome.continueSw")}</span>
               </span>
             </span>
             <span className="text-primary opacity-0 transition-opacity group-hover:opacity-100">→</span>
@@ -40,16 +40,14 @@ export function LanguageWelcome() {
               <span className="text-2xl leading-none">🇬🇧</span>
               <span>
                 <span className="block font-display text-base font-semibold text-foreground">English</span>
-                <span className="block text-xs text-muted-foreground">Continue in English</span>
+                <span className="block text-xs text-muted-foreground">{t("welcome.continueEn")}</span>
               </span>
             </span>
             <span className="text-primary opacity-0 transition-opacity group-hover:opacity-100">→</span>
           </button>
         </div>
 
-        <p className="mt-6 text-xs text-muted-foreground">
-          Unaweza kubadilisha lugha wakati wowote kwenye Settings.
-        </p>
+        <p className="mt-6 text-xs text-muted-foreground">{t("welcome.hint")}</p>
       </div>
     </div>
   );
