@@ -846,7 +846,7 @@ function StepPublish({
         </Button>
       </div>
 
-      <p className="pt-2 text-xs text-muted-foreground">
+      <p className="pt-2 text-center text-xs text-muted-foreground">
         By publishing you confirm the information is accurate and the property is yours to list.
       </p>
     </section>
