@@ -210,17 +210,51 @@ function UploadWizardPage() {
       if (pErr) throw pErr;
       const propertyId = prop.id as string;
 
-      for (let i = 0; i < media.length; i++) {
-        const m = media[i];
-        const finalFile = m.kind === "image" ? await compressImageFile(m.file) : m.file;
+      const wantWatermark = !!draft.watermark;
+      const images = media.filter((m) => m.kind === "image");
+      const video = media.find((m) => m.kind === "video");
+
+      // Photos — position by cover-first, then original order
+      const ordered = [
+        ...images.filter((m) => m.isCover),
+        ...images.filter((m) => !m.isCover),
+      ];
+      for (let i = 0; i < ordered.length; i++) {
+        const m = ordered[i];
+        const base = wantWatermark ? await watermarkImage(m.file, "SPACES") : m.file;
+        const finalFile = await compressImageFile(base);
         const { path } = await uploadMediaFile(user.id, propertyId, finalFile);
         await supabase.from("property_media").insert({
           property_id: propertyId,
           storage_path: path,
-          media_type: m.kind,
+          media_type: "image",
           position: i,
           is_cover: m.isCover,
         });
+      }
+
+      // Video (+ thumbnail as an extra image, if we can build one)
+      if (video) {
+        const { path } = await uploadMediaFile(user.id, propertyId, video.file);
+        await supabase.from("property_media").insert({
+          property_id: propertyId,
+          storage_path: path,
+          media_type: "video",
+          position: ordered.length,
+          is_cover: false,
+        });
+        try {
+          const thumb = await generateVideoThumbnail(video.file);
+          const compressed = await compressImageFile(thumb);
+          const { path: thumbPath } = await uploadMediaFile(user.id, propertyId, compressed);
+          await supabase.from("property_media").insert({
+            property_id: propertyId,
+            storage_path: thumbPath,
+            media_type: "image",
+            position: ordered.length + 1,
+            is_cover: false,
+          });
+        } catch { /* thumbnail is best-effort */ }
       }
 
       clearDraft();
