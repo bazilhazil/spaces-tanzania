@@ -12,18 +12,24 @@ export type WizardDraft = {
   bathrooms?: number;
   parking?: number;
   area_sqm?: number;
+  floor?: number;
+  year_built?: number;
   region?: string;
   district?: string;
   ward?: string;
   street?: string;
   address?: string;
+  landmark?: string;
   latitude?: number;
   longitude?: number;
   amenities?: string[];
-  // Media is stored separately (blob URLs can't persist)
+  contact_name?: string;
+  contact_phone?: string;
+  contact_whatsapp?: string;
+  preferred_contact?: "phone" | "whatsapp" | "both";
 };
 
-const KEY = "spaces:upload-draft:v1";
+const KEY = "spaces:upload-draft:v2";
 
 export function loadDraft(): WizardDraft | null {
   if (typeof window === "undefined") return null;
