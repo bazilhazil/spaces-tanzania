@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
   Heart, Search, User as UserIcon, Users, Briefcase,
-  Menu, X, LogOut, FileEdit, LifeBuoy,
+  Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -28,6 +28,8 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: "Messages", to: "/dashboard/messages", icon: MessageSquare },
       { label: "Saved Drafts", to: "/dashboard/drafts", icon: FileEdit },
       { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
+      { label: "Verification", to: "/verification", icon: ShieldCheck },
+      { label: "Trust Score", to: "/trust", icon: Sparkles },
       { label: "Subscription", to: "/dashboard/subscription", icon: CreditCard },
       { label: "Profile", to: "/dashboard/profile", icon: UserIcon },
       { label: "Settings", to: "/dashboard/settings", icon: Settings },
@@ -48,6 +50,8 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.viewings"), to: "/dashboard/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/dashboard/messages", icon: MessageSquare },
       { label: t("dashboard.side.performance"), to: "/dashboard/analytics", icon: BarChart3 },
+      { label: "Verification", to: "/verification", icon: ShieldCheck },
+      { label: "Trust Score", to: "/trust", icon: Sparkles },
       { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
     ],
   };
