@@ -177,7 +177,7 @@ function PropertyDetailPage() {
                 </span>
               </div>
             </button>
-            {property.images.slice(0, 4).map((img, i) => (
+            {property.images.slice(0, 4).map((img: string, i: number) => (
               <button
                 key={i}
                 onClick={() => setActiveImage(i)}
