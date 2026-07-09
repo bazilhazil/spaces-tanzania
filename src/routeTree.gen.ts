@@ -22,6 +22,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PropertiesSlugRouteImport } from './routes/properties.$slug'
 import { Route as ProfileHandleRouteImport } from './routes/profile.$handle'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
+import { Route as AuthenticatedViewingsRouteImport } from './routes/_authenticated/viewings'
 import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
 import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
 import { Route as AuthenticatedTrustRouteImport } from './routes/_authenticated/trust'
@@ -97,6 +98,11 @@ const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
   path: '/welcome',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedViewingsRoute = AuthenticatedViewingsRouteImport.update({
+  id: '/viewings',
+  path: '/viewings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedVerificationRoute =
   AuthenticatedVerificationRouteImport.update({
     id: '/verification',
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/trust': typeof AuthenticatedTrustRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/verification': typeof AuthenticatedVerificationRoute
+  '/viewings': typeof AuthenticatedViewingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/profile/$handle': typeof ProfileHandleRoute
   '/properties/$slug': typeof PropertiesSlugRoute
@@ -190,6 +197,7 @@ export interface FileRoutesByTo {
   '/trust': typeof AuthenticatedTrustRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/verification': typeof AuthenticatedVerificationRoute
+  '/viewings': typeof AuthenticatedViewingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/profile/$handle': typeof ProfileHandleRoute
   '/properties/$slug': typeof PropertiesSlugRoute
@@ -216,6 +224,7 @@ export interface FileRoutesById {
   '/_authenticated/trust': typeof AuthenticatedTrustRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/_authenticated/verification': typeof AuthenticatedVerificationRoute
+  '/_authenticated/viewings': typeof AuthenticatedViewingsRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/profile/$handle': typeof ProfileHandleRoute
   '/properties/$slug': typeof PropertiesSlugRoute
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/upload'
     | '/verification'
+    | '/viewings'
     | '/welcome'
     | '/profile/$handle'
     | '/properties/$slug'
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/upload'
     | '/verification'
+    | '/viewings'
     | '/welcome'
     | '/profile/$handle'
     | '/properties/$slug'
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
     | '/_authenticated/trust'
     | '/_authenticated/upload'
     | '/_authenticated/verification'
+    | '/_authenticated/viewings'
     | '/_authenticated/welcome'
     | '/profile/$handle'
     | '/properties/$slug'
@@ -406,6 +418,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWelcomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/viewings': {
+      id: '/_authenticated/viewings'
+      path: '/viewings'
+      fullPath: '/viewings'
+      preLoaderRoute: typeof AuthenticatedViewingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/verification': {
       id: '/_authenticated/verification'
       path: '/verification'
@@ -513,6 +532,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTrustRoute: typeof AuthenticatedTrustRoute
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
   AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
+  AuthenticatedViewingsRoute: typeof AuthenticatedViewingsRoute
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
   AuthenticatedPropertyIdRoute: typeof AuthenticatedPropertyIdRoute
 }
@@ -524,6 +544,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTrustRoute: AuthenticatedTrustRoute,
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
   AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
+  AuthenticatedViewingsRoute: AuthenticatedViewingsRoute,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
   AuthenticatedPropertyIdRoute: AuthenticatedPropertyIdRoute,
 }
