@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Default new users to buyer/customer.
       const { error } = await supabase
         .from("user_roles")
-        .insert({ user_id: userId, role: "buyer" as AppRole });
+        .insert({ user_id: userId, role: "buyer" });
       if (!error) current = ["buyer"];
       else console.warn("[auth] role auto-assign failed", error.message);
     }
