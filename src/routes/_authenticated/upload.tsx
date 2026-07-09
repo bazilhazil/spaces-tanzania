@@ -421,12 +421,20 @@ function UploadWizardPage() {
       <main className="mx-auto max-w-2xl px-4 pb-36 pt-6 sm:pt-10">
         <div key={step} className="animate-fade-in">
           {step === 1 && (
-            <PhotoManager
-              media={media}
-              setMedia={setMedia}
-              watermark={!!draft.watermark}
-              onWatermarkChange={(v) => setField("watermark", v)}
-            />
+            <div className="space-y-4">
+              {isEdit && existingPhotoCount > 0 && (
+                <div className="rounded-2xl border border-border/60 bg-accent/40 p-4 text-sm text-muted-foreground">
+                  This property already has <span className="font-semibold text-foreground">{existingPhotoCount}</span>{" "}
+                  photo{existingPhotoCount === 1 ? "" : "s"}. New photos you add here will be appended.
+                </div>
+              )}
+              <PhotoManager
+                media={media}
+                setMedia={setMedia}
+                watermark={!!draft.watermark}
+                onWatermarkChange={(v) => setField("watermark", v)}
+              />
+            </div>
           )}
           {step === 2 && <StepType value={draft.property_type} onChange={(v) => setField("property_type", v)} />}
           {step === 3 && <StepInfo draft={draft} setField={setField} />}
