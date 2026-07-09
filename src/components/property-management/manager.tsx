@@ -74,6 +74,7 @@ export function PropertiesManager() {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<{ ids: string[]; label: string } | null>(null);
   const [filters, setFilters] = useState<{
     region?: string; district?: string; type?: string; listing?: string;
     verified?: boolean; featured?: boolean; premium?: boolean;
@@ -93,14 +94,19 @@ export function PropertiesManager() {
       const list = (data ?? []) as any[];
       const ids = list.map((p) => p.id);
       const covers: Record<string, string> = {};
+      let metrics: Record<string, { views: number; favorites: number; messages: number; bookings: number }> = {};
       if (ids.length) {
-        const { data: media } = await supabase
-          .from("property_media")
-          .select("property_id,storage_path,is_cover,position")
-          .in("property_id", ids)
-          .order("position");
+        const [mediaRes, metricsRes] = await Promise.all([
+          supabase
+            .from("property_media")
+            .select("property_id,storage_path,is_cover,position")
+            .in("property_id", ids)
+            .order("position"),
+          fetchPropertyMetricsBatch(ids),
+        ]);
+        metrics = metricsRes;
         const chosen: Record<string, string> = {};
-        for (const m of media ?? []) {
+        for (const m of mediaRes.data ?? []) {
           if (!chosen[m.property_id] || m.is_cover) chosen[m.property_id] = m.storage_path;
         }
         for (const [pid, path] of Object.entries(chosen)) {
@@ -113,10 +119,10 @@ export function PropertiesManager() {
         ...p,
         public_id: publicIdFrom(p.id, p.created_at),
         cover: covers[p.id],
-        // Derived / demo signals (until backend fields exist)
-        favorites: mulberry(p.id, 3) % 47,
-        messages: mulberry(p.id, 5) % 22,
-        viewings: mulberry(p.id, 7) % 9,
+        view_count: metrics[p.id]?.views ?? p.view_count ?? 0,
+        favorites: metrics[p.id]?.favorites ?? 0,
+        messages: metrics[p.id]?.messages ?? 0,
+        viewings: metrics[p.id]?.bookings ?? 0,
         quality: 55 + (mulberry(p.id, 11) % 45),
         verified: i % 3 !== 0,
         featured: i % 5 === 0,
