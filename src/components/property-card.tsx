@@ -60,16 +60,39 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
           {badges.length > 0 ? (
             <ListingBadgeStrip kinds={badges} size="xs" max={3} />
           ) : <span />}
-          <button
-            aria-label={t("card.save")}
-            onClick={(e) => {
-              e.preventDefault();
-            }}
-            className="grid h-9 w-9 place-items-center rounded-full bg-background/85 text-foreground/70 backdrop-blur transition hover:text-destructive"
-          >
-            <Heart className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              aria-label={comparing ? "Remove from compare" : "Add to compare"}
+              onClick={(e) => {
+                e.preventDefault();
+                const r = toggleCompare(property.id);
+                if (!r.ok) toast.error(r.reason);
+                else toast.success(comparing ? "Removed from compare" : "Added to compare");
+              }}
+              className={cn(
+                "grid h-9 w-9 place-items-center rounded-full bg-background/85 backdrop-blur transition",
+                comparing ? "text-primary" : "text-foreground/70 hover:text-primary",
+              )}
+            >
+              <GitCompare className="h-4 w-4" />
+            </button>
+            <button
+              aria-label={favorited ? "Remove favorite" : t("card.save")}
+              onClick={(e) => {
+                e.preventDefault();
+                const now = toggleFavorite(property.id);
+                toast.success(now ? "Saved to favorites" : "Removed from favorites");
+              }}
+              className={cn(
+                "grid h-9 w-9 place-items-center rounded-full bg-background/85 backdrop-blur transition",
+                favorited ? "text-destructive" : "text-foreground/70 hover:text-destructive",
+              )}
+            >
+              <Heart className={cn("h-4 w-4", favorited && "fill-current")} />
+            </button>
+          </div>
         </div>
+
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/75 via-black/20 to-transparent p-3">
           <span className="text-[11px] font-medium uppercase tracking-widest text-white/90">
             {listingLabel}
