@@ -102,6 +102,184 @@ export type Database = {
           },
         ]
       }
+      deal_activities: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          deal_id: string
+          detail: string | null
+          id: string
+          kind: Database["public"]["Enums"]["deal_activity_kind"]
+          label: string
+          meta: Json
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          deal_id: string
+          detail?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["deal_activity_kind"]
+          label: string
+          meta?: Json
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          deal_id?: string
+          detail?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["deal_activity_kind"]
+          label?: string
+          meta?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_activities_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_documents: {
+        Row: {
+          created_at: string
+          deal_id: string
+          id: string
+          kind: Database["public"]["Enums"]["deal_document_kind"]
+          mime_type: string | null
+          name: string
+          size: number | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          deal_id: string
+          id?: string
+          kind?: Database["public"]["Enums"]["deal_document_kind"]
+          mime_type?: string | null
+          name: string
+          size?: number | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["deal_document_kind"]
+          mime_type?: string | null
+          name?: string
+          size?: number | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_documents_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          agent_id: string | null
+          buyer_email: string | null
+          buyer_id: string | null
+          buyer_name: string | null
+          buyer_phone: string | null
+          cancel_reason: string | null
+          conversation_id: string | null
+          created_at: string
+          currency: string
+          expected_close_at: string | null
+          health: Database["public"]["Enums"]["deal_health"]
+          id: string
+          kanban_position: number
+          last_activity_at: string
+          next_follow_up_at: string | null
+          notes: string | null
+          owner_id: string | null
+          priority: Database["public"]["Enums"]["deal_priority"]
+          property_id: string | null
+          reference: string
+          stage: Database["public"]["Enums"]["deal_stage"]
+          updated_at: string
+          value: number | null
+        }
+        Insert: {
+          agent_id?: string | null
+          buyer_email?: string | null
+          buyer_id?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          cancel_reason?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          currency?: string
+          expected_close_at?: string | null
+          health?: Database["public"]["Enums"]["deal_health"]
+          id?: string
+          kanban_position?: number
+          last_activity_at?: string
+          next_follow_up_at?: string | null
+          notes?: string | null
+          owner_id?: string | null
+          priority?: Database["public"]["Enums"]["deal_priority"]
+          property_id?: string | null
+          reference?: string
+          stage?: Database["public"]["Enums"]["deal_stage"]
+          updated_at?: string
+          value?: number | null
+        }
+        Update: {
+          agent_id?: string | null
+          buyer_email?: string | null
+          buyer_id?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          cancel_reason?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          currency?: string
+          expected_close_at?: string | null
+          health?: Database["public"]["Enums"]["deal_health"]
+          id?: string
+          kanban_position?: number
+          last_activity_at?: string
+          next_follow_up_at?: string | null
+          notes?: string | null
+          owner_id?: string | null
+          priority?: Database["public"]["Enums"]["deal_priority"]
+          property_id?: string | null
+          reference?: string
+          stage?: Database["public"]["Enums"]["deal_stage"]
+          updated_at?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string
@@ -638,9 +816,47 @@ export type Database = {
         }
         Returns: boolean
       }
+      recompute_deal_health: { Args: { _deal_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "buyer" | "owner" | "agent" | "admin" | "super_admin"
+      deal_activity_kind:
+        | "lead_created"
+        | "message_sent"
+        | "call_made"
+        | "viewing_scheduled"
+        | "viewing_completed"
+        | "stage_changed"
+        | "note_added"
+        | "document_uploaded"
+        | "agent_assigned"
+        | "offer_made"
+        | "offer_accepted"
+        | "offer_rejected"
+        | "follow_up_scheduled"
+        | "deal_completed"
+        | "deal_cancelled"
+        | "reminder"
+      deal_document_kind:
+        | "offer_letter"
+        | "lease_agreement"
+        | "sale_agreement"
+        | "inspection_report"
+        | "ownership_document"
+        | "other"
+      deal_health: "healthy" | "waiting" | "at_risk" | "closed"
+      deal_priority: "low" | "medium" | "high" | "urgent"
+      deal_stage:
+        | "new_inquiry"
+        | "contacted"
+        | "viewing_scheduled"
+        | "viewing_completed"
+        | "negotiation"
+        | "offer_made"
+        | "offer_accepted"
+        | "agreement_signed"
+        | "completed"
+        | "cancelled"
       listing_type: "rent" | "sale"
       media_type: "image" | "video"
       property_status:
@@ -787,6 +1003,46 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["buyer", "owner", "agent", "admin", "super_admin"],
+      deal_activity_kind: [
+        "lead_created",
+        "message_sent",
+        "call_made",
+        "viewing_scheduled",
+        "viewing_completed",
+        "stage_changed",
+        "note_added",
+        "document_uploaded",
+        "agent_assigned",
+        "offer_made",
+        "offer_accepted",
+        "offer_rejected",
+        "follow_up_scheduled",
+        "deal_completed",
+        "deal_cancelled",
+        "reminder",
+      ],
+      deal_document_kind: [
+        "offer_letter",
+        "lease_agreement",
+        "sale_agreement",
+        "inspection_report",
+        "ownership_document",
+        "other",
+      ],
+      deal_health: ["healthy", "waiting", "at_risk", "closed"],
+      deal_priority: ["low", "medium", "high", "urgent"],
+      deal_stage: [
+        "new_inquiry",
+        "contacted",
+        "viewing_scheduled",
+        "viewing_completed",
+        "negotiation",
+        "offer_made",
+        "offer_accepted",
+        "agreement_signed",
+        "completed",
+        "cancelled",
+      ],
       listing_type: ["rent", "sale"],
       media_type: ["image", "video"],
       property_status: [
