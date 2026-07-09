@@ -456,7 +456,7 @@ function ChatPane({
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* quick replies */}
       <div className="border-t border-border/70 px-4 py-2 overflow-x-auto no-scrollbar">
