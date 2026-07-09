@@ -14,7 +14,7 @@ interface PropertyCardProps {
 }
 
 
-export function PropertyCard({ property, className }: PropertyCardProps) {
+export function PropertyCard({ property, className, qualityScore }: PropertyCardProps) {
   const { t } = useI18n();
   const listingLabel =
     property.listingType === "sale"
@@ -23,6 +23,12 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
       ? t("card.forRent")
       : t("card.forLease");
   const categoryLabel = t(`search.types.${property.category}`);
+
+  const badges: ListingBadgeKind[] = [];
+  if (property.verified) badges.push("verified_property");
+  if (property.premium) badges.push("premium");
+  if (property.featured && !property.premium) badges.push("featured");
+  if (property.new && !property.premium && !property.featured) badges.push("new");
 
   return (
     <Link
@@ -43,23 +49,20 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
-          <div className="flex flex-wrap gap-1.5">
-            {property.premium && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-gold px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-gold-foreground shadow-[var(--shadow-gold)]">
-                <Sparkles className="h-3 w-3" /> {t("common.premium")}
-              </span>
-            )}
-            {property.verified && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
-                <BadgeCheck className="h-3 w-3" /> {t("common.verified")}
-              </span>
-            )}
-            {property.new && !property.premium && (
-              <span className="rounded-full bg-success px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-success-foreground">
-                {t("common.new")}
-              </span>
-            )}
-          </div>
+          {badges.length > 0 ? (
+            <ListingBadgeStrip kinds={badges} size="xs" max={3} />
+          ) : <span />}
+          <button
+            aria-label={t("card.save")}
+            onClick={(e) => {
+              e.preventDefault();
+            }}
+            className="grid h-9 w-9 place-items-center rounded-full bg-background/85 text-foreground/70 backdrop-blur transition hover:text-destructive"
+          >
+            <Heart className="h-4 w-4" />
+          </button>
+        </div>
+
           <button
             aria-label={t("card.save")}
             onClick={(e) => {
