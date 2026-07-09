@@ -288,7 +288,7 @@ function PropertyDetailPage() {
             <div className="mt-8">
               <h2 className="font-display text-xl font-semibold text-foreground">{t("properties.detail.amenities")}</h2>
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {property.amenities.map((a) => (
+                {property.amenities.map((a: string) => (
                   <span
                     key={a}
                     className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium text-foreground"
