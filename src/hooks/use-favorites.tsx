@@ -280,7 +280,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       deleteSavedSearch: (id) =>
         setState((s) => ({ ...s, savedSearches: s.savedSearches.filter((x) => x.id !== id) })),
     };
-  }, [state]);
+  }, [state, user]);
 
   return <FavContext.Provider value={value}>{children}</FavContext.Provider>;
 }
