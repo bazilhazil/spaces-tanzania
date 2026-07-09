@@ -1,13 +1,18 @@
 import { Link } from "@tanstack/react-router";
-import { BadgeCheck, Bath, BedDouble, Car, Eye, Heart, MapPin, Ruler, Sparkles } from "lucide-react";
+import { Bath, BedDouble, Car, Eye, Heart, MapPin, Ruler } from "lucide-react";
 import { formatPrice, type Property } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
+import { ListingBadgeStrip } from "@/components/trust/listing-badge";
+import { QualityScorePill } from "@/components/trust/quality-score";
+import type { ListingBadgeKind } from "@/lib/trust-engine";
 
 interface PropertyCardProps {
   property: Property;
   className?: string;
+  qualityScore?: number;
 }
+
 
 export function PropertyCard({ property, className }: PropertyCardProps) {
   const { t } = useI18n();
