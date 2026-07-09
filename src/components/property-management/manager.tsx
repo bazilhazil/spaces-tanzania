@@ -398,7 +398,7 @@ export function PropertiesManager() {
               p={p}
               selected={selected.has(p.id)}
               onSelect={() => toggleOne(p.id)}
-              onAction={(a) => handleCardAction(a, p, rows, setRows, setSelected)}
+              onAction={(a) => onCardAction(a, p)}
             />
           ))}
         </div>
@@ -408,9 +408,35 @@ export function PropertiesManager() {
           selected={selected}
           onToggle={toggleOne}
           onToggleAll={toggleAll}
-          onAction={(a, p) => handleCardAction(a, p, rows, setRows, setSelected)}
+          onAction={(a, p) => onCardAction(a, p)}
         />
       )}
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(v) => !v && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {confirmDelete?.label}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the listing and all uploaded photos. It will
+              disappear from your dashboard, search results and the homepage. This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={async () => {
+                const ids = confirmDelete?.ids ?? [];
+                setConfirmDelete(null);
+                await performDelete(ids);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
