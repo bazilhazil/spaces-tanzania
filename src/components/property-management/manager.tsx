@@ -594,10 +594,25 @@ function CardMenu({ p, onAction }: { p: ManagedProperty; onAction: (a: CardActio
       <DropdownMenuItem onClick={() => onAction("edit")}><Edit3 className="mr-2 h-3.5 w-3.5" /> Edit</DropdownMenuItem>
       <DropdownMenuItem onClick={() => onAction("duplicate")}><Copy className="mr-2 h-3.5 w-3.5" /> Duplicate</DropdownMenuItem>
       {isLive ? (
-        <DropdownMenuItem onClick={() => onAction("pause")}><Pause className="mr-2 h-3.5 w-3.5" /> Pause</DropdownMenuItem>
-      ) : (
-        <DropdownMenuItem onClick={() => onAction("resume")}><Play className="mr-2 h-3.5 w-3.5" /> Resume</DropdownMenuItem>
-      )}
+        <DropdownMenuItem onClick={() => onAction("pause")}><Pause className="mr-2 h-3.5 w-3.5" /> Pause listing</DropdownMenuItem>
+      ) : p.status === "paused" || p.status === "draft" ? (
+        <DropdownMenuItem onClick={() => onAction("resume")}><Play className="mr-2 h-3.5 w-3.5" /> Resume listing</DropdownMenuItem>
+      ) : null}
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger><CircleDot className="mr-2 h-3.5 w-3.5" /> Change status</DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-40">
+          {STATUS_CHOICES.map((s) => (
+            <DropdownMenuItem
+              key={s.value}
+              disabled={p.status === s.value}
+              onClick={() => onAction(`status:${s.value}` as CardAction)}
+            >
+              {p.status === s.value && <CheckCircle2 className="mr-2 h-3.5 w-3.5 text-primary" />}
+              <span className={cn(p.status !== s.value && "pl-6")}>{s.label}</span>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={() => onAction("share")}><Share2 className="mr-2 h-3.5 w-3.5" /> Share</DropdownMenuItem>
       <DropdownMenuItem onClick={() => onAction("copy")}><Link2 className="mr-2 h-3.5 w-3.5" /> Copy link</DropdownMenuItem>
