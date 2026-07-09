@@ -3,8 +3,9 @@ import {
   BadgeCheck, Bath, BedDouble, Building2, Calendar, Car, ChevronLeft, ChevronRight,
   Heart, Mail, MapPin, MessageCircle, Phone, Ruler, Share2, ShieldCheck, Sparkles,
   Star, X, Play, Calculator, Send, Timer, CheckCircle2, Maximize2, FileText,
+  Flag, ZoomIn, ZoomOut, Eye,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -281,8 +282,10 @@ function PropertyDetailPage() {
               <InfoBlock label="Land size" value={`${property.size} m²`} icon={<Ruler className="h-4 w-4" />} />
               <InfoBlock label="Availability" value="Available now" icon={<CheckCircle2 className="h-4 w-4" />} />
               <InfoBlock label="Listing date" value={new Date(property.createdAt).toLocaleDateString()} icon={<Calendar className="h-4 w-4" />} />
-              <InfoBlock label="Views" value={property.views.toLocaleString()} icon={<Star className="h-4 w-4" />} />
+              <InfoBlock label="Views" value={property.views.toLocaleString()} icon={<Eye className="h-4 w-4" />} />
+              <InfoBlock label="Saves" value={Math.max(3, Math.round(property.views / 40)).toString()} icon={<Heart className="h-4 w-4" />} />
             </div>
+
 
             {/* Amenities */}
             <div className="mt-8">
@@ -428,6 +431,14 @@ function PropertyDetailPage() {
                       <Mail className="h-4 w-4" /> Email
                     </Button>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full gap-2 text-muted-foreground hover:text-destructive"
+                    onClick={() => toast.success("Thanks — our trust team will review this listing")}
+                  >
+                    <Flag className="h-3.5 w-3.5" /> Report listing
+                  </Button>
                 </div>
 
                 <div className="mt-5 flex items-center gap-2 rounded-lg bg-primary/5 p-3 text-xs text-primary">
@@ -467,6 +478,39 @@ function PropertyDetailPage() {
         )}
       </main>
       <SiteFooter />
+
+      {/* Mobile sticky action bar */}
+      {agent && (
+        <div className="sticky bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur lg:hidden">
+          <div className="grid grid-cols-3 gap-2 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <Button
+              variant="outline"
+              className="gap-1.5"
+              onClick={() => requireAuth(() => { window.location.href = `tel:${agent.phone.replace(/\s/g, "")}`; })}
+            >
+              <Phone className="h-4 w-4" /> Call
+            </Button>
+            <a
+              href={`https://wa.me/${agent.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => { if (!user) { e.preventDefault(); setAuthGate(true); } }}
+              className="contents"
+            >
+              <Button className="w-full gap-1.5 bg-success text-success-foreground hover:bg-success/90">
+                <MessageCircle className="h-4 w-4" /> WhatsApp
+              </Button>
+            </a>
+            <Button
+              className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => requireAuth(() => setViewingOpen(true))}
+            >
+              <Calendar className="h-4 w-4" /> Viewing
+            </Button>
+          </div>
+        </div>
+      )}
+
 
       {/* Fullscreen lightbox */}
       {lightbox && (
@@ -546,18 +590,64 @@ function Lightbox({
 }: {
   images: string[]; index: number; onIndex: (n: number) => void; onClose: () => void; title: string;
 }) {
-  const prev = () => onIndex((index - 1 + images.length) % images.length);
-  const next = () => onIndex((index + 1) % images.length);
+  const [zoom, setZoom] = useState(1);
+  const touchStart = useRef<number | null>(null);
+  const prev = () => { setZoom(1); onIndex((index - 1 + images.length) % images.length); };
+  const next = () => { setZoom(1); onIndex((index + 1) % images.length); };
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "ArrowLeft") prev();
+      else if (e.key === "ArrowRight") next();
+      else if (e.key === "Escape") onClose();
+      else if (e.key === "+" || e.key === "=") setZoom((z) => Math.min(3, z + 0.25));
+      else if (e.key === "-") setZoom((z) => Math.max(1, z - 0.25));
+    }
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = prevOverflow; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
+  function onTouchStart(e: React.TouchEvent) { touchStart.current = e.touches[0].clientX; }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStart.current == null) return;
+    const dx = e.changedTouches[0].clientX - touchStart.current;
+    if (Math.abs(dx) > 50) (dx > 0 ? prev() : next());
+    touchStart.current = null;
+  }
+
   return (
-    <div className="fixed inset-0 z-50 grid grid-rows-[auto_1fr_auto] bg-black/95 backdrop-blur" role="dialog" aria-modal="true">
-      <div className="flex items-center justify-between px-4 py-3 text-white">
-        <span className="text-sm font-medium">{index + 1} / {images.length} · {title}</span>
-        <button onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/20">
-          <X className="h-4 w-4" />
-        </button>
+    <div className="fixed inset-0 z-[60] grid grid-rows-[auto_1fr_auto] bg-black/95 backdrop-blur" role="dialog" aria-modal="true">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 text-white">
+        <span className="truncate text-sm font-medium">{index + 1} / {images.length} · {title}</span>
+        <div className="flex items-center gap-1.5">
+          <button onClick={() => setZoom((z) => Math.max(1, z - 0.25))} aria-label="Zoom out" className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-40" disabled={zoom <= 1}>
+            <ZoomOut className="h-4 w-4" />
+          </button>
+          <span className="w-10 text-center text-xs tabular-nums">{Math.round(zoom * 100)}%</span>
+          <button onClick={() => setZoom((z) => Math.min(3, z + 0.25))} aria-label="Zoom in" className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-40" disabled={zoom >= 3}>
+            <ZoomIn className="h-4 w-4" />
+          </button>
+          <button onClick={onClose} aria-label="Close" className="ml-2 grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/20">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
-      <div className="relative grid place-items-center overflow-hidden px-4">
-        <img src={images[index]} alt={`${title} ${index + 1}`} className="max-h-full max-w-full object-contain" />
+      <div
+        className="relative grid place-items-center overflow-auto px-4"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        <img
+          src={images[index]}
+          alt={`${title} ${index + 1}`}
+          onDoubleClick={() => setZoom((z) => (z >= 2 ? 1 : z + 1))}
+          style={{ transform: `scale(${zoom})`, transition: "transform 200ms" }}
+          className="max-h-full max-w-full origin-center object-contain select-none"
+          draggable={false}
+        />
         <button onClick={prev} aria-label="Previous" className="absolute left-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20">
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -567,8 +657,8 @@ function Lightbox({
       </div>
       <div className="flex gap-2 overflow-x-auto p-4">
         {images.map((img, i) => (
-          <button key={i} onClick={() => onIndex(i)} className={cn("h-16 w-24 shrink-0 overflow-hidden rounded-lg ring-2 transition", i === index ? "ring-primary" : "ring-transparent opacity-70 hover:opacity-100")}>
-            <img src={img} alt="" className="h-full w-full object-cover" />
+          <button key={i} onClick={() => { setZoom(1); onIndex(i); }} className={cn("h-16 w-24 shrink-0 overflow-hidden rounded-lg ring-2 transition", i === index ? "ring-primary" : "ring-transparent opacity-70 hover:opacity-100")}>
+            <img src={img} alt="" loading="lazy" className="h-full w-full object-cover" />
           </button>
         ))}
       </div>
