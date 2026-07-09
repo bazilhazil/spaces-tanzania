@@ -137,7 +137,7 @@ export function computeListingQuality(factors: ListingQualityFactor[]) {
 
 export type ReportReason =
   | "fake_listing" | "wrong_price" | "wrong_location" | "already_sold"
-  | "duplicate" | "scam" | "offensive";
+  | "duplicate" | "spam" | "scam" | "offensive";
 
 export const REPORT_REASONS: { key: ReportReason; label: string; description: string }[] = [
   { key: "fake_listing",  label: "Fake listing",       description: "This property does not exist or is misrepresented." },
@@ -145,9 +145,46 @@ export const REPORT_REASONS: { key: ReportReason; label: string; description: st
   { key: "wrong_location", label: "Wrong location",     description: "The pinned location doesn't match the property." },
   { key: "already_sold",  label: "Already sold / rented", description: "This property is no longer available." },
   { key: "duplicate",     label: "Duplicate listing",   description: "Same property listed more than once." },
+  { key: "spam",          label: "Spam",                description: "Repeated, irrelevant or promotional content." },
   { key: "scam",          label: "Scam or fraud",       description: "Suspicious payment or contact behaviour." },
   { key: "offensive",     label: "Offensive content",   description: "Photos or description are inappropriate." },
 ];
+
+// ---- Public listing badge system ---------------------------------
+
+export type ListingBadgeKind =
+  | "verified_property" | "verified_owner" | "verified_agent"
+  | "premium" | "featured" | "new";
+
+export const LISTING_BADGE_META: Record<
+  ListingBadgeKind,
+  { label: string; short: string; tone: "brand" | "success" | "gold" | "info"; description: string }
+> = {
+  verified_property: { label: "Verified by SPACES", short: "Verified",        tone: "success", description: "Ownership documents reviewed and approved." },
+  verified_owner:    { label: "Verified Owner",     short: "Verified Owner",  tone: "success", description: "Owner identity confirmed by our trust team." },
+  verified_agent:    { label: "Verified Agent",     short: "Verified Agent",  tone: "brand",   description: "Licensed agent verified by SPACES." },
+  premium:           { label: "Premium Listing",    short: "Premium",         tone: "gold",    description: "Enhanced placement and priority support." },
+  featured:          { label: "Featured",           short: "Featured",        tone: "gold",    description: "Promoted across SPACES search and home." },
+  new:               { label: "New on SPACES",      short: "New",             tone: "info",    description: "Listed in the last 7 days." },
+};
+
+// ---- Quality score tier meta -------------------------------------
+export function qualityTier(score: number): { label: string; tone: "success" | "warning" | "danger" | "brand" } {
+  if (score >= 90) return { label: "Excellent", tone: "success" };
+  if (score >= 75) return { label: "Great",     tone: "brand" };
+  if (score >= 60) return { label: "Good",      tone: "warning" };
+  return { label: "Needs work", tone: "danger" };
+}
+
+// ---- Buyer / member trust snapshot -------------------------------
+export type MemberTrustSnapshot = {
+  yearsOnSpaces: number;
+  responseRate: number;         // 0..100
+  responseTime: string;
+  transactions: number;
+  rating: number;               // 0..5
+  reviewCount: number;
+};
 
 // ---- Mock user data (display-only) --------------------------------
 

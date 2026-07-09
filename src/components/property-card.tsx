@@ -1,15 +1,20 @@
 import { Link } from "@tanstack/react-router";
-import { BadgeCheck, Bath, BedDouble, Car, Eye, Heart, MapPin, Ruler, Sparkles } from "lucide-react";
+import { Bath, BedDouble, Car, Eye, Heart, MapPin, Ruler } from "lucide-react";
 import { formatPrice, type Property } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
+import { ListingBadgeStrip } from "@/components/trust/listing-badge";
+import { QualityScorePill } from "@/components/trust/quality-score";
+import type { ListingBadgeKind } from "@/lib/trust-engine";
 
 interface PropertyCardProps {
   property: Property;
   className?: string;
+  qualityScore?: number;
 }
 
-export function PropertyCard({ property, className }: PropertyCardProps) {
+
+export function PropertyCard({ property, className, qualityScore }: PropertyCardProps) {
   const { t } = useI18n();
   const listingLabel =
     property.listingType === "sale"
@@ -18,6 +23,12 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
       ? t("card.forRent")
       : t("card.forLease");
   const categoryLabel = t(`search.types.${property.category}`);
+
+  const badges: ListingBadgeKind[] = [];
+  if (property.verified) badges.push("verified_property");
+  if (property.premium) badges.push("premium");
+  if (property.featured && !property.premium) badges.push("featured");
+  if (property.new && !property.premium && !property.featured) badges.push("new");
 
   return (
     <Link
@@ -38,23 +49,9 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
-          <div className="flex flex-wrap gap-1.5">
-            {property.premium && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-gold px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-gold-foreground shadow-[var(--shadow-gold)]">
-                <Sparkles className="h-3 w-3" /> {t("common.premium")}
-              </span>
-            )}
-            {property.verified && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
-                <BadgeCheck className="h-3 w-3" /> {t("common.verified")}
-              </span>
-            )}
-            {property.new && !property.premium && (
-              <span className="rounded-full bg-success px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-success-foreground">
-                {t("common.new")}
-              </span>
-            )}
-          </div>
+          {badges.length > 0 ? (
+            <ListingBadgeStrip kinds={badges} size="xs" max={3} />
+          ) : <span />}
           <button
             aria-label={t("card.save")}
             onClick={(e) => {
@@ -90,9 +87,12 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
           <p className="font-display text-lg font-semibold text-primary">
             {formatPrice(property.price, property.currency, property.listingType)}
           </p>
-          <h3 className="mt-0.5 line-clamp-1 font-display text-base font-medium text-foreground">
-            {property.title}
-          </h3>
+          <div className="mt-0.5 flex items-center justify-between gap-2">
+            <h3 className="line-clamp-1 font-display text-base font-medium text-foreground">
+              {property.title}
+            </h3>
+            {typeof qualityScore === "number" && <QualityScorePill score={qualityScore} />}
+          </div>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="h-3 w-3" /> {property.ward}, {property.city}
           </p>
