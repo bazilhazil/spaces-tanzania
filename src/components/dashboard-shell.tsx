@@ -30,6 +30,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: "Saved Drafts", to: "/dashboard/drafts", icon: FileEdit },
       { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
       { label: "Verification", to: "/verification", icon: ShieldCheck },
+      { label: "Verification Hub", to: "/verification-hub", icon: ShieldCheck },
       { label: "Trust Score", to: "/trust", icon: Sparkles },
       { label: "Subscription", to: "/dashboard/subscription", icon: CreditCard },
       { label: "Profile", to: "/dashboard/profile", icon: UserIcon },
