@@ -84,6 +84,9 @@ function SectionPage() {
 /* ============================ MY PROPERTIES ============================ */
 
 import { PropertiesManager } from "@/components/property-management/manager";
+import { FavoritesPanel } from "@/components/favorites/favorites-panel";
+import { SavedSearchesPanel } from "@/components/favorites/saved-searches-panel";
+import { RecentlyViewedPanel } from "@/components/favorites/recently-viewed-panel";
 
 function PropertiesPanel() {
   return <PropertiesManager />;
