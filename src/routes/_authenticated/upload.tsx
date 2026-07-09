@@ -173,8 +173,9 @@ function UploadWizardPage() {
   }, [isEdit, editId, user, navigate]);
 
 
-  // Auto-save every 5s
+  // Auto-save every 5s (disabled in edit mode — edits should not touch the draft)
   useEffect(() => {
+    if (isEdit) return;
     const iv = setInterval(() => {
       if (!dirtyRef.current) return;
       saveDraft({ ...draftRef.current, step: stepRef.current });
@@ -182,7 +183,7 @@ function UploadWizardPage() {
       dirtyRef.current = false;
     }, 5000);
     return () => clearInterval(iv);
-  }, []);
+  }, [isEdit]);
 
   // Warn before leaving
   useEffect(() => {
