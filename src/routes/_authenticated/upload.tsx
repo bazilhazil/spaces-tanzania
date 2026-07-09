@@ -204,7 +204,7 @@ function UploadWizardPage() {
 
   function canProceed(): string | null {
     switch (step) {
-      case 1: return media.some((m) => m.kind === "image") ? null : "Add at least one photo";
+      case 1: return (media.some((m) => m.kind === "image") || existingPhotoCount > 0) ? null : "Add at least one photo";
       case 2: return draft.property_type ? null : "Pick a property type";
       case 3:
         if (!draft.price || draft.price <= 0) return "Enter a price";
