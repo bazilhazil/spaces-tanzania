@@ -284,6 +284,8 @@ function PropertyDetailPage() {
               <InfoBlock label="Listing date" value={new Date(property.createdAt).toLocaleDateString()} icon={<Calendar className="h-4 w-4" />} />
               <InfoBlock label="Views" value={property.views.toLocaleString()} icon={<Eye className="h-4 w-4" />} />
               <InfoBlock label="Saves" value={Math.max(3, Math.round(property.views / 40)).toString()} icon={<Heart className="h-4 w-4" />} />
+            </div>
+
 
             {/* Amenities */}
             <div className="mt-8">
