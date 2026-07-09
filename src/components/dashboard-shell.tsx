@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
   Heart, Search, User as UserIcon, Users, Briefcase, GitCompare, Clock, Contact,
-  Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles,
+  Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles, Handshake,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -25,6 +25,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: "My Properties", to: "/dashboard/properties", icon: Home },
       { label: "Upload Property", to: "/upload", icon: Upload },
       { label: "Leads", to: "/leads", icon: Contact },
+      { label: "Deals", to: "/deals", icon: Handshake },
       { label: "Viewings", to: "/viewings", icon: Calendar },
       { label: "Messages", to: "/messages", icon: MessageSquare },
       { label: "Saved Drafts", to: "/dashboard/drafts", icon: FileEdit },
@@ -52,6 +53,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
       { label: t("dashboard.side.clients"), to: "/dashboard/clients", icon: Users },
       { label: "Leads", to: "/leads", icon: Contact },
+      { label: "Deals", to: "/deals", icon: Handshake },
       { label: t("dashboard.side.properties"), to: "/dashboard/properties", icon: Briefcase },
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
