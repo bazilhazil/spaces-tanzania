@@ -99,14 +99,79 @@ function UploadWizardPage() {
     });
   }, [user]);
 
-  // Load draft
+  // Load draft (skipped when editing an existing property)
   useEffect(() => {
+    if (isEdit) return;
     const d = loadDraft();
     if (d) {
       setDraft((p) => ({ ...p, ...d }));
       setStep(Math.min(d.step || 1, TOTAL));
     }
-  }, []);
+  }, [isEdit]);
+
+  // Load existing property for edit mode
+  useEffect(() => {
+    if (!isEdit || !editId || !user) return;
+    let alive = true;
+    (async () => {
+      const { data: row, error } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("id", editId)
+        .maybeSingle();
+      if (!alive) return;
+      if (error || !row) {
+        toast.error("Property not found");
+        navigate({ to: "/dashboard/$section", params: { section: "properties" } });
+        return;
+      }
+      if (row.owner_id !== user.id) {
+        toast.error("You don't have permission to edit this property");
+        navigate({ to: "/dashboard/$section", params: { section: "properties" } });
+        return;
+      }
+      setDraft({
+        step: 2,
+        property_type: row.property_type ?? undefined,
+        listing_type: (row.listing_type ?? "rent") as "rent" | "sale",
+        title: row.title ?? undefined,
+        description: row.description ?? undefined,
+        price: row.price ?? undefined,
+        currency: row.currency ?? "TZS",
+        negotiable: !!row.negotiable,
+        bedrooms: row.bedrooms ?? undefined,
+        bathrooms: row.bathrooms ?? undefined,
+        parking: row.parking ?? undefined,
+        area_sqm: row.area_sqm ?? undefined,
+        floor: row.floor ?? undefined,
+        year_built: row.year_built ?? undefined,
+        region: row.region ?? undefined,
+        district: row.district ?? undefined,
+        ward: row.ward ?? undefined,
+        street: row.street ?? undefined,
+        address: row.address ?? undefined,
+        landmark: row.landmark ?? undefined,
+        latitude: row.latitude ?? undefined,
+        longitude: row.longitude ?? undefined,
+        amenities: (row.amenities as string[] | null) ?? [],
+        contact_name: row.contact_name ?? undefined,
+        contact_phone: row.contact_phone ?? undefined,
+        contact_whatsapp: row.contact_whatsapp ?? undefined,
+        preferred_contact: (row.preferred_contact ?? "both") as "phone" | "whatsapp" | "both",
+      });
+      const { count } = await supabase
+        .from("property_media")
+        .select("id", { count: "exact", head: true })
+        .eq("property_id", editId)
+        .eq("media_type", "image");
+      if (!alive) return;
+      setExistingPhotoCount(count ?? 0);
+      setStep(2);
+      setLoadingEdit(false);
+    })();
+    return () => { alive = false; };
+  }, [isEdit, editId, user, navigate]);
+
 
   // Auto-save every 5s
   useEffect(() => {
