@@ -72,6 +72,9 @@ function SectionPage() {
          section === "settings"     ? <SettingsIndex /> :
          section === "language"     ? <LanguagePanel /> :
          section === "mode"         ? <ModePanel /> :
+         section === "favorites"    ? <FavoritesPanel /> :
+         section === "searches"     ? <SavedSearchesPanel /> :
+         section === "recent"       ? <RecentlyViewedPanel /> :
          <EmptyPanel />}
       </div>
     </DashboardShell>
