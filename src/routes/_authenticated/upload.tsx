@@ -67,11 +67,15 @@ const TOTAL = 8;
 function UploadWizardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { id: editId } = Route.useSearch();
+  const isEdit = !!editId;
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<WizardDraft>({
     step: 1, currency: "TZS", listing_type: "rent", amenities: [], preferred_contact: "both",
   });
   const [media, setMedia] = useState<MediaItem[]>([]);
+  const [existingPhotoCount, setExistingPhotoCount] = useState(0);
+  const [loadingEdit, setLoadingEdit] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
   const [savedTick, setSavedTick] = useState<number>(0);
   const [success, setSuccess] = useState<{ status: "live" | "draft"; id?: string } | null>(null);
