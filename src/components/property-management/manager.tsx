@@ -4,19 +4,24 @@ import {
   Search, SlidersHorizontal, Plus, Grid3x3, Rows3, ChevronDown, X,
   Eye, Heart, MessageSquare, Calendar, Star, Sparkles, ShieldCheck,
   Edit3, Copy, Pause, Play, Trash2, BarChart3, Share2, Link2, Crown, MoreHorizontal,
-  Home, CheckCircle2,
+  Home, CheckCircle2, CircleDot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
+  DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { StatusBadge, EmptyState, SkeletonCard } from "@/components/ds";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
-import { deletePropertyWithStorage } from "@/lib/property-actions";
+import { deletePropertyWithStorage, duplicateProperty, fetchPropertyMetricsBatch } from "@/lib/property-actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PROPERTY_TYPES } from "./constants";
@@ -69,6 +74,7 @@ export function PropertiesManager() {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<{ ids: string[]; label: string } | null>(null);
   const [filters, setFilters] = useState<{
     region?: string; district?: string; type?: string; listing?: string;
     verified?: boolean; featured?: boolean; premium?: boolean;
@@ -88,14 +94,19 @@ export function PropertiesManager() {
       const list = (data ?? []) as any[];
       const ids = list.map((p) => p.id);
       const covers: Record<string, string> = {};
+      let metrics: Record<string, { views: number; favorites: number; messages: number; bookings: number }> = {};
       if (ids.length) {
-        const { data: media } = await supabase
-          .from("property_media")
-          .select("property_id,storage_path,is_cover,position")
-          .in("property_id", ids)
-          .order("position");
+        const [mediaRes, metricsRes] = await Promise.all([
+          supabase
+            .from("property_media")
+            .select("property_id,storage_path,is_cover,position")
+            .in("property_id", ids)
+            .order("position"),
+          fetchPropertyMetricsBatch(ids),
+        ]);
+        metrics = metricsRes;
         const chosen: Record<string, string> = {};
-        for (const m of media ?? []) {
+        for (const m of mediaRes.data ?? []) {
           if (!chosen[m.property_id] || m.is_cover) chosen[m.property_id] = m.storage_path;
         }
         for (const [pid, path] of Object.entries(chosen)) {
@@ -108,10 +119,10 @@ export function PropertiesManager() {
         ...p,
         public_id: publicIdFrom(p.id, p.created_at),
         cover: covers[p.id],
-        // Derived / demo signals (until backend fields exist)
-        favorites: mulberry(p.id, 3) % 47,
-        messages: mulberry(p.id, 5) % 22,
-        viewings: mulberry(p.id, 7) % 9,
+        view_count: metrics[p.id]?.views ?? p.view_count ?? 0,
+        favorites: metrics[p.id]?.favorites ?? 0,
+        messages: metrics[p.id]?.messages ?? 0,
+        viewings: metrics[p.id]?.bookings ?? 0,
         quality: 55 + (mulberry(p.id, 11) % 45),
         verified: i % 3 !== 0,
         featured: i % 5 === 0,
@@ -177,19 +188,24 @@ export function PropertiesManager() {
     });
   }
 
+  async function performDelete(ids: string[]) {
+    if (!ids.length) return;
+    try {
+      await Promise.all(ids.map((id) => deletePropertyWithStorage(id)));
+    } catch (e: any) {
+      return toast.error(e?.message ?? "Delete failed");
+    }
+    const set = new Set(ids);
+    setRows((r) => r.filter((x) => !set.has(x.id)));
+    setSelected((s) => { const n = new Set(s); ids.forEach((i) => n.delete(i)); return n; });
+    toast.success(`Deleted ${ids.length} propert${ids.length === 1 ? "y" : "ies"}`);
+  }
+
   async function bulk(action: "delete" | "pause" | "resume" | "archive" | "promote") {
     const ids = [...selected];
     if (!ids.length) return;
     if (action === "delete") {
-      if (!confirm(`Delete ${ids.length} propert${ids.length === 1 ? "y" : "ies"}? This also removes uploaded photos and cannot be undone.`)) return;
-      try {
-        await Promise.all(ids.map((id) => deletePropertyWithStorage(id)));
-      } catch (e: any) {
-        return toast.error(e?.message ?? "Delete failed");
-      }
-      setRows((r) => r.filter((x) => !selected.has(x.id)));
-      setSelected(new Set());
-      toast.success(`Deleted ${ids.length} propert${ids.length === 1 ? "y" : "ies"}`);
+      setConfirmDelete({ ids, label: `${ids.length} propert${ids.length === 1 ? "y" : "ies"}` });
       return;
     }
     if (action === "archive") {
@@ -212,6 +228,35 @@ export function PropertiesManager() {
     if (action === "promote") {
       toast.info("Promotion checkout coming soon");
     }
+  }
+
+  async function onCardAction(a: CardAction, p: ManagedProperty) {
+    if (a === "delete") {
+      setConfirmDelete({ ids: [p.id], label: `"${p.title}"` });
+      return;
+    }
+    if (a === "duplicate") {
+      const tid = toast.loading("Duplicating listing…");
+      try {
+        const newId = await duplicateProperty(p.id);
+        toast.dismiss(tid);
+        toast.success("Duplicated as draft");
+        window.location.href = `/upload?id=${newId}`;
+      } catch (e: any) {
+        toast.dismiss(tid);
+        toast.error(e?.message ?? "Could not duplicate");
+      }
+      return;
+    }
+    if (a.startsWith("status:")) {
+      const next = a.split(":")[1] as ManagedProperty["status"];
+      const { error } = await supabase.from("properties").update({ status: next as never }).eq("id", p.id);
+      if (error) return toast.error(error.message);
+      setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: next } : x)));
+      toast.success(`Status changed to ${statusLabel(next)}`);
+      return;
+    }
+    await handleCardAction(a, p, rows, setRows, setSelected);
   }
 
   const hasFilters =
@@ -353,7 +398,7 @@ export function PropertiesManager() {
               p={p}
               selected={selected.has(p.id)}
               onSelect={() => toggleOne(p.id)}
-              onAction={(a) => handleCardAction(a, p, rows, setRows, setSelected)}
+              onAction={(a) => onCardAction(a, p)}
             />
           ))}
         </div>
@@ -363,16 +408,54 @@ export function PropertiesManager() {
           selected={selected}
           onToggle={toggleOne}
           onToggleAll={toggleAll}
-          onAction={(a, p) => handleCardAction(a, p, rows, setRows, setSelected)}
+          onAction={(a, p) => onCardAction(a, p)}
         />
       )}
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(v) => !v && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {confirmDelete?.label}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the listing and all uploaded photos. It will
+              disappear from your dashboard, search results and the homepage. This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={async () => {
+                const ids = confirmDelete?.ids ?? [];
+                setConfirmDelete(null);
+                await performDelete(ids);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
 
 /* ------------------------------ card ------------------------------ */
 
-type CardAction = "view" | "edit" | "duplicate" | "pause" | "resume" | "delete" | "share" | "copy" | "promote" | "analytics";
+export type CardAction =
+  | "view" | "edit" | "duplicate" | "pause" | "resume" | "delete"
+  | "share" | "copy" | "promote" | "analytics"
+  | `status:${ManagedProperty["status"]}`;
+
+const STATUS_CHOICES: { value: ManagedProperty["status"]; label: string }[] = [
+  { value: "draft", label: "Draft" },
+  { value: "live", label: "Live" },
+  { value: "paused", label: "Paused" },
+  { value: "sold", label: "Sold" },
+  { value: "rented", label: "Rented" },
+  { value: "archived", label: "Archived" },
+];
 
 function PropertyManageCard({
   p, selected, onSelect, onAction,
@@ -396,11 +479,13 @@ function PropertyManageCard({
     )}>
       {/* Media */}
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-        {p.cover ? (
-          <img src={p.cover} alt={p.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground/40"><Home className="h-10 w-10" /></div>
-        )}
+        <Link to="/properties/$slug" params={{ slug: p.id }} aria-label={`Open ${p.title}`} className="absolute inset-0 z-0">
+          {p.cover ? (
+            <img src={p.cover} alt={p.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          ) : (
+            <div className="flex h-full items-center justify-center text-muted-foreground/40"><Home className="h-10 w-10" /></div>
+          )}
+        </Link>
 
         {/* selection */}
         <label className={cn(
@@ -442,7 +527,9 @@ function PropertyManageCard({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{p.public_id}</p>
-            <h3 className="mt-0.5 line-clamp-1 font-display text-base font-semibold text-foreground">{p.title}</h3>
+            <Link to="/properties/$slug" params={{ slug: p.id }} className="mt-0.5 block line-clamp-1 font-display text-base font-semibold text-foreground hover:text-primary transition-colors">
+              {p.title}
+            </Link>
             <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{location}</p>
           </div>
           <DropdownMenu>
@@ -507,10 +594,25 @@ function CardMenu({ p, onAction }: { p: ManagedProperty; onAction: (a: CardActio
       <DropdownMenuItem onClick={() => onAction("edit")}><Edit3 className="mr-2 h-3.5 w-3.5" /> Edit</DropdownMenuItem>
       <DropdownMenuItem onClick={() => onAction("duplicate")}><Copy className="mr-2 h-3.5 w-3.5" /> Duplicate</DropdownMenuItem>
       {isLive ? (
-        <DropdownMenuItem onClick={() => onAction("pause")}><Pause className="mr-2 h-3.5 w-3.5" /> Pause</DropdownMenuItem>
-      ) : (
-        <DropdownMenuItem onClick={() => onAction("resume")}><Play className="mr-2 h-3.5 w-3.5" /> Resume</DropdownMenuItem>
-      )}
+        <DropdownMenuItem onClick={() => onAction("pause")}><Pause className="mr-2 h-3.5 w-3.5" /> Pause listing</DropdownMenuItem>
+      ) : p.status === "paused" || p.status === "draft" ? (
+        <DropdownMenuItem onClick={() => onAction("resume")}><Play className="mr-2 h-3.5 w-3.5" /> Resume listing</DropdownMenuItem>
+      ) : null}
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger><CircleDot className="mr-2 h-3.5 w-3.5" /> Change status</DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-40">
+          {STATUS_CHOICES.map((s) => (
+            <DropdownMenuItem
+              key={s.value}
+              disabled={p.status === s.value}
+              onClick={() => onAction(`status:${s.value}` as CardAction)}
+            >
+              {p.status === s.value && <CheckCircle2 className="mr-2 h-3.5 w-3.5 text-primary" />}
+              <span className={cn(p.status !== s.value && "pl-6")}>{s.label}</span>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={() => onAction("share")}><Share2 className="mr-2 h-3.5 w-3.5" /> Share</DropdownMenuItem>
       <DropdownMenuItem onClick={() => onAction("copy")}><Link2 className="mr-2 h-3.5 w-3.5" /> Copy link</DropdownMenuItem>
