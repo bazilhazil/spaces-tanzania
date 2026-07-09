@@ -552,8 +552,20 @@ function PropertyManageCard({
           </span>
         </div>
 
+        {/* Owner actions — always visible on desktop, ⋯ menu covers mobile */}
+        <div className="hidden sm:grid grid-cols-4 gap-1.5 border-t border-border/50 pt-3">
+          <ActionBtn icon={Eye} label="View" onClick={() => onAction("view")} />
+          <ActionBtn icon={Edit3} label="Edit" onClick={() => onAction("edit")} />
+          {p.status === "paused" || p.status === "draft" ? (
+            <ActionBtn icon={Play} label="Resume" onClick={() => onAction("resume")} />
+          ) : (
+            <ActionBtn icon={Pause} label="Pause" onClick={() => onAction("pause")} />
+          )}
+          <ActionBtn icon={Trash2} label="Delete" onClick={() => onAction("delete")} destructive />
+        </div>
+
         {/* Metrics */}
-        <div className="grid grid-cols-4 gap-1 border-t border-border/50 pt-3">
+        <div className="grid grid-cols-4 gap-1 border-t border-border/50 pt-3 sm:border-t-0 sm:pt-0">
           <Metric icon={Eye} value={p.view_count} label="Views" />
           <Metric icon={Heart} value={p.favorites ?? 0} label="Saves" />
           <Metric icon={MessageSquare} value={p.messages ?? 0} label="Msgs" />
