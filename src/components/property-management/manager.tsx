@@ -443,7 +443,19 @@ export function PropertiesManager() {
 
 /* ------------------------------ card ------------------------------ */
 
-type CardAction = "view" | "edit" | "duplicate" | "pause" | "resume" | "delete" | "share" | "copy" | "promote" | "analytics";
+export type CardAction =
+  | "view" | "edit" | "duplicate" | "pause" | "resume" | "delete"
+  | "share" | "copy" | "promote" | "analytics"
+  | `status:${ManagedProperty["status"]}`;
+
+const STATUS_CHOICES: { value: ManagedProperty["status"]; label: string }[] = [
+  { value: "draft", label: "Draft" },
+  { value: "live", label: "Live" },
+  { value: "paused", label: "Paused" },
+  { value: "sold", label: "Sold" },
+  { value: "rented", label: "Rented" },
+  { value: "archived", label: "Archived" },
+];
 
 function PropertyManageCard({
   p, selected, onSelect, onAction,
