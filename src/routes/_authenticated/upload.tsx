@@ -465,7 +465,9 @@ function UploadWizardPage() {
             </Button>
           ) : (
             <Button onClick={() => submit("publish")} disabled={submitting} size="lg" className="gap-2 rounded-full px-8">
-              {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Publishing…</> : <><Sparkles className="h-4 w-4" /> Publish now</>}
+              {submitting
+                ? <><Loader2 className="h-4 w-4 animate-spin" /> {isEdit ? "Saving…" : "Publishing…"}</>
+                : <><Sparkles className="h-4 w-4" /> {isEdit ? "Save changes" : "Publish now"}</>}
             </Button>
           )}
         </div>
