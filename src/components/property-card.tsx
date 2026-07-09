@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { Bath, BedDouble, Car, Eye, Heart, MapPin, Ruler } from "lucide-react";
+import { Bath, BedDouble, Car, Eye, GitCompare, Heart, MapPin, Ruler } from "lucide-react";
+import { toast } from "sonner";
 import { formatPrice, type Property } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
+import { useFavorites } from "@/hooks/use-favorites";
 import { ListingBadgeStrip } from "@/components/trust/listing-badge";
 import { QualityScorePill } from "@/components/trust/quality-score";
 import type { ListingBadgeKind } from "@/lib/trust-engine";
@@ -12,6 +14,7 @@ interface PropertyCardProps {
   className?: string;
   qualityScore?: number;
 }
+
 
 
 export function PropertyCard({ property, className, qualityScore }: PropertyCardProps) {
