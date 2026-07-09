@@ -118,7 +118,7 @@ function PropertyDetailPage() {
   function share() {
     const url = typeof window !== "undefined" ? window.location.href : "";
     if (typeof navigator !== "undefined" && (navigator as any).share) {
-      (navigator as any).share({ title: property.title, url }).catch(() => {});
+      (navigator as any).share({ title: property!.title, url }).catch(() => {});
     } else if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(url);
       toast.success("Link copied");
