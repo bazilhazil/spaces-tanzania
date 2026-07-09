@@ -23,8 +23,10 @@ import { HeroSearch } from "@/components/hero-search";
 import { PropertyCard } from "@/components/property-card";
 import { Button } from "@/components/ui/button";
 import heroVilla from "@/assets/hero-villa.jpg";
-import { agents, locations, properties, stats, testimonials } from "@/lib/mock-data";
+import { agents, locations, stats, testimonials, type Property } from "@/lib/mock-data";
+import { fetchLiveProperties } from "@/lib/properties-db";
 import { useI18n } from "@/hooks/use-i18n";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -33,11 +35,17 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { t } = useI18n();
-  const featured = properties.filter((p) => p.featured);
+  const [properties, setProperties] = useState<Property[]>([]);
+  useEffect(() => {
+    let alive = true;
+    fetchLiveProperties(24).then((rows) => { if (alive) setProperties(rows); });
+    return () => { alive = false; };
+  }, []);
+  const featured = properties.slice(0, 4);
   const latest = [...properties]
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
     .slice(0, 4);
-  const verified = properties.filter((p) => p.verified).slice(0, 4);
+  const verified = properties.slice(0, 4);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -169,7 +177,7 @@ function FeaturedSection({
   eyebrow: string;
   title: string;
   subtitle: string;
-  items: typeof properties;
+  items: Property[];
   tone?: "default" | "muted";
 }) {
   const { t } = useI18n();
@@ -189,11 +197,17 @@ function FeaturedSection({
           }
         />
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((p) => (
-            <PropertyCard key={p.id} property={p} />
-          ))}
-        </div>
+        {items.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border/70 p-12 text-center text-sm text-muted-foreground">
+            No listings yet. <Link to="/upload" className="font-medium text-primary hover:underline">Be the first to list</Link>.
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {items.map((p) => (
+              <PropertyCard key={p.id} property={p} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -239,7 +253,7 @@ function Locations() {
   );
 }
 
-function Verified({ verified }: { verified: typeof properties }) {
+function Verified({ verified }: { verified: Property[] }) {
   const { t } = useI18n();
   const points = [
     t("home.verifiedPoints.title"),

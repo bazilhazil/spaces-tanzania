@@ -2,11 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { ChevronRight, SlidersHorizontal } from "lucide-react";
+import { useEffect, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PropertyCard } from "@/components/property-card";
 import { HeroSearch } from "@/components/hero-search";
-import { properties } from "@/lib/mock-data";
+import { SkeletonCard } from "@/components/ds";
+import type { Property } from "@/lib/mock-data";
+import { fetchLiveProperties } from "@/lib/properties-db";
 import {
   Select,
   SelectContent,
@@ -51,6 +54,19 @@ function PropertiesPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const { t } = useI18n();
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    fetchLiveProperties(200).then((rows) => {
+      if (!alive) return;
+      setProperties(rows);
+      setLoading(false);
+    });
+    return () => { alive = false; };
+  }, []);
 
   const filtered = properties.filter((p) => {
     if (search.type && p.listingType !== search.type) return false;
@@ -132,7 +148,11 @@ function PropertiesPage() {
             </Select>
           </div>
 
-          {sorted.length === 0 ? (
+          {loading ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[0,1,2,3,4,5,6,7].map((i) => <SkeletonCard key={i} />)}
+            </div>
+          ) : sorted.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border p-16 text-center">
               <h3 className="font-display text-lg font-semibold text-foreground">
                 {t("properties.emptyTitle")}
