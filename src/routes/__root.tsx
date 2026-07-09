@@ -154,9 +154,12 @@ function RootComponent() {
       <I18nProvider>
         <AuthProvider>
           <ModeProvider>
-            <Outlet />
-            <LanguageWelcome />
-            <Toaster richColors position="top-right" />
+            <FavoritesProvider>
+              <Outlet />
+              <LanguageWelcome />
+              <CompareTray />
+              <Toaster richColors position="top-right" />
+            </FavoritesProvider>
           </ModeProvider>
         </AuthProvider>
       </I18nProvider>
