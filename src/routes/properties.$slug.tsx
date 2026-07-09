@@ -590,18 +590,64 @@ function Lightbox({
 }: {
   images: string[]; index: number; onIndex: (n: number) => void; onClose: () => void; title: string;
 }) {
-  const prev = () => onIndex((index - 1 + images.length) % images.length);
-  const next = () => onIndex((index + 1) % images.length);
+  const [zoom, setZoom] = useState(1);
+  const touchStart = useRef<number | null>(null);
+  const prev = () => { setZoom(1); onIndex((index - 1 + images.length) % images.length); };
+  const next = () => { setZoom(1); onIndex((index + 1) % images.length); };
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "ArrowLeft") prev();
+      else if (e.key === "ArrowRight") next();
+      else if (e.key === "Escape") onClose();
+      else if (e.key === "+" || e.key === "=") setZoom((z) => Math.min(3, z + 0.25));
+      else if (e.key === "-") setZoom((z) => Math.max(1, z - 0.25));
+    }
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = prevOverflow; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
+  function onTouchStart(e: React.TouchEvent) { touchStart.current = e.touches[0].clientX; }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStart.current == null) return;
+    const dx = e.changedTouches[0].clientX - touchStart.current;
+    if (Math.abs(dx) > 50) (dx > 0 ? prev() : next());
+    touchStart.current = null;
+  }
+
   return (
-    <div className="fixed inset-0 z-50 grid grid-rows-[auto_1fr_auto] bg-black/95 backdrop-blur" role="dialog" aria-modal="true">
-      <div className="flex items-center justify-between px-4 py-3 text-white">
-        <span className="text-sm font-medium">{index + 1} / {images.length} · {title}</span>
-        <button onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/20">
-          <X className="h-4 w-4" />
-        </button>
+    <div className="fixed inset-0 z-[60] grid grid-rows-[auto_1fr_auto] bg-black/95 backdrop-blur" role="dialog" aria-modal="true">
+      <div className="flex items-center justify-between gap-3 px-4 py-3 text-white">
+        <span className="truncate text-sm font-medium">{index + 1} / {images.length} · {title}</span>
+        <div className="flex items-center gap-1.5">
+          <button onClick={() => setZoom((z) => Math.max(1, z - 0.25))} aria-label="Zoom out" className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-40" disabled={zoom <= 1}>
+            <ZoomOut className="h-4 w-4" />
+          </button>
+          <span className="w-10 text-center text-xs tabular-nums">{Math.round(zoom * 100)}%</span>
+          <button onClick={() => setZoom((z) => Math.min(3, z + 0.25))} aria-label="Zoom in" className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-40" disabled={zoom >= 3}>
+            <ZoomIn className="h-4 w-4" />
+          </button>
+          <button onClick={onClose} aria-label="Close" className="ml-2 grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/20">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
-      <div className="relative grid place-items-center overflow-hidden px-4">
-        <img src={images[index]} alt={`${title} ${index + 1}`} className="max-h-full max-w-full object-contain" />
+      <div
+        className="relative grid place-items-center overflow-auto px-4"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        <img
+          src={images[index]}
+          alt={`${title} ${index + 1}`}
+          onDoubleClick={() => setZoom((z) => (z >= 2 ? 1 : z + 1))}
+          style={{ transform: `scale(${zoom})`, transition: "transform 200ms" }}
+          className="max-h-full max-w-full origin-center object-contain select-none"
+          draggable={false}
+        />
         <button onClick={prev} aria-label="Previous" className="absolute left-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20">
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -611,8 +657,8 @@ function Lightbox({
       </div>
       <div className="flex gap-2 overflow-x-auto p-4">
         {images.map((img, i) => (
-          <button key={i} onClick={() => onIndex(i)} className={cn("h-16 w-24 shrink-0 overflow-hidden rounded-lg ring-2 transition", i === index ? "ring-primary" : "ring-transparent opacity-70 hover:opacity-100")}>
-            <img src={img} alt="" className="h-full w-full object-cover" />
+          <button key={i} onClick={() => { setZoom(1); onIndex(i); }} className={cn("h-16 w-24 shrink-0 overflow-hidden rounded-lg ring-2 transition", i === index ? "ring-primary" : "ring-transparent opacity-70 hover:opacity-100")}>
+            <img src={img} alt="" loading="lazy" className="h-full w-full object-cover" />
           </button>
         ))}
       </div>
