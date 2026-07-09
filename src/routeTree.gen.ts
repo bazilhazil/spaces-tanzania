@@ -23,6 +23,7 @@ import { Route as PropertiesSlugRouteImport } from './routes/properties.$slug'
 import { Route as ProfileHandleRouteImport } from './routes/profile.$handle'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as AuthenticatedViewingsRouteImport } from './routes/_authenticated/viewings'
+import { Route as AuthenticatedVerificationHubRouteImport } from './routes/_authenticated/verification-hub'
 import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
 import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
 import { Route as AuthenticatedTrustRouteImport } from './routes/_authenticated/trust'
@@ -105,6 +106,12 @@ const AuthenticatedViewingsRoute = AuthenticatedViewingsRouteImport.update({
   path: '/viewings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedVerificationHubRoute =
+  AuthenticatedVerificationHubRouteImport.update({
+    id: '/verification-hub',
+    path: '/verification-hub',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedVerificationRoute =
   AuthenticatedVerificationRouteImport.update({
     id: '/verification',
@@ -187,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/trust': typeof AuthenticatedTrustRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/verification': typeof AuthenticatedVerificationRoute
+  '/verification-hub': typeof AuthenticatedVerificationHubRoute
   '/viewings': typeof AuthenticatedViewingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/profile/$handle': typeof ProfileHandleRoute
@@ -213,6 +221,7 @@ export interface FileRoutesByTo {
   '/trust': typeof AuthenticatedTrustRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/verification': typeof AuthenticatedVerificationRoute
+  '/verification-hub': typeof AuthenticatedVerificationHubRoute
   '/viewings': typeof AuthenticatedViewingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/profile/$handle': typeof ProfileHandleRoute
@@ -242,6 +251,7 @@ export interface FileRoutesById {
   '/_authenticated/trust': typeof AuthenticatedTrustRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/_authenticated/verification': typeof AuthenticatedVerificationRoute
+  '/_authenticated/verification-hub': typeof AuthenticatedVerificationHubRoute
   '/_authenticated/viewings': typeof AuthenticatedViewingsRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/profile/$handle': typeof ProfileHandleRoute
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/upload'
     | '/verification'
+    | '/verification-hub'
     | '/viewings'
     | '/welcome'
     | '/profile/$handle'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/trust'
     | '/upload'
     | '/verification'
+    | '/verification-hub'
     | '/viewings'
     | '/welcome'
     | '/profile/$handle'
@@ -325,6 +337,7 @@ export interface FileRouteTypes {
     | '/_authenticated/trust'
     | '/_authenticated/upload'
     | '/_authenticated/verification'
+    | '/_authenticated/verification-hub'
     | '/_authenticated/viewings'
     | '/_authenticated/welcome'
     | '/profile/$handle'
@@ -447,6 +460,13 @@ declare module '@tanstack/react-router' {
       path: '/viewings'
       fullPath: '/viewings'
       preLoaderRoute: typeof AuthenticatedViewingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/verification-hub': {
+      id: '/_authenticated/verification-hub'
+      path: '/verification-hub'
+      fullPath: '/verification-hub'
+      preLoaderRoute: typeof AuthenticatedVerificationHubRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/verification': {
@@ -572,6 +592,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTrustRoute: typeof AuthenticatedTrustRoute
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
   AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
+  AuthenticatedVerificationHubRoute: typeof AuthenticatedVerificationHubRoute
   AuthenticatedViewingsRoute: typeof AuthenticatedViewingsRoute
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
   AuthenticatedPropertyIdRoute: typeof AuthenticatedPropertyIdRoute
@@ -586,6 +607,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTrustRoute: AuthenticatedTrustRoute,
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
   AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
+  AuthenticatedVerificationHubRoute: AuthenticatedVerificationHubRoute,
   AuthenticatedViewingsRoute: AuthenticatedViewingsRoute,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
   AuthenticatedPropertyIdRoute: AuthenticatedPropertyIdRoute,
