@@ -527,7 +527,9 @@ function PropertyManageCard({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{p.public_id}</p>
-            <h3 className="mt-0.5 line-clamp-1 font-display text-base font-semibold text-foreground">{p.title}</h3>
+            <Link to="/properties/$slug" params={{ slug: p.id }} className="mt-0.5 block line-clamp-1 font-display text-base font-semibold text-foreground hover:text-primary transition-colors">
+              {p.title}
+            </Link>
             <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{location}</p>
           </div>
           <DropdownMenu>
