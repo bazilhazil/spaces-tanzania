@@ -62,17 +62,6 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
             <Heart className="h-4 w-4" />
           </button>
         </div>
-
-          <button
-            aria-label={t("card.save")}
-            onClick={(e) => {
-              e.preventDefault();
-            }}
-            className="grid h-9 w-9 place-items-center rounded-full bg-background/85 text-foreground/70 backdrop-blur transition hover:text-destructive"
-          >
-            <Heart className="h-4 w-4" />
-          </button>
-        </div>
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/75 via-black/20 to-transparent p-3">
           <span className="text-[11px] font-medium uppercase tracking-widest text-white/90">
             {listingLabel}
