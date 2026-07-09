@@ -598,6 +598,24 @@ function Metric({ icon: Icon, value, label }: { icon: any; value: number; label:
   );
 }
 
+function ActionBtn({
+  icon: Icon, label, onClick, destructive,
+}: { icon: any; label: string; onClick: () => void; destructive?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label}
+      className={cn(
+        "inline-flex flex-col items-center justify-center gap-0.5 rounded-lg border border-border/60 bg-background py-1.5 text-[10px] font-medium uppercase tracking-wider transition hover:bg-secondary hover:text-foreground",
+        destructive ? "text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30" : "text-muted-foreground",
+      )}
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+    </button>
+  );
+}
+
 function CardMenu({ p, onAction }: { p: ManagedProperty; onAction: (a: CardAction) => void }) {
   const isLive = p.status === "live";
   return (
