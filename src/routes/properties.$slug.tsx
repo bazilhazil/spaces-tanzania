@@ -219,9 +219,9 @@ function PropertyDetailPage() {
                   <MapPin className="h-4 w-4" /> {property.street}, {property.ward}, {property.district}, {property.city}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {property.verified && <VerificationBadge kind="verified_property" size="sm" />}
-                  {property.verified && <VerificationBadge kind="verified_owner" size="sm" />}
-                  {agent?.verified && <VerificationBadge kind="verified_agent" size="sm" />}
+                  {property.verified && <VerificationBadge kind="property" size="sm" />}
+                  {property.verified && <VerificationBadge kind="identity" size="sm" />}
+                  {agent?.verified && <VerificationBadge kind="agent" size="sm" />}
                   <QualityScorePill score={78} />
                 </div>
               </div>
