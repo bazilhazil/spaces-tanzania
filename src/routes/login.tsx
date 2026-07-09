@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Logo } from "@/components/logo";
+import { redirectPathForRole, type AppRole } from "@/hooks/use-auth";
+import { supabase as sb } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { GoogleIcon } from "@/components/auth-gate-dialog";
 import { useI18n } from "@/hooks/use-i18n";
@@ -35,12 +37,32 @@ function LoginPage() {
     e.preventDefault();
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      setLoading(false);
+      const msg = error.message.toLowerCase();
+      if (msg.includes("invalid login")) return toast.error("Incorrect email or password.");
+      if (msg.includes("email not confirmed")) return toast.error("Please confirm your email before signing in.");
+      if (msg.includes("disabled")) return toast.error("This account has been disabled. Contact support.");
+      if (msg.includes("network") || msg.includes("fetch")) return toast.error("Network error. Check your connection and try again.");
+      return toast.error(error.message);
+    }
     toast.success(t("auth.login.welcomeToast"));
+
+    // Look up role before redirecting so we land on the right surface.
+    let primary: AppRole = "buyer";
+    if (data.user) {
+      const { data: rows } = await sb.from("user_roles").select("role").eq("user_id", data.user.id);
+      const roles = ((rows ?? []) as { role: AppRole }[]).map((r) => r.role);
+      const priority: AppRole[] = ["super_admin", "admin", "agent", "owner", "customer", "buyer"];
+      primary = priority.find((r) => roles.includes(r)) ?? "buyer";
+    }
+    setLoading(false);
     const hasMode = data.user && typeof window !== "undefined"
       && !!window.localStorage.getItem(`spaces:mode:${data.user.id}`);
-    navigate({ to: hasMode ? "/dashboard" : "/welcome" });
+    const target = (primary === "buyer" || primary === "customer") && !hasMode
+      ? "/welcome"
+      : redirectPathForRole(primary);
+    navigate({ to: target, replace: true });
   }
 
   async function google() {
