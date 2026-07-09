@@ -87,6 +87,12 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
           <p className="font-display text-lg font-semibold text-primary">
             {formatPrice(property.price, property.currency, property.listingType)}
           </p>
+          <div className="mt-0.5 flex items-center justify-between gap-2">
+            <h3 className="line-clamp-1 font-display text-base font-medium text-foreground">
+              {property.title}
+            </h3>
+            {typeof qualityScore === "number" && <QualityScorePill score={qualityScore} />}
+          </div>
           <h3 className="mt-0.5 line-clamp-1 font-display text-base font-medium text-foreground">
             {property.title}
           </h3>
