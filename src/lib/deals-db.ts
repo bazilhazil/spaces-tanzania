@@ -148,7 +148,7 @@ export async function fetchDeals(): Promise<Deal[]> {
       ? supabase.from("properties").select("id,title,region,district").in("id", propIds)
       : Promise.resolve({ data: [] as any[] }),
     userIds.length
-      ? supabase.from("profiles").select("id,full_name").in("id", userIds)
+      ? supabase.from("public_profiles").select("id,full_name").in("id", userIds)
       : Promise.resolve({ data: [] as any[] }),
   ]);
 
