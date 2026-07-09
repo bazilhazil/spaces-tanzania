@@ -643,7 +643,14 @@ export type Database = {
       app_role: "buyer" | "owner" | "agent" | "admin" | "super_admin"
       listing_type: "rent" | "sale"
       media_type: "image" | "video"
-      property_status: "draft" | "live" | "archived"
+      property_status:
+        | "draft"
+        | "live"
+        | "archived"
+        | "pending"
+        | "paused"
+        | "sold"
+        | "rented"
       property_type:
         | "house"
         | "apartment"
@@ -782,7 +789,15 @@ export const Constants = {
       app_role: ["buyer", "owner", "agent", "admin", "super_admin"],
       listing_type: ["rent", "sale"],
       media_type: ["image", "video"],
-      property_status: ["draft", "live", "archived"],
+      property_status: [
+        "draft",
+        "live",
+        "archived",
+        "pending",
+        "paused",
+        "sold",
+        "rented",
+      ],
       property_type: [
         "house",
         "apartment",
