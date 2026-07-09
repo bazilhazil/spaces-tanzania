@@ -39,7 +39,7 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
   return (
     <Link
       to="/properties/$slug"
-      params={{ slug: property.slug }}
+      params={{ slug: property.id }}
       onClick={() => trackView(property.id)}
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-elevated)]",
