@@ -479,6 +479,39 @@ function PropertyDetailPage() {
       </main>
       <SiteFooter />
 
+      {/* Mobile sticky action bar */}
+      {agent && (
+        <div className="sticky bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur lg:hidden">
+          <div className="grid grid-cols-3 gap-2 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <Button
+              variant="outline"
+              className="gap-1.5"
+              onClick={() => requireAuth(() => { window.location.href = `tel:${agent.phone.replace(/\s/g, "")}`; })}
+            >
+              <Phone className="h-4 w-4" /> Call
+            </Button>
+            <a
+              href={`https://wa.me/${agent.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => { if (!user) { e.preventDefault(); setAuthGate(true); } }}
+              className="contents"
+            >
+              <Button className="w-full gap-1.5 bg-success text-success-foreground hover:bg-success/90">
+                <MessageCircle className="h-4 w-4" /> WhatsApp
+              </Button>
+            </a>
+            <Button
+              className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => requireAuth(() => setViewingOpen(true))}
+            >
+              <Calendar className="h-4 w-4" /> Viewing
+            </Button>
+          </div>
+        </div>
+      )}
+
+
       {/* Fullscreen lightbox */}
       {lightbox && (
         <Lightbox
