@@ -3,8 +3,9 @@ import {
   BadgeCheck, Bath, BedDouble, Building2, Calendar, Car, ChevronLeft, ChevronRight,
   Heart, Mail, MapPin, MessageCircle, Phone, Ruler, Share2, ShieldCheck, Sparkles,
   Star, X, Play, Calculator, Send, Timer, CheckCircle2, Maximize2, FileText,
+  Flag, ZoomIn, ZoomOut, Eye,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
