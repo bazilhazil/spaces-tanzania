@@ -74,10 +74,14 @@ function itemHref(item: Item) {
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
-  const { profile, user, signOut } = useAuth();
+  const { profile, user, signOut, primaryRole, roles } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+
+  const isSuperAdmin = roles.includes("super_admin");
+  const isAdmin = isSuperAdmin || roles.includes("admin");
+  const roleLabel = isSuperAdmin ? "Super Admin" : isAdmin ? "Admin" : primaryRole;
 
   async function handleSignOut() {
     await signOut();
@@ -87,6 +91,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   const initials = (profile?.full_name || user?.email || "SA")
     .split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
+
 
   return (
     <div className="min-h-screen bg-[color:var(--color-gray-50)] text-foreground">
@@ -121,13 +126,17 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 <AvatarFallback className="bg-primary text-primary-foreground font-semibold">{initials}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{profile?.full_name || "Administrator"}</p>
+                <p className="truncate text-sm font-semibold">{profile?.full_name || user?.email || "Administrator"}</p>
+                {user?.email && profile?.full_name && (
+                  <p className="truncate text-[11px] text-muted-foreground">{user.email}</p>
+                )}
                 <div className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-[color:var(--color-gold-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[color:var(--color-gold-800)]">
-                  <ShieldAlert className="h-3 w-3" /> Super Admin
+                  <ShieldAlert className="h-3 w-3" /> {roleLabel}
                 </div>
               </div>
             </div>
           </div>
+
 
           <div className="border-b border-border/60 p-3">
             <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
