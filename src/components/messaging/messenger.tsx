@@ -432,7 +432,7 @@ function ChatPane({
       )}
 
       {/* messages */}
-      <ScrollArea className="flex-1" viewportRef={scrollRef}>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 py-6">
           {messages.map((m, i) => (
             <MessageBubble
