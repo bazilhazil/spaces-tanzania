@@ -809,7 +809,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          agency_name: string | null
+          avatar_url: string | null
+          bio: string | null
+          business_name: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          location: string | null
+        }
+        Insert: {
+          agency_name?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          business_name?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          location?: string | null
+        }
+        Update: {
+          agency_name?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          business_name?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          location?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
