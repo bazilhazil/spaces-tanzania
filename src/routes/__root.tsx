@@ -91,29 +91,31 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SPACES — Find Your Perfect Space in Tanzania" },
+      { title: "SPACES — Discover Your Next Space" },
       {
         name: "description",
         content:
-          "SPACES is Tanzania's premium real estate marketplace. Discover verified homes, apartments, and commercial properties to rent or buy across Dar es Salaam, Zanzibar, Arusha, and beyond.",
+          "Discover verified homes, apartments, offices, and commercial spaces across Tanzania. SPACES helps you find, list, and manage properties with confidence.",
       },
       { name: "author", content: "SPACES Group Ltd" },
       { name: "theme-color", content: "#0F4C81" },
-      { property: "og:title", content: "SPACES — Find Your Perfect Space in Tanzania" },
+      { property: "og:title", content: "SPACES — Discover Your Next Space" },
       {
         property: "og:description",
         content:
-          "Tanzania's most trusted real estate marketplace. Verified listings, premium agents, seamless search.",
+          "Discover verified homes, apartments, offices, and commercial spaces across Tanzania. SPACES helps you find, list, and manage properties with confidence.",
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "SPACES" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "SPACES — Find Your Perfect Space in Tanzania" },
+      { name: "twitter:title", content: "SPACES — Discover Your Next Space" },
       {
         name: "twitter:description",
         content:
-          "Tanzania's most trusted real estate marketplace. Verified listings, premium agents.",
+          "Discover verified homes, apartments, offices, and commercial spaces across Tanzania. SPACES helps you find, list, and manage properties with confidence.",
       },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/3rnUSvcYHVdmouULFBFBxI17P882/social-images/social-1783630803247-Spaces_Logo.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/3rnUSvcYHVdmouULFBFBxI17P882/social-images/social-1783630803247-Spaces_Logo.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
