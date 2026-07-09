@@ -19,6 +19,9 @@ interface PropertyCardProps {
 
 export function PropertyCard({ property, className, qualityScore }: PropertyCardProps) {
   const { t } = useI18n();
+  const { isFavorite, toggleFavorite, isComparing, toggleCompare, trackView } = useFavorites();
+  const favorited = isFavorite(property.id);
+  const comparing = isComparing(property.id);
   const listingLabel =
     property.listingType === "sale"
       ? t("card.forSale")
@@ -37,11 +40,13 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
     <Link
       to="/properties/$slug"
       params={{ slug: property.slug }}
+      onClick={() => trackView(property.id)}
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-elevated)]",
         className,
       )}
     >
+
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img
           src={property.images[0]}
