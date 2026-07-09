@@ -1,4 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 
 export type FavoriteEntry = {
   propertyId: string;
@@ -99,6 +101,7 @@ type Ctx = FavState & {
 const FavContext = createContext<Ctx | null>(null);
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [state, setState] = useState<FavState>(() => ({
     favorites: [],
     folders: [DEFAULT_FOLDER],
@@ -107,11 +110,48 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     savedSearches: [],
   }));
   const [hydrated, setHydrated] = useState(false);
+  const dbSynced = useRef<string | null>(null);
 
   useEffect(() => {
     setState(loadState());
     setHydrated(true);
   }, []);
+
+  // Load favorites from DB when the user signs in; merge any local-only favs upward.
+  useEffect(() => {
+    if (!hydrated || !user) {
+      dbSynced.current = null;
+      return;
+    }
+    if (dbSynced.current === user.id) return;
+    dbSynced.current = user.id;
+    (async () => {
+      const { data } = await supabase
+        .from("favorites")
+        .select("property_id,created_at")
+        .eq("user_id", user.id);
+      const remote: FavoriteEntry[] = (data ?? []).map((r: any) => ({
+        propertyId: r.property_id,
+        folderId: "all",
+        savedAt: r.created_at,
+      }));
+      // Push local-only favorites the DB doesn't have yet.
+      setState((s) => {
+        const remoteIds = new Set(remote.map((r) => r.propertyId));
+        const localOnly = s.favorites.filter((f) => !remoteIds.has(f.propertyId));
+        if (localOnly.length) {
+          void supabase
+            .from("favorites")
+            .insert(localOnly.map((f) => ({ user_id: user.id, property_id: f.propertyId })));
+        }
+        const merged = [
+          ...remote,
+          ...localOnly.filter((f) => !remoteIds.has(f.propertyId)),
+        ];
+        return { ...s, favorites: merged };
+      });
+    })();
+  }, [hydrated, user]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -132,9 +172,15 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
           const exists = s.favorites.some((f) => f.propertyId === id);
           if (exists) {
             nowFav = false;
+            if (user) {
+              void supabase.from("favorites").delete().eq("user_id", user.id).eq("property_id", id);
+            }
             return { ...s, favorites: s.favorites.filter((f) => f.propertyId !== id) };
           }
           nowFav = true;
+          if (user) {
+            void supabase.from("favorites").insert({ user_id: user.id, property_id: id });
+          }
           return {
             ...s,
             favorites: [
@@ -145,8 +191,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         });
         return nowFav;
       },
-      removeFavorite: (id) =>
-        setState((s) => ({ ...s, favorites: s.favorites.filter((f) => f.propertyId !== id) })),
+      removeFavorite: (id) => {
+        if (user) {
+          void supabase.from("favorites").delete().eq("user_id", user.id).eq("property_id", id);
+        }
+        setState((s) => ({ ...s, favorites: s.favorites.filter((f) => f.propertyId !== id) }));
+      },
       moveFavorite: (id, folderId) =>
         setState((s) => ({
           ...s,
@@ -198,14 +248,20 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       clearCompare: () => setState((s) => ({ ...s, compare: [] })),
       removeFromCompare: (id) =>
         setState((s) => ({ ...s, compare: s.compare.filter((c) => c !== id) })),
-      trackView: (id) =>
+      trackView: (id) => {
+        // Fire-and-forget analytics row; RLS allows anon + authenticated inserts.
+        void supabase.from("property_views").insert({
+          property_id: id,
+          viewer_id: user?.id ?? null,
+        });
         setState((s) => {
           const filtered = s.recentlyViewed.filter((r) => r.propertyId !== id);
           return {
             ...s,
             recentlyViewed: [{ propertyId: id, viewedAt: new Date().toISOString() }, ...filtered].slice(0, MAX_RECENT),
           };
-        }),
+        });
+      },
       clearRecent: () => setState((s) => ({ ...s, recentlyViewed: [] })),
       saveSearch: (input) => {
         const s: SavedSearch = {
@@ -224,7 +280,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       deleteSavedSearch: (id) =>
         setState((s) => ({ ...s, savedSearches: s.savedSearches.filter((x) => x.id !== id) })),
     };
-  }, [state]);
+  }, [state, user]);
 
   return <FavContext.Provider value={value}>{children}</FavContext.Provider>;
 }
