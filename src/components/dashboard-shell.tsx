@@ -49,6 +49,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
     agent: [
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
       { label: t("dashboard.side.clients"), to: "/dashboard/clients", icon: Users },
+      { label: "Leads", to: "/leads", icon: Contact },
       { label: t("dashboard.side.properties"), to: "/dashboard/properties", icon: Briefcase },
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
