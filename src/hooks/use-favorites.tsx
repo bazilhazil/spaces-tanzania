@@ -248,14 +248,20 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       clearCompare: () => setState((s) => ({ ...s, compare: [] })),
       removeFromCompare: (id) =>
         setState((s) => ({ ...s, compare: s.compare.filter((c) => c !== id) })),
-      trackView: (id) =>
+      trackView: (id) => {
+        // Fire-and-forget analytics row; RLS allows anon + authenticated inserts.
+        void supabase.from("property_views").insert({
+          property_id: id,
+          viewer_id: user?.id ?? null,
+        });
         setState((s) => {
           const filtered = s.recentlyViewed.filter((r) => r.propertyId !== id);
           return {
             ...s,
             recentlyViewed: [{ propertyId: id, viewedAt: new Date().toISOString() }, ...filtered].slice(0, MAX_RECENT),
           };
-        }),
+        });
+      },
       clearRecent: () => setState((s) => ({ ...s, recentlyViewed: [] })),
       saveSearch: (input) => {
         const s: SavedSearch = {
