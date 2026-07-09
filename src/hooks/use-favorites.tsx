@@ -172,9 +172,15 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
           const exists = s.favorites.some((f) => f.propertyId === id);
           if (exists) {
             nowFav = false;
+            if (user) {
+              void supabase.from("favorites").delete().eq("user_id", user.id).eq("property_id", id);
+            }
             return { ...s, favorites: s.favorites.filter((f) => f.propertyId !== id) };
           }
           nowFav = true;
+          if (user) {
+            void supabase.from("favorites").insert({ user_id: user.id, property_id: id });
+          }
           return {
             ...s,
             favorites: [
@@ -185,8 +191,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         });
         return nowFav;
       },
-      removeFavorite: (id) =>
-        setState((s) => ({ ...s, favorites: s.favorites.filter((f) => f.propertyId !== id) })),
+      removeFavorite: (id) => {
+        if (user) {
+          void supabase.from("favorites").delete().eq("user_id", user.id).eq("property_id", id);
+        }
+        setState((s) => ({ ...s, favorites: s.favorites.filter((f) => f.propertyId !== id) }));
+      },
       moveFavorite: (id, folderId) =>
         setState((s) => ({
           ...s,
