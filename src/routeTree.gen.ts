@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrustSystemRouteImport } from './routes/trust-system'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PropertiesRouteImport } from './routes/properties'
@@ -31,6 +32,11 @@ import { Route as AuthenticatedPropertyIdRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_authenticated/dashboard.$section'
 import { Route as AuthenticatedAdminSectionRouteImport } from './routes/_authenticated/admin.$section'
 
+const TrustSystemRoute = TrustSystemRouteImport.update({
+  id: '/trust-system',
+  path: '/trust-system',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/trust-system': typeof TrustSystemRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/trust': typeof AuthenticatedTrustRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/trust-system': typeof TrustSystemRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/trust': typeof AuthenticatedTrustRoute
   '/upload': typeof AuthenticatedUploadRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/trust-system': typeof TrustSystemRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/trust': typeof AuthenticatedTrustRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/properties'
     | '/register'
     | '/sitemap.xml'
+    | '/trust-system'
     | '/admin'
     | '/dashboard'
     | '/trust'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/properties'
     | '/register'
     | '/sitemap.xml'
+    | '/trust-system'
     | '/dashboard'
     | '/trust'
     | '/upload'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/properties'
     | '/register'
     | '/sitemap.xml'
+    | '/trust-system'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/trust'
@@ -285,11 +297,19 @@ export interface RootRouteChildren {
   PropertiesRoute: typeof PropertiesRouteWithChildren
   RegisterRoute: typeof RegisterRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TrustSystemRoute: typeof TrustSystemRoute
   ProfileHandleRoute: typeof ProfileHandleRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/trust-system': {
+      id: '/trust-system'
+      path: '/trust-system'
+      fullPath: '/trust-system'
+      preLoaderRoute: typeof TrustSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -512,6 +532,7 @@ const rootRouteChildren: RootRouteChildren = {
   PropertiesRoute: PropertiesRouteWithChildren,
   RegisterRoute: RegisterRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TrustSystemRoute: TrustSystemRoute,
   ProfileHandleRoute: ProfileHandleRoute,
 }
 export const routeTree = rootRouteImport
