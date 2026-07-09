@@ -148,7 +148,11 @@ function PropertiesPage() {
             </Select>
           </div>
 
-          {sorted.length === 0 ? (
+          {loading ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[0,1,2,3,4,5,6,7].map((i) => <SkeletonCard key={i} />)}
+            </div>
+          ) : sorted.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border p-16 text-center">
               <h3 className="font-display text-lg font-semibold text-foreground">
                 {t("properties.emptyTitle")}
