@@ -101,7 +101,7 @@ export async function duplicateProperty(propertyId: string): Promise<string> {
 
   const { data: media } = await supabase
     .from("property_media")
-    .select("storage_path,mime_type,is_cover,position")
+    .select("storage_path,media_type,is_cover,position")
     .eq("property_id", propertyId)
     .order("position");
   if (media && media.length) {
