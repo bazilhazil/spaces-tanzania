@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BadgeCheck, Bath, BedDouble, Building2, Calendar, Car, ChevronLeft, ChevronRight,
   Heart, Mail, MapPin, MessageCircle, Phone, Ruler, Share2, ShieldCheck, Sparkles,
@@ -19,76 +19,50 @@ import { VerificationBadge } from "@/components/trust/verification-badge";
 import { TrustScoreRing } from "@/components/trust/trust-score-ring";
 import { QualityScorePill } from "@/components/trust/quality-score";
 import { computeTrustScore, MOCK_TRUST_SIGNALS } from "@/lib/trust-engine";
-import { formatPrice, getAgent, getProperty, properties } from "@/lib/mock-data";
+import { formatPrice, type Property, type Agent } from "@/lib/mock-data";
+import { fetchLiveProperties, fetchPropertyById, contactAgentFromRow } from "@/lib/properties-db";
 import { useAuth } from "@/hooks/use-auth";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/properties/$slug")({
-  loader: ({ params }) => {
-    const property = getProperty(params.slug);
-    if (!property) throw notFound();
-    return property;
-  },
   component: PropertyDetailPage,
-  notFoundComponent: NotFoundPanel,
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.title} — ${loaderData.ward}, ${loaderData.city} · SPACES` },
-          { name: "description", content: `${loaderData.bedrooms ? loaderData.bedrooms + "-bed " : ""}${loaderData.category.toLowerCase()} in ${loaderData.ward}, ${loaderData.city}. ${loaderData.description.slice(0, 130)}` },
-          { property: "og:title", content: `${loaderData.title} — SPACES` },
-          { property: "og:description", content: loaderData.description.slice(0, 155) },
-          { property: "og:image", content: loaderData.images[0] },
-          { property: "og:type", content: "article" },
-          { name: "twitter:card", content: "summary_large_image" },
-          { name: "twitter:image", content: loaderData.images[0] },
-        ]
-      : [],
-    links: loaderData ? [{ rel: "canonical", href: `https://spacestz.com/properties/${loaderData.slug}` }] : [],
-    scripts: loaderData ? [{
-      type: "application/ld+json",
-      children: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Residence",
-        name: loaderData.title,
-        description: loaderData.description,
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: loaderData.street,
-          addressLocality: loaderData.city,
-          addressRegion: loaderData.district,
-          addressCountry: "TZ",
-        },
-        numberOfRooms: loaderData.bedrooms,
-        floorSize: { "@type": "QuantitativeValue", value: loaderData.size, unitCode: "MTK" },
-        image: loaderData.images,
-      }),
-    }] : [],
+  head: () => ({
+    meta: [
+      { title: "Property details · SPACES" },
+      { name: "description", content: "View verified property listings across Tanzania on SPACES." },
+    ],
   }),
 });
 
-function NotFoundPanel() {
-  const { t } = useI18n();
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="font-display text-3xl">{t("properties.notFoundTitle")}</h1>
-        <Link to="/properties" className="mt-4 inline-block text-primary underline">
-          {t("properties.notFoundBack")}
-        </Link>
-      </div>
-    </div>
-  );
-}
-
 function PropertyDetailPage() {
-  const property = Route.useLoaderData();
+  const { slug } = Route.useParams();
   const { t } = useI18n();
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const agent = getAgent(property.agentId);
+  const [property, setProperty] = useState<Property | null>(null);
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [similar, setSimilar] = useState<Property[]>([]);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    (async () => {
+      const res = await fetchPropertyById(slug);
+      if (!alive) return;
+      if (res) {
+        setProperty(res.property);
+        setAgent(contactAgentFromRow(res.row));
+        const others = await fetchLiveProperties(12);
+        if (!alive) return;
+        setSimilar(others.filter((p) => p.id !== res.property.id).slice(0, 4));
+      }
+      setLoading(false);
+    })();
+    return () => { alive = false; };
+  }, [slug]);
 
   const [activeImage, setActiveImage] = useState(0);
   const [lightbox, setLightbox] = useState(false);
@@ -97,19 +71,44 @@ function PropertyDetailPage() {
   const [viewingOpen, setViewingOpen] = useState(false);
   const [authGate, setAuthGate] = useState(false);
 
+  const trust = useMemo(() => computeTrustScore(MOCK_TRUST_SIGNALS), []);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <SiteHeader />
+        <main className="container-page flex-1 py-12">
+          <div className="h-8 w-64 animate-pulse rounded bg-muted" />
+          <div className="mt-6 grid gap-3 md:grid-cols-4 md:grid-rows-2">
+            <div className="aspect-[4/3] animate-pulse rounded-2xl bg-muted md:col-span-2 md:row-span-2" />
+            {[0,1,2,3].map((i) => <div key={i} className="aspect-[4/3] animate-pulse rounded-2xl bg-muted" />)}
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  if (!property) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <h1 className="font-display text-3xl">{t("properties.notFoundTitle")}</h1>
+          <Link to="/properties" className="mt-4 inline-block text-primary underline">
+            {t("properties.notFoundBack")}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const favorited = isFavorite(property.id);
-  const similar = useMemo(
-    () => properties
-      .filter((p) => p.id !== property.id && (p.category === property.category || p.city === property.city))
-      .slice(0, 4),
-    [property.id, property.category, property.city],
-  );
-  const trust = computeTrustScore(MOCK_TRUST_SIGNALS);
-  const publicId = property.id.toUpperCase();
+  const publicId = property.id.slice(0, 8).toUpperCase();
   const listingLabel =
     property.listingType === "sale" ? t("card.forSale")
     : property.listingType === "rent" ? t("card.forRent")
     : t("card.forLease");
+
 
   function requireAuth(cb: () => void) {
     if (!user) { setAuthGate(true); return; }
