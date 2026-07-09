@@ -30,7 +30,7 @@ const searchSchema = z.object({
   sort: fallback(z.enum(["newest", "popular", "price-asc", "price-desc"]).optional(), undefined),
 });
 
-export const Route = createFileRoute("/properties")({
+export const Route = createFileRoute("/properties/")({
   validateSearch: zodValidator(searchSchema),
   component: PropertiesPage,
   head: () => ({
