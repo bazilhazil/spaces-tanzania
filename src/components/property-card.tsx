@@ -93,9 +93,6 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
             </h3>
             {typeof qualityScore === "number" && <QualityScorePill score={qualityScore} />}
           </div>
-          <h3 className="mt-0.5 line-clamp-1 font-display text-base font-medium text-foreground">
-            {property.title}
-          </h3>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="h-3 w-3" /> {property.ward}, {property.city}
           </p>
