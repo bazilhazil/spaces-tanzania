@@ -16,6 +16,7 @@ import { StatusBadge, EmptyState, SkeletonCard } from "@/components/ds";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
+import { deletePropertyWithStorage } from "@/lib/property-actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PROPERTY_TYPES } from "./constants";
@@ -180,9 +181,12 @@ export function PropertiesManager() {
     const ids = [...selected];
     if (!ids.length) return;
     if (action === "delete") {
-      if (!confirm(`Delete ${ids.length} propert${ids.length === 1 ? "y" : "ies"}? This cannot be undone.`)) return;
-      const { error } = await supabase.from("properties").delete().in("id", ids);
-      if (error) return toast.error(error.message);
+      if (!confirm(`Delete ${ids.length} propert${ids.length === 1 ? "y" : "ies"}? This also removes uploaded photos and cannot be undone.`)) return;
+      try {
+        await Promise.all(ids.map((id) => deletePropertyWithStorage(id)));
+      } catch (e: any) {
+        return toast.error(e?.message ?? "Delete failed");
+      }
       setRows((r) => r.filter((x) => !selected.has(x.id)));
       setSelected(new Set());
       toast.success(`Deleted ${ids.length} propert${ids.length === 1 ? "y" : "ies"}`);
@@ -197,11 +201,10 @@ export function PropertiesManager() {
       return;
     }
     if (action === "pause" || action === "resume") {
-      // status enum limited to draft/live/archived — treat pause as archived, resume as live
-      const next = action === "pause" ? "archived" : "live";
-      const { error } = await supabase.from("properties").update({ status: next as any }).in("id", ids);
+      const next = action === "pause" ? "paused" : "live";
+      const { error } = await supabase.from("properties").update({ status: next as never }).in("id", ids);
       if (error) return toast.error(error.message);
-      setRows((r) => r.map((x) => (selected.has(x.id) ? { ...x, status: next as any } : x)));
+      setRows((r) => r.map((x) => (selected.has(x.id) ? { ...x, status: next as never } : x)));
       setSelected(new Set());
       toast.success(`${action === "pause" ? "Paused" : "Resumed"} ${ids.length}`);
       return;
@@ -750,17 +753,20 @@ async function handleCardAction(
       break;
     case "pause":
     case "resume": {
-      const next = a === "pause" ? "archived" : "live";
-      const { error } = await supabase.from("properties").update({ status: next as any }).eq("id", p.id);
+      const next = a === "pause" ? "paused" : "live";
+      const { error } = await supabase.from("properties").update({ status: next as never }).eq("id", p.id);
       if (error) return toast.error(error.message);
-      setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: next as any } : x)));
+      setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: next as never } : x)));
       toast.success(a === "pause" ? "Paused" : "Resumed");
       break;
     }
     case "delete":
-      if (!confirm(`Delete "${p.title}"? This cannot be undone.`)) return;
-      const { error } = await supabase.from("properties").delete().eq("id", p.id);
-      if (error) return toast.error(error.message);
+      if (!confirm(`Delete "${p.title}"? Photos will be removed and this cannot be undone.`)) return;
+      try {
+        await deletePropertyWithStorage(p.id);
+      } catch (e: any) {
+        return toast.error(e?.message ?? "Delete failed");
+      }
       setRows((r) => r.filter((x) => x.id !== p.id));
       setSelected((s) => { const n = new Set(s); n.delete(p.id); return n; });
       toast.success("Property deleted");
