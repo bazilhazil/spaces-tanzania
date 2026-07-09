@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
 import { useAuth } from "@/hooks/use-auth";
 import { publicIdFrom } from "@/components/property-management/manager";
+import { deletePropertyWithStorage, fetchPropertyMetrics, type PropertyMetrics } from "@/lib/property-actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ function PropertyDetail() {
   const [cover, setCover] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("overview");
+  const [metrics, setMetrics] = useState<PropertyMetrics>({ views: 0, favorites: 0, messages: 0, bookings: 0 });
 
   useEffect(() => {
     let alive = true;
@@ -38,12 +40,17 @@ function PropertyDetail() {
       if (!alive) return;
       if (!data) { setLoading(false); return; }
       setRow(data);
-      const { data: media } = await supabase
-        .from("property_media")
-        .select("storage_path,is_cover,position")
-        .eq("property_id", id)
-        .order("position");
-      const chosen = (media ?? []).find((m: any) => m.is_cover) ?? media?.[0];
+      const [{ data: media }, m] = await Promise.all([
+        supabase
+          .from("property_media")
+          .select("storage_path,is_cover,position")
+          .eq("property_id", id)
+          .order("position"),
+        fetchPropertyMetrics(id),
+      ]);
+      if (!alive) return;
+      setMetrics(m);
+      const chosen = (media ?? []).find((mm: any) => mm.is_cover) ?? media?.[0];
       if (chosen) setCover((await signedUrl(chosen.storage_path)) ?? undefined);
       setLoading(false);
     })();
@@ -84,16 +91,19 @@ function PropertyDetail() {
   const isOwner = user?.id === row.owner_id;
   const quality = computeQuality(row, !!cover);
 
-  async function updateStatus(next: "live" | "archived" | "draft") {
-    const { error } = await supabase.from("properties").update({ status: next }).eq("id", id);
+  async function updateStatus(next: "live" | "paused" | "draft" | "sold" | "rented" | "archived") {
+    const { error } = await supabase.from("properties").update({ status: next as never }).eq("id", id);
     if (error) return toast.error(error.message);
     setRow({ ...row, status: next });
     toast.success("Status updated");
   }
   async function del() {
-    if (!confirm("Delete this property? This cannot be undone.")) return;
-    const { error } = await supabase.from("properties").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (!confirm("Delete this property? Photos will be removed and this cannot be undone.")) return;
+    try {
+      await deletePropertyWithStorage(id);
+    } catch (e: any) {
+      return toast.error(e?.message ?? "Delete failed");
+    }
     toast.success("Deleted");
     navigate({ to: "/dashboard/$section", params: { section: "properties" } });
   }
@@ -160,9 +170,15 @@ function PropertyDetail() {
                   <Button asChild variant="outline" size="sm" className="rounded-lg"><a href={url} target="_blank" rel="noreferrer"><Eye className="mr-1 h-3.5 w-3.5" /> View public</a></Button>
                   <Button asChild variant="outline" size="sm" className="rounded-lg"><a href={`/upload?id=${row.id}`}><Edit3 className="mr-1 h-3.5 w-3.5" /> Edit</a></Button>
                   {row.status === "live" ? (
-                    <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("archived")}><Pause className="mr-1 h-3.5 w-3.5" /> Pause</Button>
+                    <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("paused")}><Pause className="mr-1 h-3.5 w-3.5" /> Pause</Button>
                   ) : (
-                    <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("live")}><Play className="mr-1 h-3.5 w-3.5" /> Resume</Button>
+                    <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("live")}><Play className="mr-1 h-3.5 w-3.5" /> {row.status === "draft" ? "Publish" : "Resume"}</Button>
+                  )}
+                  {row.listing_type === "sale" && row.status !== "sold" && (
+                    <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("sold")}><CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Mark sold</Button>
+                  )}
+                  {row.listing_type === "rent" && row.status !== "rented" && (
+                    <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("rented")}><CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Mark rented</Button>
                   )}
                   <Button variant="outline" size="sm" className="rounded-lg" onClick={() => { navigator.clipboard.writeText(url); toast.success("Link copied"); }}><Link2 className="mr-1 h-3.5 w-3.5" /> Copy link</Button>
                   <Button variant="outline" size="sm" className="rounded-lg" onClick={async () => { if ((navigator as any).share) try { await (navigator as any).share({ title: row.title, url }); } catch {} else { navigator.clipboard.writeText(url); toast.success("Link copied"); } }}><Share2 className="mr-1 h-3.5 w-3.5" /> Share</Button>
@@ -177,10 +193,10 @@ function PropertyDetail() {
 
         {/* Metrics */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard icon={Eye} label="Total views" value={row.view_count?.toLocaleString() ?? "0"}  />
-          <StatCard icon={Heart} label="Saves" value={12}  />
-          <StatCard icon={MessageSquare} label="Messages" value={4}  />
-          <StatCard icon={Calendar} label="Viewings" value={2}  />
+          <StatCard icon={Eye} label="Total views" value={metrics.views.toLocaleString()} />
+          <StatCard icon={Heart} label="Saves" value={metrics.favorites.toLocaleString()} />
+          <StatCard icon={MessageSquare} label="Messages" value={metrics.messages.toLocaleString()} />
+          <StatCard icon={Calendar} label="Viewings" value={metrics.bookings.toLocaleString()} />
         </div>
 
         {/* Tabs */}
@@ -378,7 +394,7 @@ function statusKind(s: string): any {
   return "draft";
 }
 function statusLabel(s: string) {
-  return ({ live: "Live", draft: "Draft", archived: "Paused", pending: "Pending Review", sold: "Sold", rented: "Rented" } as Record<string, string>)[s] ?? s;
+  return ({ live: "Live", draft: "Draft", archived: "Archived", pending: "Pending Review", paused: "Paused", sold: "Sold", rented: "Rented" } as Record<string, string>)[s] ?? s;
 }
 
 function computeQuality(row: any, hasCover: boolean) {
