@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
-  Heart, Search, User as UserIcon, Users, Briefcase,
+  Heart, Search, User as UserIcon, Users, Briefcase, GitCompare, Clock,
   Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,8 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.savedSearches"), to: "/dashboard/searches", icon: Search },
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
+      { label: "Compare", to: "/compare", icon: GitCompare },
+      { label: "Recently Viewed", to: "/dashboard/recent", icon: Clock },
       { label: t("nav.profile"), to: "/dashboard/settings", icon: UserIcon },
     ],
     agent: [

@@ -16,7 +16,9 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ModeProvider } from "@/hooks/use-mode";
 import { I18nProvider } from "@/hooks/use-i18n";
+import { FavoritesProvider } from "@/hooks/use-favorites";
 import { LanguageWelcome } from "@/components/language-welcome";
+import { CompareTray } from "@/components/favorites/compare-tray";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -152,9 +154,12 @@ function RootComponent() {
       <I18nProvider>
         <AuthProvider>
           <ModeProvider>
-            <Outlet />
-            <LanguageWelcome />
-            <Toaster richColors position="top-right" />
+            <FavoritesProvider>
+              <Outlet />
+              <LanguageWelcome />
+              <CompareTray />
+              <Toaster richColors position="top-right" />
+            </FavoritesProvider>
           </ModeProvider>
         </AuthProvider>
       </I18nProvider>

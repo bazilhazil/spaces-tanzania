@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { Bath, BedDouble, Car, Eye, Heart, MapPin, Ruler } from "lucide-react";
+import { Bath, BedDouble, Car, Eye, GitCompare, Heart, MapPin, Ruler } from "lucide-react";
+import { toast } from "sonner";
 import { formatPrice, type Property } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
+import { useFavorites } from "@/hooks/use-favorites";
 import { ListingBadgeStrip } from "@/components/trust/listing-badge";
 import { QualityScorePill } from "@/components/trust/quality-score";
 import type { ListingBadgeKind } from "@/lib/trust-engine";
@@ -14,8 +16,12 @@ interface PropertyCardProps {
 }
 
 
+
 export function PropertyCard({ property, className, qualityScore }: PropertyCardProps) {
   const { t } = useI18n();
+  const { isFavorite, toggleFavorite, isComparing, toggleCompare, trackView } = useFavorites();
+  const favorited = isFavorite(property.id);
+  const comparing = isComparing(property.id);
   const listingLabel =
     property.listingType === "sale"
       ? t("card.forSale")
@@ -34,11 +40,13 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
     <Link
       to="/properties/$slug"
       params={{ slug: property.slug }}
+      onClick={() => trackView(property.id)}
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-elevated)]",
         className,
       )}
     >
+
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img
           src={property.images[0]}
@@ -52,16 +60,39 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
           {badges.length > 0 ? (
             <ListingBadgeStrip kinds={badges} size="xs" max={3} />
           ) : <span />}
-          <button
-            aria-label={t("card.save")}
-            onClick={(e) => {
-              e.preventDefault();
-            }}
-            className="grid h-9 w-9 place-items-center rounded-full bg-background/85 text-foreground/70 backdrop-blur transition hover:text-destructive"
-          >
-            <Heart className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              aria-label={comparing ? "Remove from compare" : "Add to compare"}
+              onClick={(e) => {
+                e.preventDefault();
+                const r = toggleCompare(property.id);
+                if (!r.ok) toast.error(r.reason);
+                else toast.success(comparing ? "Removed from compare" : "Added to compare");
+              }}
+              className={cn(
+                "grid h-9 w-9 place-items-center rounded-full bg-background/85 backdrop-blur transition",
+                comparing ? "text-primary" : "text-foreground/70 hover:text-primary",
+              )}
+            >
+              <GitCompare className="h-4 w-4" />
+            </button>
+            <button
+              aria-label={favorited ? "Remove favorite" : t("card.save")}
+              onClick={(e) => {
+                e.preventDefault();
+                const now = toggleFavorite(property.id);
+                toast.success(now ? "Saved to favorites" : "Removed from favorites");
+              }}
+              className={cn(
+                "grid h-9 w-9 place-items-center rounded-full bg-background/85 backdrop-blur transition",
+                favorited ? "text-destructive" : "text-foreground/70 hover:text-destructive",
+              )}
+            >
+              <Heart className={cn("h-4 w-4", favorited && "fill-current")} />
+            </button>
+          </div>
         </div>
+
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/75 via-black/20 to-transparent p-3">
           <span className="text-[11px] font-medium uppercase tracking-widest text-white/90">
             {listingLabel}

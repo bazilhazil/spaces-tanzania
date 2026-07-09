@@ -36,8 +36,9 @@ const META: Record<string, { title: string; desc: string }> = {
   settings:     { title: "Settings",        desc: "Preferences, language and privacy." },
   mode:         { title: "My Mode",          desc: "Switch between Buyer, Owner and Agent anytime." },
   language:     { title: "Language",        desc: "Choose your preferred language." },
-  favorites:    { title: "Favorites",       desc: "Homes you loved." },
+  favorites:    { title: "Favorites",       desc: "Homes you loved, organised in folders." },
   searches:     { title: "Saved Searches",  desc: "Get alerts when matching homes appear." },
+  recent:       { title: "Recently Viewed",  desc: "Pick up browsing where you left off." },
   clients:      { title: "Clients",         desc: "Your client roster." },
   users:        { title: "Users",           desc: "Manage all users." },
   verification: { title: "Verification",    desc: "Pending property verifications." },
@@ -71,6 +72,9 @@ function SectionPage() {
          section === "settings"     ? <SettingsIndex /> :
          section === "language"     ? <LanguagePanel /> :
          section === "mode"         ? <ModePanel /> :
+         section === "favorites"    ? <FavoritesPanel /> :
+         section === "searches"     ? <SavedSearchesPanel /> :
+         section === "recent"       ? <RecentlyViewedPanel /> :
          <EmptyPanel />}
       </div>
     </DashboardShell>
@@ -80,6 +84,9 @@ function SectionPage() {
 /* ============================ MY PROPERTIES ============================ */
 
 import { PropertiesManager } from "@/components/property-management/manager";
+import { FavoritesPanel } from "@/components/favorites/favorites-panel";
+import { SavedSearchesPanel } from "@/components/favorites/saved-searches-panel";
+import { RecentlyViewedPanel } from "@/components/favorites/recently-viewed-panel";
 
 function PropertiesPanel() {
   return <PropertiesManager />;
