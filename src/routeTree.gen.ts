@@ -12,13 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrustSystemRouteImport } from './routes/trust-system'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegisterRouteImport } from './routes/register'
-import { Route as PropertiesRouteImport } from './routes/properties'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DesignSystemRouteImport } from './routes/design-system'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesSlugRouteImport } from './routes/properties.$slug'
 import { Route as ProfileHandleRouteImport } from './routes/profile.$handle'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
@@ -54,11 +54,6 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PropertiesRoute = PropertiesRouteImport.update({
-  id: '/properties',
-  path: '/properties',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -88,10 +83,15 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PropertiesIndexRoute = PropertiesIndexRouteImport.update({
+  id: '/properties/',
+  path: '/properties/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PropertiesSlugRoute = PropertiesSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => PropertiesRoute,
+  id: '/properties/$slug',
+  path: '/properties/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileHandleRoute = ProfileHandleRouteImport.update({
   id: '/profile/$handle',
@@ -194,7 +194,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/design-system': typeof DesignSystemRoute
   '/login': typeof LoginRoute
-  '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trust-system': typeof TrustSystemRoute
@@ -213,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/profile/$handle': typeof ProfileHandleRoute
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/properties/': typeof PropertiesIndexRoute
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
@@ -224,7 +224,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/design-system': typeof DesignSystemRoute
   '/login': typeof LoginRoute
-  '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trust-system': typeof TrustSystemRoute
@@ -242,6 +241,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/profile/$handle': typeof ProfileHandleRoute
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/properties': typeof PropertiesIndexRoute
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
@@ -255,7 +255,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/design-system': typeof DesignSystemRoute
   '/login': typeof LoginRoute
-  '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trust-system': typeof TrustSystemRoute
@@ -274,6 +273,7 @@ export interface FileRoutesById {
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/profile/$handle': typeof ProfileHandleRoute
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/properties/': typeof PropertiesIndexRoute
   '/_authenticated/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/_authenticated/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
@@ -287,7 +287,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design-system'
     | '/login'
-    | '/properties'
     | '/register'
     | '/sitemap.xml'
     | '/trust-system'
@@ -306,6 +305,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/profile/$handle'
     | '/properties/$slug'
+    | '/properties/'
     | '/admin/$section'
     | '/dashboard/$section'
     | '/property/$id'
@@ -317,7 +317,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design-system'
     | '/login'
-    | '/properties'
     | '/register'
     | '/sitemap.xml'
     | '/trust-system'
@@ -335,6 +334,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/profile/$handle'
     | '/properties/$slug'
+    | '/properties'
     | '/admin/$section'
     | '/dashboard/$section'
     | '/property/$id'
@@ -347,7 +347,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design-system'
     | '/login'
-    | '/properties'
     | '/register'
     | '/sitemap.xml'
     | '/trust-system'
@@ -366,6 +365,7 @@ export interface FileRouteTypes {
     | '/_authenticated/welcome'
     | '/profile/$handle'
     | '/properties/$slug'
+    | '/properties/'
     | '/_authenticated/admin/$section'
     | '/_authenticated/dashboard/$section'
     | '/_authenticated/property/$id'
@@ -379,11 +379,12 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DesignSystemRoute: typeof DesignSystemRoute
   LoginRoute: typeof LoginRoute
-  PropertiesRoute: typeof PropertiesRouteWithChildren
   RegisterRoute: typeof RegisterRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrustSystemRoute: typeof TrustSystemRoute
   ProfileHandleRoute: typeof ProfileHandleRoute
+  PropertiesSlugRoute: typeof PropertiesSlugRoute
+  PropertiesIndexRoute: typeof PropertiesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -407,13 +408,6 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/properties': {
-      id: '/properties'
-      path: '/properties'
-      fullPath: '/properties'
-      preLoaderRoute: typeof PropertiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -458,12 +452,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/properties/': {
+      id: '/properties/'
+      path: '/properties'
+      fullPath: '/properties/'
+      preLoaderRoute: typeof PropertiesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/properties/$slug': {
       id: '/properties/$slug'
-      path: '/$slug'
+      path: '/properties/$slug'
       fullPath: '/properties/$slug'
       preLoaderRoute: typeof PropertiesSlugRouteImport
-      parentRoute: typeof PropertiesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/profile/$handle': {
       id: '/profile/$handle'
@@ -658,18 +659,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface PropertiesRouteChildren {
-  PropertiesSlugRoute: typeof PropertiesSlugRoute
-}
-
-const PropertiesRouteChildren: PropertiesRouteChildren = {
-  PropertiesSlugRoute: PropertiesSlugRoute,
-}
-
-const PropertiesRouteWithChildren = PropertiesRoute._addFileChildren(
-  PropertiesRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -677,11 +666,12 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DesignSystemRoute: DesignSystemRoute,
   LoginRoute: LoginRoute,
-  PropertiesRoute: PropertiesRouteWithChildren,
   RegisterRoute: RegisterRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrustSystemRoute: TrustSystemRoute,
   ProfileHandleRoute: ProfileHandleRoute,
+  PropertiesSlugRoute: PropertiesSlugRoute,
+  PropertiesIndexRoute: PropertiesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
