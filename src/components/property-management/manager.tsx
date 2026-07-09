@@ -4,19 +4,24 @@ import {
   Search, SlidersHorizontal, Plus, Grid3x3, Rows3, ChevronDown, X,
   Eye, Heart, MessageSquare, Calendar, Star, Sparkles, ShieldCheck,
   Edit3, Copy, Pause, Play, Trash2, BarChart3, Share2, Link2, Crown, MoreHorizontal,
-  Home, CheckCircle2,
+  Home, CheckCircle2, CircleDot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
+  DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { StatusBadge, EmptyState, SkeletonCard } from "@/components/ds";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
-import { deletePropertyWithStorage } from "@/lib/property-actions";
+import { deletePropertyWithStorage, duplicateProperty, fetchPropertyMetricsBatch } from "@/lib/property-actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PROPERTY_TYPES } from "./constants";
