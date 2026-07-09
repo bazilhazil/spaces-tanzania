@@ -188,19 +188,24 @@ export function PropertiesManager() {
     });
   }
 
+  async function performDelete(ids: string[]) {
+    if (!ids.length) return;
+    try {
+      await Promise.all(ids.map((id) => deletePropertyWithStorage(id)));
+    } catch (e: any) {
+      return toast.error(e?.message ?? "Delete failed");
+    }
+    const set = new Set(ids);
+    setRows((r) => r.filter((x) => !set.has(x.id)));
+    setSelected((s) => { const n = new Set(s); ids.forEach((i) => n.delete(i)); return n; });
+    toast.success(`Deleted ${ids.length} propert${ids.length === 1 ? "y" : "ies"}`);
+  }
+
   async function bulk(action: "delete" | "pause" | "resume" | "archive" | "promote") {
     const ids = [...selected];
     if (!ids.length) return;
     if (action === "delete") {
-      if (!confirm(`Delete ${ids.length} propert${ids.length === 1 ? "y" : "ies"}? This also removes uploaded photos and cannot be undone.`)) return;
-      try {
-        await Promise.all(ids.map((id) => deletePropertyWithStorage(id)));
-      } catch (e: any) {
-        return toast.error(e?.message ?? "Delete failed");
-      }
-      setRows((r) => r.filter((x) => !selected.has(x.id)));
-      setSelected(new Set());
-      toast.success(`Deleted ${ids.length} propert${ids.length === 1 ? "y" : "ies"}`);
+      setConfirmDelete({ ids, label: `${ids.length} propert${ids.length === 1 ? "y" : "ies"}` });
       return;
     }
     if (action === "archive") {
@@ -223,6 +228,35 @@ export function PropertiesManager() {
     if (action === "promote") {
       toast.info("Promotion checkout coming soon");
     }
+  }
+
+  async function onCardAction(a: CardAction, p: ManagedProperty) {
+    if (a === "delete") {
+      setConfirmDelete({ ids: [p.id], label: `"${p.title}"` });
+      return;
+    }
+    if (a === "duplicate") {
+      const tid = toast.loading("Duplicating listing…");
+      try {
+        const newId = await duplicateProperty(p.id);
+        toast.dismiss(tid);
+        toast.success("Duplicated as draft");
+        window.location.href = `/upload?id=${newId}`;
+      } catch (e: any) {
+        toast.dismiss(tid);
+        toast.error(e?.message ?? "Could not duplicate");
+      }
+      return;
+    }
+    if (a.startsWith("status:")) {
+      const next = a.split(":")[1] as ManagedProperty["status"];
+      const { error } = await supabase.from("properties").update({ status: next as never }).eq("id", p.id);
+      if (error) return toast.error(error.message);
+      setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: next } : x)));
+      toast.success(`Status changed to ${statusLabel(next)}`);
+      return;
+    }
+    await handleCardAction(a, p, rows, setRows, setSelected);
   }
 
   const hasFilters =
