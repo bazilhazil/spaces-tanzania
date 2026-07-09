@@ -101,6 +101,7 @@ type Ctx = FavState & {
 const FavContext = createContext<Ctx | null>(null);
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [state, setState] = useState<FavState>(() => ({
     favorites: [],
     folders: [DEFAULT_FOLDER],
@@ -109,11 +110,48 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     savedSearches: [],
   }));
   const [hydrated, setHydrated] = useState(false);
+  const dbSynced = useRef<string | null>(null);
 
   useEffect(() => {
     setState(loadState());
     setHydrated(true);
   }, []);
+
+  // Load favorites from DB when the user signs in; merge any local-only favs upward.
+  useEffect(() => {
+    if (!hydrated || !user) {
+      dbSynced.current = null;
+      return;
+    }
+    if (dbSynced.current === user.id) return;
+    dbSynced.current = user.id;
+    (async () => {
+      const { data } = await supabase
+        .from("favorites")
+        .select("property_id,created_at")
+        .eq("user_id", user.id);
+      const remote: FavoriteEntry[] = (data ?? []).map((r: any) => ({
+        propertyId: r.property_id,
+        folderId: "all",
+        savedAt: r.created_at,
+      }));
+      // Push local-only favorites the DB doesn't have yet.
+      setState((s) => {
+        const remoteIds = new Set(remote.map((r) => r.propertyId));
+        const localOnly = s.favorites.filter((f) => !remoteIds.has(f.propertyId));
+        if (localOnly.length) {
+          void supabase
+            .from("favorites")
+            .insert(localOnly.map((f) => ({ user_id: user.id, property_id: f.propertyId })));
+        }
+        const merged = [
+          ...remote,
+          ...localOnly.filter((f) => !remoteIds.has(f.propertyId)),
+        ];
+        return { ...s, favorites: merged };
+      });
+    })();
+  }, [hydrated, user]);
 
   useEffect(() => {
     if (!hydrated) return;
