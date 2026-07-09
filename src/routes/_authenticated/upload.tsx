@@ -255,56 +255,79 @@ function UploadWizardPage() {
 
   async function submit(mode: "publish" | "draft") {
     if (!user) return toast.error("Please sign in");
-    if (mode === "publish" && !media.some((m) => m.kind === "image")) return toast.error("Add at least one photo");
+    const hasImages = media.some((m) => m.kind === "image") || existingPhotoCount > 0;
+    if (mode === "publish" && !hasImages) return toast.error("Add at least one photo");
     setSubmitting(true);
     try {
       const title = (draft.title?.trim() || autoTitle);
-      const { data: prop, error: pErr } = await supabase
-        .from("properties")
-        .insert({
-          owner_id: user.id,
-          property_type: draft.property_type as any,
-          listing_type: (draft.listing_type ?? "rent") as any,
-          title,
-          description: draft.description ?? null,
-          price: draft.price ?? 0,
-          currency: draft.currency ?? "TZS",
-          negotiable: !!draft.negotiable,
-          bedrooms: draft.bedrooms ?? null,
-          bathrooms: draft.bathrooms ?? null,
-          parking: draft.parking ?? null,
-          area_sqm: draft.area_sqm ?? null,
-          floor: draft.floor ?? null,
-          year_built: draft.year_built ?? null,
-          region: draft.region ?? null,
-          district: draft.district ?? null,
-          ward: draft.ward ?? null,
-          street: draft.street ?? null,
-          address: draft.address ?? null,
-          landmark: draft.landmark ?? null,
-          latitude: draft.latitude ?? null,
-          longitude: draft.longitude ?? null,
-          amenities: draft.amenities ?? [],
-          contact_name: draft.contact_name ?? null,
-          contact_phone: draft.contact_phone ?? null,
-          contact_whatsapp: draft.contact_whatsapp ?? null,
-          preferred_contact: draft.preferred_contact ?? null,
-          status: mode === "publish" ? "live" : "draft",
-        } as any)
-        .select("id")
-        .single();
-      if (pErr) throw pErr;
-      const propertyId = prop.id as string;
+      const payload = {
+        property_type: draft.property_type as any,
+        listing_type: (draft.listing_type ?? "rent") as any,
+        title,
+        description: draft.description ?? null,
+        price: draft.price ?? 0,
+        currency: draft.currency ?? "TZS",
+        negotiable: !!draft.negotiable,
+        bedrooms: draft.bedrooms ?? null,
+        bathrooms: draft.bathrooms ?? null,
+        parking: draft.parking ?? null,
+        area_sqm: draft.area_sqm ?? null,
+        floor: draft.floor ?? null,
+        year_built: draft.year_built ?? null,
+        region: draft.region ?? null,
+        district: draft.district ?? null,
+        ward: draft.ward ?? null,
+        street: draft.street ?? null,
+        address: draft.address ?? null,
+        landmark: draft.landmark ?? null,
+        latitude: draft.latitude ?? null,
+        longitude: draft.longitude ?? null,
+        amenities: draft.amenities ?? [],
+        contact_name: draft.contact_name ?? null,
+        contact_phone: draft.contact_phone ?? null,
+        contact_whatsapp: draft.contact_whatsapp ?? null,
+        preferred_contact: draft.preferred_contact ?? null,
+      };
+
+      let propertyId: string;
+      if (isEdit && editId) {
+        const updatePayload: any = { ...payload, updated_at: new Date().toISOString() };
+        if (mode === "publish") updatePayload.status = "live";
+        const { data: upd, error: uErr } = await supabase
+          .from("properties")
+          .update(updatePayload)
+          .eq("id", editId)
+          .eq("owner_id", user.id)
+          .select("id")
+          .single();
+        if (uErr) throw uErr;
+        if (!upd) throw new Error("Update failed — you may not own this property");
+        propertyId = upd.id as string;
+      } else {
+        const { data: prop, error: pErr } = await supabase
+          .from("properties")
+          .insert({
+            ...payload,
+            owner_id: user.id,
+            status: mode === "publish" ? "live" : "draft",
+          } as any)
+          .select("id")
+          .single();
+        if (pErr) throw pErr;
+        propertyId = prop.id as string;
+      }
 
       const wantWatermark = !!draft.watermark;
       const images = media.filter((m) => m.kind === "image");
       const video = media.find((m) => m.kind === "video");
 
-      // Photos — position by cover-first, then original order
+      // Photos — position by cover-first, then original order.
+      // In edit mode, append after existing photos and never override the cover.
       const ordered = [
         ...images.filter((m) => m.isCover),
         ...images.filter((m) => !m.isCover),
       ];
+      const positionOffset = isEdit ? existingPhotoCount : 0;
       for (let i = 0; i < ordered.length; i++) {
         const m = ordered[i];
         const base = wantWatermark ? await watermarkImage(m.file, "SPACES") : m.file;
@@ -314,19 +337,18 @@ function UploadWizardPage() {
           property_id: propertyId,
           storage_path: path,
           media_type: "image",
-          position: i,
-          is_cover: m.isCover,
+          position: positionOffset + i,
+          is_cover: isEdit ? false : m.isCover,
         });
       }
 
-      // Video (+ thumbnail as an extra image, if we can build one)
       if (video) {
         const { path } = await uploadMediaFile(user.id, propertyId, video.file);
         await supabase.from("property_media").insert({
           property_id: propertyId,
           storage_path: path,
           media_type: "video",
-          position: ordered.length,
+          position: positionOffset + ordered.length,
           is_cover: false,
         });
         try {
@@ -337,15 +359,20 @@ function UploadWizardPage() {
             property_id: propertyId,
             storage_path: thumbPath,
             media_type: "image",
-            position: ordered.length + 1,
+            position: positionOffset + ordered.length + 1,
             is_cover: false,
           });
         } catch { /* thumbnail is best-effort */ }
       }
 
-      clearDraft();
+      if (!isEdit) clearDraft();
       dirtyRef.current = false;
-      setSuccess({ status: mode === "publish" ? "live" : "draft", id: propertyId });
+      if (isEdit) {
+        toast.success("Property updated");
+        navigate({ to: "/dashboard/$section", params: { section: "properties" } });
+      } else {
+        setSuccess({ status: mode === "publish" ? "live" : "draft", id: propertyId });
+      }
     } catch (e: any) {
       console.error(e);
       toast.error(e.message ?? "Something went wrong");
@@ -353,6 +380,17 @@ function UploadWizardPage() {
       setSubmitting(false);
     }
   }
+
+  if (loadingEdit) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background">
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" /> Loading property…
+        </div>
+      </div>
+    );
+  }
+
 
   if (success) return <SuccessScreen status={success.status} />;
 
