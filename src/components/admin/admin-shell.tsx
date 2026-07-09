@@ -74,10 +74,14 @@ function itemHref(item: Item) {
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
-  const { profile, user, signOut } = useAuth();
+  const { profile, user, signOut, primaryRole, roles } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+
+  const isSuperAdmin = roles.includes("super_admin");
+  const isAdmin = isSuperAdmin || roles.includes("admin");
+  const roleLabel = isSuperAdmin ? "Super Admin" : isAdmin ? "Admin" : primaryRole;
 
   async function handleSignOut() {
     await signOut();
@@ -87,6 +91,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   const initials = (profile?.full_name || user?.email || "SA")
     .split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
+
 
   return (
     <div className="min-h-screen bg-[color:var(--color-gray-50)] text-foreground">
