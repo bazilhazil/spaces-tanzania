@@ -552,8 +552,20 @@ function PropertyManageCard({
           </span>
         </div>
 
+        {/* Owner actions — always visible on desktop, ⋯ menu covers mobile */}
+        <div className="hidden sm:grid grid-cols-4 gap-1.5 border-t border-border/50 pt-3">
+          <ActionBtn icon={Eye} label="View" onClick={() => onAction("view")} />
+          <ActionBtn icon={Edit3} label="Edit" onClick={() => onAction("edit")} />
+          {p.status === "paused" || p.status === "draft" ? (
+            <ActionBtn icon={Play} label="Resume" onClick={() => onAction("resume")} />
+          ) : (
+            <ActionBtn icon={Pause} label="Pause" onClick={() => onAction("pause")} />
+          )}
+          <ActionBtn icon={Trash2} label="Delete" onClick={() => onAction("delete")} destructive />
+        </div>
+
         {/* Metrics */}
-        <div className="grid grid-cols-4 gap-1 border-t border-border/50 pt-3">
+        <div className="grid grid-cols-4 gap-1 border-t border-border/50 pt-3 sm:border-t-0 sm:pt-0">
           <Metric icon={Eye} value={p.view_count} label="Views" />
           <Metric icon={Heart} value={p.favorites ?? 0} label="Saves" />
           <Metric icon={MessageSquare} value={p.messages ?? 0} label="Msgs" />
@@ -583,6 +595,24 @@ function Metric({ icon: Icon, value, label }: { icon: any; value: number; label:
       </span>
       <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</span>
     </div>
+  );
+}
+
+function ActionBtn({
+  icon: Icon, label, onClick, destructive,
+}: { icon: any; label: string; onClick: () => void; destructive?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label}
+      className={cn(
+        "inline-flex flex-col items-center justify-center gap-0.5 rounded-lg border border-border/60 bg-background py-1.5 text-[10px] font-medium uppercase tracking-wider transition hover:bg-secondary hover:text-foreground",
+        destructive ? "text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30" : "text-muted-foreground",
+      )}
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+    </button>
   );
 }
 
