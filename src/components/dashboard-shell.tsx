@@ -25,6 +25,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: "My Properties", to: "/dashboard/properties", icon: Home },
       { label: "Upload Property", to: "/upload", icon: Upload },
       { label: "Leads", to: "/leads", icon: Contact },
+      { label: "Deals", to: "/deals", icon: Handshake },
       { label: "Viewings", to: "/viewings", icon: Calendar },
       { label: "Messages", to: "/messages", icon: MessageSquare },
       { label: "Saved Drafts", to: "/dashboard/drafts", icon: FileEdit },
