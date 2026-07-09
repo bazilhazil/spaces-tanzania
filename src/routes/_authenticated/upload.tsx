@@ -29,6 +29,7 @@ import {
 
 export const Route = createFileRoute("/_authenticated/upload")({
   component: UploadWizardPage,
+  validateSearch: (s: Record<string, unknown>) => ({ id: typeof s.id === "string" ? s.id : undefined }),
   head: () => ({ meta: [{ title: "Publish your property — SPACES" }] }),
 });
 
@@ -66,11 +67,15 @@ const TOTAL = 8;
 function UploadWizardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { id: editId } = Route.useSearch();
+  const isEdit = !!editId;
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<WizardDraft>({
     step: 1, currency: "TZS", listing_type: "rent", amenities: [], preferred_contact: "both",
   });
   const [media, setMedia] = useState<MediaItem[]>([]);
+  const [existingPhotoCount, setExistingPhotoCount] = useState(0);
+  const [loadingEdit, setLoadingEdit] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
   const [savedTick, setSavedTick] = useState<number>(0);
   const [success, setSuccess] = useState<{ status: "live" | "draft"; id?: string } | null>(null);
@@ -94,17 +99,83 @@ function UploadWizardPage() {
     });
   }, [user]);
 
-  // Load draft
+  // Load draft (skipped when editing an existing property)
   useEffect(() => {
+    if (isEdit) return;
     const d = loadDraft();
     if (d) {
       setDraft((p) => ({ ...p, ...d }));
       setStep(Math.min(d.step || 1, TOTAL));
     }
-  }, []);
+  }, [isEdit]);
 
-  // Auto-save every 5s
+  // Load existing property for edit mode
   useEffect(() => {
+    if (!isEdit || !editId || !user) return;
+    let alive = true;
+    (async () => {
+      const { data: row, error } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("id", editId)
+        .maybeSingle();
+      if (!alive) return;
+      if (error || !row) {
+        toast.error("Property not found");
+        navigate({ to: "/dashboard/$section", params: { section: "properties" } });
+        return;
+      }
+      if (row.owner_id !== user.id) {
+        toast.error("You don't have permission to edit this property");
+        navigate({ to: "/dashboard/$section", params: { section: "properties" } });
+        return;
+      }
+      setDraft({
+        step: 2,
+        property_type: row.property_type ?? undefined,
+        listing_type: (row.listing_type ?? "rent") as "rent" | "sale",
+        title: row.title ?? undefined,
+        description: row.description ?? undefined,
+        price: row.price ?? undefined,
+        currency: row.currency ?? "TZS",
+        negotiable: !!row.negotiable,
+        bedrooms: row.bedrooms ?? undefined,
+        bathrooms: row.bathrooms ?? undefined,
+        parking: row.parking ?? undefined,
+        area_sqm: row.area_sqm ?? undefined,
+        floor: row.floor ?? undefined,
+        year_built: row.year_built ?? undefined,
+        region: row.region ?? undefined,
+        district: row.district ?? undefined,
+        ward: row.ward ?? undefined,
+        street: row.street ?? undefined,
+        address: row.address ?? undefined,
+        landmark: row.landmark ?? undefined,
+        latitude: row.latitude ?? undefined,
+        longitude: row.longitude ?? undefined,
+        amenities: (row.amenities as string[] | null) ?? [],
+        contact_name: row.contact_name ?? undefined,
+        contact_phone: row.contact_phone ?? undefined,
+        contact_whatsapp: row.contact_whatsapp ?? undefined,
+        preferred_contact: (row.preferred_contact ?? "both") as "phone" | "whatsapp" | "both",
+      });
+      const { count } = await supabase
+        .from("property_media")
+        .select("id", { count: "exact", head: true })
+        .eq("property_id", editId)
+        .eq("media_type", "image");
+      if (!alive) return;
+      setExistingPhotoCount(count ?? 0);
+      setStep(2);
+      setLoadingEdit(false);
+    })();
+    return () => { alive = false; };
+  }, [isEdit, editId, user, navigate]);
+
+
+  // Auto-save every 5s (disabled in edit mode — edits should not touch the draft)
+  useEffect(() => {
+    if (isEdit) return;
     const iv = setInterval(() => {
       if (!dirtyRef.current) return;
       saveDraft({ ...draftRef.current, step: stepRef.current });
@@ -112,7 +183,7 @@ function UploadWizardPage() {
       dirtyRef.current = false;
     }, 5000);
     return () => clearInterval(iv);
-  }, []);
+  }, [isEdit]);
 
   // Warn before leaving
   useEffect(() => {
@@ -133,7 +204,7 @@ function UploadWizardPage() {
 
   function canProceed(): string | null {
     switch (step) {
-      case 1: return media.some((m) => m.kind === "image") ? null : "Add at least one photo";
+      case 1: return (media.some((m) => m.kind === "image") || existingPhotoCount > 0) ? null : "Add at least one photo";
       case 2: return draft.property_type ? null : "Pick a property type";
       case 3:
         if (!draft.price || draft.price <= 0) return "Enter a price";
@@ -184,56 +255,79 @@ function UploadWizardPage() {
 
   async function submit(mode: "publish" | "draft") {
     if (!user) return toast.error("Please sign in");
-    if (mode === "publish" && !media.some((m) => m.kind === "image")) return toast.error("Add at least one photo");
+    const hasImages = media.some((m) => m.kind === "image") || existingPhotoCount > 0;
+    if (mode === "publish" && !hasImages) return toast.error("Add at least one photo");
     setSubmitting(true);
     try {
       const title = (draft.title?.trim() || autoTitle);
-      const { data: prop, error: pErr } = await supabase
-        .from("properties")
-        .insert({
-          owner_id: user.id,
-          property_type: draft.property_type as any,
-          listing_type: (draft.listing_type ?? "rent") as any,
-          title,
-          description: draft.description ?? null,
-          price: draft.price ?? 0,
-          currency: draft.currency ?? "TZS",
-          negotiable: !!draft.negotiable,
-          bedrooms: draft.bedrooms ?? null,
-          bathrooms: draft.bathrooms ?? null,
-          parking: draft.parking ?? null,
-          area_sqm: draft.area_sqm ?? null,
-          floor: draft.floor ?? null,
-          year_built: draft.year_built ?? null,
-          region: draft.region ?? null,
-          district: draft.district ?? null,
-          ward: draft.ward ?? null,
-          street: draft.street ?? null,
-          address: draft.address ?? null,
-          landmark: draft.landmark ?? null,
-          latitude: draft.latitude ?? null,
-          longitude: draft.longitude ?? null,
-          amenities: draft.amenities ?? [],
-          contact_name: draft.contact_name ?? null,
-          contact_phone: draft.contact_phone ?? null,
-          contact_whatsapp: draft.contact_whatsapp ?? null,
-          preferred_contact: draft.preferred_contact ?? null,
-          status: mode === "publish" ? "live" : "draft",
-        } as any)
-        .select("id")
-        .single();
-      if (pErr) throw pErr;
-      const propertyId = prop.id as string;
+      const payload = {
+        property_type: draft.property_type as any,
+        listing_type: (draft.listing_type ?? "rent") as any,
+        title,
+        description: draft.description ?? null,
+        price: draft.price ?? 0,
+        currency: draft.currency ?? "TZS",
+        negotiable: !!draft.negotiable,
+        bedrooms: draft.bedrooms ?? null,
+        bathrooms: draft.bathrooms ?? null,
+        parking: draft.parking ?? null,
+        area_sqm: draft.area_sqm ?? null,
+        floor: draft.floor ?? null,
+        year_built: draft.year_built ?? null,
+        region: draft.region ?? null,
+        district: draft.district ?? null,
+        ward: draft.ward ?? null,
+        street: draft.street ?? null,
+        address: draft.address ?? null,
+        landmark: draft.landmark ?? null,
+        latitude: draft.latitude ?? null,
+        longitude: draft.longitude ?? null,
+        amenities: draft.amenities ?? [],
+        contact_name: draft.contact_name ?? null,
+        contact_phone: draft.contact_phone ?? null,
+        contact_whatsapp: draft.contact_whatsapp ?? null,
+        preferred_contact: draft.preferred_contact ?? null,
+      };
+
+      let propertyId: string;
+      if (isEdit && editId) {
+        const updatePayload: any = { ...payload, updated_at: new Date().toISOString() };
+        if (mode === "publish") updatePayload.status = "live";
+        const { data: upd, error: uErr } = await supabase
+          .from("properties")
+          .update(updatePayload)
+          .eq("id", editId)
+          .eq("owner_id", user.id)
+          .select("id")
+          .single();
+        if (uErr) throw uErr;
+        if (!upd) throw new Error("Update failed — you may not own this property");
+        propertyId = upd.id as string;
+      } else {
+        const { data: prop, error: pErr } = await supabase
+          .from("properties")
+          .insert({
+            ...payload,
+            owner_id: user.id,
+            status: mode === "publish" ? "live" : "draft",
+          } as any)
+          .select("id")
+          .single();
+        if (pErr) throw pErr;
+        propertyId = prop.id as string;
+      }
 
       const wantWatermark = !!draft.watermark;
       const images = media.filter((m) => m.kind === "image");
       const video = media.find((m) => m.kind === "video");
 
-      // Photos — position by cover-first, then original order
+      // Photos — position by cover-first, then original order.
+      // In edit mode, append after existing photos and never override the cover.
       const ordered = [
         ...images.filter((m) => m.isCover),
         ...images.filter((m) => !m.isCover),
       ];
+      const positionOffset = isEdit ? existingPhotoCount : 0;
       for (let i = 0; i < ordered.length; i++) {
         const m = ordered[i];
         const base = wantWatermark ? await watermarkImage(m.file, "SPACES") : m.file;
@@ -243,19 +337,18 @@ function UploadWizardPage() {
           property_id: propertyId,
           storage_path: path,
           media_type: "image",
-          position: i,
-          is_cover: m.isCover,
+          position: positionOffset + i,
+          is_cover: isEdit ? false : m.isCover,
         });
       }
 
-      // Video (+ thumbnail as an extra image, if we can build one)
       if (video) {
         const { path } = await uploadMediaFile(user.id, propertyId, video.file);
         await supabase.from("property_media").insert({
           property_id: propertyId,
           storage_path: path,
           media_type: "video",
-          position: ordered.length,
+          position: positionOffset + ordered.length,
           is_cover: false,
         });
         try {
@@ -266,15 +359,20 @@ function UploadWizardPage() {
             property_id: propertyId,
             storage_path: thumbPath,
             media_type: "image",
-            position: ordered.length + 1,
+            position: positionOffset + ordered.length + 1,
             is_cover: false,
           });
         } catch { /* thumbnail is best-effort */ }
       }
 
-      clearDraft();
+      if (!isEdit) clearDraft();
       dirtyRef.current = false;
-      setSuccess({ status: mode === "publish" ? "live" : "draft", id: propertyId });
+      if (isEdit) {
+        toast.success("Property updated");
+        navigate({ to: "/dashboard/$section", params: { section: "properties" } });
+      } else {
+        setSuccess({ status: mode === "publish" ? "live" : "draft", id: propertyId });
+      }
     } catch (e: any) {
       console.error(e);
       toast.error(e.message ?? "Something went wrong");
@@ -282,6 +380,17 @@ function UploadWizardPage() {
       setSubmitting(false);
     }
   }
+
+  if (loadingEdit) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background">
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" /> Loading property…
+        </div>
+      </div>
+    );
+  }
+
 
   if (success) return <SuccessScreen status={success.status} />;
 
@@ -312,12 +421,20 @@ function UploadWizardPage() {
       <main className="mx-auto max-w-2xl px-4 pb-36 pt-6 sm:pt-10">
         <div key={step} className="animate-fade-in">
           {step === 1 && (
-            <PhotoManager
-              media={media}
-              setMedia={setMedia}
-              watermark={!!draft.watermark}
-              onWatermarkChange={(v) => setField("watermark", v)}
-            />
+            <div className="space-y-4">
+              {isEdit && existingPhotoCount > 0 && (
+                <div className="rounded-2xl border border-border/60 bg-accent/40 p-4 text-sm text-muted-foreground">
+                  This property already has <span className="font-semibold text-foreground">{existingPhotoCount}</span>{" "}
+                  photo{existingPhotoCount === 1 ? "" : "s"}. New photos you add here will be appended.
+                </div>
+              )}
+              <PhotoManager
+                media={media}
+                setMedia={setMedia}
+                watermark={!!draft.watermark}
+                onWatermarkChange={(v) => setField("watermark", v)}
+              />
+            </div>
           )}
           {step === 2 && <StepType value={draft.property_type} onChange={(v) => setField("property_type", v)} />}
           {step === 3 && <StepInfo draft={draft} setField={setField} />}
@@ -348,7 +465,9 @@ function UploadWizardPage() {
             </Button>
           ) : (
             <Button onClick={() => submit("publish")} disabled={submitting} size="lg" className="gap-2 rounded-full px-8">
-              {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Publishing…</> : <><Sparkles className="h-4 w-4" /> Publish now</>}
+              {submitting
+                ? <><Loader2 className="h-4 w-4 animate-spin" /> {isEdit ? "Saving…" : "Publishing…"}</>
+                : <><Sparkles className="h-4 w-4" /> {isEdit ? "Save changes" : "Publish now"}</>}
             </Button>
           )}
         </div>
