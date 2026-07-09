@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
-  Heart, Search, User as UserIcon, Users, Briefcase,
+  Heart, Search, User as UserIcon, Users, Briefcase, GitCompare, Clock,
   Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
