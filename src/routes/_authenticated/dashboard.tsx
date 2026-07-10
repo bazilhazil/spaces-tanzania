@@ -305,10 +305,12 @@ export function PropertyMiniCard({ p }: { p: RecentProperty }) {
   >
     Delete
   </button>
-     </div>
+      </div>
+      </div>
     </div>
   );
 }
+
 
 function NonOwnerHome({ role }: { role: SpacesMode }) {
   const items = role === "agent"
