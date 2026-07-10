@@ -36,6 +36,7 @@ import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedPropertyIdRouteImport } from './routes/_authenticated/property.$id'
+import { Route as AuthenticatedDashboardPropertiesRouteImport } from './routes/_authenticated/dashboard.properties'
 import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_authenticated/dashboard.$section'
 import { Route as AuthenticatedAdminSectionRouteImport } from './routes/_authenticated/admin.$section'
 
@@ -175,6 +176,12 @@ const AuthenticatedPropertyIdRoute = AuthenticatedPropertyIdRouteImport.update({
   path: '/property/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDashboardPropertiesRoute =
+  AuthenticatedDashboardPropertiesRouteImport.update({
+    id: '/properties',
+    path: '/properties',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardSectionRoute =
   AuthenticatedDashboardSectionRouteImport.update({
     id: '/$section',
@@ -215,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/properties/': typeof PropertiesIndexRoute
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
+  '/dashboard/properties': typeof AuthenticatedDashboardPropertiesRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -244,6 +252,7 @@ export interface FileRoutesByTo {
   '/properties': typeof PropertiesIndexRoute
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
+  '/dashboard/properties': typeof AuthenticatedDashboardPropertiesRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
@@ -276,6 +285,7 @@ export interface FileRoutesById {
   '/properties/': typeof PropertiesIndexRoute
   '/_authenticated/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/_authenticated/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
+  '/_authenticated/dashboard/properties': typeof AuthenticatedDashboardPropertiesRoute
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -308,6 +318,7 @@ export interface FileRouteTypes {
     | '/properties/'
     | '/admin/$section'
     | '/dashboard/$section'
+    | '/dashboard/properties'
     | '/property/$id'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
     | '/properties'
     | '/admin/$section'
     | '/dashboard/$section'
+    | '/dashboard/properties'
     | '/property/$id'
     | '/admin'
   id:
@@ -368,6 +380,7 @@ export interface FileRouteTypes {
     | '/properties/'
     | '/_authenticated/admin/$section'
     | '/_authenticated/dashboard/$section'
+    | '/_authenticated/dashboard/properties'
     | '/_authenticated/property/$id'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
@@ -578,6 +591,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPropertyIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/properties': {
+      id: '/_authenticated/dashboard/properties'
+      path: '/properties'
+      fullPath: '/dashboard/properties'
+      preLoaderRoute: typeof AuthenticatedDashboardPropertiesRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/$section': {
       id: '/_authenticated/dashboard/$section'
       path: '/$section'
@@ -610,11 +630,14 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardSectionRoute: typeof AuthenticatedDashboardSectionRoute
+  AuthenticatedDashboardPropertiesRoute: typeof AuthenticatedDashboardPropertiesRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
     AuthenticatedDashboardSectionRoute: AuthenticatedDashboardSectionRoute,
+    AuthenticatedDashboardPropertiesRoute:
+      AuthenticatedDashboardPropertiesRoute,
   }
 
 const AuthenticatedDashboardRouteWithChildren =

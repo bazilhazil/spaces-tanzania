@@ -133,7 +133,7 @@ function OwnerHome() {
             <h2 className="font-display text-xl font-semibold text-foreground">My Properties</h2>
             <p className="text-sm text-muted-foreground">Your latest listings at a glance.</p>
           </div>
-          <Link to="/dashboard/$section" params={{ section: "properties" }}
+          <Link to="/dashboard/properties"
             className="hidden text-sm font-medium text-primary hover:underline sm:inline-flex sm:items-center sm:gap-1">
             View all <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
