@@ -555,7 +555,7 @@ function PropertyManageCard({
         {/* Owner actions — always visible on desktop, ⋯ menu covers mobile */}
         <div className="grid grid-cols-4 gap-1.5 border-t border-border/50 pt-3">
           <ActionBtn icon={Eye} label="View" onClick={() => onAction("view")} />
-          <ActionBtn icon={Edit3} label="Edit" onClick={() => onAction("edit")} />
+          <ActionBtn icon={Edit3} label="TEST EDIT" onClick={() => onAction("edit")} />
           {p.status === "paused" || p.status === "draft" ? (
             <ActionBtn icon={Play} label="Resume" onClick={() => onAction("resume")} />
           ) : (
