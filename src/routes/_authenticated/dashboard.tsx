@@ -291,7 +291,7 @@ export function PropertyMiniCard({ p }: { p: RecentProperty }) {
             <Eye className="h-3 w-3" /> {p.view_count}
           </p>
         </div>
-     <div className="flex gap-2 border-t border-border/50 p-3">
+      <div className="flex gap-2 border-t border-border/50 p-3">
   <button
     className="flex-1 rounded-lg bg-primary px-3 py-2 text-sm text-white"
     onClick={() => window.location.href = `/dashboard/properties`}
