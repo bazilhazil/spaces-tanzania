@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
   Heart, Search, User as UserIcon, Users, Briefcase, GitCompare, Clock, Contact,
-  Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles, Handshake,
+  Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles, Handshake, Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -59,8 +59,10 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
       { label: t("dashboard.side.performance"), to: "/dashboard/analytics", icon: BarChart3 },
+      { label: "Agent Performance", to: "/dashboard/agent-performance", icon: Trophy },
       { label: "Verification", to: "/verification", icon: ShieldCheck },
       { label: "Verification Hub", to: "/verification-hub", icon: ShieldCheck },
+      { label: "Trust Score", to: "/trust", icon: Sparkles },
       { label: "Trust Score", to: "/trust", icon: Sparkles },
       { label: "Billing & Plans", to: "/billing", icon: CreditCard },
       { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
