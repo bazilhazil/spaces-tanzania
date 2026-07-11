@@ -256,8 +256,7 @@ function AgentPerformancePage() {
 
         {/* Overview */}
         <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Link to="/leads" className="block"><StatCard label="Assigned Leads" value={assignedLeads} icon={Contact} tone="brand" /></Link>
-          <Link to="/dashboard/clients" className="block"><StatCard label="Active Clients" value={activeClients} icon={Users} tone="brand" /></Link>
+          <Link to="/leads" className="block"><StatCard label="Active Leads" value={assignedLeads} icon={Contact} tone="brand" /></Link>
           <StatCard label="Active Listings"   value={activeListings}      icon={Home}         tone="gold" />
           <StatCard label="Scheduled Viewings"value={scheduledViewings}   icon={Calendar}     tone="brand" />
           <StatCard label="Deals In Progress" value={dealsInProgress}     icon={Handshake}    tone="brand" />
