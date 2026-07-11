@@ -76,7 +76,7 @@ export function BillingCenter() {
 
 /* ─────────────────────────── Plans ─────────────────────────── */
 
-function PlansPanel({ cycle, onCycleChange }: { cycle: BillingCycle; onCycleChange: (c: BillingCycle) => void }) {
+function PlansPanel({ cycle, onCycleChange, onCheckout }: { cycle: BillingCycle; onCycleChange: (c: BillingCycle) => void; onCheckout: (i: PaymentIntent) => void }) {
   const currentId = CURRENT_SUBSCRIPTION.planId;
 
   return (
