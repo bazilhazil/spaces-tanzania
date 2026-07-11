@@ -9,8 +9,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/ds/empty-state";
 import {
   Bell, Check, Trash2, Search, Settings2, MailCheck, Smartphone, MessageCircle, BellRing,
-  Users, Handshake, Calendar, CreditCard, ShieldCheck, Home, Megaphone, AlertTriangle,
+  Users, Handshake, Calendar, CreditCard, ShieldCheck, Home, Megaphone, AlertTriangle, MoreVertical,
 } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import {
   KIND_META, listNotifications, markAllRead, markRead, removeNotification,
   getPrefs, setPrefs, getProviders, setProviders, anyProviderConfigured,
