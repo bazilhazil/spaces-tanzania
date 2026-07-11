@@ -42,6 +42,7 @@ import { Route as AuthenticatedDashboardPerformanceRouteImport } from './routes/
 import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_authenticated/dashboard.favorites'
 import { Route as AuthenticatedDashboardAgentPerformanceRouteImport } from './routes/_authenticated/dashboard.agent-performance'
 import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_authenticated/dashboard.$section'
+import { Route as AuthenticatedBillingHistoryRouteImport } from './routes/_authenticated/billing.history'
 import { Route as AuthenticatedAdminSectionRouteImport } from './routes/_authenticated/admin.$section'
 
 const TrustSystemRoute = TrustSystemRouteImport.update({
@@ -216,6 +217,12 @@ const AuthenticatedDashboardSectionRoute =
     path: '/$section',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedBillingHistoryRoute =
+  AuthenticatedBillingHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => AuthenticatedBillingRoute,
+  } as any)
 const AuthenticatedAdminSectionRoute =
   AuthenticatedAdminSectionRouteImport.update({
     id: '/$section',
@@ -233,7 +240,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trust-system': typeof TrustSystemRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/billing': typeof AuthenticatedBillingRoute
+  '/billing': typeof AuthenticatedBillingRouteWithChildren
   '/business-intelligence': typeof AuthenticatedBusinessIntelligenceRoute
   '/compare': typeof AuthenticatedCompareRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
@@ -250,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/properties/$slug': typeof PropertiesSlugRoute
   '/properties/': typeof PropertiesIndexRoute
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
+  '/billing/history': typeof AuthenticatedBillingHistoryRoute
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/dashboard/agent-performance': typeof AuthenticatedDashboardAgentPerformanceRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
@@ -267,7 +275,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trust-system': typeof TrustSystemRoute
-  '/billing': typeof AuthenticatedBillingRoute
+  '/billing': typeof AuthenticatedBillingRouteWithChildren
   '/business-intelligence': typeof AuthenticatedBusinessIntelligenceRoute
   '/compare': typeof AuthenticatedCompareRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
@@ -284,6 +292,7 @@ export interface FileRoutesByTo {
   '/properties/$slug': typeof PropertiesSlugRoute
   '/properties': typeof PropertiesIndexRoute
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
+  '/billing/history': typeof AuthenticatedBillingHistoryRoute
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/dashboard/agent-performance': typeof AuthenticatedDashboardAgentPerformanceRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
@@ -304,7 +313,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trust-system': typeof TrustSystemRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/_authenticated/billing': typeof AuthenticatedBillingRoute
+  '/_authenticated/billing': typeof AuthenticatedBillingRouteWithChildren
   '/_authenticated/business-intelligence': typeof AuthenticatedBusinessIntelligenceRoute
   '/_authenticated/compare': typeof AuthenticatedCompareRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
@@ -321,6 +330,7 @@ export interface FileRoutesById {
   '/properties/$slug': typeof PropertiesSlugRoute
   '/properties/': typeof PropertiesIndexRoute
   '/_authenticated/admin/$section': typeof AuthenticatedAdminSectionRoute
+  '/_authenticated/billing/history': typeof AuthenticatedBillingHistoryRoute
   '/_authenticated/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/_authenticated/dashboard/agent-performance': typeof AuthenticatedDashboardAgentPerformanceRoute
   '/_authenticated/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
@@ -358,6 +368,7 @@ export interface FileRouteTypes {
     | '/properties/$slug'
     | '/properties/'
     | '/admin/$section'
+    | '/billing/history'
     | '/dashboard/$section'
     | '/dashboard/agent-performance'
     | '/dashboard/favorites'
@@ -392,6 +403,7 @@ export interface FileRouteTypes {
     | '/properties/$slug'
     | '/properties'
     | '/admin/$section'
+    | '/billing/history'
     | '/dashboard/$section'
     | '/dashboard/agent-performance'
     | '/dashboard/favorites'
@@ -428,6 +440,7 @@ export interface FileRouteTypes {
     | '/properties/$slug'
     | '/properties/'
     | '/_authenticated/admin/$section'
+    | '/_authenticated/billing/history'
     | '/_authenticated/dashboard/$section'
     | '/_authenticated/dashboard/agent-performance'
     | '/_authenticated/dashboard/favorites'
@@ -685,6 +698,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardSectionRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/billing/history': {
+      id: '/_authenticated/billing/history'
+      path: '/history'
+      fullPath: '/billing/history'
+      preLoaderRoute: typeof AuthenticatedBillingHistoryRouteImport
+      parentRoute: typeof AuthenticatedBillingRoute
+    }
     '/_authenticated/admin/$section': {
       id: '/_authenticated/admin/$section'
       path: '/$section'
@@ -707,6 +727,17 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
+interface AuthenticatedBillingRouteChildren {
+  AuthenticatedBillingHistoryRoute: typeof AuthenticatedBillingHistoryRoute
+}
+
+const AuthenticatedBillingRouteChildren: AuthenticatedBillingRouteChildren = {
+  AuthenticatedBillingHistoryRoute: AuthenticatedBillingHistoryRoute,
+}
+
+const AuthenticatedBillingRouteWithChildren =
+  AuthenticatedBillingRoute._addFileChildren(AuthenticatedBillingRouteChildren)
 
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardSectionRoute: typeof AuthenticatedDashboardSectionRoute
@@ -735,7 +766,7 @@ const AuthenticatedDashboardRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
-  AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
+  AuthenticatedBillingRoute: typeof AuthenticatedBillingRouteWithChildren
   AuthenticatedBusinessIntelligenceRoute: typeof AuthenticatedBusinessIntelligenceRoute
   AuthenticatedCompareRoute: typeof AuthenticatedCompareRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
@@ -753,7 +784,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
-  AuthenticatedBillingRoute: AuthenticatedBillingRoute,
+  AuthenticatedBillingRoute: AuthenticatedBillingRouteWithChildren,
   AuthenticatedBusinessIntelligenceRoute:
     AuthenticatedBusinessIntelligenceRoute,
   AuthenticatedCompareRoute: AuthenticatedCompareRoute,
