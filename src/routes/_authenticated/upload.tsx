@@ -835,7 +835,7 @@ function StepPreview({
         {cover ? (
           <div className="relative">
             <img src={cover.previewUrl} className="aspect-[4/5] w-full object-cover sm:aspect-[16/10]" alt="" />
-            <div className="absolute right-3 top-3"><EditBtn s={1} label="Photos" /></div>
+            <div className="absolute right-3 top-3"><EditBtn s={2} label="Photos" /></div>
             {images.length > 1 && (
               <div className="absolute bottom-3 left-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white">
                 +{images.length - 1} more
