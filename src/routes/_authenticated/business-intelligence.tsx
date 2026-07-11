@@ -328,7 +328,7 @@ function BIPage() {
         <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">Business Intelligence</h1>
-            <p className="mt-1 text-muted-foreground">Analytics, market insights and performance across the SPACES platform.</p>
+            <p className="mt-1 text-muted-foreground">Track platform growth, revenue and market insights.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Select value={range} onValueChange={(v) => setRange(v as Range)}>
