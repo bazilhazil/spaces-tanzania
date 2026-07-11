@@ -61,6 +61,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.properties"), to: "/dashboard/properties", icon: Briefcase },
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
+      { label: "Notifications", to: "/notifications", icon: Bell },
       { label: t("dashboard.side.performance"), to: "/dashboard/analytics", icon: BarChart3 },
       { label: "Agent Performance", to: "/dashboard/agent-performance", icon: Trophy },
       { label: "Business Intelligence", to: "/business-intelligence", icon: BarChart3 },
