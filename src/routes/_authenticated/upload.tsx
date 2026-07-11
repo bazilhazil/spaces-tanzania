@@ -60,7 +60,7 @@ const AMENITIES = [
   { value: "internet", label: "Internet", icon: Wifi },
 ] as const;
 
-const STEP_LABELS = ["Photos", "Type", "Details", "Location", "Amenities", "Contact", "Preview", "Publish"];
+const STEP_LABELS = ["Type", "Photos", "Location", "Details", "Amenities", "Contact", "Preview", "Publish"];
 const TOTAL = 8;
 
 
@@ -181,7 +181,7 @@ function UploadWizardPage() {
       saveDraft({ ...draftRef.current, step: stepRef.current });
       setSavedTick(Date.now());
       dirtyRef.current = false;
-    }, 5000);
+    }, 30000);
     return () => clearInterval(iv);
   }, [isEdit]);
 
@@ -204,13 +204,13 @@ function UploadWizardPage() {
 
   function canProceed(): string | null {
     switch (step) {
-      case 1: return (media.some((m) => m.kind === "image") || existingPhotoCount > 0) ? null : "Add at least one photo";
-      case 2: return draft.property_type ? null : "Pick a property type";
+      case 1: return draft.property_type ? null : "Pick a property type";
+      case 2: return (media.some((m) => m.kind === "image") || existingPhotoCount > 0) ? null : "Add at least one photo";
       case 3:
-        if (!draft.price || draft.price <= 0) return "Enter a price";
+        if (!draft.region?.trim() || !draft.district?.trim()) return "Region and district are required";
         return null;
       case 4:
-        if (!draft.region?.trim() || !draft.district?.trim()) return "Region and district are required";
+        if (!draft.price || draft.price <= 0) return "Enter a price";
         return null;
       case 6:
         if (!draft.contact_name?.trim()) return "Add your name";
@@ -406,7 +406,7 @@ function UploadWizardPage() {
               </span>
               <span className="text-muted-foreground">
                 {savedTick > 0 ? (
-                  <span className="inline-flex items-center gap-1"><Save className="h-3 w-3" /> Saved</span>
+                  <span className="inline-flex items-center gap-1"><Save className="h-3 w-3" /> Saved automatically</span>
                 ) : (
                   `${Math.round((step / TOTAL) * 100)}%`
                 )}
@@ -420,7 +420,8 @@ function UploadWizardPage() {
 
       <main className="mx-auto max-w-2xl px-4 pb-36 pt-6 sm:pt-10">
         <div key={step} className="animate-fade-in">
-          {step === 1 && (
+          {step === 1 && <StepType value={draft.property_type} onChange={(v) => setField("property_type", v)} />}
+          {step === 2 && (
             <div className="space-y-4">
               {isEdit && existingPhotoCount > 0 && (
                 <div className="rounded-2xl border border-border/60 bg-accent/40 p-4 text-sm text-muted-foreground">
@@ -428,6 +429,7 @@ function UploadWizardPage() {
                   photo{existingPhotoCount === 1 ? "" : "s"}. New photos you add here will be appended.
                 </div>
               )}
+              <p className="text-sm text-muted-foreground">Take photos or select from gallery.</p>
               <PhotoManager
                 media={media}
                 setMedia={setMedia}
@@ -436,9 +438,8 @@ function UploadWizardPage() {
               />
             </div>
           )}
-          {step === 2 && <StepType value={draft.property_type} onChange={(v) => setField("property_type", v)} />}
-          {step === 3 && <StepInfo draft={draft} setField={setField} />}
-          {step === 4 && <StepLocation draft={draft} setField={setField} />}
+          {step === 3 && <StepLocation draft={draft} setField={setField} />}
+          {step === 4 && <StepInfo draft={draft} setField={setField} />}
           {step === 5 && <StepAmenities value={draft.amenities ?? []} onChange={(v) => setField("amenities", v)} />}
           {step === 6 && <StepContact draft={draft} setField={setField} />}
           {step === 7 && <StepPreview draft={draft} media={media} autoTitle={autoTitle} onEdit={setStep} />}
@@ -721,12 +722,33 @@ function StepAmenities({ value, onChange }: { value: string[]; onChange: (v: str
 // ============================================================
 function StepContact({ draft, setField }: { draft: WizardDraft; setField: <K extends keyof WizardDraft>(k: K, v: WizardDraft[K]) => void }) {
   const method = draft.preferred_contact ?? "both";
+  const { user } = useAuth();
+  const [sameAsAccount, setSameAsAccount] = useState(false);
+
+  async function applyAccountDetails(checked: boolean) {
+    setSameAsAccount(checked);
+    if (!checked || !user) return;
+    const { data } = await supabase.from("profiles").select("full_name,phone").eq("id", user.id).maybeSingle();
+    if (!data) return toast.error("No account details on file");
+    setField("contact_name", data.full_name ?? "");
+    setField("contact_phone", data.phone ?? "");
+    setField("contact_whatsapp", data.phone ?? "");
+  }
+
   return (
     <section className="space-y-6">
       <div>
         <h1 className="font-display text-3xl font-semibold sm:text-4xl">How can buyers reach you? 📞</h1>
         <p className="mt-2 text-muted-foreground">This shows on your listing.</p>
       </div>
+
+      <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-border bg-accent/30 p-4">
+        <Checkbox checked={sameAsAccount} onCheckedChange={(v) => applyAccountDetails(!!v)} />
+        <div>
+          <div className="text-sm font-semibold">Same as account details</div>
+          <div className="text-xs text-muted-foreground">Use the name and phone on your profile</div>
+        </div>
+      </label>
 
       <Field label="Your name *">
         <div className="relative">
@@ -834,7 +856,7 @@ function StepPreview({
         {cover ? (
           <div className="relative">
             <img src={cover.previewUrl} className="aspect-[4/5] w-full object-cover sm:aspect-[16/10]" alt="" />
-            <div className="absolute right-3 top-3"><EditBtn s={1} label="Photos" /></div>
+            <div className="absolute right-3 top-3"><EditBtn s={2} label="Photos" /></div>
             {images.length > 1 && (
               <div className="absolute bottom-3 left-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white">
                 +{images.length - 1} more
@@ -862,7 +884,7 @@ function StepPreview({
             </div>
           </div>
 
-          <div className="flex justify-end"><EditBtn s={3} label="Details" /></div>
+          <div className="flex justify-end"><EditBtn s={4} label="Details" /></div>
 
           {(draft.bedrooms || draft.bathrooms || draft.parking || draft.area_sqm) && (
             <div className="grid grid-cols-4 gap-3 rounded-2xl bg-muted p-3 text-center text-sm">
@@ -938,6 +960,16 @@ function StepPublish({
       </div>
 
       <ListingScorePanel score={score} breakdown={breakdown} />
+
+      <div className="flex items-start gap-3 rounded-2xl border border-border bg-accent/40 p-4">
+        <Shield className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+        <div className="text-sm">
+          <div className="font-semibold text-foreground">Your property will be reviewed before going live.</div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            Status flow: <span className="font-medium">Draft → Pending Review → Approved</span> (or Rejected with feedback).
+          </div>
+        </div>
+      </div>
 
       <div className="space-y-3 pt-2">
         <Button onClick={onPublish} disabled={submitting} size="lg" className="h-14 w-full rounded-full text-base">
