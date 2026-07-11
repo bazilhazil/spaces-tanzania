@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_clients: {
+        Row: {
+          agent_id: string
+          avatar_url: string | null
+          budget: number | null
+          client_type: string
+          created_at: string
+          currency: string | null
+          email: string | null
+          full_name: string
+          id: string
+          interested_property_id: string | null
+          last_activity_at: string | null
+          notes: string | null
+          phone: string | null
+          preferred_area: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          avatar_url?: string | null
+          budget?: number | null
+          client_type?: string
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          interested_property_id?: string | null
+          last_activity_at?: string | null
+          notes?: string | null
+          phone?: string | null
+          preferred_area?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          avatar_url?: string | null
+          budget?: number | null
+          client_type?: string
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          interested_property_id?: string | null
+          last_activity_at?: string | null
+          notes?: string | null
+          phone?: string | null
+          preferred_area?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_clients_interested_property_id_fkey"
+            columns: ["interested_property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_clients_interested_property_id_fkey"
+            columns: ["interested_property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           buyer_id: string
