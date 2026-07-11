@@ -39,7 +39,6 @@ import { Route as AuthenticatedPropertyIdRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDashboardPropertiesRouteImport } from './routes/_authenticated/dashboard.properties'
 import { Route as AuthenticatedDashboardPerformanceRouteImport } from './routes/_authenticated/dashboard.performance'
 import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_authenticated/dashboard.favorites'
-import { Route as AuthenticatedDashboardClientsRouteImport } from './routes/_authenticated/dashboard.clients'
 import { Route as AuthenticatedDashboardAgentPerformanceRouteImport } from './routes/_authenticated/dashboard.agent-performance'
 import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_authenticated/dashboard.$section'
 import { Route as AuthenticatedAdminSectionRouteImport } from './routes/_authenticated/admin.$section'
@@ -198,12 +197,6 @@ const AuthenticatedDashboardFavoritesRoute =
     path: '/favorites',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
-const AuthenticatedDashboardClientsRoute =
-  AuthenticatedDashboardClientsRouteImport.update({
-    id: '/clients',
-    path: '/clients',
-    getParentRoute: () => AuthenticatedDashboardRoute,
-  } as any)
 const AuthenticatedDashboardAgentPerformanceRoute =
   AuthenticatedDashboardAgentPerformanceRouteImport.update({
     id: '/agent-performance',
@@ -251,7 +244,6 @@ export interface FileRoutesByFullPath {
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/dashboard/agent-performance': typeof AuthenticatedDashboardAgentPerformanceRoute
-  '/dashboard/clients': typeof AuthenticatedDashboardClientsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/dashboard/performance': typeof AuthenticatedDashboardPerformanceRoute
   '/dashboard/properties': typeof AuthenticatedDashboardPropertiesRoute
@@ -285,7 +277,6 @@ export interface FileRoutesByTo {
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/dashboard/agent-performance': typeof AuthenticatedDashboardAgentPerformanceRoute
-  '/dashboard/clients': typeof AuthenticatedDashboardClientsRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/dashboard/performance': typeof AuthenticatedDashboardPerformanceRoute
   '/dashboard/properties': typeof AuthenticatedDashboardPropertiesRoute
@@ -322,7 +313,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/_authenticated/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/_authenticated/dashboard/agent-performance': typeof AuthenticatedDashboardAgentPerformanceRoute
-  '/_authenticated/dashboard/clients': typeof AuthenticatedDashboardClientsRoute
   '/_authenticated/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/_authenticated/dashboard/performance': typeof AuthenticatedDashboardPerformanceRoute
   '/_authenticated/dashboard/properties': typeof AuthenticatedDashboardPropertiesRoute
@@ -359,7 +349,6 @@ export interface FileRouteTypes {
     | '/admin/$section'
     | '/dashboard/$section'
     | '/dashboard/agent-performance'
-    | '/dashboard/clients'
     | '/dashboard/favorites'
     | '/dashboard/performance'
     | '/dashboard/properties'
@@ -393,7 +382,6 @@ export interface FileRouteTypes {
     | '/admin/$section'
     | '/dashboard/$section'
     | '/dashboard/agent-performance'
-    | '/dashboard/clients'
     | '/dashboard/favorites'
     | '/dashboard/performance'
     | '/dashboard/properties'
@@ -429,7 +417,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/$section'
     | '/_authenticated/dashboard/$section'
     | '/_authenticated/dashboard/agent-performance'
-    | '/_authenticated/dashboard/clients'
     | '/_authenticated/dashboard/favorites'
     | '/_authenticated/dashboard/performance'
     | '/_authenticated/dashboard/properties'
@@ -664,13 +651,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardFavoritesRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
-    '/_authenticated/dashboard/clients': {
-      id: '/_authenticated/dashboard/clients'
-      path: '/clients'
-      fullPath: '/dashboard/clients'
-      preLoaderRoute: typeof AuthenticatedDashboardClientsRouteImport
-      parentRoute: typeof AuthenticatedDashboardRoute
-    }
     '/_authenticated/dashboard/agent-performance': {
       id: '/_authenticated/dashboard/agent-performance'
       path: '/agent-performance'
@@ -711,7 +691,6 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardSectionRoute: typeof AuthenticatedDashboardSectionRoute
   AuthenticatedDashboardAgentPerformanceRoute: typeof AuthenticatedDashboardAgentPerformanceRoute
-  AuthenticatedDashboardClientsRoute: typeof AuthenticatedDashboardClientsRoute
   AuthenticatedDashboardFavoritesRoute: typeof AuthenticatedDashboardFavoritesRoute
   AuthenticatedDashboardPerformanceRoute: typeof AuthenticatedDashboardPerformanceRoute
   AuthenticatedDashboardPropertiesRoute: typeof AuthenticatedDashboardPropertiesRoute
@@ -722,7 +701,6 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardSectionRoute: AuthenticatedDashboardSectionRoute,
     AuthenticatedDashboardAgentPerformanceRoute:
       AuthenticatedDashboardAgentPerformanceRoute,
-    AuthenticatedDashboardClientsRoute: AuthenticatedDashboardClientsRoute,
     AuthenticatedDashboardFavoritesRoute: AuthenticatedDashboardFavoritesRoute,
     AuthenticatedDashboardPerformanceRoute:
       AuthenticatedDashboardPerformanceRoute,
