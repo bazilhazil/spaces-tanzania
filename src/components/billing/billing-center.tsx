@@ -102,7 +102,7 @@ function PlansPanel({ cycle, onCycleChange, onCheckout }: { cycle: BillingCycle;
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {PLANS.map((plan) => {
           const isCurrent = plan.id === currentId;
           const price = cycle === "monthly" ? plan.priceMonthlyTZS : plan.priceAnnualTZS;
@@ -447,7 +447,7 @@ function AdminPanel() {
 
   return (
     <section className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <StatCard label="MRR" value={formatTZS(REVENUE_KPI.mrrTZS)} delta={REVENUE_KPI.mrrDelta} icon={TrendingUp} tone="brand" />
         <StatCard label="ARR" value={formatTZS(REVENUE_KPI.arrTZS)} icon={Building2} tone="gold" />
         <StatCard label="Active subscribers" value={REVENUE_KPI.activeSubs} delta={REVENUE_KPI.activeSubsDelta} icon={Users} tone="success" />

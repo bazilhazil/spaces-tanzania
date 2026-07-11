@@ -102,7 +102,7 @@ export function EcosystemCenter({ role = "admin" }: { role?: "admin" | "owner" }
   return (
     <div className="space-y-6 animate-fade-in">
       {/* KPI widgets */}
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <KpiCard icon={Clock}         label="Pending"           value={kpis.pending}         tone="warning" />
         <KpiCard icon={CheckCircle2}  label="Approved today"    value={kpis.approvedToday}   tone="success" />
         <KpiCard icon={XCircle}       label="Rejected today"    value={kpis.rejectedToday}   tone="danger"  />
