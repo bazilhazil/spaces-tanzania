@@ -1,5 +1,5 @@
 import { useI18n, type Lang } from "@/hooks/use-i18n";
-import { Logo } from "@/components/logo";
+import { Brand } from "@/components/brand";
 
 export function LanguageWelcome() {
   const { chosen, setLang, t } = useI18n();
@@ -12,8 +12,8 @@ export function LanguageWelcome() {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-primary/95 via-primary/90 to-primary-glow/80 px-4 backdrop-blur-md">
       <div className="animate-fade-in w-full max-w-md rounded-3xl border border-white/15 bg-background p-8 text-center shadow-[var(--shadow-elevated)] md:p-10">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center">
-          <Logo className="h-16 w-16 object-contain" />
+        <div className="mx-auto flex items-center justify-center">
+          <Brand size="xl" variant="mark" />
         </div>
         <h1 className="mt-5 font-display text-3xl font-semibold text-primary">{t("welcome.title")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{t("welcome.sub")}</p>

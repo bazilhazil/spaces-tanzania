@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Logo } from "@/components/logo";
+import { Brand } from "@/components/brand";
 import { toast } from "sonner";
 import { GoogleIcon } from "@/components/auth-gate-dialog";
 import { useI18n } from "@/hooks/use-i18n";
@@ -74,9 +74,8 @@ function RegisterPage() {
       <div className="relative hidden overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/70 lg:block">
         <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_80%_20%,white_1px,transparent_1px)] [background-size:24px_24px]" />
         <div className="relative flex h-full flex-col justify-between p-12 text-primary-foreground">
-          <Link to="/" className="flex items-center gap-2">
-            <Logo className="h-10 w-10" />
-            <span className="font-display text-2xl font-semibold">SPACES</span>
+          <Link to="/" className="flex items-center">
+            <Brand size="lg" tone="inherit" />
           </Link>
           <div className="max-w-md">
             <h2 className="font-display text-4xl font-semibold leading-tight">
@@ -92,9 +91,8 @@ function RegisterPage() {
 
       <div className="flex items-center justify-center bg-background px-6 py-10">
         <div className="w-full max-w-md animate-fade-in">
-          <Link to="/" className="mb-6 flex items-center gap-2 lg:hidden">
-            <Logo className="h-9 w-9" />
-            <span className="font-display text-xl font-semibold text-primary">SPACES</span>
+          <Link to="/" className="mb-6 flex items-center lg:hidden">
+            <Brand size="md" />
           </Link>
           <h1 className="font-display text-3xl font-semibold text-foreground">{t("auth.register.title")}</h1>
           <p className="mt-1.5 text-sm text-muted-foreground">{t("auth.register.subtitle")}</p>

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
-import { Logo } from "@/components/logo";
+import { Brand } from "@/components/brand";
 import { useI18n } from "@/hooks/use-i18n";
 
 export function SiteFooter() {
@@ -9,10 +9,7 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-border/60 bg-secondary/40">
       <div className="container-page grid gap-10 py-14 md:grid-cols-4">
         <div className="md:col-span-1">
-          <div className="flex items-center gap-2">
-            <Logo className="h-8 w-8" />
-            <span className="font-display text-xl font-semibold text-primary">SPACES</span>
-          </div>
+          <Brand size="md" />
           <p className="mt-3 max-w-xs text-sm text-muted-foreground">{t("footer.brandBlurb")}</p>
           <div className="mt-5 flex gap-3 text-muted-foreground">
             <a href="#" aria-label="Facebook" className="hover:text-primary"><Facebook className="h-4 w-4" /></a>

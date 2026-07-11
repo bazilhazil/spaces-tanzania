@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { LayoutDashboard, LogOut, Menu, Upload, User as UserIcon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/logo";
+import { Brand } from "@/components/brand";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -67,11 +67,8 @@ export function SiteHeader() {
       }
     >
       <div className="container-page flex h-16 items-center justify-between gap-4 md:h-18">
-        <Link to="/" className="flex shrink-0 items-center gap-2">
-          <Logo className="h-9 w-9 object-contain" />
-          <span className="font-display text-xl font-semibold tracking-tight text-primary">
-            SPACES
-          </span>
+        <Link to="/" className="flex shrink-0 items-center">
+          <Brand size="md" />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
