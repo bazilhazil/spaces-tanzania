@@ -160,9 +160,9 @@ export function DealsCenter() {
                     primaryRole === "admin" || primaryRole === "super_admin";
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="w-full max-w-full space-y-6 animate-fade-in">
       {/* KPI grid */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         <Kpi icon={Activity} label="Active" value={stats.active} tone="text-sky-600" />
         <Kpi icon={Calendar} label="Closing this week" value={stats.closingWeek} tone="text-violet-600" />
         <Kpi icon={CheckCircle2} label="Completed" value={stats.completed} tone="text-emerald-600" />
@@ -170,6 +170,7 @@ export function DealsCenter() {
         <Kpi icon={Clock} label="Avg. close time" value={`${stats.avgDays}d`} tone="text-amber-600" />
         <Kpi icon={DollarSign} label="Pipeline value" value={fmtMoney(stats.totalValue, deals[0]?.currency ?? "TZS")} tone="text-primary" small />
       </div>
+
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
