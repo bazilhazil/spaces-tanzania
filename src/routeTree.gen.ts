@@ -32,13 +32,13 @@ import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedDealsRouteImport } from './routes/_authenticated/deals'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCompareRouteImport } from './routes/_authenticated/compare'
+import { Route as AuthenticatedBusinessIntelligenceRouteImport } from './routes/_authenticated/business-intelligence'
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedPropertyIdRouteImport } from './routes/_authenticated/property.$id'
 import { Route as AuthenticatedDashboardPropertiesRouteImport } from './routes/_authenticated/dashboard.properties'
 import { Route as AuthenticatedDashboardPerformanceRouteImport } from './routes/_authenticated/dashboard.performance'
-import { Route as AuthenticatedDashboardIntelligenceRouteImport } from './routes/_authenticated/dashboard.intelligence'
 import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_authenticated/dashboard.favorites'
 import { Route as AuthenticatedDashboardAgentPerformanceRouteImport } from './routes/_authenticated/dashboard.agent-performance'
 import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_authenticated/dashboard.$section'
@@ -160,6 +160,12 @@ const AuthenticatedCompareRoute = AuthenticatedCompareRouteImport.update({
   path: '/compare',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBusinessIntelligenceRoute =
+  AuthenticatedBusinessIntelligenceRouteImport.update({
+    id: '/business-intelligence',
+    path: '/business-intelligence',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
   id: '/billing',
   path: '/billing',
@@ -190,12 +196,6 @@ const AuthenticatedDashboardPerformanceRoute =
   AuthenticatedDashboardPerformanceRouteImport.update({
     id: '/performance',
     path: '/performance',
-    getParentRoute: () => AuthenticatedDashboardRoute,
-  } as any)
-const AuthenticatedDashboardIntelligenceRoute =
-  AuthenticatedDashboardIntelligenceRouteImport.update({
-    id: '/intelligence',
-    path: '/intelligence',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
 const AuthenticatedDashboardFavoritesRoute =
@@ -234,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/trust-system': typeof TrustSystemRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/billing': typeof AuthenticatedBillingRoute
+  '/business-intelligence': typeof AuthenticatedBusinessIntelligenceRoute
   '/compare': typeof AuthenticatedCompareRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/deals': typeof AuthenticatedDealsRoute
@@ -252,7 +253,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/dashboard/agent-performance': typeof AuthenticatedDashboardAgentPerformanceRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
-  '/dashboard/intelligence': typeof AuthenticatedDashboardIntelligenceRoute
   '/dashboard/performance': typeof AuthenticatedDashboardPerformanceRoute
   '/dashboard/properties': typeof AuthenticatedDashboardPropertiesRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
@@ -268,6 +268,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trust-system': typeof TrustSystemRoute
   '/billing': typeof AuthenticatedBillingRoute
+  '/business-intelligence': typeof AuthenticatedBusinessIntelligenceRoute
   '/compare': typeof AuthenticatedCompareRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/deals': typeof AuthenticatedDealsRoute
@@ -286,7 +287,6 @@ export interface FileRoutesByTo {
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/dashboard/agent-performance': typeof AuthenticatedDashboardAgentPerformanceRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
-  '/dashboard/intelligence': typeof AuthenticatedDashboardIntelligenceRoute
   '/dashboard/performance': typeof AuthenticatedDashboardPerformanceRoute
   '/dashboard/properties': typeof AuthenticatedDashboardPropertiesRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
@@ -305,6 +305,7 @@ export interface FileRoutesById {
   '/trust-system': typeof TrustSystemRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
+  '/_authenticated/business-intelligence': typeof AuthenticatedBusinessIntelligenceRoute
   '/_authenticated/compare': typeof AuthenticatedCompareRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/deals': typeof AuthenticatedDealsRoute
@@ -323,7 +324,6 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/_authenticated/dashboard/agent-performance': typeof AuthenticatedDashboardAgentPerformanceRoute
   '/_authenticated/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
-  '/_authenticated/dashboard/intelligence': typeof AuthenticatedDashboardIntelligenceRoute
   '/_authenticated/dashboard/performance': typeof AuthenticatedDashboardPerformanceRoute
   '/_authenticated/dashboard/properties': typeof AuthenticatedDashboardPropertiesRoute
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
@@ -342,6 +342,7 @@ export interface FileRouteTypes {
     | '/trust-system'
     | '/admin'
     | '/billing'
+    | '/business-intelligence'
     | '/compare'
     | '/dashboard'
     | '/deals'
@@ -360,7 +361,6 @@ export interface FileRouteTypes {
     | '/dashboard/$section'
     | '/dashboard/agent-performance'
     | '/dashboard/favorites'
-    | '/dashboard/intelligence'
     | '/dashboard/performance'
     | '/dashboard/properties'
     | '/property/$id'
@@ -376,6 +376,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/trust-system'
     | '/billing'
+    | '/business-intelligence'
     | '/compare'
     | '/dashboard'
     | '/deals'
@@ -394,7 +395,6 @@ export interface FileRouteTypes {
     | '/dashboard/$section'
     | '/dashboard/agent-performance'
     | '/dashboard/favorites'
-    | '/dashboard/intelligence'
     | '/dashboard/performance'
     | '/dashboard/properties'
     | '/property/$id'
@@ -412,6 +412,7 @@ export interface FileRouteTypes {
     | '/trust-system'
     | '/_authenticated/admin'
     | '/_authenticated/billing'
+    | '/_authenticated/business-intelligence'
     | '/_authenticated/compare'
     | '/_authenticated/dashboard'
     | '/_authenticated/deals'
@@ -430,7 +431,6 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/$section'
     | '/_authenticated/dashboard/agent-performance'
     | '/_authenticated/dashboard/favorites'
-    | '/_authenticated/dashboard/intelligence'
     | '/_authenticated/dashboard/performance'
     | '/_authenticated/dashboard/properties'
     | '/_authenticated/property/$id'
@@ -615,6 +615,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompareRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/business-intelligence': {
+      id: '/_authenticated/business-intelligence'
+      path: '/business-intelligence'
+      fullPath: '/business-intelligence'
+      preLoaderRoute: typeof AuthenticatedBusinessIntelligenceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/billing': {
       id: '/_authenticated/billing'
       path: '/billing'
@@ -655,13 +662,6 @@ declare module '@tanstack/react-router' {
       path: '/performance'
       fullPath: '/dashboard/performance'
       preLoaderRoute: typeof AuthenticatedDashboardPerformanceRouteImport
-      parentRoute: typeof AuthenticatedDashboardRoute
-    }
-    '/_authenticated/dashboard/intelligence': {
-      id: '/_authenticated/dashboard/intelligence'
-      path: '/intelligence'
-      fullPath: '/dashboard/intelligence'
-      preLoaderRoute: typeof AuthenticatedDashboardIntelligenceRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
     '/_authenticated/dashboard/favorites': {
@@ -712,7 +712,6 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardSectionRoute: typeof AuthenticatedDashboardSectionRoute
   AuthenticatedDashboardAgentPerformanceRoute: typeof AuthenticatedDashboardAgentPerformanceRoute
   AuthenticatedDashboardFavoritesRoute: typeof AuthenticatedDashboardFavoritesRoute
-  AuthenticatedDashboardIntelligenceRoute: typeof AuthenticatedDashboardIntelligenceRoute
   AuthenticatedDashboardPerformanceRoute: typeof AuthenticatedDashboardPerformanceRoute
   AuthenticatedDashboardPropertiesRoute: typeof AuthenticatedDashboardPropertiesRoute
 }
@@ -723,8 +722,6 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardAgentPerformanceRoute:
       AuthenticatedDashboardAgentPerformanceRoute,
     AuthenticatedDashboardFavoritesRoute: AuthenticatedDashboardFavoritesRoute,
-    AuthenticatedDashboardIntelligenceRoute:
-      AuthenticatedDashboardIntelligenceRoute,
     AuthenticatedDashboardPerformanceRoute:
       AuthenticatedDashboardPerformanceRoute,
     AuthenticatedDashboardPropertiesRoute:
@@ -739,6 +736,7 @@ const AuthenticatedDashboardRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
+  AuthenticatedBusinessIntelligenceRoute: typeof AuthenticatedBusinessIntelligenceRoute
   AuthenticatedCompareRoute: typeof AuthenticatedCompareRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
   AuthenticatedDealsRoute: typeof AuthenticatedDealsRoute
@@ -756,6 +754,8 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedBillingRoute: AuthenticatedBillingRoute,
+  AuthenticatedBusinessIntelligenceRoute:
+    AuthenticatedBusinessIntelligenceRoute,
   AuthenticatedCompareRoute: AuthenticatedCompareRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
   AuthenticatedDealsRoute: AuthenticatedDealsRoute,

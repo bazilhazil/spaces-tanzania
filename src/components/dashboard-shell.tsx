@@ -60,7 +60,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
       { label: t("dashboard.side.performance"), to: "/dashboard/analytics", icon: BarChart3 },
       { label: "Agent Performance", to: "/dashboard/agent-performance", icon: Trophy },
-      { label: "Business Intelligence", to: "/dashboard/intelligence", icon: BarChart3 },
+      { label: "Business Intelligence", to: "/business-intelligence", icon: BarChart3 },
       { label: "Verification", to: "/verification", icon: ShieldCheck },
       { label: "Verification Hub", to: "/verification-hub", icon: ShieldCheck },
       { label: "Trust Score", to: "/trust", icon: Sparkles },
