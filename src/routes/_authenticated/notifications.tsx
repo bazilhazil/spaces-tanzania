@@ -111,23 +111,38 @@ function NotificationsPage() {
         </header>
 
         <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <TabsList className="flex w-full flex-wrap justify-start gap-1 md:w-auto">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="unread">Unread</TabsTrigger>
-              <TabsTrigger value="read">Read</TabsTrigger>
-              <TabsTrigger value="today">Today</TabsTrigger>
-              <TabsTrigger value="week">This week</TabsTrigger>
-              <TabsTrigger value="earlier">Earlier</TabsTrigger>
-              <TabsTrigger value="settings"><Settings2 className="mr-1.5 h-3.5 w-3.5" />Settings</TabsTrigger>
-            </TabsList>
-            {tab !== "settings" && (
-              <div className="relative w-full md:w-64">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search notifications" className="pl-9" />
-              </div>
-            )}
+          <div className="flex items-center gap-2">
+            <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <TabsList className="inline-flex w-max flex-nowrap justify-start gap-1 whitespace-nowrap">
+                <TabsTrigger value="all" className="shrink-0">All</TabsTrigger>
+                <TabsTrigger value="unread" className="shrink-0">Unread</TabsTrigger>
+                <TabsTrigger value="read" className="shrink-0">Read</TabsTrigger>
+                <TabsTrigger value="today" className="shrink-0">Today</TabsTrigger>
+                <TabsTrigger value="week" className="shrink-0">This week</TabsTrigger>
+                <TabsTrigger value="earlier" className="shrink-0">Earlier</TabsTrigger>
+                <TabsTrigger value="settings" className="hidden shrink-0 md:inline-flex">
+                  <Settings2 className="mr-1.5 h-3.5 w-3.5" />Settings
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            <Button
+              variant={tab === "settings" ? "default" : "outline"}
+              size="icon"
+              className="shrink-0 md:hidden"
+              aria-label="Settings"
+              aria-pressed={tab === "settings"}
+              onClick={() => setTab(tab === "settings" ? "all" : "settings")}
+            >
+              <Settings2 className="h-4 w-4" />
+            </Button>
           </div>
+
+          {tab !== "settings" && (
+            <div className="relative w-full">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search notifications" className="pl-9" />
+            </div>
+          )}
 
           {(["all", "unread", "read", "today", "week", "earlier"] as const).map((t) => (
             <TabsContent key={t} value={t} className="mt-0">
