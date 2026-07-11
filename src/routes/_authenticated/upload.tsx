@@ -863,7 +863,7 @@ function StepPreview({
             </div>
           </div>
 
-          <div className="flex justify-end"><EditBtn s={3} label="Details" /></div>
+          <div className="flex justify-end"><EditBtn s={4} label="Details" /></div>
 
           {(draft.bedrooms || draft.bathrooms || draft.parking || draft.area_sqm) && (
             <div className="grid grid-cols-4 gap-3 rounded-2xl bg-muted p-3 text-center text-sm">
