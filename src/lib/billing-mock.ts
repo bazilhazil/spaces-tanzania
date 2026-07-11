@@ -10,7 +10,7 @@ export type InvoiceStatus = "paid" | "pending" | "failed" | "refunded";
 export type PaymentMethodId =
   | "mpesa"
   | "mixx"
-  | "tigopesa"
+  | "selcom"
   | "airtel"
   | "halopesa"
   | "visa"
