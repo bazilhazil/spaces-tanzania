@@ -38,6 +38,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPropertyIdRouteImport } from './routes/_authenticated/property.$id'
 import { Route as AuthenticatedDashboardPropertiesRouteImport } from './routes/_authenticated/dashboard.properties'
 import { Route as AuthenticatedDashboardPerformanceRouteImport } from './routes/_authenticated/dashboard.performance'
+import { Route as AuthenticatedDashboardIntelligenceRouteImport } from './routes/_authenticated/dashboard.intelligence'
 import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_authenticated/dashboard.favorites'
 import { Route as AuthenticatedDashboardAgentPerformanceRouteImport } from './routes/_authenticated/dashboard.agent-performance'
 import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_authenticated/dashboard.$section'
@@ -191,6 +192,12 @@ const AuthenticatedDashboardPerformanceRoute =
     path: '/performance',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardIntelligenceRoute =
+  AuthenticatedDashboardIntelligenceRouteImport.update({
+    id: '/intelligence',
+    path: '/intelligence',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardFavoritesRoute =
   AuthenticatedDashboardFavoritesRouteImport.update({
     id: '/favorites',
@@ -245,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/dashboard/agent-performance': typeof AuthenticatedDashboardAgentPerformanceRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
+  '/dashboard/intelligence': typeof AuthenticatedDashboardIntelligenceRoute
   '/dashboard/performance': typeof AuthenticatedDashboardPerformanceRoute
   '/dashboard/properties': typeof AuthenticatedDashboardPropertiesRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
@@ -278,6 +286,7 @@ export interface FileRoutesByTo {
   '/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/dashboard/agent-performance': typeof AuthenticatedDashboardAgentPerformanceRoute
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
+  '/dashboard/intelligence': typeof AuthenticatedDashboardIntelligenceRoute
   '/dashboard/performance': typeof AuthenticatedDashboardPerformanceRoute
   '/dashboard/properties': typeof AuthenticatedDashboardPropertiesRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
@@ -314,6 +323,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/$section': typeof AuthenticatedDashboardSectionRoute
   '/_authenticated/dashboard/agent-performance': typeof AuthenticatedDashboardAgentPerformanceRoute
   '/_authenticated/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
+  '/_authenticated/dashboard/intelligence': typeof AuthenticatedDashboardIntelligenceRoute
   '/_authenticated/dashboard/performance': typeof AuthenticatedDashboardPerformanceRoute
   '/_authenticated/dashboard/properties': typeof AuthenticatedDashboardPropertiesRoute
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
@@ -350,6 +360,7 @@ export interface FileRouteTypes {
     | '/dashboard/$section'
     | '/dashboard/agent-performance'
     | '/dashboard/favorites'
+    | '/dashboard/intelligence'
     | '/dashboard/performance'
     | '/dashboard/properties'
     | '/property/$id'
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/dashboard/$section'
     | '/dashboard/agent-performance'
     | '/dashboard/favorites'
+    | '/dashboard/intelligence'
     | '/dashboard/performance'
     | '/dashboard/properties'
     | '/property/$id'
@@ -418,6 +430,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/$section'
     | '/_authenticated/dashboard/agent-performance'
     | '/_authenticated/dashboard/favorites'
+    | '/_authenticated/dashboard/intelligence'
     | '/_authenticated/dashboard/performance'
     | '/_authenticated/dashboard/properties'
     | '/_authenticated/property/$id'
@@ -644,6 +657,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardPerformanceRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/intelligence': {
+      id: '/_authenticated/dashboard/intelligence'
+      path: '/intelligence'
+      fullPath: '/dashboard/intelligence'
+      preLoaderRoute: typeof AuthenticatedDashboardIntelligenceRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/favorites': {
       id: '/_authenticated/dashboard/favorites'
       path: '/favorites'
@@ -692,6 +712,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardSectionRoute: typeof AuthenticatedDashboardSectionRoute
   AuthenticatedDashboardAgentPerformanceRoute: typeof AuthenticatedDashboardAgentPerformanceRoute
   AuthenticatedDashboardFavoritesRoute: typeof AuthenticatedDashboardFavoritesRoute
+  AuthenticatedDashboardIntelligenceRoute: typeof AuthenticatedDashboardIntelligenceRoute
   AuthenticatedDashboardPerformanceRoute: typeof AuthenticatedDashboardPerformanceRoute
   AuthenticatedDashboardPropertiesRoute: typeof AuthenticatedDashboardPropertiesRoute
 }
@@ -702,6 +723,8 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardAgentPerformanceRoute:
       AuthenticatedDashboardAgentPerformanceRoute,
     AuthenticatedDashboardFavoritesRoute: AuthenticatedDashboardFavoritesRoute,
+    AuthenticatedDashboardIntelligenceRoute:
+      AuthenticatedDashboardIntelligenceRoute,
     AuthenticatedDashboardPerformanceRoute:
       AuthenticatedDashboardPerformanceRoute,
     AuthenticatedDashboardPropertiesRoute:
