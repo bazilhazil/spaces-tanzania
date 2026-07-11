@@ -10,10 +10,13 @@ export type InvoiceStatus = "paid" | "pending" | "failed" | "refunded";
 export type PaymentMethodId =
   | "mpesa"
   | "mixx"
+  | "tigopesa"
   | "airtel"
   | "halopesa"
   | "visa"
-  | "mastercard";
+  | "mastercard"
+  | "bank";
+
 
 export type Plan = {
   id: PlanId;
