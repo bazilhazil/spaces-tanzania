@@ -406,7 +406,7 @@ function UploadWizardPage() {
               </span>
               <span className="text-muted-foreground">
                 {savedTick > 0 ? (
-                  <span className="inline-flex items-center gap-1"><Save className="h-3 w-3" /> Saved</span>
+                  <span className="inline-flex items-center gap-1"><Save className="h-3 w-3" /> Saved automatically</span>
                 ) : (
                   `${Math.round((step / TOTAL) * 100)}%`
                 )}
