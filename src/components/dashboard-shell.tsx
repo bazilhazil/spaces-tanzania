@@ -64,7 +64,6 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: "Verification", to: "/verification", icon: ShieldCheck },
       { label: "Verification Hub", to: "/verification-hub", icon: ShieldCheck },
       { label: "Trust Score", to: "/trust", icon: Sparkles },
-      { label: "Trust Score", to: "/trust", icon: Sparkles },
       { label: "Billing & Plans", to: "/billing", icon: CreditCard },
       { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
     ],
