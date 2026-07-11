@@ -32,6 +32,9 @@ export function BillingCenter() {
   const isAdmin = primaryRole === "admin" || primaryRole === "super_admin";
   const [tab, setTab] = useState<Tab>("plans");
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
+  const [intent, setIntent] = useState<PaymentIntent | null>(null);
+  const openIntent = (i: PaymentIntent) => setIntent(i);
+
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "plans", label: "Plans" },
