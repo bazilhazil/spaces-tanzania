@@ -17,7 +17,7 @@ import { StatCard, EmptyState } from "@/components/ds";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/dashboard/intelligence")({
+export const Route = createFileRoute("/_authenticated/business-intelligence")({
   head: () => ({
     meta: [
       { title: "Business Intelligence — SPACES" },
