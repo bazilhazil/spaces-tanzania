@@ -233,7 +233,7 @@ export function DealsCenter() {
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter}
                         onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-              <div className="flex gap-3 overflow-x-auto pb-4">
+              <div className="flex flex-col gap-3 overflow-hidden pb-4 md:flex-row md:overflow-x-auto">
                 {DEAL_STAGES.map((s) => (
                   <StageColumn
                     key={s}
