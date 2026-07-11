@@ -395,5 +395,18 @@
     "body": "Something went wrong on our end. Try refreshing or head back home.",
     "retry": "Try again",
     "home": "Go home"
+  },
+  "favoritesPage": {
+    "title": "Favorites",
+    "subtitle": "Properties you've saved across your devices.",
+    "back": "Dashboard",
+    "savedOn": "Saved {date}",
+    "contact": "Contact owner",
+    "remove": "Remove",
+    "removed": "Removed from favorites",
+    "emptyTitle": "No saved properties yet.",
+    "emptyBody": "Tap the heart on any listing to save it here.",
+    "browse": "Browse Properties",
+    "loading": "Loading your favorites…"
   }
 }
