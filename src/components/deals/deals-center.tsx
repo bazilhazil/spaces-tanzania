@@ -184,14 +184,14 @@ export function DealsCenter() {
           />
         </div>
         <Select value={stageFilter} onValueChange={(v) => setStageFilter(v as DealStage | "all")}>
-          <SelectTrigger className="h-11 w-[170px] rounded-xl"><SelectValue placeholder="Stage" /></SelectTrigger>
+          <SelectTrigger className="h-11 w-full rounded-xl sm:w-[170px]"><SelectValue placeholder="Stage" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All stages</SelectItem>
             {DEAL_STAGES.map((s) => <SelectItem key={s} value={s}>{STAGE_LABEL[s]}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={priorityFilter} onValueChange={(v) => setPriorityFilter(v as DealPriority | "all")}>
-          <SelectTrigger className="h-11 w-[140px] rounded-xl"><SelectValue placeholder="Priority" /></SelectTrigger>
+          <SelectTrigger className="h-11 w-full rounded-xl sm:w-[140px]"><SelectValue placeholder="Priority" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All priorities</SelectItem>
             <SelectItem value="low">Low</SelectItem>
@@ -201,7 +201,7 @@ export function DealsCenter() {
           </SelectContent>
         </Select>
         <Select value={regionFilter} onValueChange={setRegionFilter}>
-          <SelectTrigger className="h-11 w-[150px] rounded-xl"><SelectValue placeholder="Region" /></SelectTrigger>
+          <SelectTrigger className="h-11 w-full rounded-xl sm:w-[150px]"><SelectValue placeholder="Region" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All regions</SelectItem>
             {regions.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
@@ -211,8 +211,9 @@ export function DealsCenter() {
           type="date"
           value={dateFrom}
           onChange={(e) => setDateFrom(e.target.value)}
-          className="h-11 w-[160px] rounded-xl"
+          className="h-11 w-full rounded-xl sm:w-[160px]"
         />
+
         {(stageFilter !== "all" || priorityFilter !== "all" || regionFilter !== "all" || dateFrom) && (
           <Button variant="ghost" className="h-11 rounded-xl" onClick={() => {
             setStageFilter("all"); setPriorityFilter("all"); setRegionFilter("all"); setDateFrom("");
