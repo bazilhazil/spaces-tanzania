@@ -33,7 +33,7 @@ const RANGE_LABEL: Record<Range, string> = {
   "1d": "Today", "7d": "Last 7 days", "30d": "Last 30 days", "90d": "Last 90 days", "1y": "Last year",
 };
 
-type Prop = { id: string; title: string; region: string | null; district: string | null; city?: string | null; property_type?: string | null; price: number | null; currency: string | null; status: string | null; view_count: number | null; created_at: string; owner_id: string | null };
+type Prop = { id: string; title: string; region: string | null; district: string | null; property_type?: string | null; price: number | null; currency: string | null; status: string | null; view_count: number | null; created_at: string; owner_id: string | null };
 type Deal = { id: string; property_id: string | null; stage: string; health: string | null; value: number | null; currency: string | null; agent_id: string | null; owner_id: string | null; created_at: string; last_activity_at: string | null };
 type Booking = { id: string; property_id: string | null; status: string; scheduled_at: string; created_at: string };
 type Conv = { id: string; property_id: string | null; created_at: string; last_message_at: string | null };
@@ -93,7 +93,7 @@ function BIPage() {
     (async () => {
       setLoading(true);
       const [pRes, dRes, bRes, cRes, vRes, prRes, nRes] = await Promise.all([
-        supabase.from("properties").select("id,title,region,district,city,property_type,price,currency,status,view_count,created_at,owner_id").order("created_at", { ascending: false }).limit(500),
+        supabase.from("properties").select("id,title,region,district,property_type,price,currency,status,view_count,created_at,owner_id").order("created_at", { ascending: false }).limit(500),
         supabase.from("deals").select("id,property_id,stage,health,value,currency,agent_id,owner_id,created_at,last_activity_at").order("created_at", { ascending: false }).limit(500),
         supabase.from("bookings").select("id,property_id,status,scheduled_at,created_at").order("created_at", { ascending: false }).limit(500),
         supabase.from("conversations").select("id,property_id,created_at,last_message_at").order("created_at", { ascending: false }).limit(500),
@@ -205,7 +205,7 @@ function BIPage() {
   // Market insights
   const topRegions = useMemo(() => {
     const m = new Map<string, number>();
-    fProps.forEach((p) => { const k = p.region || p.city || "—"; m.set(k, (m.get(k) ?? 0) + (p.view_count ?? 0)); });
+    fProps.forEach((p) => { const k = p.region || p.district || "—"; m.set(k, (m.get(k) ?? 0) + (p.view_count ?? 0)); });
     return Array.from(m.entries()).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([name, value]) => ({ name, value }));
   }, [fProps]);
 
