@@ -315,7 +315,7 @@ function OverviewPanel({
   return (
     <div className="space-y-6">
       {/* KPIs */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <KpiCard icon={<Sparkles className="h-4 w-4" />} label="Today's leads" value={kpis.todaysLeads} tone="primary" />
         <KpiCard icon={<Clock className="h-4 w-4" />} label="Pending follow-ups" value={kpis.pendingFollowUps} tone="amber" />
         <KpiCard icon={<TrendingUp className="h-4 w-4" />} label="Conversion rate" value={`${kpis.conversion}%`} tone="emerald" />
@@ -621,7 +621,7 @@ function AnalyticsPanel({ leads, kpis }: { leads: Lead[]; kpis: ReturnType<typeo
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <KpiCard icon={<TrendingUp className="h-4 w-4" />} label="Conversion" value={`${kpis.conversion}%`} tone="emerald" />
         <KpiCard icon={<CheckCheck className="h-4 w-4" />} label="Closed deals" value={kpis.closed} tone="primary" />
         <KpiCard icon={<Clock className="h-4 w-4" />} label="Avg closing" value={kpis.avgDays ? `${kpis.avgDays}d` : "—"} tone="indigo" />

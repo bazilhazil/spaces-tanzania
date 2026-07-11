@@ -118,7 +118,7 @@ export function DashboardPanel() {
       />
 
       {/* KPI grid */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {KPI.map((k) => (
           <StatCard key={k.label} label={k.label} value={k.value} delta={k.delta} tone={k.tone}
             icon={k.label.includes("Revenue") ? DollarSign : k.label.includes("Listing") ? Home : k.label.includes("Booking") ? Calendar : Activity} />
@@ -126,7 +126,7 @@ export function DashboardPanel() {
       </div>
 
       {/* Highlights row */}
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {HIGHLIGHTS.map((h) => (
           <div key={h.label} className="ds-card p-4">
             <div className="ds-caption">{h.label}</div>
@@ -439,7 +439,7 @@ export function ReportsPanel() {
   return (
     <>
       <PageHeader kicker="Trust & Safety" title="Reports" subtitle="User-submitted reports across listings, users, and messages." />
-      <div className="mb-6 grid gap-3 sm:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Pending" value="14" tone="danger" icon={Flag} />
         <StatCard label="Resolved (7d)" value="42" tone="success" icon={CheckCircle2} />
         <StatCard label="High severity" value="3" tone="danger" icon={AlertTriangle} />
@@ -543,7 +543,7 @@ export function PaymentsPanel() {
   return (
     <>
       <PageHeader kicker="Revenue" title="Payments" subtitle="All transactions across SPACES." />
-      <div className="mb-6 grid gap-3 sm:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Today" value="TZS 8.4M" delta={6.2} tone="success" icon={DollarSign} />
         <StatCard label="This week" value="TZS 42.1M" delta={11.0} tone="brand" icon={DollarSign} />
         <StatCard label="Refunds (30d)" value="TZS 620K" delta={-2.0} tone="danger" icon={RefreshCw} />

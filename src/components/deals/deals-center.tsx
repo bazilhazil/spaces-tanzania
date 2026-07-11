@@ -162,7 +162,7 @@ export function DealsCenter() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* KPI grid */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <Kpi icon={Activity} label="Active" value={stats.active} tone="text-sky-600" />
         <Kpi icon={Calendar} label="Closing this week" value={stats.closingWeek} tone="text-violet-600" />
         <Kpi icon={CheckCircle2} label="Completed" value={stats.completed} tone="text-emerald-600" />
@@ -173,7 +173,7 @@ export function DealsCenter() {
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 min-w-[220px]">
+        <div className="relative w-full sm:flex-1 sm:min-w-[220px]">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
