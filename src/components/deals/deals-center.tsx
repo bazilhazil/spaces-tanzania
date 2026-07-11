@@ -160,9 +160,9 @@ export function DealsCenter() {
                     primaryRole === "admin" || primaryRole === "super_admin";
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="w-full max-w-full space-y-6 animate-fade-in">
       {/* KPI grid */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         <Kpi icon={Activity} label="Active" value={stats.active} tone="text-sky-600" />
         <Kpi icon={Calendar} label="Closing this week" value={stats.closingWeek} tone="text-violet-600" />
         <Kpi icon={CheckCircle2} label="Completed" value={stats.completed} tone="text-emerald-600" />
@@ -170,6 +170,7 @@ export function DealsCenter() {
         <Kpi icon={Clock} label="Avg. close time" value={`${stats.avgDays}d`} tone="text-amber-600" />
         <Kpi icon={DollarSign} label="Pipeline value" value={fmtMoney(stats.totalValue, deals[0]?.currency ?? "TZS")} tone="text-primary" small />
       </div>
+
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
@@ -183,14 +184,14 @@ export function DealsCenter() {
           />
         </div>
         <Select value={stageFilter} onValueChange={(v) => setStageFilter(v as DealStage | "all")}>
-          <SelectTrigger className="h-11 w-[170px] rounded-xl"><SelectValue placeholder="Stage" /></SelectTrigger>
+          <SelectTrigger className="h-11 w-full rounded-xl sm:w-[170px]"><SelectValue placeholder="Stage" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All stages</SelectItem>
             {DEAL_STAGES.map((s) => <SelectItem key={s} value={s}>{STAGE_LABEL[s]}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={priorityFilter} onValueChange={(v) => setPriorityFilter(v as DealPriority | "all")}>
-          <SelectTrigger className="h-11 w-[140px] rounded-xl"><SelectValue placeholder="Priority" /></SelectTrigger>
+          <SelectTrigger className="h-11 w-full rounded-xl sm:w-[140px]"><SelectValue placeholder="Priority" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All priorities</SelectItem>
             <SelectItem value="low">Low</SelectItem>
@@ -200,7 +201,7 @@ export function DealsCenter() {
           </SelectContent>
         </Select>
         <Select value={regionFilter} onValueChange={setRegionFilter}>
-          <SelectTrigger className="h-11 w-[150px] rounded-xl"><SelectValue placeholder="Region" /></SelectTrigger>
+          <SelectTrigger className="h-11 w-full rounded-xl sm:w-[150px]"><SelectValue placeholder="Region" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All regions</SelectItem>
             {regions.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
@@ -210,8 +211,9 @@ export function DealsCenter() {
           type="date"
           value={dateFrom}
           onChange={(e) => setDateFrom(e.target.value)}
-          className="h-11 w-[160px] rounded-xl"
+          className="h-11 w-full rounded-xl sm:w-[160px]"
         />
+
         {(stageFilter !== "all" || priorityFilter !== "all" || regionFilter !== "all" || dateFrom) && (
           <Button variant="ghost" className="h-11 rounded-xl" onClick={() => {
             setStageFilter("all"); setPriorityFilter("all"); setRegionFilter("all"); setDateFrom("");
@@ -231,7 +233,7 @@ export function DealsCenter() {
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter}
                         onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-              <div className="flex gap-3 overflow-x-auto pb-4">
+              <div className="flex flex-col gap-3 overflow-hidden pb-4 md:flex-row md:overflow-x-auto">
                 {DEAL_STAGES.map((s) => (
                   <StageColumn
                     key={s}
@@ -278,9 +280,10 @@ function StageColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex w-72 shrink-0 flex-col rounded-2xl border border-border/60 bg-secondary/30 p-2 transition",
+        "flex w-full shrink-0 flex-col rounded-2xl border border-border/60 bg-secondary/30 p-4 transition md:w-72 md:p-2",
         isOver && "ring-2 ring-primary/50 bg-primary/5",
       )}
+
     >
       <div className="flex items-center justify-between px-2 py-2">
         <div className="flex items-center gap-2">
