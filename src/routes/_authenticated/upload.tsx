@@ -961,6 +961,16 @@ function StepPublish({
 
       <ListingScorePanel score={score} breakdown={breakdown} />
 
+      <div className="flex items-start gap-3 rounded-2xl border border-border bg-accent/40 p-4">
+        <Shield className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+        <div className="text-sm">
+          <div className="font-semibold text-foreground">Your property will be reviewed before going live.</div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            Status flow: <span className="font-medium">Draft → Pending Review → Approved</span> (or Rejected with feedback).
+          </div>
+        </div>
+      </div>
+
       <div className="space-y-3 pt-2">
         <Button onClick={onPublish} disabled={submitting} size="lg" className="h-14 w-full rounded-full text-base">
           {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Publishing…</> : <><Sparkles className="mr-2 h-5 w-5" /> Publish now</>}
