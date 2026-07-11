@@ -27,6 +27,7 @@ import { Route as AuthenticatedVerificationHubRouteImport } from './routes/_auth
 import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
 import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
 import { Route as AuthenticatedTrustRouteImport } from './routes/_authenticated/trust'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedDealsRouteImport } from './routes/_authenticated/deals'
@@ -136,6 +137,12 @@ const AuthenticatedTrustRoute = AuthenticatedTrustRouteImport.update({
   path: '/trust',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -247,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/deals': typeof AuthenticatedDealsRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/messages': typeof AuthenticatedMessagesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/trust': typeof AuthenticatedTrustRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/verification': typeof AuthenticatedVerificationRoute
@@ -282,6 +290,7 @@ export interface FileRoutesByTo {
   '/deals': typeof AuthenticatedDealsRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/messages': typeof AuthenticatedMessagesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/trust': typeof AuthenticatedTrustRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/verification': typeof AuthenticatedVerificationRoute
@@ -320,6 +329,7 @@ export interface FileRoutesById {
   '/_authenticated/deals': typeof AuthenticatedDealsRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/trust': typeof AuthenticatedTrustRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/_authenticated/verification': typeof AuthenticatedVerificationRoute
@@ -358,6 +368,7 @@ export interface FileRouteTypes {
     | '/deals'
     | '/leads'
     | '/messages'
+    | '/notifications'
     | '/trust'
     | '/upload'
     | '/verification'
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/deals'
     | '/leads'
     | '/messages'
+    | '/notifications'
     | '/trust'
     | '/upload'
     | '/verification'
@@ -430,6 +442,7 @@ export interface FileRouteTypes {
     | '/_authenticated/deals'
     | '/_authenticated/leads'
     | '/_authenticated/messages'
+    | '/_authenticated/notifications'
     | '/_authenticated/trust'
     | '/_authenticated/upload'
     | '/_authenticated/verification'
@@ -591,6 +604,13 @@ declare module '@tanstack/react-router' {
       path: '/trust'
       fullPath: '/trust'
       preLoaderRoute: typeof AuthenticatedTrustRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/messages': {
@@ -773,6 +793,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDealsRoute: typeof AuthenticatedDealsRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedTrustRoute: typeof AuthenticatedTrustRoute
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
   AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
@@ -792,6 +813,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDealsRoute: AuthenticatedDealsRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedTrustRoute: AuthenticatedTrustRoute,
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
   AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,

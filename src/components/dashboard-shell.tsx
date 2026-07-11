@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
   Heart, Search, User as UserIcon, Users, Briefcase, GitCompare, Clock, Contact,
-  Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles, Handshake, Trophy, ShieldAlert,
+  Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles, Handshake, Trophy, ShieldAlert, Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -28,6 +28,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: "Deals", to: "/deals", icon: Handshake },
       { label: "Viewings", to: "/viewings", icon: Calendar },
       { label: "Messages", to: "/messages", icon: MessageSquare },
+      { label: "Notifications", to: "/notifications", icon: Bell },
       { label: "Saved Drafts", to: "/dashboard/drafts", icon: FileEdit },
       { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
       { label: "Performance", to: "/dashboard/performance", icon: BarChart3 },
@@ -47,6 +48,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.savedSearches"), to: "/dashboard/searches", icon: Search },
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
+      { label: "Notifications", to: "/notifications", icon: Bell },
       { label: "Compare", to: "/compare", icon: GitCompare },
       { label: "Recently Viewed", to: "/dashboard/recent", icon: Clock },
       { label: t("nav.profile"), to: "/dashboard/settings", icon: UserIcon },
@@ -59,6 +61,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.properties"), to: "/dashboard/properties", icon: Briefcase },
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
+      { label: "Notifications", to: "/notifications", icon: Bell },
       { label: t("dashboard.side.performance"), to: "/dashboard/analytics", icon: BarChart3 },
       { label: "Agent Performance", to: "/dashboard/agent-performance", icon: Trophy },
       { label: "Business Intelligence", to: "/business-intelligence", icon: BarChart3 },
