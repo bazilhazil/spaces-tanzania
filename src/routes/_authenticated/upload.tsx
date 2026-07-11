@@ -60,7 +60,7 @@ const AMENITIES = [
   { value: "internet", label: "Internet", icon: Wifi },
 ] as const;
 
-const STEP_LABELS = ["Photos", "Type", "Details", "Location", "Amenities", "Contact", "Preview", "Publish"];
+const STEP_LABELS = ["Type", "Photos", "Location", "Details", "Amenities", "Contact", "Preview", "Publish"];
 const TOTAL = 8;
 
 
