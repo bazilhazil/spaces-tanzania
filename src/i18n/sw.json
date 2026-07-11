@@ -395,5 +395,18 @@
     "body": "Hitilafu imetokea. Jaribu kupakia upya au rudi mwanzo.",
     "retry": "Jaribu tena",
     "home": "Rudi mwanzo"
+  },
+  "favoritesPage": {
+    "title": "Vipendwa",
+    "subtitle": "Mali ulizohifadhi kwenye vifaa vyako vyote.",
+    "back": "Dashibodi",
+    "savedOn": "Ilihifadhiwa {date}",
+    "contact": "Wasiliana na mmiliki",
+    "remove": "Ondoa",
+    "removed": "Imeondolewa kwenye vipendwa",
+    "emptyTitle": "Hujahifadhi mali yoyote bado.",
+    "emptyBody": "Bonyeza moyo kwenye tangazo lolote ili kuhifadhi hapa.",
+    "browse": "Vinjari Mali",
+    "loading": "Inapakia vipendwa vyako…"
   }
 }
