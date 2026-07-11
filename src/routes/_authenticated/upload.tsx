@@ -420,7 +420,8 @@ function UploadWizardPage() {
 
       <main className="mx-auto max-w-2xl px-4 pb-36 pt-6 sm:pt-10">
         <div key={step} className="animate-fade-in">
-          {step === 1 && (
+          {step === 1 && <StepType value={draft.property_type} onChange={(v) => setField("property_type", v)} />}
+          {step === 2 && (
             <div className="space-y-4">
               {isEdit && existingPhotoCount > 0 && (
                 <div className="rounded-2xl border border-border/60 bg-accent/40 p-4 text-sm text-muted-foreground">
@@ -428,6 +429,7 @@ function UploadWizardPage() {
                   photo{existingPhotoCount === 1 ? "" : "s"}. New photos you add here will be appended.
                 </div>
               )}
+              <p className="text-sm text-muted-foreground">Take photos or select from gallery.</p>
               <PhotoManager
                 media={media}
                 setMedia={setMedia}
@@ -436,9 +438,8 @@ function UploadWizardPage() {
               />
             </div>
           )}
-          {step === 2 && <StepType value={draft.property_type} onChange={(v) => setField("property_type", v)} />}
-          {step === 3 && <StepInfo draft={draft} setField={setField} />}
-          {step === 4 && <StepLocation draft={draft} setField={setField} />}
+          {step === 3 && <StepLocation draft={draft} setField={setField} />}
+          {step === 4 && <StepInfo draft={draft} setField={setField} />}
           {step === 5 && <StepAmenities value={draft.amenities ?? []} onChange={(v) => setField("amenities", v)} />}
           {step === 6 && <StepContact draft={draft} setField={setField} />}
           {step === 7 && <StepPreview draft={draft} media={media} autoTitle={autoTitle} onEdit={setStep} />}
