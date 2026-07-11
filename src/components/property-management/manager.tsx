@@ -553,9 +553,9 @@ function PropertyManageCard({
         </div>
 
         {/* Owner actions — always visible on desktop, ⋯ menu covers mobile */}
-       <div className="bg-red-500 p-8">
-          THIS IS A TEST
-        </div>
+       <div className="bg-green-500 p-8">
+          HELLO SPACES
+         </div>
 
         {/* Metrics */}
         <div className="grid grid-cols-4 gap-1 border-t border-border/50 pt-3 sm:border-t-0 sm:pt-0">
