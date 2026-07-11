@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   Check, Star, Flame, ShieldCheck, Home, Search, Crown, Sparkles,
   CreditCard, Receipt, Download, Tag, TrendingUp, Users, BadgePercent,
-  Smartphone, Wallet, Building2, ArrowRight, Plus, Pause, Play, X,
+  Smartphone, Wallet, Building2, ArrowRight, Plus, Pause, Play, X, History, Settings2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,11 +12,14 @@ import { cn } from "@/lib/utils";
 import { StatCard } from "@/components/ds/stat-card";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { CheckoutDialog } from "@/components/billing/checkout-dialog";
+import { isGatewayConfigured, setGatewayConfigured, VERIFICATION_FEES, type PaymentIntent } from "@/lib/payments-store";
 import {
   PLANS, ADDONS, PAYMENT_METHODS, CURRENT_SUBSCRIPTION, INVOICES, COUPONS,
   REVENUE_KPI, REVENUE_BY_PLAN, REVENUE_TREND,
   formatTZS, planById, type PlanId, type BillingCycle, type AddOn,
 } from "@/lib/billing-mock";
+
 
 const ADDON_ICONS: Record<AddOn["icon"], typeof Star> = {
   star: Star, flame: Flame, shield: ShieldCheck, home: Home, search: Search, crown: Crown,
