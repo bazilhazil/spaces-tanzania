@@ -554,16 +554,7 @@ function PropertyManageCard({
 
         {/* Owner actions — always visible on desktop, ⋯ menu covers mobile */}
        <div className="bg-red-500 p-8">
-    THIS IS A TEST
-</div>
-          <ActionBtn icon={Eye} label="View" onClick={() => onAction("view")} />
-          <ActionBtn icon={Edit3} label="TEST EDIT" onClick={() => onAction("edit")} />
-          {p.status === "paused" || p.status === "draft" ? (
-            <ActionBtn icon={Play} label="Resume" onClick={() => onAction("resume")} />
-          ) : (
-            <ActionBtn icon={Pause} label="Pause" onClick={() => onAction("pause")} />
-          )}
-          <ActionBtn icon={Trash2} label="Delete" onClick={() => onAction("delete")} destructive />
+          THIS IS A TEST
         </div>
 
         {/* Metrics */}
