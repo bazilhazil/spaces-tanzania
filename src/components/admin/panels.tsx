@@ -306,7 +306,7 @@ export function UsersPanel() {
         actions={<Button size="sm" className="gap-2"><Plus className="h-4 w-4" /> Invite Admin</Button>} />
       <Panel>
         <div className="mb-4 flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[240px]">
+          <div className="relative w-full sm:flex-1 sm:min-w-[240px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input placeholder="Search users by name or email…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
           </div>
