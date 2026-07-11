@@ -331,31 +331,90 @@ function BillingPanel() {
 function PaymentMethodsPanel() {
   const mobile = PAYMENT_METHODS.filter(m => m.category === "mobile");
   const card = PAYMENT_METHODS.filter(m => m.category === "card");
+  const bank = PAYMENT_METHODS.filter(m => m.category === "bank");
+  const [configured, setConfigured] = useState(isGatewayConfigured());
+  const [intent, setIntent] = useState<PaymentIntent | null>(null);
 
   return (
     <section className="space-y-6">
-      <div className="ds-card border-primary/20 bg-primary/[0.03] p-5">
-        <div className="flex items-start gap-3">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <Wallet className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="font-semibold">Payment gateways launching soon</div>
-            <p className="mt-1 text-sm text-foreground/75">
-              SPACES is preparing local mobile money and international card acceptance. Gateway integration is on track — the architecture below
-              is ready to receive payments the moment gateways are activated.
-            </p>
+      {configured ? (
+        <div className="ds-card border-emerald-500/30 bg-emerald-500/[0.04] p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-emerald-500/10 text-emerald-600">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="font-semibold">Preview gateway active</div>
+                <p className="mt-1 text-sm text-foreground/75">
+                  Checkout flows are enabled in preview mode. All payments generate real invoices in your history — no funds are moved.
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => { setGatewayConfigured(false); setConfigured(false); toast("Preview gateway disabled"); }}>
+              Disable
+            </Button>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="ds-card border-amber-500/30 bg-amber-500/[0.05] p-6 text-center">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-amber-500/10 text-amber-600">
+            <Wallet className="h-6 w-6" />
+          </div>
+          <div className="mt-3 font-display text-lg font-semibold">Payment gateway setup required</div>
+          <p className="mx-auto mt-1 max-w-md text-sm text-foreground/75">
+            Connect a payment provider to accept live subscriptions, boosts and verification fees on SPACES.
+          </p>
+          <Button className="mt-4" onClick={() => { setGatewayConfigured(true); setConfigured(true); toast.success("Preview gateway enabled"); }}>
+            <Settings2 className="mr-2 h-4 w-4" /> Configure payment provider
+          </Button>
+        </div>
+      )}
 
       <PaymentGroup title="Mobile money" icon={Smartphone} items={mobile} />
       <PaymentGroup title="Cards" icon={CreditCard} items={card} />
+      <PaymentGroup title="Bank" icon={Building2} items={bank} />
+
+      <VerificationFeesPanel onCheckout={setIntent} />
+
+      <CheckoutDialog open={intent !== null} onOpenChange={(v) => !v && setIntent(null)} intent={intent} />
     </section>
   );
 }
 
+function VerificationFeesPanel({ onCheckout }: { onCheckout: (i: PaymentIntent) => void }) {
+  return (
+    <div>
+      <div className="mb-3 flex items-center gap-2">
+        <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+        <div className="font-semibold">Verification payments</div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {VERIFICATION_FEES.map((v) => (
+          <div key={v.id} className="ds-card flex flex-col p-4">
+            <div className="font-semibold">{v.name}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{v.description}</div>
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <span className="font-display text-lg font-semibold">{formatTZS(v.priceTZS)}</span>
+              <Badge variant="outline" className="border-blue-500/30 text-blue-700 dark:text-blue-300">Pending</Badge>
+            </div>
+            <Button size="sm" className="mt-3" onClick={() => onCheckout({
+              purpose: "verification",
+              reference: v.id,
+              label: v.name,
+              amountTZS: v.priceTZS,
+            })}>
+              Pay & submit for review
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function PaymentGroup({ title, icon: Icon, items }: { title: string; icon: typeof Smartphone; items: typeof PAYMENT_METHODS }) {
+
   return (
     <div>
       <div className="mb-3 flex items-center gap-2">
