@@ -572,7 +572,7 @@ function PropertyManageCard({
             params={{ id: p.id }}
             className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
           >
-            View analytics <BarChart3 className="h-3 w-3" />
+            TEST EDIT BUTTON <BarChart3 className="h-3 w-3" />
           </Link>
         </div>
       </div>
