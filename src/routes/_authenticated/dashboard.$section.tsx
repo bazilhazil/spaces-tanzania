@@ -39,7 +39,7 @@ const META: Record<string, { title: string; desc: string }> = {
   favorites:    { title: "Favorites",       desc: "Homes you loved, organised in folders." },
   searches:     { title: "Saved Searches",  desc: "Get alerts when matching homes appear." },
   recent:       { title: "Recently Viewed",  desc: "Pick up browsing where you left off." },
-  clients:      { title: "Clients",         desc: "Your client roster." },
+  clients:      { title: "Active Leads",    desc: "Your active leads." },
   users:        { title: "Users",           desc: "Manage all users." },
   verification: { title: "Verification",    desc: "Pending property verifications." },
   reports:      { title: "Reports",         desc: "Reported listings." },
