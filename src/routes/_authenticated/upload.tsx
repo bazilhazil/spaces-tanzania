@@ -181,7 +181,7 @@ function UploadWizardPage() {
       saveDraft({ ...draftRef.current, step: stepRef.current });
       setSavedTick(Date.now());
       dirtyRef.current = false;
-    }, 5000);
+    }, 30000);
     return () => clearInterval(iv);
   }, [isEdit]);
 
