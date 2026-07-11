@@ -280,9 +280,10 @@ function StageColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex w-72 shrink-0 flex-col rounded-2xl border border-border/60 bg-secondary/30 p-2 transition",
+        "flex w-full shrink-0 flex-col rounded-2xl border border-border/60 bg-secondary/30 p-4 transition md:w-72 md:p-2",
         isOver && "ring-2 ring-primary/50 bg-primary/5",
       )}
+
     >
       <div className="flex items-center justify-between px-2 py-2">
         <div className="flex items-center gap-2">
