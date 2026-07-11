@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
   Heart, Search, User as UserIcon, Users, Briefcase, GitCompare, Clock, Contact,
-  Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles, Handshake, Trophy,
+  Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles, Handshake, Trophy, ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -73,7 +73,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
 
 
 export function DashboardShell({ children }: { children: ReactNode }) {
-  const { profile, user, signOut } = useAuth();
+  const { profile, user, signOut, roles } = useAuth();
   const { mode, setMode } = useMode();
   const activeMode: SpacesMode = mode ?? "buyer";
   const { t } = useI18n();
@@ -81,7 +81,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const NAV = useRoleNav();
-  const items = NAV[activeMode];
+  const isAdmin = roles.includes("admin") || roles.includes("super_admin");
+  const items: Item[] = isAdmin
+    ? [...NAV[activeMode], { label: "Admin Control Center", to: "/admin", icon: ShieldAlert }]
+    : NAV[activeMode];
 
 
 
