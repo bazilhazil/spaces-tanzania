@@ -395,13 +395,13 @@ function OverviewGrid({ o }: { o: {
 }
 
 function QuickActions() {
-  const actions = [
+  const actions: { label: string; to: string; icon: React.ComponentType<{ className?: string }>; primary?: boolean }[] = [
     { label: "List New Space", to: "/upload", icon: Upload, primary: true },
     { label: "View Leads", to: "/leads", icon: Contact },
     { label: "Respond to Messages", to: "/messages", icon: MessageSquare },
     { label: "Upgrade Plan", to: "/billing", icon: Crown },
     { label: "View Analytics", to: "/dashboard/analytics", icon: BarChart3 },
-  ] as const;
+  ];
   return (
     <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-5 md:overflow-visible">
       {actions.map((a) => {
