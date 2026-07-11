@@ -73,10 +73,7 @@ function mapRow(row: Row, images: string[]): Property {
 // For anonymous visitors we query `public_properties` (a view that omits owner
 // contact details). Authenticated users hit the base `properties` table so
 // they still get contact_name/contact_phone/contact_whatsapp on the details page.
-async function currentSource(): Promise<"properties" | "public_properties"> {
-  const { data } = await supabase.auth.getSession();
-  return data.session ? "properties" : "public_properties";
-}
+
 
 export async function fetchLiveProperties(limit = 60): Promise<Property[]> {
   const { data: session } = await supabase.auth.getSession();
