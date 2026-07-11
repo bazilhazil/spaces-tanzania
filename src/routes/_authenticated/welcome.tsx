@@ -53,8 +53,8 @@ const CARDS: Card[] = [
     emoji: "🤝",
     icon: Handshake,
     title: "I'm a Real Estate Agent",
-    desc: "Manage multiple listings and clients.",
-    unlocks: ["Clients", "Listings", "Commission", "Performance"],
+    desc: "Manage multiple listings and leads.",
+    unlocks: ["Active Leads", "Listings", "Commission", "Performance"],
     gradient: "from-amber-500/15 via-primary/10 to-transparent",
   },
 ];

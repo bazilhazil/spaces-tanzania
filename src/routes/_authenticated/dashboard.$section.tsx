@@ -39,7 +39,7 @@ const META: Record<string, { title: string; desc: string }> = {
   favorites:    { title: "Favorites",       desc: "Homes you loved, organised in folders." },
   searches:     { title: "Saved Searches",  desc: "Get alerts when matching homes appear." },
   recent:       { title: "Recently Viewed",  desc: "Pick up browsing where you left off." },
-  clients:      { title: "Clients",         desc: "Your client roster." },
+  clients:      { title: "Active Leads",    desc: "Your active leads." },
   users:        { title: "Users",           desc: "Manage all users." },
   verification: { title: "Verification",    desc: "Pending property verifications." },
   reports:      { title: "Reports",         desc: "Reported listings." },
@@ -628,7 +628,7 @@ function ModePanel() {
   const options: { key: SpacesMode; emoji: string; title: string; desc: string; unlocks: string[] }[] = [
     { key: "buyer", emoji: "🏠", title: "Buyer", desc: "Find your next home.", unlocks: ["Favorites", "Viewing Requests", "Saved Searches"] },
     { key: "owner", emoji: "🏡", title: "Owner", desc: "List and manage your properties.", unlocks: ["Upload Property", "My Properties", "Analytics", "Bookings"] },
-    { key: "agent", emoji: "🤝", title: "Agent", desc: "Manage clients and listings.", unlocks: ["Clients", "Listings", "Commission", "Performance"] },
+    { key: "agent", emoji: "🤝", title: "Agent", desc: "Manage leads and listings.", unlocks: ["Active Leads", "Listings", "Commission", "Performance"] },
   ];
   return (
     <div className="grid gap-4 md:grid-cols-3">
