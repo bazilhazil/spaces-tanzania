@@ -199,22 +199,53 @@ function NotifList({ items }: { items: SpacesNotification[] }) {
                 </div>
                 <span className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground">{timeAgo(n.createdAt)}</span>
               </div>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
+              <div className="mt-2 flex items-center justify-between gap-2">
                 <Badge variant="outline" className="rounded-full text-[10px]">{KIND_META[n.kind].label}</Badge>
-                {n.href && (
-                  <Button asChild size="sm" variant="ghost" className="h-7 px-2 text-xs">
-                    <Link to={n.href}>Open</Link>
+
+                {/* Desktop: inline action buttons */}
+                <div className="hidden flex-wrap items-center gap-1 md:flex">
+                  {n.href && (
+                    <Button asChild size="sm" variant="ghost" className="h-7 px-2 text-xs">
+                      <Link to={n.href}>Open</Link>
+                    </Button>
+                  )}
+                  {!n.read && (
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => markRead(n.id)}>
+                      <Check className="mr-1 h-3.5 w-3.5" />Mark read
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
+                    onClick={() => { removeNotification(n.id); toast.success("Notification deleted"); }}>
+                    <Trash2 className="mr-1 h-3.5 w-3.5" />Delete
                   </Button>
-                )}
-                {!n.read && (
-                  <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => markRead(n.id)}>
-                    <Check className="mr-1 h-3.5 w-3.5" />Mark read
-                  </Button>
-                )}
-                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
-                  onClick={() => { removeNotification(n.id); toast.success("Notification deleted"); }}>
-                  <Trash2 className="mr-1 h-3.5 w-3.5" />Delete
-                </Button>
+                </div>
+
+                {/* Mobile: dropdown menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0 md:hidden" aria-label="Notification actions">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    {n.href && (
+                      <DropdownMenuItem asChild>
+                        <Link to={n.href}>Open</Link>
+                      </DropdownMenuItem>
+                    )}
+                    {!n.read && (
+                      <DropdownMenuItem onClick={() => markRead(n.id)}>
+                        <Check className="mr-2 h-4 w-4" />Mark as read
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={() => { removeNotification(n.id); toast.success("Notification deleted"); }}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </li>
