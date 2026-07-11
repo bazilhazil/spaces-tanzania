@@ -147,7 +147,7 @@ export type PaymentMethod = {
 export const PAYMENT_METHODS: PaymentMethod[] = [
   { id: "mpesa", name: "M-Pesa", category: "mobile", status: "planned", description: "Vodacom mobile money" },
   { id: "mixx", name: "Mixx by Yas", category: "mobile", status: "planned", description: "Yas Tanzania wallet" },
-  { id: "tigopesa", name: "Tigo Pesa", category: "mobile", status: "planned", description: "Tigo mobile money" },
+  { id: "selcom", name: "Selcom", category: "mobile", status: "planned", description: "Selcom Pesa wallet" },
   { id: "airtel", name: "Airtel Money", category: "mobile", status: "planned", description: "Airtel mobile money" },
   { id: "halopesa", name: "HaloPesa", category: "mobile", status: "planned", description: "Halotel mobile money" },
   { id: "visa", name: "Visa", category: "card", status: "planned", description: "Global credit / debit" },
