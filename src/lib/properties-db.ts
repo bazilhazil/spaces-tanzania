@@ -70,24 +70,31 @@ function mapRow(row: Row, images: string[]): Property {
   };
 }
 
+// For anonymous visitors we query `public_properties` (a view that omits owner
+// contact details). Authenticated users hit the base `properties` table so
+// they still get contact_name/contact_phone/contact_whatsapp on the details page.
+
+
 export async function fetchLiveProperties(limit = 60): Promise<Property[]> {
-  const { data, error } = await supabase
-    .from("properties")
-    .select("*")
-    .eq("status", "live")
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  if (error || !data) return [];
-  const media = await mediaForProperties(data.map((r: any) => r.id));
-  return (data as Row[]).map((r) => mapRow(r, media[r.id] ?? []));
+  const { data: session } = await supabase.auth.getSession();
+  const result = session.session
+    ? await supabase.from("properties").select("*").eq("status", "live").order("created_at", { ascending: false }).limit(limit)
+    : await supabase.from("public_properties").select("*").order("created_at", { ascending: false }).limit(limit);
+  if (result.error || !result.data) return [];
+  const rows = result.data as Row[];
+  const media = await mediaForProperties(rows.map((r) => r.id));
+  return rows.map((r) => mapRow(r, media[r.id] ?? []));
 }
 
 export async function fetchPropertyById(id: string): Promise<{ property: Property; row: Row } | null> {
-  const { data } = await supabase.from("properties").select("*").eq("id", id).maybeSingle();
-  if (!data) return null;
-  // allow viewing live listings publicly; owner/admin covered by RLS
-  const media = await mediaForProperties([data.id]);
-  return { property: mapRow(data, media[data.id] ?? []), row: data };
+  const { data: session } = await supabase.auth.getSession();
+  const result = session.session
+    ? await supabase.from("properties").select("*").eq("id", id).maybeSingle()
+    : await supabase.from("public_properties").select("*").eq("id", id).maybeSingle();
+  if (!result.data) return null;
+  const row = result.data as Row;
+  const media = await mediaForProperties([row.id]);
+  return { property: mapRow(row, media[row.id] ?? []), row };
 }
 
 export function contactAgentFromRow(row: Row): Agent {
