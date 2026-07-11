@@ -204,13 +204,13 @@ function UploadWizardPage() {
 
   function canProceed(): string | null {
     switch (step) {
-      case 1: return (media.some((m) => m.kind === "image") || existingPhotoCount > 0) ? null : "Add at least one photo";
-      case 2: return draft.property_type ? null : "Pick a property type";
+      case 1: return draft.property_type ? null : "Pick a property type";
+      case 2: return (media.some((m) => m.kind === "image") || existingPhotoCount > 0) ? null : "Add at least one photo";
       case 3:
-        if (!draft.price || draft.price <= 0) return "Enter a price";
+        if (!draft.region?.trim() || !draft.district?.trim()) return "Region and district are required";
         return null;
       case 4:
-        if (!draft.region?.trim() || !draft.district?.trim()) return "Region and district are required";
+        if (!draft.price || draft.price <= 0) return "Enter a price";
         return null;
       case 6:
         if (!draft.contact_name?.trim()) return "Add your name";
