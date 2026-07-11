@@ -148,11 +148,27 @@ function PlansPanel({ cycle, onCycleChange, onCheckout }: { cycle: BillingCycle;
                   className="w-full"
                   variant={isCurrent ? "outline" : plan.featured ? "default" : "outline"}
                   disabled={isCurrent}
-                  onClick={() => toast.success(`Plan change queued — ${plan.name}`, { description: "Payment gateway will be enabled soon." })}
+                  onClick={() => {
+                    if (price == null) {
+                      toast.success("Sales team notified", { description: "We'll reach out about Enterprise pricing." });
+                      return;
+                    }
+                    if (price === 0) {
+                      toast.success("You're on the Free plan");
+                      return;
+                    }
+                    onCheckout({
+                      purpose: "subscription",
+                      reference: plan.id,
+                      label: `${plan.name} — ${cycle === "monthly" ? "Monthly" : "Annual"}`,
+                      amountTZS: price,
+                    });
+                  }}
                 >
                   {isCurrent ? "Current plan" : plan.cta}
                 </Button>
               </div>
+
             </div>
           );
         })}
