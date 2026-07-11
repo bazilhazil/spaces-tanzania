@@ -62,14 +62,17 @@ export function BillingCenter() {
         ))}
       </div>
 
-      {tab === "plans" && <PlansPanel cycle={cycle} onCycleChange={setCycle} />}
-      {tab === "addons" && <AddOnsPanel />}
+      {tab === "plans" && <PlansPanel cycle={cycle} onCycleChange={setCycle} onCheckout={openIntent} />}
+      {tab === "addons" && <AddOnsPanel onCheckout={openIntent} />}
       {tab === "billing" && <BillingPanel />}
       {tab === "payments" && <PaymentMethodsPanel />}
       {tab === "admin" && isAdmin && <AdminPanel />}
+
+      <CheckoutDialog open={intent !== null} onOpenChange={(v) => !v && setIntent(null)} intent={intent} />
     </div>
   );
 }
+
 
 /* ─────────────────────────── Plans ─────────────────────────── */
 
