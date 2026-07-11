@@ -389,7 +389,7 @@ function AgentPerformancePage() {
                 );
               })}
               {clientCards.length === 0 && !loading && (
-                <div className="col-span-full py-10 text-center text-sm text-muted-foreground">No clients yet. New inquiries land here automatically.</div>
+                <div className="col-span-full py-10 text-center text-sm text-muted-foreground">No active leads yet. New inquiries land here automatically.</div>
               )}
             </div>
           </section>
