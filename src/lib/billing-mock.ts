@@ -10,10 +10,13 @@ export type InvoiceStatus = "paid" | "pending" | "failed" | "refunded";
 export type PaymentMethodId =
   | "mpesa"
   | "mixx"
+  | "tigopesa"
   | "airtel"
   | "halopesa"
   | "visa"
-  | "mastercard";
+  | "mastercard"
+  | "bank";
+
 
 export type Plan = {
   id: PlanId;
@@ -136,7 +139,7 @@ export const ADDONS: AddOn[] = [
 export type PaymentMethod = {
   id: PaymentMethodId;
   name: string;
-  category: "mobile" | "card";
+  category: "mobile" | "card" | "bank";
   status: "planned"; // gateways not yet integrated
   description: string;
 };
@@ -144,11 +147,14 @@ export type PaymentMethod = {
 export const PAYMENT_METHODS: PaymentMethod[] = [
   { id: "mpesa", name: "M-Pesa", category: "mobile", status: "planned", description: "Vodacom mobile money" },
   { id: "mixx", name: "Mixx by Yas", category: "mobile", status: "planned", description: "Yas Tanzania wallet" },
+  { id: "tigopesa", name: "Tigo Pesa", category: "mobile", status: "planned", description: "Tigo mobile money" },
   { id: "airtel", name: "Airtel Money", category: "mobile", status: "planned", description: "Airtel mobile money" },
   { id: "halopesa", name: "HaloPesa", category: "mobile", status: "planned", description: "Halotel mobile money" },
   { id: "visa", name: "Visa", category: "card", status: "planned", description: "Global credit / debit" },
   { id: "mastercard", name: "Mastercard", category: "card", status: "planned", description: "Global credit / debit" },
+  { id: "bank", name: "Bank Transfer", category: "bank", status: "planned", description: "Direct TZS bank transfer" },
 ];
+
 
 export type Subscription = {
   planId: PlanId;

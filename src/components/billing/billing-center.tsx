@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   Check, Star, Flame, ShieldCheck, Home, Search, Crown, Sparkles,
   CreditCard, Receipt, Download, Tag, TrendingUp, Users, BadgePercent,
-  Smartphone, Wallet, Building2, ArrowRight, Plus, Pause, Play, X,
+  Smartphone, Wallet, Building2, ArrowRight, Plus, Pause, Play, X, History, Settings2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,11 +12,14 @@ import { cn } from "@/lib/utils";
 import { StatCard } from "@/components/ds/stat-card";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { CheckoutDialog } from "@/components/billing/checkout-dialog";
+import { isGatewayConfigured, setGatewayConfigured, VERIFICATION_FEES, type PaymentIntent } from "@/lib/payments-store";
 import {
   PLANS, ADDONS, PAYMENT_METHODS, CURRENT_SUBSCRIPTION, INVOICES, COUPONS,
   REVENUE_KPI, REVENUE_BY_PLAN, REVENUE_TREND,
   formatTZS, planById, type PlanId, type BillingCycle, type AddOn,
 } from "@/lib/billing-mock";
+
 
 const ADDON_ICONS: Record<AddOn["icon"], typeof Star> = {
   star: Star, flame: Flame, shield: ShieldCheck, home: Home, search: Search, crown: Crown,
@@ -28,6 +32,9 @@ export function BillingCenter() {
   const isAdmin = primaryRole === "admin" || primaryRole === "super_admin";
   const [tab, setTab] = useState<Tab>("plans");
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
+  const [intent, setIntent] = useState<PaymentIntent | null>(null);
+  const openIntent = (i: PaymentIntent) => setIntent(i);
+
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "plans", label: "Plans" },
@@ -55,18 +62,21 @@ export function BillingCenter() {
         ))}
       </div>
 
-      {tab === "plans" && <PlansPanel cycle={cycle} onCycleChange={setCycle} />}
-      {tab === "addons" && <AddOnsPanel />}
+      {tab === "plans" && <PlansPanel cycle={cycle} onCycleChange={setCycle} onCheckout={openIntent} />}
+      {tab === "addons" && <AddOnsPanel onCheckout={openIntent} />}
       {tab === "billing" && <BillingPanel />}
       {tab === "payments" && <PaymentMethodsPanel />}
       {tab === "admin" && isAdmin && <AdminPanel />}
+
+      <CheckoutDialog open={intent !== null} onOpenChange={(v) => !v && setIntent(null)} intent={intent} />
     </div>
   );
 }
 
+
 /* ─────────────────────────── Plans ─────────────────────────── */
 
-function PlansPanel({ cycle, onCycleChange }: { cycle: BillingCycle; onCycleChange: (c: BillingCycle) => void }) {
+function PlansPanel({ cycle, onCycleChange, onCheckout }: { cycle: BillingCycle; onCycleChange: (c: BillingCycle) => void; onCheckout: (i: PaymentIntent) => void }) {
   const currentId = CURRENT_SUBSCRIPTION.planId;
 
   return (
@@ -138,11 +148,27 @@ function PlansPanel({ cycle, onCycleChange }: { cycle: BillingCycle; onCycleChan
                   className="w-full"
                   variant={isCurrent ? "outline" : plan.featured ? "default" : "outline"}
                   disabled={isCurrent}
-                  onClick={() => toast.success(`Plan change queued — ${plan.name}`, { description: "Payment gateway will be enabled soon." })}
+                  onClick={() => {
+                    if (price == null) {
+                      toast.success("Sales team notified", { description: "We'll reach out about Enterprise pricing." });
+                      return;
+                    }
+                    if (price === 0) {
+                      toast.success("You're on the Free plan");
+                      return;
+                    }
+                    onCheckout({
+                      purpose: "subscription",
+                      reference: plan.id,
+                      label: `${plan.name} — ${cycle === "monthly" ? "Monthly" : "Annual"}`,
+                      amountTZS: price,
+                    });
+                  }}
                 >
                   {isCurrent ? "Current plan" : plan.cta}
                 </Button>
               </div>
+
             </div>
           );
         })}
@@ -153,7 +179,7 @@ function PlansPanel({ cycle, onCycleChange }: { cycle: BillingCycle; onCycleChan
 
 /* ─────────────────────────── Add-ons ─────────────────────────── */
 
-function AddOnsPanel() {
+function AddOnsPanel({ onCheckout }: { onCheckout: (i: PaymentIntent) => void }) {
   return (
     <section className="space-y-5">
       <div>
@@ -163,6 +189,7 @@ function AddOnsPanel() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {ADDONS.map((a) => {
           const Icon = ADDON_ICONS[a.icon];
+          const expires = new Date(Date.now() + a.durationDays * 86400_000).toLocaleDateString();
           return (
             <div key={a.id} className="ds-card ds-card-hover flex flex-col p-5">
               <div className="flex items-start gap-3">
@@ -171,13 +198,19 @@ function AddOnsPanel() {
                 </div>
                 <div className="min-w-0">
                   <div className="font-semibold text-foreground">{a.name}</div>
-                  <div className="text-xs text-muted-foreground">{a.durationDays} days</div>
+                  <div className="text-xs text-muted-foreground">{a.durationDays} days · expires {expires}</div>
                 </div>
               </div>
               <p className="mt-3 text-sm text-foreground/80">{a.description}</p>
               <div className="mt-4 flex items-center justify-between">
                 <div className="font-display text-xl font-semibold">{formatTZS(a.priceTZS)}</div>
-                <Button size="sm" onClick={() => toast.success(`Added: ${a.name}`, { description: "Complete checkout when payments launch." })}>
+                <Button size="sm" onClick={() => onCheckout({
+                  purpose: "boost",
+                  reference: a.id,
+                  label: `${a.name} — ${a.durationDays} days`,
+                  amountTZS: a.priceTZS,
+                  durationDays: a.durationDays,
+                })}>
                   <Plus className="mr-1 h-4 w-4" /> Purchase
                 </Button>
               </div>
@@ -188,6 +221,7 @@ function AddOnsPanel() {
     </section>
   );
 }
+
 
 /* ─────────────────────────── Billing (owner) ─────────────────────────── */
 
@@ -258,8 +292,11 @@ function BillingPanel() {
             <div className="font-semibold">Invoice history</div>
             <div className="text-xs text-muted-foreground">Download receipts for accounting.</div>
           </div>
-          <Receipt className="h-5 w-5 text-muted-foreground" />
+          <Button asChild variant="outline" size="sm">
+            <Link to="/billing/history"><History className="mr-1 h-4 w-4" /> Full history</Link>
+          </Button>
         </div>
+
         <div className="divide-y divide-border/60">
           {INVOICES.map((inv) => (
             <div key={inv.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
@@ -294,31 +331,90 @@ function BillingPanel() {
 function PaymentMethodsPanel() {
   const mobile = PAYMENT_METHODS.filter(m => m.category === "mobile");
   const card = PAYMENT_METHODS.filter(m => m.category === "card");
+  const bank = PAYMENT_METHODS.filter(m => m.category === "bank");
+  const [configured, setConfigured] = useState(isGatewayConfigured());
+  const [intent, setIntent] = useState<PaymentIntent | null>(null);
 
   return (
     <section className="space-y-6">
-      <div className="ds-card border-primary/20 bg-primary/[0.03] p-5">
-        <div className="flex items-start gap-3">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <Wallet className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="font-semibold">Payment gateways launching soon</div>
-            <p className="mt-1 text-sm text-foreground/75">
-              SPACES is preparing local mobile money and international card acceptance. Gateway integration is on track — the architecture below
-              is ready to receive payments the moment gateways are activated.
-            </p>
+      {configured ? (
+        <div className="ds-card border-emerald-500/30 bg-emerald-500/[0.04] p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-emerald-500/10 text-emerald-600">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="font-semibold">Preview gateway active</div>
+                <p className="mt-1 text-sm text-foreground/75">
+                  Checkout flows are enabled in preview mode. All payments generate real invoices in your history — no funds are moved.
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => { setGatewayConfigured(false); setConfigured(false); toast("Preview gateway disabled"); }}>
+              Disable
+            </Button>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="ds-card border-amber-500/30 bg-amber-500/[0.05] p-6 text-center">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-amber-500/10 text-amber-600">
+            <Wallet className="h-6 w-6" />
+          </div>
+          <div className="mt-3 font-display text-lg font-semibold">Payment gateway setup required</div>
+          <p className="mx-auto mt-1 max-w-md text-sm text-foreground/75">
+            Connect a payment provider to accept live subscriptions, boosts and verification fees on SPACES.
+          </p>
+          <Button className="mt-4" onClick={() => { setGatewayConfigured(true); setConfigured(true); toast.success("Preview gateway enabled"); }}>
+            <Settings2 className="mr-2 h-4 w-4" /> Configure payment provider
+          </Button>
+        </div>
+      )}
 
       <PaymentGroup title="Mobile money" icon={Smartphone} items={mobile} />
       <PaymentGroup title="Cards" icon={CreditCard} items={card} />
+      <PaymentGroup title="Bank" icon={Building2} items={bank} />
+
+      <VerificationFeesPanel onCheckout={setIntent} />
+
+      <CheckoutDialog open={intent !== null} onOpenChange={(v) => !v && setIntent(null)} intent={intent} />
     </section>
   );
 }
 
+function VerificationFeesPanel({ onCheckout }: { onCheckout: (i: PaymentIntent) => void }) {
+  return (
+    <div>
+      <div className="mb-3 flex items-center gap-2">
+        <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+        <div className="font-semibold">Verification payments</div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {VERIFICATION_FEES.map((v) => (
+          <div key={v.id} className="ds-card flex flex-col p-4">
+            <div className="font-semibold">{v.name}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{v.description}</div>
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <span className="font-display text-lg font-semibold">{formatTZS(v.priceTZS)}</span>
+              <Badge variant="outline" className="border-blue-500/30 text-blue-700 dark:text-blue-300">Pending</Badge>
+            </div>
+            <Button size="sm" className="mt-3" onClick={() => onCheckout({
+              purpose: "verification",
+              reference: v.id,
+              label: v.name,
+              amountTZS: v.priceTZS,
+            })}>
+              Pay & submit for review
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function PaymentGroup({ title, icon: Icon, items }: { title: string; icon: typeof Smartphone; items: typeof PAYMENT_METHODS }) {
+
   return (
     <div>
       <div className="mb-3 flex items-center gap-2">
