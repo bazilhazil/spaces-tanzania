@@ -1,18 +1,18 @@
 import { cn } from "@/lib/utils";
+import markAsset from "@/assets/spaces-logo-mark.png.asset.json";
 
 /**
  * SPACES unified brand system.
  *
  * Single source of truth for the SPACES mark + wordmark across the entire app
  * (marketing site, auth, dashboards, admin, mobile menus). Any future brand
- * tweak should happen here — every surface will pick it up automatically.
+ * tweak should happen here — every surface picks it up automatically.
  *
  * Rules:
- *  • Blue only. No gold accents on the mark. No drop shadows.
- *  • Mark is an inline SVG using currentColor so it perfectly matches wordmark.
- *  • `size` controls mark + wordmark + gap together for perfect vertical alignment.
- *  • `tone="inherit"` lets the mark/wordmark ride the parent color (e.g. white
- *    on the primary hero panels). Default tone is brand blue.
+ *  • One mark asset, one wordmark, one set of size presets.
+ *  • No drop shadows, no ad-hoc spacing — sizes control mark + text + gap together.
+ *  • `tone="inherit"` lets the wordmark ride the parent color (e.g. white on
+ *    the primary hero panels). Default tone is brand blue.
  */
 
 type BrandSize = "sm" | "md" | "lg" | "xl";
@@ -24,35 +24,29 @@ interface BrandProps {
   tone?: BrandTone;
   variant?: BrandVariant;
   className?: string;
-  /** Accessible label for icon-only usage. */
   label?: string;
 }
 
+// Bumped one notch across the board vs. the earlier system so the mark reads
+// clearly at every breakpoint without breaking navbar rhythm.
 const SIZE: Record<BrandSize, { mark: string; text: string; gap: string }> = {
-  sm: { mark: "h-6 w-6",   text: "text-base",  gap: "gap-1.5" },
-  md: { mark: "h-8 w-8",   text: "text-xl",    gap: "gap-2"   },
-  lg: { mark: "h-10 w-10", text: "text-2xl",   gap: "gap-2.5" },
-  xl: { mark: "h-16 w-16", text: "text-4xl",   gap: "gap-3"   },
+  sm: { mark: "h-8 w-8",   text: "text-lg",  gap: "gap-2"   },
+  md: { mark: "h-10 w-10", text: "text-xl",  gap: "gap-2.5" },
+  lg: { mark: "h-12 w-12", text: "text-2xl", gap: "gap-3"   },
+  xl: { mark: "h-20 w-20", text: "text-4xl", gap: "gap-3.5" },
 };
 
 function BrandMark({ className }: { className?: string }) {
-  // Crescent-style SPACES mark. Solid disc with a circular notch taken from
-  // the lower edge. Rendered in currentColor for perfect color parity with
-  // whatever text sits beside it.
   return (
-    <svg
-      viewBox="0 0 64 64"
-      className={cn("block shrink-0", className)}
-      fill="currentColor"
+    <img
+      src={markAsset.url}
+      alt=""
       aria-hidden="true"
-      focusable="false"
-    >
-      <mask id="spaces-mark-notch">
-        <rect width="64" height="64" fill="white" />
-        <circle cx="32" cy="60" r="14" fill="black" />
-      </mask>
-      <circle cx="32" cy="30" r="22" mask="url(#spaces-mark-notch)" />
-    </svg>
+      draggable={false}
+      className={cn("block shrink-0 select-none object-contain", className)}
+      loading="eager"
+      decoding="async"
+    />
   );
 }
 
@@ -69,7 +63,7 @@ export function Brand({
   if (variant === "mark") {
     return (
       <span
-        className={cn("inline-flex items-center justify-center", toneCls, className)}
+        className={cn("inline-flex items-center justify-center", className)}
         aria-label={label}
         role="img"
       >
@@ -85,12 +79,7 @@ export function Brand({
       role="img"
     >
       <BrandMark className={s.mark} />
-      <span
-        className={cn(
-          "font-display font-semibold tracking-tight",
-          s.text,
-        )}
-      >
+      <span className={cn("font-display font-semibold tracking-tight", s.text)}>
         SPACES
       </span>
     </span>
@@ -98,3 +87,4 @@ export function Brand({
 }
 
 export { BrandMark };
+
