@@ -722,12 +722,33 @@ function StepAmenities({ value, onChange }: { value: string[]; onChange: (v: str
 // ============================================================
 function StepContact({ draft, setField }: { draft: WizardDraft; setField: <K extends keyof WizardDraft>(k: K, v: WizardDraft[K]) => void }) {
   const method = draft.preferred_contact ?? "both";
+  const { user } = useAuth();
+  const [sameAsAccount, setSameAsAccount] = useState(false);
+
+  async function applyAccountDetails(checked: boolean) {
+    setSameAsAccount(checked);
+    if (!checked || !user) return;
+    const { data } = await supabase.from("profiles").select("full_name,phone").eq("id", user.id).maybeSingle();
+    if (!data) return toast.error("No account details on file");
+    setField("contact_name", data.full_name ?? "");
+    setField("contact_phone", data.phone ?? "");
+    setField("contact_whatsapp", data.phone ?? "");
+  }
+
   return (
     <section className="space-y-6">
       <div>
         <h1 className="font-display text-3xl font-semibold sm:text-4xl">How can buyers reach you? 📞</h1>
         <p className="mt-2 text-muted-foreground">This shows on your listing.</p>
       </div>
+
+      <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-border bg-accent/30 p-4">
+        <Checkbox checked={sameAsAccount} onCheckedChange={(v) => applyAccountDetails(!!v)} />
+        <div>
+          <div className="text-sm font-semibold">Same as account details</div>
+          <div className="text-xs text-muted-foreground">Use the name and phone on your profile</div>
+        </div>
+      </label>
 
       <Field label="Your name *">
         <div className="relative">
