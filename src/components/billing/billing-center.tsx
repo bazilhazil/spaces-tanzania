@@ -179,7 +179,7 @@ function PlansPanel({ cycle, onCycleChange, onCheckout }: { cycle: BillingCycle;
 
 /* ─────────────────────────── Add-ons ─────────────────────────── */
 
-function AddOnsPanel() {
+function AddOnsPanel({ onCheckout }: { onCheckout: (i: PaymentIntent) => void }) {
   return (
     <section className="space-y-5">
       <div>
@@ -189,6 +189,7 @@ function AddOnsPanel() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {ADDONS.map((a) => {
           const Icon = ADDON_ICONS[a.icon];
+          const expires = new Date(Date.now() + a.durationDays * 86400_000).toLocaleDateString();
           return (
             <div key={a.id} className="ds-card ds-card-hover flex flex-col p-5">
               <div className="flex items-start gap-3">
@@ -197,13 +198,19 @@ function AddOnsPanel() {
                 </div>
                 <div className="min-w-0">
                   <div className="font-semibold text-foreground">{a.name}</div>
-                  <div className="text-xs text-muted-foreground">{a.durationDays} days</div>
+                  <div className="text-xs text-muted-foreground">{a.durationDays} days · expires {expires}</div>
                 </div>
               </div>
               <p className="mt-3 text-sm text-foreground/80">{a.description}</p>
               <div className="mt-4 flex items-center justify-between">
                 <div className="font-display text-xl font-semibold">{formatTZS(a.priceTZS)}</div>
-                <Button size="sm" onClick={() => toast.success(`Added: ${a.name}`, { description: "Complete checkout when payments launch." })}>
+                <Button size="sm" onClick={() => onCheckout({
+                  purpose: "boost",
+                  reference: a.id,
+                  label: `${a.name} — ${a.durationDays} days`,
+                  amountTZS: a.priceTZS,
+                  durationDays: a.durationDays,
+                })}>
                   <Plus className="mr-1 h-4 w-4" /> Purchase
                 </Button>
               </div>
@@ -214,6 +221,7 @@ function AddOnsPanel() {
     </section>
   );
 }
+
 
 /* ─────────────────────────── Billing (owner) ─────────────────────────── */
 
