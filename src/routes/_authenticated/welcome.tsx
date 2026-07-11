@@ -6,7 +6,7 @@ import { useMode, type SpacesMode } from "@/hooks/use-mode";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
-import { Logo } from "@/components/logo";
+import { Brand } from "@/components/brand";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/welcome")({
@@ -85,10 +85,7 @@ function WelcomePage() {
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 py-8 md:py-14">
         <header className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Logo className="h-9 w-9" />
-            <span className="font-display text-lg font-semibold text-primary">SPACES</span>
-          </div>
+          <Brand size="md" />
           <button
             onClick={() => {
               setMode("buyer");

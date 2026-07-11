@@ -6,7 +6,7 @@ import {
   Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles, Handshake, Trophy, ShieldAlert, Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/logo";
+import { Brand } from "@/components/brand";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
 import { useMode, type SpacesMode } from "@/hooks/use-mode";
@@ -106,9 +106,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-secondary/30">
       {/* Mobile top bar */}
       <div className="sticky top-0 z-40 flex items-center justify-between border-b border-border/60 bg-background/90 px-4 py-3 backdrop-blur lg:hidden">
-        <Link to="/" className="flex items-center gap-2">
-          <Logo className="h-8 w-8" />
-          <span className="font-display font-semibold text-primary">SPACES</span>
+        <Link to="/" className="flex items-center">
+          <Brand size="sm" />
         </Link>
         <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} aria-label={t("nav.openMenu")}>
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -123,9 +122,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             open ? "translate-x-0" : "-translate-x-full",
           )}
         >
-          <Link to="/" className="hidden items-center gap-2 border-b border-border/60 px-6 py-5 lg:flex">
-            <Logo className="h-9 w-9" />
-            <span className="font-display text-xl font-semibold text-primary">SPACES</span>
+          <Link to="/" className="hidden items-center border-b border-border/60 px-6 py-5 lg:flex">
+            <Brand size="md" />
           </Link>
 
           <div className="border-b border-border/60 p-4">

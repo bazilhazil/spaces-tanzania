@@ -5,7 +5,7 @@ import {
   CreditCard, Receipt, Flag, LifeBuoy, Megaphone, Bell, BarChart3, FileClock,
   Settings, ShieldAlert, LogOut, Menu, X, Search, Command,
 } from "lucide-react";
-import { Logo } from "@/components/logo";
+import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
@@ -98,8 +98,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
       {/* Mobile top bar */}
       <div className="sticky top-0 z-40 flex items-center justify-between border-b border-border/60 bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
         <Link to="/admin" className="flex items-center gap-2">
-          <Logo className="h-8 w-8" />
-          <span className="font-display font-semibold text-primary">SPACES <span className="text-[10px] uppercase tracking-widest text-[color:var(--color-gold-700)]">Admin</span></span>
+          <Brand size="sm" />
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-[color:var(--color-gold-700)]">Admin</span>
         </Link>
         <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -112,12 +112,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
           "fixed inset-y-0 left-0 z-30 flex w-72 flex-col border-r border-border/60 bg-background transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
         )}>
-          <Link to="/admin" className="hidden items-center gap-2 border-b border-border/60 px-6 py-5 lg:flex">
-            <Logo className="h-9 w-9" />
-            <div className="leading-tight">
-              <div className="font-display text-xl font-semibold text-primary">SPACES</div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-gold-700)]">Control Center</div>
-            </div>
+          <Link to="/admin" className="hidden items-center gap-3 border-b border-border/60 px-6 py-5 lg:flex">
+            <Brand size="md" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-gold-700)]">Control Center</span>
           </Link>
 
           <div className="border-b border-border/60 p-4">
