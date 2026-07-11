@@ -292,8 +292,11 @@ function BillingPanel() {
             <div className="font-semibold">Invoice history</div>
             <div className="text-xs text-muted-foreground">Download receipts for accounting.</div>
           </div>
-          <Receipt className="h-5 w-5 text-muted-foreground" />
+          <Button asChild variant="outline" size="sm">
+            <Link to="/billing/history"><History className="mr-1 h-4 w-4" /> Full history</Link>
+          </Button>
         </div>
+
         <div className="divide-y divide-border/60">
           {INVOICES.map((inv) => (
             <div key={inv.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
