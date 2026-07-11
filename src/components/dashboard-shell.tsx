@@ -48,6 +48,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.savedSearches"), to: "/dashboard/searches", icon: Search },
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
+      { label: "Notifications", to: "/notifications", icon: Bell },
       { label: "Compare", to: "/compare", icon: GitCompare },
       { label: "Recently Viewed", to: "/dashboard/recent", icon: Clock },
       { label: t("nav.profile"), to: "/dashboard/settings", icon: UserIcon },
