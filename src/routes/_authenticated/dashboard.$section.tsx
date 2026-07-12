@@ -25,7 +25,6 @@ export const Route = createFileRoute("/_authenticated/dashboard/$section")({
 });
 
 const META: Record<string, { title: string; desc: string }> = {
-  properties:   { title: "My Properties",   desc: "Manage your listings and monitor performance." },
   viewings:     { title: "Viewings",        desc: "Approve, reschedule and organise property tours." },
   messages:     { title: "Messages",        desc: "Chat with interested buyers and renters." },
   drafts:       { title: "Saved Drafts",    desc: "Pick up where you left off." },
