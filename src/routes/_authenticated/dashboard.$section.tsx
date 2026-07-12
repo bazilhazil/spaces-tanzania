@@ -47,7 +47,16 @@ const META: Record<string, { title: string; desc: string }> = {
 
 function SectionPage() {
   const { section } = Route.useParams();
+  const navigate = useNavigate();
   const meta = META[section] ?? { title: section, desc: "" };
+
+  useEffect(() => {
+    if (section === "properties") {
+      navigate({ to: "/dashboard/properties", replace: true });
+    }
+  }, [section, navigate]);
+
+  if (section === "properties") return null;
 
   return (
     <DashboardShell>
@@ -60,8 +69,7 @@ function SectionPage() {
           <p className="mt-1 text-muted-foreground">{meta.desc}</p>
         </header>
 
-        {section === "properties"   ? <PropertiesPanel /> :
-         section === "viewings"     ? <ViewingsPanel /> :
+        {section === "viewings"     ? <ViewingsPanel /> :
          section === "messages"     ? <MessagesPanel /> :
          section === "drafts"       ? <DraftsPanel /> :
          section === "analytics"    ? <AnalyticsPanel /> :
@@ -80,16 +88,11 @@ function SectionPage() {
   );
 }
 
-/* ============================ MY PROPERTIES ============================ */
+/* ============================ FAVORITES / SEARCHES / RECENT ============================ */
 
-import { PropertiesManager } from "@/components/property-management/manager";
 import { FavoritesPanel } from "@/components/favorites/favorites-panel";
 import { SavedSearchesPanel } from "@/components/favorites/saved-searches-panel";
 import { RecentlyViewedPanel } from "@/components/favorites/recently-viewed-panel";
-
-function PropertiesPanel() {
-  return <PropertiesManager />;
-}
 
 
 /* ============================ VIEWINGS ============================ */
