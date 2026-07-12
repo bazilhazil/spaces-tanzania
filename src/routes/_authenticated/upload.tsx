@@ -122,12 +122,12 @@ function UploadWizardPage() {
       if (!alive) return;
       if (error || !row) {
         toast.error("Property not found");
-        navigate({ to: "/dashboard/$section", params: { section: "properties" } });
+        navigate({ to: "/dashboard/properties" });
         return;
       }
       if (row.owner_id !== user.id) {
         toast.error("You don't have permission to edit this property");
-        navigate({ to: "/dashboard/$section", params: { section: "properties" } });
+        navigate({ to: "/dashboard/properties" });
         return;
       }
       setDraft({
@@ -369,7 +369,7 @@ function UploadWizardPage() {
       dirtyRef.current = false;
       if (isEdit) {
         toast.success("Property updated");
-        navigate({ to: "/dashboard/$section", params: { section: "properties" } });
+        navigate({ to: "/dashboard/properties" });
       } else {
         setSuccess({ status: mode === "publish" ? "live" : "draft", id: propertyId });
       }
@@ -993,7 +993,7 @@ function StepPublish({
 function SuccessScreen({ status }: { status: "live" | "draft" }) {
   const navigate = useNavigate();
   useEffect(() => {
-    const t = setTimeout(() => navigate({ to: "/dashboard/$section", params: { section: "properties" } }), 3400);
+    const t = setTimeout(() => navigate({ to: "/dashboard/properties" }), 3400);
     return () => clearTimeout(t);
   }, [navigate]);
 
@@ -1024,7 +1024,7 @@ function SuccessScreen({ status }: { status: "live" | "draft" }) {
         </p>
         <div className="mt-6 flex justify-center gap-3">
           <Button asChild variant="outline" className="rounded-full">
-            <Link to="/dashboard/$section" params={{ section: "properties" }}>My Properties</Link>
+            <Link to="/dashboard/properties">My Properties</Link>
           </Button>
           <Button asChild className="rounded-full">
             <Link to="/upload">Publish another</Link>

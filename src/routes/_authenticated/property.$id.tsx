@@ -78,7 +78,7 @@ function PropertyDetail() {
           <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
           <h1 className="mt-4 font-display text-2xl font-semibold">Property not found</h1>
           <p className="mt-2 text-muted-foreground">It may have been removed, or you don't have access.</p>
-          <Link to="/dashboard/$section" params={{ section: "properties" }} className="mt-6 inline-block">
+          <Link to="/dashboard/properties" className="mt-6 inline-block">
             <Button>Back to My Properties</Button>
           </Link>
         </div>
@@ -105,7 +105,7 @@ function PropertyDetail() {
       return toast.error(e?.message ?? "Delete failed");
     }
     toast.success("Deleted");
-    navigate({ to: "/dashboard/$section", params: { section: "properties" } });
+    navigate({ to: "/dashboard/properties" });
   }
 
   const url = typeof window !== "undefined" ? `${window.location.origin}/properties/${row.id}` : "";
@@ -124,7 +124,7 @@ function PropertyDetail() {
     <DashboardShell>
       <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
         <div>
-          <Link to="/dashboard/$section" params={{ section: "properties" }} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary">
+          <Link to="/dashboard/properties" className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary">
             <ArrowLeft className="h-3.5 w-3.5" /> My Properties
           </Link>
         </div>

@@ -208,7 +208,7 @@ function QuickActions() {
     primary?: boolean; desc: string; params?: { section: string };
   }> = [
     { label: "Upload New Property", to: "/upload", icon: Upload, primary: true, desc: "List a new home in minutes" },
-    { label: "View My Listings", to: "/dashboard/$section", params: { section: "properties" }, icon: Home, desc: "Manage your portfolio" },
+    { label: "View My Listings", to: "/dashboard/properties", icon: Home, desc: "Manage your portfolio" },
     { label: "Upgrade to Premium", to: "/dashboard/$section", params: { section: "subscription" }, icon: Crown, desc: "Boost visibility 5×" },
     { label: "Verify My Identity", to: "/dashboard/$section", params: { section: "profile" }, icon: ShieldCheck, desc: "Get the trusted badge" },
   ];
