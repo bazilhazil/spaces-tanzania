@@ -870,10 +870,10 @@ async function handleCardAction(
     case "view":
       window.open(url, "_blank");
       break;
-    case "edit":
-      console.log("EDITING PROPERTY:", p.id);
-      window.location.assign(`/upload?id=${p.id}`);
-      break;
+   case "edit":
+     console.log("EDIT CLICKED", p.id);
+     window.location.assign(`/upload?id=${p.id}`);
+   break;
     case "duplicate":
       toast.info("Duplicating listing…");
       break;
