@@ -596,7 +596,10 @@ function ActionBtn({
 }: { icon: any; label: string; onClick: () => void; destructive?: boolean }) {
   return (
     <button
-      onClick={onClick}
+      onClick={() => {
+        console.log("BUTTON CLICKED:", label);
+        onClick();
+      }}
       aria-label={label}
       className={cn(
         "inline-flex flex-col items-center justify-center gap-0.5 rounded-lg border border-border/60 bg-background py-1.5 text-[10px] font-medium uppercase tracking-wider transition hover:bg-secondary hover:text-foreground",
