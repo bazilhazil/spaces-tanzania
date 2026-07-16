@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ProfileCompletionCard } from "@/components/profile-completion-card";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
+import { deletePropertyWithStorage } from "@/lib/property-actions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -267,6 +268,7 @@ function statusChip(status: string) {
 }
 
 export function PropertyMiniCard({ p }: { p: RecentProperty }) {
+  const navigate = useNavigate();
   const location = [p.district, p.region].filter(Boolean).join(", ") || "Tanzania";
   return (
     <div className="group overflow-hidden rounded-2xl border border-border/60 bg-background shadow-[var(--shadow-soft)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]">
@@ -291,21 +293,30 @@ export function PropertyMiniCard({ p }: { p: RecentProperty }) {
             <Eye className="h-3 w-3" /> {p.view_count}
           </p>
         </div>
-      <div className="flex gap-2 border-t border-border/50 p-3">
-  <button
-    className="flex-1 rounded-lg bg-primary px-3 py-2 text-sm text-white"
-    onClick={() => window.location.href = `/dashboard/properties`}
-  >
-    Edit
-  </button>
+        <div className="flex gap-2 border-t border-border/50 p-3">
+          <button
+            className="flex-1 rounded-lg bg-primary px-3 py-2 text-sm text-white"
+            onClick={() => navigate({ to: "/upload", search: { id: p.id } })}
+          >
+            Edit
+          </button>
 
-  <button
-    className="flex-1 rounded-lg border border-red-500 px-3 py-2 text-sm text-red-500"
-    onClick={() => alert("Delete property")}
-  >
-    Delete
-  </button>
-      </div>
+          <button
+            className="flex-1 rounded-lg border border-red-500 px-3 py-2 text-sm text-red-500"
+            onClick={async () => {
+              if (!confirm(`Delete "${p.title}"?`)) return;
+
+              try {
+                await deletePropertyWithStorage(p.id);
+                window.location.reload();
+              } catch (e: any) {
+                alert(e.message ?? "Delete failed");
+              }
+            }}
+          >
+            Delete
+          </button>
+        </div>
       </div>
     </div>
   );
