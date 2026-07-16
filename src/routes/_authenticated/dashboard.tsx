@@ -296,7 +296,7 @@ export function PropertyMiniCard({ p }: { p: RecentProperty }) {
         <div className="flex gap-2 border-t border-border/50 p-3">
           <button
             className="flex-1 rounded-lg bg-primary px-3 py-2 text-sm text-white"
-            onClick={() => navigate({ to: "/upload", search: { id: p.id } })}
+            onClick={() => navigate({ to: "/dashboard/properties/$id/manage", params: { id: p.id } })}
           >
             Edit
           </button>
