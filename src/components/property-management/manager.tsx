@@ -874,8 +874,7 @@ async function handleCardAction(
       window.open(url, "_blank");
       break;
    case "edit":
-     console.log("EDIT CLICKED", p.id);
-     window.location.assign(`/upload?id=${p.id}`);
+     window.location.assign(`/dashboard/properties/${p.id}/manage`);
    break;
     case "duplicate":
       toast.info("Duplicating listing…");
