@@ -76,6 +76,16 @@ function ManagePropertyPage() {
   const [media, setMedia] = useState<MediaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [activeTab, setActiveTab] = useState<"overview" | "details" | "photos" | "settings">("overview");
+
+  function jumpToSection(tab: "overview" | "details" | "photos" | "settings") {
+    setActiveTab(tab);
+    // Desktop: all sections are visible, so scroll to the anchor.
+    // Defer to next frame so the mobile tab has switched first.
+    requestAnimationFrame(() => {
+      document.getElementById(`section-${tab}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   useEffect(() => {
     let alive = true;
