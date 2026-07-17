@@ -871,9 +871,13 @@ async function handleCardAction(
     case "view":
       window.open(url, "_blank");
       break;
-   case "edit":
-     window.location.assign(`/dashboard/properties/${p.id}/manage`);
+   case "edit": {
+     const destination = `/dashboard/properties/${p.id}/manage`;
+     console.log("Edit source:", "properties manager card");
+     console.log("Navigating to:", destination);
+     window.location.assign(destination);
    break;
+   }
     case "duplicate":
       toast.info("Duplicating listing…");
       break;
