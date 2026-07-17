@@ -552,11 +552,6 @@ function PropertyManageCard({
           </span>
         </div>
 
-        {/* Owner actions — always visible on desktop, ⋯ menu covers mobile */}
-       <div className="bg-green-500 p-8">
-          HELLO SPACES
-         </div>
-
         {/* Metrics */}
         <div className="grid grid-cols-4 gap-1 border-t border-border/50 pt-3 sm:border-t-0 sm:pt-0">
           <Metric icon={Eye} value={p.view_count} label="Views" />
@@ -572,9 +567,10 @@ function PropertyManageCard({
             params={{ id: p.id }}
             className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
           >
-            TEST EDIT BUTTON <BarChart3 className="h-3 w-3" />
+            View details <BarChart3 className="h-3 w-3" />
           </Link>
         </div>
+
       </div>
     </div>
   );
