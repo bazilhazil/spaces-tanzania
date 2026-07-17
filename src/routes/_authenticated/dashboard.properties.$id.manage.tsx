@@ -401,59 +401,60 @@ function QuickActions({
 
 function DetailsSection({
   prop, onSave,
-}: { prop: Property; onSave: (f: Partial<Property>) => Promise<boolean | undefined> }) {
+}: { prop: Property; onSave: (f: Partial<Property>, label?: string) => Promise<boolean | undefined> }) {
   return (
     <section id="section-details" className="space-y-4">
       <h2 className="font-display text-lg font-semibold text-foreground">Property details</h2>
       <div className="grid gap-3 sm:grid-cols-2">
-        <EditField label="Title" value={prop.title} onSave={(v) => onSave({ title: v })} />
+        <EditField label="Title" value={prop.title} onSave={(v) => onSave({ title: v }, "Title")} />
         <EditField
           label="Price" type="number" value={String(prop.price)}
-          onSave={(v) => onSave({ price: Number(v) })}
+          onSave={(v) => onSave({ price: Number(v) }, "Price")}
         />
         <EditField
           label="Area (sqm)" type="number" value={prop.area_sqm != null ? String(prop.area_sqm) : ""}
-          onSave={(v) => onSave({ area_sqm: v === "" ? null : (Number(v) as never) })}
+          onSave={(v) => onSave({ area_sqm: v === "" ? null : (Number(v) as never) }, "Area")}
         />
         <EditField
           label="Bedrooms" type="number" value={prop.bedrooms != null ? String(prop.bedrooms) : ""}
-          onSave={(v) => onSave({ bedrooms: v === "" ? null : Number(v) })}
+          onSave={(v) => onSave({ bedrooms: v === "" ? null : Number(v) }, "Bedrooms")}
         />
         <EditField
           label="Bathrooms" type="number" value={prop.bathrooms != null ? String(prop.bathrooms) : ""}
-          onSave={(v) => onSave({ bathrooms: v === "" ? null : Number(v) })}
+          onSave={(v) => onSave({ bathrooms: v === "" ? null : Number(v) }, "Bathrooms")}
         />
         <EditSelect
           label="Property type" value={prop.property_type}
           options={PROPERTY_TYPES.map((t) => ({ value: t, label: t[0].toUpperCase() + t.slice(1) }))}
-          onSave={(v) => onSave({ property_type: v })}
+          onSave={(v) => onSave({ property_type: v }, "Property type")}
         />
         <EditSelect
           label="Listing type" value={prop.listing_type}
           options={[{ value: "rent", label: "For Rent" }, { value: "sale", label: "For Sale" }]}
-          onSave={(v) => onSave({ listing_type: v as "rent" | "sale" })}
+          onSave={(v) => onSave({ listing_type: v as "rent" | "sale" }, "Listing type")}
         />
         <EditField
           label="Contact phone" value={prop.contact_phone ?? ""}
-          onSave={(v) => onSave({ contact_phone: v })}
+          onSave={(v) => onSave({ contact_phone: v }, "Contact phone")}
         />
         <EditField
           label="Region" value={prop.region ?? ""}
-          onSave={(v) => onSave({ region: v })}
+          onSave={(v) => onSave({ region: v }, "Location")}
         />
         <EditField
           label="District" value={prop.district ?? ""}
-          onSave={(v) => onSave({ district: v })}
+          onSave={(v) => onSave({ district: v }, "Location")}
         />
       </div>
 
       <EditTextArea
         label="Description" value={prop.description ?? ""}
-        onSave={(v) => onSave({ description: v })}
+        onSave={(v) => onSave({ description: v }, "Description")}
       />
     </section>
   );
 }
+
 
 function EditField({
   label, value, onSave, type = "text",
