@@ -22,7 +22,7 @@ function PropertiesPage() {
   }
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
+      <div className="mx-auto w-full min-w-0 max-w-6xl space-y-6 overflow-x-hidden animate-fade-in">
         <header>
           <Link
             to="/dashboard"

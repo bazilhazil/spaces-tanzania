@@ -286,11 +286,12 @@ export function PropertiesManager() {
     !!filters.minPrice || !!filters.maxPrice || !!filters.from || !!filters.to;
 
   return (
-    <div className="space-y-5">
+    <div className="w-full min-w-0 max-w-full space-y-5">
       {/* Toolbar */}
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 min-w-[220px]">
+      <div className="flex w-full min-w-0 flex-col gap-3">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
+          <div className="relative w-full min-w-0 flex-1 sm:min-w-[220px]">
+
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={query}
@@ -350,7 +351,8 @@ export function PropertiesManager() {
         </div>
 
         {/* Status tabs */}
-        <div className="-mx-1 flex gap-1.5 overflow-x-auto pb-1">
+        <div className="-mx-1 flex w-full max-w-full gap-1.5 overflow-x-auto whitespace-nowrap px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+
           {STATUS_TABS.map((s) => {
             const active = tab === s.key;
             const n = counts[s.key] ?? 0;
@@ -495,9 +497,10 @@ function PropertyManageCard({
 
   return (
     <div className={cn(
-      "group relative overflow-hidden rounded-2xl border bg-background shadow-[var(--shadow-soft)] transition-all",
+      "group relative w-full min-w-0 max-w-full overflow-hidden rounded-2xl border bg-background shadow-[var(--shadow-soft)] transition-all",
       selected ? "border-primary ring-2 ring-primary/30" : "border-border/60 hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]",
     )}>
+
       {/* Media */}
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
         <Link to="/properties/$slug" params={{ slug: p.id }} aria-label={`Open ${p.title}`} className="absolute inset-0 z-0">
@@ -574,7 +577,7 @@ function PropertyManageCard({
         </div>
 
         {/* Metrics */}
-        <div className="grid grid-cols-4 gap-1 border-t border-border/50 pt-3 sm:border-t-0 sm:pt-0">
+        <div className="grid grid-cols-2 gap-1 border-t border-border/50 pt-3 sm:grid-cols-4 sm:border-t-0 sm:pt-0">
           <Metric icon={Eye} value={p.view_count} label="Views" />
           <Metric icon={Heart} value={p.favorites ?? 0} label="Saves" />
           <Metric icon={MessageSquare} value={p.messages ?? 0} label="Msgs" />
