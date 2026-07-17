@@ -66,6 +66,7 @@ const STATUS_TABS: { key: string; label: string }[] = [
 
 export function PropertiesManager() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [rows, setRows] = useState<ManagedProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("all");
