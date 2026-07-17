@@ -498,19 +498,20 @@ function PropertyManageCard({
 
   return (
     <div className={cn(
-      "group relative w-full min-w-0 max-w-full overflow-hidden rounded-2xl border bg-background shadow-[var(--shadow-soft)] transition-all",
+      "property-card-mobile group relative w-full min-w-0 max-w-full overflow-hidden rounded-2xl border bg-background shadow-[var(--shadow-soft)] transition-all box-border",
       selected ? "border-primary ring-2 ring-primary/30" : "border-border/60 hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]",
     )}>
 
       {/* Media */}
-      <div className="property-card-media relative block aspect-[16/10] shrink-0 overflow-hidden bg-muted">
+      <div className="property-card-media relative block w-full max-w-full overflow-hidden bg-muted md:aspect-[16/10]">
         <Link to="/properties/$slug" params={{ slug: p.id }} aria-label={`Open ${p.title}`} className="absolute inset-0 z-0 block">
           {p.cover ? (
-            <img src={p.cover} alt={p.title} loading="lazy" className="property-card-image h-full w-full object-cover transition-transform duration-500 md:group-hover:scale-105" />
+            <img src={p.cover} alt={p.title} loading="lazy" className="property-card-image h-full w-full object-cover object-center transition-transform duration-500 md:group-hover:scale-105" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-muted-foreground/40"><Home className="h-10 w-10 max-md:h-8 max-md:w-8" /></div>
           )}
         </Link>
+
 
         {/* selection */}
         <label className={cn(
