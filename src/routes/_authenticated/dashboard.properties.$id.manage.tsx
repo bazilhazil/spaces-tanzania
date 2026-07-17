@@ -254,7 +254,37 @@ function ManagePropertyPage() {
         </Tabs>
       </div>
 
+      {/* Sticky footer action bar */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/60 bg-background/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur sm:px-6"
+      >
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-end gap-2 sm:gap-3">
+          <Button
+            variant="outline"
+            className="flex-1 gap-1.5 rounded-xl sm:flex-none"
+            onClick={() => window.open(`/property/${prop.id}`, "_blank", "noopener")}
+          >
+            <ExternalLink className="h-4 w-4" />
+            <span className="hidden sm:inline">Preview listing</span>
+            <span className="sm:hidden">Preview</span>
+          </Button>
+          <Button
+            size="lg"
+            className="flex-1 gap-1.5 rounded-xl sm:flex-none"
+            disabled={saving}
+            onClick={() => {
+              toast.success("✓ Changes saved successfully");
+              navigate({ to: "/dashboard/properties" });
+            }}
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+            Done editing
+          </Button>
+        </div>
+      </div>
+
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this property?</AlertDialogTitle>
