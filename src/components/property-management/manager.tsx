@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Search, SlidersHorizontal, Plus, Grid3x3, Rows3, ChevronDown, X,
