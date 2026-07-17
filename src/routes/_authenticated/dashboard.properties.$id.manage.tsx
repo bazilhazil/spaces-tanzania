@@ -278,9 +278,20 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function QuickActions({
-  prop, onPauseToggle, onDelete,
-}: { prop: Property; onPauseToggle: () => void; onDelete: () => void }) {
-  const items = [
+  prop, onPauseToggle, onJump,
+}: {
+  prop: Property;
+  onPauseToggle: () => void;
+  onDelete: () => void;
+  onJump: (tab: "overview" | "details" | "photos" | "settings") => void;
+}) {
+  const items: Array<{
+    icon: typeof DollarSign;
+    label: string;
+    tab?: "details" | "photos" | "settings";
+    action?: () => void;
+    hint: string;
+  }> = [
     { icon: DollarSign, label: "Edit price", tab: "details", hint: `${prop.currency} ${Number(prop.price).toLocaleString()}` },
     { icon: Ruler, label: "Size & details", tab: "details", hint: `${prop.area_sqm ?? "—"} sqm` },
     { icon: Camera, label: "Manage photos", tab: "photos", hint: "Reorder, cover, upload" },
@@ -293,14 +304,6 @@ function QuickActions({
       hint: prop.status === "paused" ? "Currently paused" : "Currently active",
     },
   ];
-
-  function jumpTo(tab: string) {
-    // Switch mobile tab if visible
-    const trigger = document.querySelector<HTMLButtonElement>(`[role="tab"][data-state][value="${tab}"]`);
-    trigger?.click();
-    // Scroll to section on desktop
-    document.getElementById(`section-${tab}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
 
   return (
     <section>
