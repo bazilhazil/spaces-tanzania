@@ -314,7 +314,7 @@ function QuickActions({
           return (
             <button
               key={it.label}
-              onClick={it.action ?? (() => jumpTo(it.tab!))}
+              onClick={it.action ?? (() => onJump(it.tab!))}
               className="group flex items-start gap-3 rounded-2xl border border-border/60 bg-background p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-soft)]"
             >
               <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
