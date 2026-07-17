@@ -77,6 +77,8 @@ function ManagePropertyPage() {
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "details" | "photos" | "settings">("overview");
+  const [saving, setSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
 
   function jumpToSection(tab: "overview" | "details" | "photos" | "settings") {
     setActiveTab(tab);
