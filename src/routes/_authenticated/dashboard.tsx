@@ -29,7 +29,14 @@ function DashboardPage() {
   const { profile, user } = useAuth();
   const { mode, ready } = useMode();
   const { t } = useI18n();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const name = (profile?.full_name || user?.email || t("common.welcome")).split(" ")[0];
+
+  // This route is a layout parent for /dashboard/properties, /dashboard/properties/:id/manage, etc.
+  // When a child route is active, render its <Outlet /> instead of the dashboard home content.
+  if (pathname !== "/dashboard" && pathname !== "/dashboard/") {
+    return <Outlet />;
+  }
 
   if (ready && !mode) {
     if (typeof window !== "undefined") window.location.replace("/welcome");
