@@ -116,13 +116,16 @@ function ManagePropertyPage() {
     return () => { alive = false; };
   }, [id]);
 
-  async function patch(fields: Partial<Property>) {
-    if (!prop) return;
+  async function patch(fields: Partial<Property>, label?: string) {
+    if (!prop) return false;
+    setSaving(true);
     const { error } = await supabase
       .from("properties").update(fields as never).eq("id", prop.id);
+    setSaving(false);
     if (error) { toast.error(error.message); return false; }
     setProp({ ...prop, ...fields });
-    toast.success("Saved");
+    setLastSavedAt(Date.now());
+    toast.success(label ? `✓ ${label} updated successfully` : "✓ Changes saved");
     return true;
   }
 
