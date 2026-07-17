@@ -168,7 +168,19 @@ function PropertyDetail() {
               {isOwner && (
                 <div className="mt-auto flex flex-wrap gap-2 pt-2">
                   <Button asChild variant="outline" size="sm" className="rounded-lg"><a href={url} target="_blank" rel="noreferrer"><Eye className="mr-1 h-3.5 w-3.5" /> View public</a></Button>
-                  <Button asChild variant="outline" size="sm" className="rounded-lg"><a href={`/upload?id=${row.id}`}><Edit3 className="mr-1 h-3.5 w-3.5" /> Edit</a></Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg"
+                    onClick={() => {
+                      console.log("Edit source:", "property.$id details");
+                      const destination = `/dashboard/properties/${row.id}/manage`;
+                      console.log("Navigating to:", destination);
+                      navigate({ to: "/dashboard/properties/$id/manage", params: { id: row.id } });
+                    }}
+                  >
+                    <Edit3 className="mr-1 h-3.5 w-3.5" /> Edit
+                  </Button>
                   {row.status === "live" ? (
                     <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("paused")}><Pause className="mr-1 h-3.5 w-3.5" /> Pause</Button>
                   ) : (
