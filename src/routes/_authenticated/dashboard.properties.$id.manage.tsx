@@ -173,13 +173,25 @@ function ManagePropertyPage() {
 
   return (
     <DashboardShell>
-      <div className="mx-auto w-full max-w-5xl space-y-6 animate-fade-in">
-        <Link
-          to="/dashboard/properties"
-          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" /> My Properties
-        </Link>
+      {/* Sticky top bar */}
+      <div className="sticky top-0 z-40 -mx-4 mb-4 border-b border-border/60 bg-background/85 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:-mx-6 sm:px-6">
+        <div className="mx-auto flex w-full max-w-5xl items-center gap-3">
+          <Button
+            variant="ghost" size="sm"
+            className="shrink-0 gap-1 rounded-lg px-2"
+            onClick={() => navigate({ to: "/dashboard/properties" })}
+          >
+            <ChevronLeft className="h-4 w-4" /> <span className="hidden sm:inline">My Properties</span>
+          </Button>
+          <h1 className="min-w-0 flex-1 truncate font-display text-sm font-semibold text-foreground sm:text-base">
+            {prop.title}
+          </h1>
+          <SaveStatus saving={saving} lastSavedAt={lastSavedAt} />
+        </div>
+      </div>
+
+      <div className="mx-auto w-full max-w-5xl space-y-6 pb-28 animate-fade-in">
+
 
         {/* HEADER */}
         <header className="overflow-hidden rounded-3xl border border-border/60 bg-background shadow-[var(--shadow-soft)]">
