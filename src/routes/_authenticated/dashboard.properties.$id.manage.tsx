@@ -206,7 +206,7 @@ function ManagePropertyPage() {
         </header>
 
         {/* Mobile tabs / Desktop full */}
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
           <TabsList className="grid w-full grid-cols-4 md:hidden">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="details">Details</TabsTrigger>
@@ -215,7 +215,7 @@ function ManagePropertyPage() {
           </TabsList>
 
           <TabsContent value="overview" className="mt-4 space-y-6 md:mt-0 md:!block">
-            <QuickActions prop={prop} onPauseToggle={togglePause} onDelete={() => setConfirmDelete(true)} />
+            <QuickActions prop={prop} onPauseToggle={togglePause} onDelete={() => setConfirmDelete(true)} onJump={jumpToSection} />
           </TabsContent>
 
           <TabsContent value="details" className="mt-4 space-y-4 md:mt-6 md:!block">
