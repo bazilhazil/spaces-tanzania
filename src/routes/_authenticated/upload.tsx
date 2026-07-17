@@ -69,6 +69,16 @@ function UploadWizardPage() {
   const { user } = useAuth();
   const { id: editId } = Route.useSearch();
   const isEdit = !!editId;
+
+  // Unified editor: any legacy ?id=... link must land in the new manage page.
+  useEffect(() => {
+    if (editId) {
+      console.log("Edit source:", "legacy /upload?id");
+      console.log("Navigating to:", `/dashboard/properties/${editId}/manage`);
+      navigate({ to: "/dashboard/properties/$id/manage", params: { id: editId }, replace: true });
+    }
+  }, [editId, navigate]);
+
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<WizardDraft>({
     step: 1, currency: "TZS", listing_type: "rent", amenities: [], preferred_contact: "both",
@@ -76,6 +86,7 @@ function UploadWizardPage() {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [existingPhotoCount, setExistingPhotoCount] = useState(0);
   const [loadingEdit, setLoadingEdit] = useState(isEdit);
+
   const [submitting, setSubmitting] = useState(false);
   const [savedTick, setSavedTick] = useState<number>(0);
   const [success, setSuccess] = useState<{ status: "live" | "draft"; id?: string } | null>(null);
