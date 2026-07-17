@@ -286,11 +286,12 @@ export function PropertiesManager() {
     !!filters.minPrice || !!filters.maxPrice || !!filters.from || !!filters.to;
 
   return (
-    <div className="space-y-5">
+    <div className="w-full min-w-0 max-w-full space-y-5">
       {/* Toolbar */}
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 min-w-[220px]">
+      <div className="flex w-full min-w-0 flex-col gap-3">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
+          <div className="relative w-full min-w-0 flex-1 sm:min-w-[220px]">
+
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={query}
