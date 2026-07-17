@@ -241,7 +241,9 @@ export function PropertiesManager() {
         const newId = await duplicateProperty(p.id);
         toast.dismiss(tid);
         toast.success("Duplicated as draft");
-        window.location.href = `/upload?id=${newId}`;
+        console.log("Edit source:", "duplicate → manage");
+        console.log("Navigating to:", `/dashboard/properties/${newId}/manage`);
+        window.location.href = `/dashboard/properties/${newId}/manage`;
       } catch (e: any) {
         toast.dismiss(tid);
         toast.error(e?.message ?? "Could not duplicate");
