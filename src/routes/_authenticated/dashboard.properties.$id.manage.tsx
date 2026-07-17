@@ -76,6 +76,16 @@ function ManagePropertyPage() {
   const [media, setMedia] = useState<MediaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [activeTab, setActiveTab] = useState<"overview" | "details" | "photos" | "settings">("overview");
+
+  function jumpToSection(tab: "overview" | "details" | "photos" | "settings") {
+    setActiveTab(tab);
+    // Desktop: all sections are visible, so scroll to the anchor.
+    // Defer to next frame so the mobile tab has switched first.
+    requestAnimationFrame(() => {
+      document.getElementById(`section-${tab}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   useEffect(() => {
     let alive = true;
@@ -196,7 +206,7 @@ function ManagePropertyPage() {
         </header>
 
         {/* Mobile tabs / Desktop full */}
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
           <TabsList className="grid w-full grid-cols-4 md:hidden">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="details">Details</TabsTrigger>
@@ -205,7 +215,7 @@ function ManagePropertyPage() {
           </TabsList>
 
           <TabsContent value="overview" className="mt-4 space-y-6 md:mt-0 md:!block">
-            <QuickActions prop={prop} onPauseToggle={togglePause} onDelete={() => setConfirmDelete(true)} />
+            <QuickActions prop={prop} onPauseToggle={togglePause} onDelete={() => setConfirmDelete(true)} onJump={jumpToSection} />
           </TabsContent>
 
           <TabsContent value="details" className="mt-4 space-y-4 md:mt-6 md:!block">
@@ -268,9 +278,20 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function QuickActions({
-  prop, onPauseToggle, onDelete,
-}: { prop: Property; onPauseToggle: () => void; onDelete: () => void }) {
-  const items = [
+  prop, onPauseToggle, onJump,
+}: {
+  prop: Property;
+  onPauseToggle: () => void;
+  onDelete: () => void;
+  onJump: (tab: "overview" | "details" | "photos" | "settings") => void;
+}) {
+  const items: Array<{
+    icon: typeof DollarSign;
+    label: string;
+    tab?: "details" | "photos" | "settings";
+    action?: () => void;
+    hint: string;
+  }> = [
     { icon: DollarSign, label: "Edit price", tab: "details", hint: `${prop.currency} ${Number(prop.price).toLocaleString()}` },
     { icon: Ruler, label: "Size & details", tab: "details", hint: `${prop.area_sqm ?? "—"} sqm` },
     { icon: Camera, label: "Manage photos", tab: "photos", hint: "Reorder, cover, upload" },
@@ -284,14 +305,6 @@ function QuickActions({
     },
   ];
 
-  function jumpTo(tab: string) {
-    // Switch mobile tab if visible
-    const trigger = document.querySelector<HTMLButtonElement>(`[role="tab"][data-state][value="${tab}"]`);
-    trigger?.click();
-    // Scroll to section on desktop
-    document.getElementById(`section-${tab}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
   return (
     <section>
       <h2 className="mb-3 font-display text-lg font-semibold text-foreground">Quick actions</h2>
@@ -301,7 +314,7 @@ function QuickActions({
           return (
             <button
               key={it.label}
-              onClick={it.action ?? (() => jumpTo(it.tab!))}
+              onClick={it.action ?? (() => onJump(it.tab!))}
               className="group flex items-start gap-3 rounded-2xl border border-border/60 bg-background p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-soft)]"
             >
               <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
