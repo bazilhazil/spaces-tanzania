@@ -612,14 +612,15 @@ function PropertyManageCard({
 
 function Metric({ icon: Icon, value, label }: { icon: any; value: number; label: string }) {
   return (
-    <div className="flex flex-col items-center gap-0.5 rounded-lg bg-secondary/40 py-1.5">
-      <span className="inline-flex items-center gap-1 text-sm font-semibold text-foreground">
+    <div className="flex flex-col items-center gap-0.5 rounded-lg bg-secondary/40 py-1.5 max-md:py-1">
+      <span className="inline-flex items-center gap-1 text-sm font-semibold text-foreground max-md:text-xs">
         <Icon className="h-3 w-3 text-muted-foreground" /> {value}
       </span>
-      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="text-[10px] uppercase tracking-wider text-muted-foreground max-md:text-[9px]">{label}</span>
     </div>
   );
 }
+
 
 function ActionBtn({
   icon: Icon, label, onClick, destructive,
