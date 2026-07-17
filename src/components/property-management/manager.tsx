@@ -497,9 +497,10 @@ function PropertyManageCard({
 
   return (
     <div className={cn(
-      "group relative overflow-hidden rounded-2xl border bg-background shadow-[var(--shadow-soft)] transition-all",
+      "group relative w-full min-w-0 max-w-full overflow-hidden rounded-2xl border bg-background shadow-[var(--shadow-soft)] transition-all",
       selected ? "border-primary ring-2 ring-primary/30" : "border-border/60 hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]",
     )}>
+
       {/* Media */}
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
         <Link to="/properties/$slug" params={{ slug: p.id }} aria-label={`Open ${p.title}`} className="absolute inset-0 z-0">
