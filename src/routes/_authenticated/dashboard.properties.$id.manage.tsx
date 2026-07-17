@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft, Eye, Calendar, DollarSign, Ruler, Camera, MapPin, FileText,
-  Pause, Play, Trash2, Star, Upload as UploadIcon, X, Home, Loader2, Save, GripVertical,
+  Pause, Play, Trash2, Star, Upload as UploadIcon, X, Home, Loader2, Save, GripVertical, Check, ExternalLink,
 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Button } from "@/components/ui/button";
@@ -77,6 +77,8 @@ function ManagePropertyPage() {
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "details" | "photos" | "settings">("overview");
+  const [saving, setSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
 
   function jumpToSection(tab: "overview" | "details" | "photos" | "settings") {
     setActiveTab(tab);
@@ -114,13 +116,16 @@ function ManagePropertyPage() {
     return () => { alive = false; };
   }, [id]);
 
-  async function patch(fields: Partial<Property>) {
-    if (!prop) return;
+  async function patch(fields: Partial<Property>, label?: string) {
+    if (!prop) return false;
+    setSaving(true);
     const { error } = await supabase
       .from("properties").update(fields as never).eq("id", prop.id);
+    setSaving(false);
     if (error) { toast.error(error.message); return false; }
     setProp({ ...prop, ...fields });
-    toast.success("Saved");
+    setLastSavedAt(Date.now());
+    toast.success(label ? `✓ ${label} updated successfully` : "✓ Changes saved");
     return true;
   }
 
@@ -168,13 +173,25 @@ function ManagePropertyPage() {
 
   return (
     <DashboardShell>
-      <div className="mx-auto w-full max-w-5xl space-y-6 animate-fade-in">
-        <Link
-          to="/dashboard/properties"
-          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" /> My Properties
-        </Link>
+      {/* Sticky top bar */}
+      <div className="sticky top-0 z-40 -mx-4 mb-4 border-b border-border/60 bg-background/85 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:-mx-6 sm:px-6">
+        <div className="mx-auto flex w-full max-w-5xl items-center gap-3">
+          <Button
+            variant="ghost" size="sm"
+            className="shrink-0 gap-1 rounded-lg px-2"
+            onClick={() => navigate({ to: "/dashboard/properties" })}
+          >
+            <ChevronLeft className="h-4 w-4" /> <span className="hidden sm:inline">My Properties</span>
+          </Button>
+          <h1 className="min-w-0 flex-1 truncate font-display text-sm font-semibold text-foreground sm:text-base">
+            {prop.title}
+          </h1>
+          <SaveStatus saving={saving} lastSavedAt={lastSavedAt} />
+        </div>
+      </div>
+
+      <div className="mx-auto w-full max-w-5xl space-y-6 pb-28 animate-fade-in">
+
 
         {/* HEADER */}
         <header className="overflow-hidden rounded-3xl border border-border/60 bg-background shadow-[var(--shadow-soft)]">
@@ -237,7 +254,37 @@ function ManagePropertyPage() {
         </Tabs>
       </div>
 
+      {/* Sticky footer action bar */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/60 bg-background/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur sm:px-6"
+      >
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-end gap-2 sm:gap-3">
+          <Button
+            variant="outline"
+            className="flex-1 gap-1.5 rounded-xl sm:flex-none"
+            onClick={() => window.open(`/property/${prop.id}`, "_blank", "noopener")}
+          >
+            <ExternalLink className="h-4 w-4" />
+            <span className="hidden sm:inline">Preview listing</span>
+            <span className="sm:hidden">Preview</span>
+          </Button>
+          <Button
+            size="lg"
+            className="flex-1 gap-1.5 rounded-xl sm:flex-none"
+            disabled={saving}
+            onClick={() => {
+              toast.success("✓ Changes saved successfully");
+              navigate({ to: "/dashboard/properties" });
+            }}
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+            Done editing
+          </Button>
+        </div>
+      </div>
+
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this property?</AlertDialogTitle>
@@ -259,6 +306,26 @@ function ManagePropertyPage() {
     </DashboardShell>
   );
 }
+
+function SaveStatus({ saving, lastSavedAt }: { saving: boolean; lastSavedAt: number | null }) {
+  if (saving) {
+    return (
+      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+        <Loader2 className="h-3 w-3 animate-spin" /> Saving…
+      </span>
+    );
+  }
+  if (lastSavedAt) {
+    return (
+      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+        <Check className="h-3 w-3" /> Saved
+      </span>
+    );
+  }
+  return null;
+}
+
+
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
@@ -334,59 +401,60 @@ function QuickActions({
 
 function DetailsSection({
   prop, onSave,
-}: { prop: Property; onSave: (f: Partial<Property>) => Promise<boolean | undefined> }) {
+}: { prop: Property; onSave: (f: Partial<Property>, label?: string) => Promise<boolean | undefined> }) {
   return (
     <section id="section-details" className="space-y-4">
       <h2 className="font-display text-lg font-semibold text-foreground">Property details</h2>
       <div className="grid gap-3 sm:grid-cols-2">
-        <EditField label="Title" value={prop.title} onSave={(v) => onSave({ title: v })} />
+        <EditField label="Title" value={prop.title} onSave={(v) => onSave({ title: v }, "Title")} />
         <EditField
           label="Price" type="number" value={String(prop.price)}
-          onSave={(v) => onSave({ price: Number(v) })}
+          onSave={(v) => onSave({ price: Number(v) }, "Price")}
         />
         <EditField
           label="Area (sqm)" type="number" value={prop.area_sqm != null ? String(prop.area_sqm) : ""}
-          onSave={(v) => onSave({ area_sqm: v === "" ? null : (Number(v) as never) })}
+          onSave={(v) => onSave({ area_sqm: v === "" ? null : (Number(v) as never) }, "Area")}
         />
         <EditField
           label="Bedrooms" type="number" value={prop.bedrooms != null ? String(prop.bedrooms) : ""}
-          onSave={(v) => onSave({ bedrooms: v === "" ? null : Number(v) })}
+          onSave={(v) => onSave({ bedrooms: v === "" ? null : Number(v) }, "Bedrooms")}
         />
         <EditField
           label="Bathrooms" type="number" value={prop.bathrooms != null ? String(prop.bathrooms) : ""}
-          onSave={(v) => onSave({ bathrooms: v === "" ? null : Number(v) })}
+          onSave={(v) => onSave({ bathrooms: v === "" ? null : Number(v) }, "Bathrooms")}
         />
         <EditSelect
           label="Property type" value={prop.property_type}
           options={PROPERTY_TYPES.map((t) => ({ value: t, label: t[0].toUpperCase() + t.slice(1) }))}
-          onSave={(v) => onSave({ property_type: v })}
+          onSave={(v) => onSave({ property_type: v }, "Property type")}
         />
         <EditSelect
           label="Listing type" value={prop.listing_type}
           options={[{ value: "rent", label: "For Rent" }, { value: "sale", label: "For Sale" }]}
-          onSave={(v) => onSave({ listing_type: v as "rent" | "sale" })}
+          onSave={(v) => onSave({ listing_type: v as "rent" | "sale" }, "Listing type")}
         />
         <EditField
           label="Contact phone" value={prop.contact_phone ?? ""}
-          onSave={(v) => onSave({ contact_phone: v })}
+          onSave={(v) => onSave({ contact_phone: v }, "Contact phone")}
         />
         <EditField
           label="Region" value={prop.region ?? ""}
-          onSave={(v) => onSave({ region: v })}
+          onSave={(v) => onSave({ region: v }, "Location")}
         />
         <EditField
           label="District" value={prop.district ?? ""}
-          onSave={(v) => onSave({ district: v })}
+          onSave={(v) => onSave({ district: v }, "Location")}
         />
       </div>
 
       <EditTextArea
         label="Description" value={prop.description ?? ""}
-        onSave={(v) => onSave({ description: v })}
+        onSave={(v) => onSave({ description: v }, "Description")}
       />
     </section>
   );
 }
+
 
 function EditField({
   label, value, onSave, type = "text",
