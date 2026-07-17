@@ -351,7 +351,8 @@ export function PropertiesManager() {
         </div>
 
         {/* Status tabs */}
-        <div className="-mx-1 flex gap-1.5 overflow-x-auto pb-1">
+        <div className="-mx-1 flex w-full max-w-full gap-1.5 overflow-x-auto whitespace-nowrap px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+
           {STATUS_TABS.map((s) => {
             const active = tab === s.key;
             const n = counts[s.key] ?? 0;
