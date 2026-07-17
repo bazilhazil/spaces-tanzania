@@ -502,11 +502,11 @@ function PropertyManageCard({
       selected ? "border-primary ring-2 ring-primary/30" : "border-border/60 hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]",
     )}>
 
-      {/* Media — mobile height capped at 200px, desktop keeps aspect ratio */}
-      <div className="relative block aspect-[16/10] shrink-0 overflow-hidden bg-muted max-md:aspect-auto max-md:h-[180px] max-md:max-h-[200px]">
+      {/* Media */}
+      <div className="property-card-media relative block aspect-[16/10] shrink-0 overflow-hidden bg-muted">
         <Link to="/properties/$slug" params={{ slug: p.id }} aria-label={`Open ${p.title}`} className="absolute inset-0 z-0 block">
           {p.cover ? (
-            <img src={p.cover} alt={p.title} loading="lazy" className="property-card-image h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <img src={p.cover} alt={p.title} loading="lazy" className="property-card-image h-full w-full object-cover transition-transform duration-500 md:group-hover:scale-105" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-muted-foreground/40"><Home className="h-10 w-10 max-md:h-8 max-md:w-8" /></div>
           )}
