@@ -307,6 +307,26 @@ function ManagePropertyPage() {
   );
 }
 
+function SaveStatus({ saving, lastSavedAt }: { saving: boolean; lastSavedAt: number | null }) {
+  if (saving) {
+    return (
+      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+        <Loader2 className="h-3 w-3 animate-spin" /> Saving…
+      </span>
+    );
+  }
+  if (lastSavedAt) {
+    return (
+      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+        <Check className="h-3 w-3" /> Saved
+      </span>
+    );
+  }
+  return null;
+}
+
+
+
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     live: "bg-emerald-500/90 text-white",
