@@ -502,64 +502,65 @@ function PropertyManageCard({
       selected ? "border-primary ring-2 ring-primary/30" : "border-border/60 hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]",
     )}>
 
-      {/* Media */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+      {/* Media — mobile height capped at 200px, desktop keeps aspect ratio */}
+      <div className="relative aspect-[16/10] max-md:aspect-auto overflow-hidden bg-muted">
         <Link to="/properties/$slug" params={{ slug: p.id }} aria-label={`Open ${p.title}`} className="absolute inset-0 z-0">
           {p.cover ? (
-            <img src={p.cover} alt={p.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <img src={p.cover} alt={p.title} loading="lazy" className="property-card-image h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
           ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground/40"><Home className="h-10 w-10" /></div>
+            <div className="flex h-full items-center justify-center text-muted-foreground/40"><Home className="h-10 w-10 max-md:h-8 max-md:w-8" /></div>
           )}
         </Link>
 
         {/* selection */}
         <label className={cn(
           "absolute left-3 top-3 grid h-7 w-7 place-items-center rounded-md bg-background/90 shadow ring-1 ring-border backdrop-blur transition",
+          "max-md:left-2 max-md:top-2 max-md:h-6 max-md:w-6",
           selected ? "opacity-100" : "opacity-0 group-hover:opacity-100",
         )}>
           <Checkbox checked={selected} onCheckedChange={() => onSelect()} />
         </label>
 
         {/* badges */}
-        <div className="absolute right-3 top-3 flex flex-wrap justify-end gap-1.5">
+        <div className="absolute right-3 top-3 flex flex-wrap justify-end gap-1.5 max-md:right-2 max-md:top-2 max-md:gap-1">
           {p.premium && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow">
-              <Crown className="h-3 w-3" /> Premium
+            <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow max-md:px-1.5 max-md:py-0 max-md:text-[9px]">
+              <Crown className="h-3 w-3 max-md:h-2.5 max-md:w-2.5" /> Premium
             </span>
           )}
           {p.featured && !p.premium && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
-              <Sparkles className="h-3 w-3" /> Featured
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground max-md:px-1.5 max-md:py-0 max-md:text-[9px]">
+              <Sparkles className="h-3 w-3 max-md:h-2.5 max-md:w-2.5" /> Featured
             </span>
           )}
           {p.verified && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
-              <ShieldCheck className="h-3 w-3" /> Verified
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white max-md:px-1.5 max-md:py-0 max-md:text-[9px]">
+              <ShieldCheck className="h-3 w-3 max-md:h-2.5 max-md:w-2.5" /> Verified
             </span>
           )}
         </div>
 
-        <div className="absolute bottom-3 left-3">
-          <StatusBadge kind={statusToKind(p.status)} label={statusLabel(p.status)} />
+        <div className="absolute bottom-3 left-3 max-md:bottom-2 max-md:left-2">
+          <StatusBadge kind={statusToKind(p.status)} label={statusLabel(p.status)} className="max-md:px-1.5 max-md:py-0 max-md:text-[10px]" />
         </div>
-        <div className="absolute bottom-3 right-3 rounded-full bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur">
+        <div className="absolute bottom-3 right-3 max-md:bottom-2 max-md:right-3 rounded-full bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur max-md:text-[10px]">
           <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" /> {p.view_count.toLocaleString()}</span>
         </div>
       </div>
 
       {/* Body */}
-      <div className="space-y-3 p-4">
+      <div className="space-y-3 p-4 max-md:space-y-2 max-md:p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{p.public_id}</p>
-            <Link to="/properties/$slug" params={{ slug: p.id }} className="mt-0.5 block line-clamp-1 font-display text-base font-semibold text-foreground hover:text-primary transition-colors">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground max-md:text-[9px]">{p.public_id}</p>
+            <Link to="/properties/$slug" params={{ slug: p.id }} className="mt-0.5 block line-clamp-1 font-display text-base font-semibold text-foreground hover:text-primary transition-colors max-md:text-sm">
               {p.title}
             </Link>
-            <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{location}</p>
+            <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground max-md:text-[11px]">{location}</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button aria-label="More actions" className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground">
+              <button aria-label="More actions" className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground max-md:h-7 max-md:w-7">
                 <MoreHorizontal className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
@@ -568,38 +569,46 @@ function PropertyManageCard({
         </div>
 
         <div className="flex items-end justify-between">
-          <p className="font-display text-lg font-semibold text-primary">
+          <p className="font-display text-lg font-semibold text-primary max-md:text-base">
             {p.currency} {p.price.toLocaleString()}
-            {p.listing_type === "rent" && <span className="ml-1 text-xs font-normal text-muted-foreground">/mo</span>}
+            {p.listing_type === "rent" && <span className="ml-1 text-xs font-normal text-muted-foreground max-md:text-[10px]">/mo</span>}
           </p>
-          <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1", qualityTone)}>
+          <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 max-md:px-1.5 max-md:py-0 max-md:text-[10px]", qualityTone)}>
             <Star className="h-3 w-3" /> {p.quality}
           </span>
         </div>
 
-        {/* Metrics */}
+        {/* Metrics — 2×2 on mobile, 4 columns on desktop */}
         <div className="grid grid-cols-2 gap-1 border-t border-border/50 pt-3 sm:grid-cols-4 sm:border-t-0 sm:pt-0">
           <Metric icon={Eye} value={p.view_count} label="Views" />
           <Metric icon={Heart} value={p.favorites ?? 0} label="Saves" />
-          <Metric icon={MessageSquare} value={p.messages ?? 0} label="Msgs" />
+          <Metric icon={MessageSquare} value={p.messages ?? 0} label="Messages" />
           <Metric icon={Calendar} value={p.viewings ?? 0} label="Tours" />
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+        {/* Mobile quick actions */}
+        <div className="grid grid-cols-4 gap-2 md:hidden">
+          <ActionBtn icon={Eye} label="View" onClick={() => onAction("view")} />
+          <ActionBtn icon={Edit3} label="Edit" onClick={() => onAction("edit")} />
+          <ActionBtn icon={Share2} label="Share" onClick={() => onAction("share")} />
+          <ActionBtn icon={BarChart3} label="Stats" onClick={() => onAction("analytics")} />
+        </div>
+
+        <div className="flex items-center justify-between text-[11px] text-muted-foreground max-md:text-[10px]">
           <span>Listed {dateStr}</span>
           <Link
             to="/property/$id"
             params={{ id: p.id }}
-            className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+            className="hidden md:inline-flex items-center gap-1 font-medium text-primary hover:underline"
           >
             View details <BarChart3 className="h-3 w-3" />
           </Link>
         </div>
-
       </div>
     </div>
   );
 }
+
 
 function Metric({ icon: Icon, value, label }: { icon: any; value: number; label: string }) {
   return (
