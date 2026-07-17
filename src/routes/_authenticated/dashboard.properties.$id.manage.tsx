@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft, Eye, Calendar, DollarSign, Ruler, Camera, MapPin, FileText,
-  Pause, Play, Trash2, Star, Upload as UploadIcon, X, Home, Loader2, Save, GripVertical,
+  Pause, Play, Trash2, Star, Upload as UploadIcon, X, Home, Loader2, Save, GripVertical, Check, ExternalLink,
 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Button } from "@/components/ui/button";
