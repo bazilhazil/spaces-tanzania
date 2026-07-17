@@ -576,7 +576,7 @@ function PropertyManageCard({
         </div>
 
         {/* Metrics */}
-        <div className="grid grid-cols-4 gap-1 border-t border-border/50 pt-3 sm:border-t-0 sm:pt-0">
+        <div className="grid grid-cols-2 gap-1 border-t border-border/50 pt-3 sm:grid-cols-4 sm:border-t-0 sm:pt-0">
           <Metric icon={Eye} value={p.view_count} label="Views" />
           <Metric icon={Heart} value={p.favorites ?? 0} label="Saves" />
           <Metric icon={MessageSquare} value={p.messages ?? 0} label="Msgs" />
