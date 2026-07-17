@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { PropertiesManager } from "@/components/property-management/manager";
@@ -15,6 +15,11 @@ export const Route = createFileRoute("/_authenticated/dashboard/properties")({
 });
 
 function PropertiesPage() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // Layout parent for /dashboard/properties/:id/manage — render child when nested.
+  if (pathname !== "/dashboard/properties" && pathname !== "/dashboard/properties/") {
+    return <Outlet />;
+  }
   return (
     <DashboardShell>
       <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
