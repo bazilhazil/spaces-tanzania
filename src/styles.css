@@ -4,6 +4,16 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Mobile property management card image constraint */
+@media (max-width: 768px) {
+  .property-card-image {
+    height: 180px;
+    max-height: 200px;
+    object-fit: cover;
+  }
+}
+
+
 /*
  * SPACES design system.
  * Brand: Deep Blue #0F4C81, Gold #C8A24D, White.
