@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Search, SlidersHorizontal, Plus, Grid3x3, Rows3, ChevronDown, X,
@@ -66,6 +66,7 @@ const STATUS_TABS: { key: string; label: string }[] = [
 
 export function PropertiesManager() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [rows, setRows] = useState<ManagedProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("all");
@@ -231,6 +232,24 @@ export function PropertiesManager() {
   }
 
   async function onCardAction(a: CardAction, p: ManagedProperty) {
+    if (a === "edit") {
+      console.log("Edit source:", "dropdown menu");
+      console.log("Property object:", p);
+      console.log("Route ID:", p.id);
+      console.time("dropdown-edit");
+      navigate({ to: "/dashboard/properties/$id/manage", params: { id: p.id } });
+      console.timeEnd("dropdown-edit");
+      return;
+    }
+    if (a === "view") {
+      console.log("View listing clicked");
+      console.log("Property object:", p);
+      console.log("Route ID (slug):", p.id);
+      console.time("dropdown-view");
+      navigate({ to: "/properties/$slug", params: { slug: p.id } });
+      console.timeEnd("dropdown-view");
+      return;
+    }
     if (a === "delete") {
       setConfirmDelete({ ids: [p.id], label: `"${p.title}"` });
       return;
