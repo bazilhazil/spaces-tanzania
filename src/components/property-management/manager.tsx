@@ -361,7 +361,7 @@ export function PropertiesManager() {
                 key={s.key}
                 onClick={() => setTab(s.key)}
                 className={cn(
-                  "shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-medium ring-1 transition-colors",
+                  "shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-medium ring-1 transition-colors max-md:px-3 max-md:py-1",
                   active
                     ? "bg-primary text-primary-foreground ring-primary"
                     : "bg-background text-foreground/70 ring-border hover:bg-accent"
@@ -372,6 +372,7 @@ export function PropertiesManager() {
             );
           })}
         </div>
+
 
         {showFilters && (
           <FiltersPanel
