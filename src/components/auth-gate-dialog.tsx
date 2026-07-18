@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable";
 import { useI18n } from "@/hooks/use-i18n";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Mail, Phone } from "lucide-react";
 
 export function AuthGateDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const { t } = useI18n();
@@ -13,31 +13,45 @@ export function AuthGateDialog({ open, onOpenChange }: { open: boolean; onOpenCh
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md overflow-hidden rounded-3xl border-border/60 p-0">
-        <div className="bg-gradient-to-br from-primary to-primary/80 p-6 text-primary-foreground">
-          <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 backdrop-blur">
-            <Sparkles className="h-5 w-5" />
+      <DialogContent className="max-w-md overflow-hidden rounded-3xl border-white/10 bg-[#05070d] p-0 text-white">
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-sky-500/70 p-6 text-primary-foreground">
+          <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_20%_20%,white_1px,transparent_1px)] [background-size:22px_22px]" />
+          <div className="relative">
+            <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 backdrop-blur">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <DialogHeader className="space-y-2 text-left">
+              <DialogTitle className="font-display text-2xl text-primary-foreground">
+                {t("auth.gate.title")}
+              </DialogTitle>
+              <DialogDescription className="text-primary-foreground/85">
+                {t("auth.gate.sub")}
+              </DialogDescription>
+            </DialogHeader>
           </div>
-          <DialogHeader className="space-y-2 text-left">
-            <DialogTitle className="font-display text-2xl text-primary-foreground">
-              {t("auth.gate.title")}
-            </DialogTitle>
-            <DialogDescription className="text-primary-foreground/85">
-              {t("auth.gate.sub")}
-            </DialogDescription>
-          </DialogHeader>
         </div>
         <div className="space-y-3 p-6">
-          <Button onClick={google} variant="outline" className="h-11 w-full gap-2 rounded-xl">
-            <GoogleIcon /> {t("auth.gate.google")}
+          <Button
+            onClick={google}
+            variant="outline"
+            className="h-11 w-full gap-2 rounded-xl border-white/15 bg-white text-slate-900 hover:bg-white/90 hover:text-slate-900"
+          >
+            <GoogleIcon /> Continue with Google
           </Button>
-          <Link to="/register" onClick={() => onOpenChange(false)}>
-            <Button className="h-11 w-full rounded-xl">{t("auth.gate.email")}</Button>
+          <Link to="/auth" search={{ mode: "signin" }} onClick={() => onOpenChange(false)}>
+            <Button variant="outline" className="h-11 w-full gap-2 rounded-xl border-white/15 bg-white/[0.04] text-white hover:bg-white/10 hover:text-white">
+              <Mail className="h-4 w-4" /> Continue with email
+            </Button>
           </Link>
-          <p className="pt-2 text-center text-sm text-muted-foreground">
-            {t("auth.gate.haveAccount")}{" "}
-            <Link to="/login" onClick={() => onOpenChange(false)} className="font-medium text-primary hover:underline">
-              {t("nav.login")}
+          <Link to="/auth" search={{ mode: "signin" }} onClick={() => onOpenChange(false)}>
+            <Button variant="outline" className="h-11 w-full gap-2 rounded-xl border-white/15 bg-white/[0.04] text-white hover:bg-white/10 hover:text-white">
+              <Phone className="h-4 w-4" /> Continue with phone
+            </Button>
+          </Link>
+          <p className="pt-2 text-center text-sm text-white/60">
+            New to SPACES?{" "}
+            <Link to="/auth" search={{ mode: "signup" }} onClick={() => onOpenChange(false)} className="font-medium text-primary hover:underline">
+              Create an account
             </Link>
           </p>
         </div>
