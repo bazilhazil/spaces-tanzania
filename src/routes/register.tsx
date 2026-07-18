@@ -66,7 +66,7 @@ function RegisterPage() {
   }
 
   async function google() {
-    await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/dashboard" });
+    await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
   }
 
   return (
