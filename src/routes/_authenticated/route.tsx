@@ -23,7 +23,7 @@ function AuthenticatedLayout() {
     loading,
     initialized,
     hasSession: !!session,
-    redirectTarget: !session && initialized && !loading ? "/login" : null,
+    redirectTarget: !session && initialized && !loading ? "/auth" : null,
   });
 
   useEffect(() => {
@@ -42,7 +42,7 @@ function AuthenticatedLayout() {
         : "/";
     // eslint-disable-next-line no-console
     console.log("[auth-guard] redirecting to /login from", here);
-    navigate({ to: "/login", replace: true, search: { redirect: here } });
+    navigate({ to: "/auth", replace: true, search: { redirect: here } });
     // navigate intentionally excluded — new ref each render would re-fire.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialized, loading, session]);

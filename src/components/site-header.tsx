@@ -132,7 +132,7 @@ export function SiteHeader() {
             </DropdownMenu>
           ) : (
             <>
-              <Link to="/login" className="hidden md:inline-flex">
+              <Link to="/auth" className="hidden md:inline-flex">
                 <Button variant="ghost" size="sm" className="rounded-full text-foreground/80 hover:text-primary">
                   {t("nav.login")}
                 </Button>
@@ -186,7 +186,7 @@ export function SiteHeader() {
                 </>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
-                  <Link to="/login" onClick={() => setOpen(false)}>
+                  <Link to="/auth" onClick={() => setOpen(false)}>
                     <Button variant="outline" className="w-full rounded-full">{t("nav.login")}</Button>
                   </Link>
                   <Link to="/register" onClick={() => setOpen(false)}>
