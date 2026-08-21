@@ -114,7 +114,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         </Button>
       </div>
 
-      <div className="flex">
+      <div className="flex w-full min-w-0 max-w-full">
         {/* Sidebar */}
         <aside
           className={cn(
@@ -199,7 +199,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         {open && <div onClick={() => setOpen(false)} className="fixed inset-0 z-20 bg-black/30 lg:hidden" />}
 
         {/* Main */}
-        <main className="flex-1 p-4 md:p-8">{children}</main>
+        <main className="w-full min-w-0 max-w-full flex-1 overflow-x-hidden p-4 md:p-8">{children}</main>
       </div>
     </div>
   );
