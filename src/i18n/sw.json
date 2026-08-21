@@ -82,10 +82,22 @@
     "whyTitle": "Imejengwa juu ya uaminifu, imeundwa kwa ajili yako",
     "whySub": "Mahali pa kuaminika zaidi Tanzania pa kutafuta, kutangaza na kusimamia mali.",
     "whyItems": {
-      "verified": { "title": "Matangazo Yaliyothibitishwa", "body": "Kila mali iliyothibitishwa hukaguliwa kimwili na hati zake kuhakikiwa na timu yetu." },
-      "trusted": { "title": "Mawakala wa Kuaminika", "body": "Mawakala walio na leseni na rekodi bora na maoni wazi." },
-      "fast": { "title": "Utafutaji wa Haraka", "body": "Chuja kwa mji, bei na huduma kwa sekunde. Hifadhi utafutaji kwa baadaye." },
-      "support": { "title": "Msaada wa Kitaalamu", "body": "Watu halisi kupitia WhatsApp, simu na barua pepe — siku 7 kwa wiki." }
+      "verified": {
+        "title": "Matangazo Yaliyothibitishwa",
+        "body": "Kila mali iliyothibitishwa hukaguliwa kimwili na hati zake kuhakikiwa na timu yetu."
+      },
+      "trusted": {
+        "title": "Mawakala wa Kuaminika",
+        "body": "Mawakala walio na leseni na rekodi bora na maoni wazi."
+      },
+      "fast": {
+        "title": "Utafutaji wa Haraka",
+        "body": "Chuja kwa mji, bei na huduma kwa sekunde. Hifadhi utafutaji kwa baadaye."
+      },
+      "support": {
+        "title": "Msaada wa Kitaalamu",
+        "body": "Watu halisi kupitia WhatsApp, simu na barua pepe — siku 7 kwa wiki."
+      }
     },
     "cta": {
       "eyebrow": "Kwa wamiliki na mawakala",
@@ -96,7 +108,11 @@
     }
   },
   "search": {
-    "tab": { "rent": "Pangisha", "sale": "Nunua", "commercial": "Biashara" },
+    "tab": {
+      "rent": "Pangisha",
+      "sale": "Nunua",
+      "commercial": "Biashara"
+    },
     "placeholder": "Mji, eneo, mtaa…",
     "city": "Mji",
     "type": "Aina",
@@ -109,7 +125,8 @@
       "Office": "Ofisi",
       "Shop": "Duka",
       "Warehouse": "Ghala",
-      "Land": "Kiwanja"
+      "Land": "Kiwanja",
+      "Commercial Building": "Nafasi ya Biashara"
     },
     "shortcuts": {
       "House": "Nyumba",
@@ -139,7 +156,8 @@
     "bedrooms": "Vyumba vya kulala",
     "bathrooms": "Bafu",
     "parking": "Maegesho",
-    "size": "Ukubwa"
+    "size": "Ukubwa",
+    "viewSpace": "Angalia Nafasi"
   },
   "properties": {
     "titleAll": "Mali Zote",
@@ -194,8 +212,18 @@
     "tagline": "Pata Nafasi Yako Kamili.",
     "rights": "Haki zote zimehifadhiwa. Dar es Salaam, Tanzania.",
     "brandBlurb": "Soko la mali za kuaminika zaidi Tanzania. Pata nafasi yako kamili ya kupanga, kununua au kukua.",
-    "companyLinks": { "about": "Kuhusu", "careers": "Ajira", "press": "Vyombo vya habari", "contact": "Mawasiliano" },
-    "supportLinks": { "help": "Kituo cha msaada", "verification": "Uthibitisho", "terms": "Sheria", "privacy": "Faragha" },
+    "companyLinks": {
+      "about": "Kuhusu",
+      "careers": "Ajira",
+      "press": "Vyombo vya habari",
+      "contact": "Mawasiliano"
+    },
+    "supportLinks": {
+      "help": "Kituo cha msaada",
+      "verification": "Uthibitisho",
+      "terms": "Sheria",
+      "privacy": "Faragha"
+    },
     "copyright": "© 2025 SPACES Group Ltd."
   },
   "auth": {
@@ -242,9 +270,18 @@
       "confirmPlaceholder": "Rudia",
       "roleLabel": "Mimi ni…",
       "roles": {
-        "buyer": { "label": "Mnunuzi", "desc": "Panga au nunua nyumba" },
-        "owner": { "label": "Mmiliki", "desc": "Tangaza mali yako" },
-        "agent": { "label": "Wakala", "desc": "Kua kwenye biashara" }
+        "buyer": {
+          "label": "Mnunuzi",
+          "desc": "Panga au nunua nyumba"
+        },
+        "owner": {
+          "label": "Mmiliki",
+          "desc": "Tangaza mali yako"
+        },
+        "agent": {
+          "label": "Wakala",
+          "desc": "Kua kwenye biashara"
+        }
       },
       "agreePre": "Nakubali",
       "terms": "Sheria",
@@ -408,5 +445,70 @@
     "emptyBody": "Bonyeza moyo kwenye tangazo lolote ili kuhifadhi hapa.",
     "browse": "Vinjari Mali",
     "loading": "Inapakia vipendwa vyako…"
+  },
+  "share": {
+    "title": "Shiriki nafasi hii",
+    "whatsapp": "WhatsApp",
+    "facebook": "Facebook",
+    "x": "X",
+    "email": "Barua pepe",
+    "copyLink": "Nakili kiungo",
+    "copied": "Kiungo kimenakiliwa"
+  },
+  "contact": {
+    "call": "Piga simu",
+    "whatsapp": "WhatsApp",
+    "message": "Tuma ujumbe",
+    "requestViewing": "Omba kutembelea",
+    "leadSaved": "Ombi lako limetumwa kwa mmiliki",
+    "loginRequired": "Ingia ili kuwasiliana na mmiliki"
+  },
+  "discovery": {
+    "searchPlaceholder": "Jaribu “Mbezi Beach”, “nyumba ya vyumba 2 Masaki”, “Ofisi Posta”",
+    "search": "Tafuta",
+    "filters": "Vichujio",
+    "showFilters": "Onyesha vichujio",
+    "apply": "Tumia vichujio",
+    "clear": "Futa vichujio",
+    "changeLocation": "Badilisha eneo",
+    "results": "Nafasi {count} zimepatikana",
+    "noResultsTitle": "Hakuna nafasi zilizopatikana.",
+    "noResultsBody": "Jaribu kuondoa baadhi ya vichujio au tafuta eneo lingine.",
+    "listingType": "Aina ya tangazo",
+    "any": "Zote",
+    "forRent": "Kupanga",
+    "forSale": "Kuuza",
+    "commercial": "Biashara",
+    "propertyType": "Aina ya mali",
+    "priceRange": "Kiwango cha bei",
+    "minPrice": "Bei ya chini",
+    "maxPrice": "Bei ya juu",
+    "bedrooms": "Vyumba vya kulala",
+    "bathrooms": "Bafu",
+    "size": "Ukubwa (m²)",
+    "minSize": "Ukubwa wa chini",
+    "maxSize": "Ukubwa wa juu",
+    "furnished": "Yenye samani",
+    "parking": "Maegesho",
+    "amenities": "Huduma",
+    "verifiedOnly": "Zilizothibitishwa pekee",
+    "region": "Mkoa",
+    "district": "Jiji / Wilaya",
+    "area": "Eneo",
+    "allRegions": "Mikoa yote",
+    "allDistricts": "Wilaya zote",
+    "allAreas": "Maeneo yote",
+    "map": "Ramani",
+    "list": "Orodha",
+    "mapEmpty": "Hakuna maeneo yenye ramani kwa matokeo haya.",
+    "sort": "Panga",
+    "sortRecommended": "Zinazopendekezwa",
+    "sortNewest": "Mpya zaidi",
+    "sortPriceAsc": "Bei ya chini",
+    "sortPriceDesc": "Bei ya juu",
+    "sortViews": "Zilizotazamwa zaidi",
+    "viewSpace": "Angalia Nafasi",
+    "verified": "Imethibitishwa",
+    "activeFilters": "{count} hai"
   }
 }

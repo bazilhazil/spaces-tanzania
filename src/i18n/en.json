@@ -82,10 +82,22 @@
     "whyTitle": "Built on trust, designed for you",
     "whySub": "Tanzania's most reliable place to find, list, and manage property.",
     "whyItems": {
-      "verified": { "title": "Verified Listings", "body": "Every verified property is physically inspected and title-checked by our team." },
-      "trusted": { "title": "Trusted Agents", "body": "Licensed local agents with proven track records and transparent reviews." },
-      "fast": { "title": "Fast Search", "body": "Filter by city, price, and amenities in seconds. Save searches for later." },
-      "support": { "title": "Professional Support", "body": "Real humans on WhatsApp, phone, and email — 7 days a week." }
+      "verified": {
+        "title": "Verified Listings",
+        "body": "Every verified property is physically inspected and title-checked by our team."
+      },
+      "trusted": {
+        "title": "Trusted Agents",
+        "body": "Licensed local agents with proven track records and transparent reviews."
+      },
+      "fast": {
+        "title": "Fast Search",
+        "body": "Filter by city, price, and amenities in seconds. Save searches for later."
+      },
+      "support": {
+        "title": "Professional Support",
+        "body": "Real humans on WhatsApp, phone, and email — 7 days a week."
+      }
     },
     "cta": {
       "eyebrow": "For owners & agents",
@@ -96,7 +108,11 @@
     }
   },
   "search": {
-    "tab": { "rent": "Rent", "sale": "Buy", "commercial": "Commercial" },
+    "tab": {
+      "rent": "Rent",
+      "sale": "Buy",
+      "commercial": "Commercial"
+    },
     "placeholder": "City, area, street…",
     "city": "City",
     "type": "Type",
@@ -109,7 +125,8 @@
       "Office": "Office",
       "Shop": "Shop",
       "Warehouse": "Warehouse",
-      "Land": "Land"
+      "Land": "Land",
+      "Commercial Building": "Commercial Space"
     },
     "shortcuts": {
       "House": "Houses",
@@ -139,7 +156,8 @@
     "bedrooms": "Bedrooms",
     "bathrooms": "Bathrooms",
     "parking": "Parking",
-    "size": "Size"
+    "size": "Size",
+    "viewSpace": "View Space"
   },
   "properties": {
     "titleAll": "All Properties",
@@ -194,8 +212,18 @@
     "tagline": "Find Your Perfect Space.",
     "rights": "All rights reserved. Dar es Salaam, Tanzania.",
     "brandBlurb": "Tanzania's most trusted real estate marketplace. Find your perfect space to rent, buy, or grow.",
-    "companyLinks": { "about": "About", "careers": "Careers", "press": "Press", "contact": "Contact" },
-    "supportLinks": { "help": "Help center", "verification": "Verification", "terms": "Terms", "privacy": "Privacy" },
+    "companyLinks": {
+      "about": "About",
+      "careers": "Careers",
+      "press": "Press",
+      "contact": "Contact"
+    },
+    "supportLinks": {
+      "help": "Help center",
+      "verification": "Verification",
+      "terms": "Terms",
+      "privacy": "Privacy"
+    },
     "copyright": "© 2025 SPACES Group Ltd."
   },
   "auth": {
@@ -242,9 +270,18 @@
       "confirmPlaceholder": "Repeat",
       "roleLabel": "I am a…",
       "roles": {
-        "buyer": { "label": "Buyer", "desc": "Rent or buy a home" },
-        "owner": { "label": "Owner", "desc": "List your property" },
-        "agent": { "label": "Agent", "desc": "Grow your portfolio" }
+        "buyer": {
+          "label": "Buyer",
+          "desc": "Rent or buy a home"
+        },
+        "owner": {
+          "label": "Owner",
+          "desc": "List your property"
+        },
+        "agent": {
+          "label": "Agent",
+          "desc": "Grow your portfolio"
+        }
       },
       "agreePre": "I agree to the",
       "terms": "Terms",
@@ -408,5 +445,70 @@
     "emptyBody": "Tap the heart on any listing to save it here.",
     "browse": "Browse Properties",
     "loading": "Loading your favorites…"
+  },
+  "share": {
+    "title": "Share this space",
+    "whatsapp": "WhatsApp",
+    "facebook": "Facebook",
+    "x": "X",
+    "email": "Email",
+    "copyLink": "Copy link",
+    "copied": "Link copied"
+  },
+  "contact": {
+    "call": "Call",
+    "whatsapp": "WhatsApp",
+    "message": "Message",
+    "requestViewing": "Request Viewing",
+    "leadSaved": "Your request was sent to the owner",
+    "loginRequired": "Sign in to contact the owner"
+  },
+  "discovery": {
+    "searchPlaceholder": "Try “Mbezi Beach”, “2 bedroom apartment in Masaki”, “Office in Posta”",
+    "search": "Search",
+    "filters": "Filters",
+    "showFilters": "Show filters",
+    "apply": "Apply filters",
+    "clear": "Clear filters",
+    "changeLocation": "Change location",
+    "results": "{count} spaces found",
+    "noResultsTitle": "No spaces found.",
+    "noResultsBody": "Try removing some filters or searching another area.",
+    "listingType": "Listing type",
+    "any": "Any",
+    "forRent": "For Rent",
+    "forSale": "For Sale",
+    "commercial": "Commercial",
+    "propertyType": "Property type",
+    "priceRange": "Price range",
+    "minPrice": "Min price",
+    "maxPrice": "Max price",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "size": "Property size (m²)",
+    "minSize": "Min size",
+    "maxSize": "Max size",
+    "furnished": "Furnished",
+    "parking": "Parking",
+    "amenities": "Amenities",
+    "verifiedOnly": "Verified only",
+    "region": "Region",
+    "district": "City / District",
+    "area": "Area",
+    "allRegions": "All regions",
+    "allDistricts": "All districts",
+    "allAreas": "All areas",
+    "map": "Map",
+    "list": "List",
+    "mapEmpty": "No mapped locations for these results yet.",
+    "sort": "Sort",
+    "sortRecommended": "Recommended",
+    "sortNewest": "Newest",
+    "sortPriceAsc": "Lowest price",
+    "sortPriceDesc": "Highest price",
+    "sortViews": "Most viewed",
+    "viewSpace": "View Space",
+    "verified": "Verified",
+    "activeFilters": "{count} active"
   }
 }
