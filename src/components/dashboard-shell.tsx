@@ -114,7 +114,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         </Button>
       </div>
 
-      <div className="flex">
+      <div className="flex w-full min-w-0 max-w-full">
         {/* Sidebar */}
         <aside
           className={cn(
