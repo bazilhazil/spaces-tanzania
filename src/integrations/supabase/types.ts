@@ -409,6 +409,66 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          contact_method: string
+          created_at: string
+          id: string
+          message: string | null
+          owner_id: string
+          property_id: string
+          status: string
+          updated_at: string
+          visitor_email: string | null
+          visitor_id: string | null
+          visitor_name: string | null
+          visitor_phone: string | null
+        }
+        Insert: {
+          contact_method: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          owner_id: string
+          property_id: string
+          status?: string
+          updated_at?: string
+          visitor_email?: string | null
+          visitor_id?: string | null
+          visitor_name?: string | null
+          visitor_phone?: string | null
+        }
+        Update: {
+          contact_method?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          owner_id?: string
+          property_id?: string
+          status?: string
+          updated_at?: string
+          visitor_email?: string | null
+          visitor_id?: string | null
+          visitor_name?: string | null
+          visitor_phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           body: string
