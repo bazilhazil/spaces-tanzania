@@ -343,7 +343,7 @@ export function PropertiesManager() {
               <Rows3 className="h-4 w-4" />
             </button>
           </div>
-          <Link to="/upload">
+          <Link to="/upload" className="hidden md:block">
             <Button className="h-11 gap-2 rounded-xl">
               <Plus className="h-4 w-4" /> New Property
             </Button>
