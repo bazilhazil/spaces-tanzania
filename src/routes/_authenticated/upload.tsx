@@ -29,7 +29,8 @@ import {
 
 export const Route = createFileRoute("/_authenticated/upload")({
   component: UploadWizardPage,
-  validateSearch: (s: Record<string, unknown>) => ({ id: typeof s.id === "string" ? s.id : undefined }),
+  validateSearch: (s: Record<string, unknown>): { id?: string } =>
+    typeof s.id === "string" ? { id: s.id } : {},
   head: () => ({ meta: [{ title: "Publish your property — SPACES" }] }),
 });
 
