@@ -374,6 +374,13 @@ export function PropertiesManager() {
         </div>
 
 
+        {/* Mobile-only primary action */}
+        <Link to="/upload" className="block w-full md:hidden">
+          <Button className="h-12 w-full gap-2 rounded-xl text-base">
+            <Plus className="h-5 w-5" /> New Property
+          </Button>
+        </Link>
+
         {showFilters && (
           <FiltersPanel
             filters={filters}
