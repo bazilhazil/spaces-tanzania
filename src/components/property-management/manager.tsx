@@ -938,13 +938,11 @@ function EmptyPropertiesIllustration() {
           <path d="M145 55 L145 45 M155 65 L165 65 M138 58 L131 51 M152 58 L159 51" stroke="hsl(var(--gold, 45 90% 55%))" strokeWidth="2" strokeLinecap="round" />
         </svg>
       </div>
-      <h3 className="mt-2 font-display text-2xl font-semibold text-foreground">You haven't published any properties yet</h3>
-      <p className="mx-auto mt-2 max-w-md text-muted-foreground">
-        Start showcasing your space to thousands of buyers and renters across Tanzania. It takes less than 3 minutes.
-      </p>
+      <h3 className="mt-2 font-display text-2xl font-semibold text-foreground">{t("spaces.empty.title")}</h3>
+      <p className="mx-auto mt-2 max-w-md text-muted-foreground">{t("spaces.empty.desc")}</p>
       <Link to="/upload" className="mt-6 inline-block">
         <Button size="lg" className="h-12 gap-2 rounded-xl px-6 text-base shadow-[var(--shadow-elevated)]">
-          <Plus className="h-4 w-4" /> Upload Your First Property
+          <Plus className="h-4 w-4" /> {t("spaces.empty.cta")}
         </Button>
       </Link>
     </div>
@@ -959,6 +957,7 @@ function statusToKind(s: string): any {
     case "pending": return "pending";
     case "sold": return "sold";
     case "rented": return "rented";
+    case "rejected": return "pending";
     case "paused": return "draft";
     case "archived": return "draft";
     case "draft":
@@ -967,8 +966,9 @@ function statusToKind(s: string): any {
 }
 function statusLabel(s: string) {
   const map: Record<string, string> = {
-    live: "Live", draft: "Draft", archived: "Archived",
-    pending: "Pending Review", paused: "Paused", sold: "Sold", rented: "Rented",
+    live: "Published", draft: "Draft", archived: "Unavailable",
+    pending: "Pending Review", paused: "Paused", sold: "Sold",
+    rented: "Rented", rejected: "Rejected",
   };
   return map[s] ?? s;
 }
