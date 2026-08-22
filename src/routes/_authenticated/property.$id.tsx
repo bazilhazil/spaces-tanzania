@@ -30,7 +30,7 @@ function PropertyDetail() {
   const [cover, setCover] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("overview");
-  const [metrics, setMetrics] = useState<PropertyMetrics>({ views: 0, favorites: 0, messages: 0, bookings: 0 });
+  const [metrics, setMetrics] = useState<PropertyMetrics>({ views: 0, favorites: 0, messages: 0, bookings: 0, leads: 0, deals: 0, activeDeal: false });
 
   useEffect(() => {
     let alive = true;
