@@ -4,7 +4,7 @@ import {
   Search, SlidersHorizontal, Plus, Grid3x3, Rows3, ChevronDown, X,
   Eye, Heart, MessageSquare, Calendar, Star, Sparkles, ShieldCheck,
   Edit3, Copy, Pause, Play, Trash2, BarChart3, Share2, Link2, Crown, MoreHorizontal,
-  Home, CheckCircle2, CircleDot,
+  Home, CheckCircle2, CircleDot, Camera, FileText, Users, Briefcase, UserCog,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,24 +19,36 @@ import {
 } from "@/components/ui/alert-dialog";
 import { StatusBadge, EmptyState, SkeletonCard } from "@/components/ds";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
-import { deletePropertyWithStorage, duplicateProperty, fetchPropertyMetricsBatch } from "@/lib/property-actions";
+import {
+  conversionRate, deletePropertyWithStorage, duplicateProperty, fetchPropertyMetricsBatch,
+  type PropertyMetrics,
+} from "@/lib/property-actions";
+import {
+  canEditListing, canManageLeads, canManageViewings, fetchMyAssignments, type AgentPermission,
+} from "@/lib/property-agents";
+import { AgentAccessDialog } from "./agent-access-dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PROPERTY_TYPES } from "./constants";
 import { TZ_REGIONS } from "@/lib/tz-locations";
 
+export type ManagedStatus =
+  | "draft" | "live" | "archived" | "pending" | "paused" | "sold" | "rented" | "rejected";
+
 export type ManagedProperty = {
   id: string;
   public_id: string;
+  owner_id: string;
   title: string;
   region: string | null;
   district: string | null;
   ward: string | null;
   price: number;
   currency: string;
-  status: "draft" | "live" | "archived" | "pending" | "paused" | "sold" | "rented";
+  status: ManagedStatus;
   listing_type: "rent" | "sale";
   property_type: string;
   view_count: number;
@@ -45,24 +57,32 @@ export type ManagedProperty = {
   favorites?: number;
   messages?: number;
   viewings?: number;
+  leads?: number;
+  deals?: number;
+  activeDeal?: boolean;
+  conversion?: number;
   quality?: number;
   verified?: boolean;
   featured?: boolean;
   premium?: boolean;
+  /** Set when the listing is not owned by the signed-in user but assigned to them. */
+  assignedPermission?: AgentPermission;
 };
 
 type SortKey = "newest" | "oldest" | "views_desc" | "views_asc" | "price_desc" | "price_asc";
 
-const STATUS_TABS: { key: string; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "live", label: "Live" },
-  { key: "pending", label: "Pending Review" },
-  { key: "draft", label: "Draft" },
-  { key: "paused", label: "Paused" },
-  { key: "sold", label: "Sold" },
-  { key: "rented", label: "Rented" },
-  { key: "archived", label: "Archived" },
+const STATUS_TABS: { key: string; labelKey: string }[] = [
+  { key: "all", labelKey: "spaces.status.all" },
+  { key: "live", labelKey: "spaces.status.live" },
+  { key: "pending", labelKey: "spaces.status.pending" },
+  { key: "draft", labelKey: "spaces.status.draft" },
+  { key: "paused", labelKey: "spaces.status.paused" },
+  { key: "sold", labelKey: "spaces.status.sold" },
+  { key: "rented", labelKey: "spaces.status.rented" },
+  { key: "rejected", labelKey: "spaces.status.rejected" },
+  { key: "archived", labelKey: "spaces.status.archived" },
 ];
+
 
 export function PropertiesManager() {
   const { user } = useAuth();
