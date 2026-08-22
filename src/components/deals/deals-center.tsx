@@ -1,4 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { LOST_REASONS, type LostReason } from "@/lib/crm-workflow";
+
+const LOST_REASON_LABEL: Record<LostReason, string> = {
+  price: "Price",
+  location: "Location",
+  changed_mind: "Customer changed mind",
+  unavailable: "Property unavailable",
+  chose_other: "Chose another property",
+  other: "Other",
+};
+
+
 import {
   DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors,
   useDraggable, useDroppable, closestCenter,
@@ -438,6 +451,8 @@ function DealDetailSheet({
   const [uploading, setUploading] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [lostReason, setLostReason] = useState<LostReason>("other");
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -510,7 +525,9 @@ function DealDetailSheet({
   }
   async function doCancel() {
     try {
-      await cancelDeal(deal!.id, cancelReason.trim() || "No reason provided");
+      const detail = cancelReason.trim();
+      await cancelDeal(deal!.id, detail ? `${LOST_REASON_LABEL[lostReason]} — ${detail}` : LOST_REASON_LABEL[lostReason]);
+
       toast.success("Deal cancelled"); setCancelOpen(false); setCancelReason(""); onChanged(); await refresh();
     } catch (e: any) { toast.error(e?.message ?? "Failed"); }
   }
@@ -572,6 +589,14 @@ function DealDetailSheet({
           </Field>
           <Field label="Buyer"><div className="text-sm">{deal.buyer_name ?? "—"} <span className="text-muted-foreground">{deal.buyer_email ?? ""}</span></div></Field>
           <Field label="Owner / Agent"><div className="text-sm">{deal.owner_name ?? "—"}{deal.agent_name ? ` · ${deal.agent_name}` : ""}</div></Field>
+          {deal.lead_id && (
+            <Field label="Related Lead">
+              <Link to="/leads" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                View lead <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </Field>
+          )}
+
         </div>
 
         <Tabs defaultValue="timeline" className="mt-6">
@@ -681,7 +706,18 @@ function DealDetailSheet({
             This moves <strong>{deal.reference}</strong> to Cancelled and notifies participants.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <Textarea placeholder="Optional reason…" value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} rows={3} />
+        <div className="space-y-2">
+          <Select value={lostReason} onValueChange={(v) => setLostReason(v as LostReason)}>
+            <SelectTrigger className="h-10"><SelectValue placeholder="Reason" /></SelectTrigger>
+            <SelectContent>
+              {LOST_REASONS.map((r) => (
+                <SelectItem key={r} value={r}>{LOST_REASON_LABEL[r]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Textarea placeholder="More detail (optional)…" value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} rows={3} />
+        </div>
+
         <AlertDialogFooter>
           <AlertDialogCancel>Keep deal</AlertDialogCancel>
           <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={doCancel}>
