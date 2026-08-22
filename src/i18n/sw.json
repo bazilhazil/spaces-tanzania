@@ -510,5 +510,53 @@
     "viewSpace": "Angalia Nafasi",
     "verified": "Imethibitishwa",
     "activeFilters": "{count} hai"
+  },
+  "viewings": {
+    "title": "Maombi ya kutazama",
+    "subtitle": "Omba, thibitisha na fuatilia matembezi ya kutazama nyumba mahali pamoja.",
+    "tabs": {
+      "incoming": "Maombi ya Kutazama",
+      "mine": "Maombi Yangu ya Kutazama",
+      "all": "Maombi yote"
+    },
+    "emptyIncoming": "Bado hakuna maombi ya kutazama.",
+    "emptyMine": "Bado hujaomba kutazama nyumba yoyote.",
+    "emptyAll": "Bado hakuna maombi ya kutazama kwenye mfumo.",
+    "actionFailed": "Imeshindikana kusasisha ombi. Tafadhali jaribu tena.",
+    "newTimeSuggested": "Muda mpya umependekezwa",
+    "kpi": {
+      "upcoming": "Yajayo",
+      "pending": "Yanasubiri",
+      "completed": "Yamekamilika",
+      "cancelled": "Yamesitishwa"
+    },
+    "status": {
+      "pending": "Inasubiri",
+      "approved": "Imekubaliwa",
+      "rejected": "Imekataliwa",
+      "rescheduled": "Imepangwa upya",
+      "cancelled": "Imesitishwa",
+      "completed": "Imekamilika"
+    },
+    "actions": {
+      "approve": "Kubali",
+      "reject": "Kataa",
+      "suggestTime": "Pendekeza muda mpya",
+      "acceptTime": "Kubali muda mpya",
+      "cancel": "Sitisha",
+      "complete": "Weka imekamilika",
+      "messageBuyer": "Tuma ujumbe kwa mnunuzi",
+      "messageOwner": "Tuma ujumbe kwa mmiliki",
+      "viewProperty": "Tazama nyumba",
+      "close": "Funga"
+    },
+    "reschedule": {
+      "title": "Pendekeza muda mpya",
+      "body": "Chagua tarehe na saa nyingine. Mnunuzi atajulishwa na anaweza kukubali."
+    },
+    "form": {
+      "date": "Tarehe",
+      "time": "Saa"
+    }
   }
 }

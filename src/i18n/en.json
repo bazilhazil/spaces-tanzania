@@ -510,5 +510,53 @@
     "viewSpace": "View Space",
     "verified": "Verified",
     "activeFilters": "{count} active"
+  },
+  "viewings": {
+    "title": "Viewing requests",
+    "subtitle": "Request, approve and track property viewings in one place.",
+    "tabs": {
+      "incoming": "Viewing Requests",
+      "mine": "My Viewing Requests",
+      "all": "All requests"
+    },
+    "emptyIncoming": "No viewing requests yet.",
+    "emptyMine": "You haven't requested any viewings yet.",
+    "emptyAll": "No viewing requests on the platform yet.",
+    "actionFailed": "Could not update the request. Please try again.",
+    "newTimeSuggested": "New time suggested",
+    "kpi": {
+      "upcoming": "Upcoming",
+      "pending": "Pending",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "rescheduled": "Rescheduled",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "suggestTime": "Suggest new time",
+      "acceptTime": "Accept new time",
+      "cancel": "Cancel",
+      "complete": "Mark completed",
+      "messageBuyer": "Message buyer",
+      "messageOwner": "Message owner",
+      "viewProperty": "View property",
+      "close": "Close"
+    },
+    "reschedule": {
+      "title": "Suggest a new time",
+      "body": "Pick another date and time. The buyer will be notified and can accept it."
+    },
+    "form": {
+      "date": "Date",
+      "time": "Time"
+    }
   }
 }
