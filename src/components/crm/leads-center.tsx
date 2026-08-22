@@ -339,7 +339,7 @@ function LeadDrawer({
                 <span className="absolute -left-[21px] top-1.5 grid h-3 w-3 place-items-center rounded-full bg-primary/20">
                   <CheckCircle2 className="h-3 w-3 text-primary" />
                 </span>
-                <p className="text-sm font-medium">{t(`crm.event.${e.kind}`, e.label)}</p>
+                <p className="text-sm font-medium">{eventLabel(t, e)}</p>
                 {e.detail && <p className="text-xs text-muted-foreground">{e.detail}</p>}
                 <p className="text-[11px] text-muted-foreground">{new Date(e.at).toLocaleString()}</p>
               </li>
