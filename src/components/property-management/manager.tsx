@@ -338,6 +338,22 @@ export function PropertiesManager() {
 
   return (
     <div className="w-full min-w-0 max-w-full space-y-5">
+      {/* Quick actions */}
+      <div className="-mx-1 flex w-full max-w-full gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <Link to="/upload" className="shrink-0">
+          <Button className="h-10 gap-2 rounded-xl"><Plus className="h-4 w-4" /> {t("spaces.quick.addSpace")}</Button>
+        </Link>
+        <Link to="/leads" className="shrink-0">
+          <Button variant="outline" className="h-10 gap-2 rounded-xl"><Users className="h-4 w-4" /> {t("spaces.quick.leads")}</Button>
+        </Link>
+        <Link to="/viewings" className="shrink-0">
+          <Button variant="outline" className="h-10 gap-2 rounded-xl"><Calendar className="h-4 w-4" /> {t("spaces.quick.viewings")}</Button>
+        </Link>
+        <Link to="/messages" className="shrink-0">
+          <Button variant="outline" className="h-10 gap-2 rounded-xl"><MessageSquare className="h-4 w-4" /> {t("spaces.quick.messages")}</Button>
+        </Link>
+      </div>
+
       {/* Toolbar */}
       <div className="flex w-full min-w-0 flex-col gap-3">
         <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
@@ -347,7 +363,7 @@ export function PropertiesManager() {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by ID, title, location, status…"
+              placeholder={t("spaces.searchPlaceholder")}
               className="h-11 rounded-xl pl-9"
             />
           </div>
@@ -356,24 +372,20 @@ export function PropertiesManager() {
             className={cn("h-11 gap-2 rounded-xl", hasFilters && "border-primary/60 text-primary")}
             onClick={() => setShowFilters((s) => !s)}
           >
-            <SlidersHorizontal className="h-4 w-4" /> Filters
+            <SlidersHorizontal className="h-4 w-4" /> {t("spaces.filters")}
             {hasFilters && <span className="ml-1 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">{Object.values(filters).filter(Boolean).length}</span>}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="h-11 gap-2 rounded-xl">
-                Sort <ChevronDown className="h-4 w-4" />
+                {t("spaces.sort.label")} <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              {([
-                ["newest", "Newest"], ["oldest", "Oldest"],
-                ["views_desc", "Highest views"], ["views_asc", "Lowest views"],
-                ["price_desc", "Highest price"], ["price_asc", "Lowest price"],
-              ] as [SortKey, string][]).map(([k, label]) => (
+              {(["newest", "oldest", "views_desc", "views_asc", "price_desc", "price_asc"] as SortKey[]).map((k) => (
                 <DropdownMenuItem key={k} onClick={() => setSort(k)}>
                   {sort === k && <CheckCircle2 className="mr-2 h-3.5 w-3.5 text-primary" />}
-                  <span className={cn(sort !== k && "pl-6")}>{label}</span>
+                  <span className={cn(sort !== k && "pl-6")}>{t(`spaces.sort.${k}`)}</span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -394,11 +406,6 @@ export function PropertiesManager() {
               <Rows3 className="h-4 w-4" />
             </button>
           </div>
-          <Link to="/upload" className="hidden md:block">
-            <Button className="h-11 gap-2 rounded-xl">
-              <Plus className="h-4 w-4" /> New Property
-            </Button>
-          </Link>
         </div>
 
         {/* Status tabs */}
@@ -418,19 +425,12 @@ export function PropertiesManager() {
                     : "bg-background text-foreground/70 ring-border hover:bg-accent"
                 )}
               >
-                {s.label} <span className={cn("ml-1 rounded-full px-1.5 text-[10px] font-semibold", active ? "bg-primary-foreground/20" : "bg-secondary text-muted-foreground")}>{n}</span>
+                {t(s.labelKey)} <span className={cn("ml-1 rounded-full px-1.5 text-[10px] font-semibold", active ? "bg-primary-foreground/20" : "bg-secondary text-muted-foreground")}>{n}</span>
               </button>
             );
           })}
         </div>
 
-
-        {/* Mobile-only primary action */}
-        <Link to="/upload" className="block w-full md:hidden">
-          <Button className="h-12 w-full gap-2 rounded-xl text-base">
-            <Plus className="h-5 w-5" /> New Property
-          </Button>
-        </Link>
 
         {showFilters && (
           <FiltersPanel
