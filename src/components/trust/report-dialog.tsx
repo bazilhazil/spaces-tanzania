@@ -8,6 +8,7 @@ import { REPORT_REASONS, type ReportReason } from "@/lib/trust-engine";
 import { Flag, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 type Props = {
   target: string;
