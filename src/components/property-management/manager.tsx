@@ -468,8 +468,8 @@ export function PropertiesManager() {
         ) : (
           <EmptyState
             icon={Search}
-            title="No matches"
-            description="Try clearing filters or searching for a different term."
+            title={t("spaces.empty.noMatchesTitle")}
+            description={t("spaces.empty.noMatchesDesc")}
           />
         )
       ) : view === "grid" ? (
@@ -494,18 +494,25 @@ export function PropertiesManager() {
         />
       )}
 
+      {agentDialog && user && (
+        <AgentAccessDialog
+          open={!!agentDialog}
+          onOpenChange={(v) => !v && setAgentDialog(null)}
+          propertyId={agentDialog.id}
+          propertyTitle={agentDialog.title}
+          ownerId={user.id}
+        />
+      )}
+
       <AlertDialog open={!!confirmDelete} onOpenChange={(v) => !v && setConfirmDelete(null)}>
         <AlertDialogContent>
+          <AlertDialogTitle className="sr-only">{t("spaces.deleteTitle", { label: confirmDelete?.label ?? "" })}</AlertDialogTitle>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete {confirmDelete?.label}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This permanently removes the listing and all uploaded photos. It will
-              disappear from your dashboard, search results and the homepage. This
-              action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t("spaces.deleteTitle", { label: confirmDelete?.label ?? "" })}</AlertDialogTitle>
+            <AlertDialogDescription>{t("spaces.deleteDesc")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={async () => {
@@ -514,7 +521,7 @@ export function PropertiesManager() {
                 await performDelete(ids);
               }}
             >
-              Delete
+              {t("spaces.actions.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -526,18 +533,14 @@ export function PropertiesManager() {
 /* ------------------------------ card ------------------------------ */
 
 export type CardAction =
-  | "view" | "edit" | "duplicate" | "pause" | "resume" | "delete"
-  | "share" | "copy" | "promote" | "analytics"
+  | "view" | "edit" | "photos" | "details" | "duplicate" | "pause" | "resume" | "delete"
+  | "share" | "copy" | "promote" | "analytics" | "leads" | "viewings" | "agents"
   | `status:${ManagedProperty["status"]}`;
 
-const STATUS_CHOICES: { value: ManagedProperty["status"]; label: string }[] = [
-  { value: "draft", label: "Draft" },
-  { value: "live", label: "Live" },
-  { value: "paused", label: "Paused" },
-  { value: "sold", label: "Sold" },
-  { value: "rented", label: "Rented" },
-  { value: "archived", label: "Archived" },
+const STATUS_CHOICES: ManagedStatus[] = [
+  "draft", "pending", "live", "paused", "sold", "rented", "rejected", "archived",
 ];
+
 
 function PropertyManageCard({
   p, selected, onSelect, onAction,
