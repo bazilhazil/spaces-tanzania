@@ -197,7 +197,8 @@
       "email": "Email",
       "bookViewing": "Book a viewing",
       "trustLine": "Verified agent. Response within 24 hours.",
-      "whatsappMessage": "Hello, I'm interested in {title} on SPACES."
+      "whatsappMessage": "Hello, I'm interested in {title} on SPACES.",
+      "contactUnavailable": "Contact details aren't available for this listing yet. Send an inquiry instead."
     }
   },
   "agents": {
