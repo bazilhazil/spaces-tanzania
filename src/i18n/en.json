@@ -640,5 +640,101 @@
     },
     "lostReasonNotes": "Add more detail (optional)",
     "confirmLost": "Mark as lost"
+  },
+  "spaces": {
+    "title": "My Spaces",
+    "subtitle": "Manage every listing, lead and viewing in one place.",
+    "searchPlaceholder": "Search by ID, title, location, status…",
+    "filters": "Filters",
+    "listedOn": "Listed {date}",
+    "activeDeal": "Active deal",
+    "deleteTitle": "Delete {label}?",
+    "deleteDesc": "This permanently removes the listing and all uploaded photos. It will disappear from your dashboard, search results and the homepage. This action cannot be undone.",
+    "quick": {
+      "addSpace": "Add Space",
+      "leads": "Manage Leads",
+      "viewings": "Viewing Requests",
+      "messages": "Messages"
+    },
+    "sort": {
+      "label": "Sort",
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "views_desc": "Highest views",
+      "views_asc": "Lowest views",
+      "price_desc": "Highest price",
+      "price_asc": "Lowest price"
+    },
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "pending": "Pending Review",
+      "live": "Published",
+      "featured": "Featured",
+      "paused": "Paused",
+      "sold": "Sold",
+      "rented": "Rented",
+      "archived": "Unavailable",
+      "rejected": "Rejected"
+    },
+    "metric": {
+      "views": "Views",
+      "saves": "Saves",
+      "leads": "Leads",
+      "viewings": "Viewings",
+      "messages": "Messages",
+      "conversion": "Conversion"
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "photos": "Manage Photos",
+      "details": "Manage Details",
+      "leads": "View Leads",
+      "viewings": "Viewing Requests",
+      "performance": "View Performance",
+      "share": "Share",
+      "copyLink": "Copy link",
+      "duplicate": "Duplicate",
+      "promote": "Promote",
+      "pause": "Pause Listing",
+      "resume": "Resume Listing",
+      "changeStatus": "Change status",
+      "delete": "Delete",
+      "agentAccess": "Agent access"
+    },
+    "empty": {
+      "title": "No spaces listed yet.",
+      "desc": "Start showcasing your space to thousands of buyers and renters across Tanzania. It takes less than 3 minutes.",
+      "cta": "List Your Space",
+      "noMatchesTitle": "No matches",
+      "noMatchesDesc": "Try clearing filters or searching for a different term."
+    },
+    "toast": {
+      "duplicating": "Duplicating listing…",
+      "duplicated": "Duplicated as draft",
+      "duplicateFailed": "Could not duplicate",
+      "statusChanged": "Status changed to {status}"
+    },
+    "agents": {
+      "title": "Agent access",
+      "subtitle": "Choose which agents can manage {title}.",
+      "addAgent": "Add an agent",
+      "searchPlaceholder": "Agent email, name or agency",
+      "noResults": "No agent found.",
+      "none": "No agents assigned yet.",
+      "unnamed": "Agent",
+      "assigned": "Agent assigned",
+      "assignFailed": "Could not assign agent",
+      "updated": "Permission updated",
+      "removed": "Agent removed",
+      "permission": {
+        "view_only": "View only",
+        "manage_leads": "Manage leads",
+        "manage_viewings": "Manage viewing requests",
+        "edit_listing": "Edit listing",
+        "full_management": "Full management"
+      }
+    }
   }
 }

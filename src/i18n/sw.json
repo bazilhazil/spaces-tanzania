@@ -640,5 +640,101 @@
     },
     "lostReasonNotes": "Ongeza maelezo zaidi (hiari)",
     "confirmLost": "Weka kama imepotea"
+  },
+  "spaces": {
+    "title": "Nafasi Zangu",
+    "subtitle": "Simamia kila tangazo, mteja na ombi la kutembelea mahali pamoja.",
+    "searchPlaceholder": "Tafuta kwa namba, kichwa, eneo, hali…",
+    "filters": "Vichujio",
+    "listedOn": "Imewekwa {date}",
+    "activeDeal": "Mkataba hai",
+    "deleteTitle": "Futa {label}?",
+    "deleteDesc": "Hii inaondoa tangazo na picha zote kabisa. Litatoweka kwenye dashibodi yako, matokeo ya utafutaji na ukurasa wa mwanzo. Hatua hii haiwezi kutenguliwa.",
+    "quick": {
+      "addSpace": "Ongeza Nafasi",
+      "leads": "Simamia Wateja",
+      "viewings": "Maombi ya Kutembelea",
+      "messages": "Ujumbe"
+    },
+    "sort": {
+      "label": "Panga",
+      "newest": "Mpya zaidi",
+      "oldest": "Za zamani",
+      "views_desc": "Miwani mingi",
+      "views_asc": "Miwani michache",
+      "price_desc": "Bei kubwa",
+      "price_asc": "Bei ndogo"
+    },
+    "status": {
+      "all": "Zote",
+      "draft": "Rasimu",
+      "pending": "Inasubiri Ukaguzi",
+      "live": "Imechapishwa",
+      "featured": "Iliyoangaziwa",
+      "paused": "Imesitishwa",
+      "sold": "Imeuzwa",
+      "rented": "Imepangishwa",
+      "archived": "Haipatikani",
+      "rejected": "Imekataliwa"
+    },
+    "metric": {
+      "views": "Miwani",
+      "saves": "Zilizohifadhiwa",
+      "leads": "Wateja",
+      "viewings": "Kutembelea",
+      "messages": "Ujumbe",
+      "conversion": "Ubadilishaji"
+    },
+    "actions": {
+      "view": "Angalia",
+      "edit": "Hariri",
+      "photos": "Simamia Picha",
+      "details": "Simamia Maelezo",
+      "leads": "Angalia Wateja",
+      "viewings": "Maombi ya Kutembelea",
+      "performance": "Angalia Utendaji",
+      "share": "Shiriki",
+      "copyLink": "Nakili kiungo",
+      "duplicate": "Nakili tangazo",
+      "promote": "Tangaza",
+      "pause": "Sitisha Tangazo",
+      "resume": "Rudisha Tangazo",
+      "changeStatus": "Badilisha hali",
+      "delete": "Futa",
+      "agentAccess": "Ruhusa za wakala"
+    },
+    "empty": {
+      "title": "Bado hujaweka nafasi yoyote.",
+      "desc": "Anza kuonyesha nafasi yako kwa maelfu ya wanunuzi na wapangaji Tanzania nzima. Inachukua chini ya dakika 3.",
+      "cta": "Weka Nafasi Yako",
+      "noMatchesTitle": "Hakuna matokeo",
+      "noMatchesDesc": "Jaribu kuondoa vichujio au tafuta kwa neno lingine."
+    },
+    "toast": {
+      "duplicating": "Inanakili tangazo…",
+      "duplicated": "Imenakiliwa kama rasimu",
+      "duplicateFailed": "Imeshindwa kunakili",
+      "statusChanged": "Hali imebadilishwa kuwa {status}"
+    },
+    "agents": {
+      "title": "Ruhusa za wakala",
+      "subtitle": "Chagua mawakala wanaoweza kusimamia {title}.",
+      "addAgent": "Ongeza wakala",
+      "searchPlaceholder": "Barua pepe, jina au kampuni ya wakala",
+      "noResults": "Hakuna wakala aliyepatikana.",
+      "none": "Hakuna wakala aliyepewa ruhusa.",
+      "unnamed": "Wakala",
+      "assigned": "Wakala amepewa ruhusa",
+      "assignFailed": "Imeshindwa kumpa wakala ruhusa",
+      "updated": "Ruhusa imebadilishwa",
+      "removed": "Wakala ameondolewa",
+      "permission": {
+        "view_only": "Kuangalia tu",
+        "manage_leads": "Kusimamia wateja",
+        "manage_viewings": "Kusimamia maombi ya kutembelea",
+        "edit_listing": "Kuhariri tangazo",
+        "full_management": "Usimamizi kamili"
+      }
+    }
   }
 }
