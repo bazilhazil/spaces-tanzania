@@ -18,7 +18,7 @@ import { AuthGateDialog } from "@/components/auth-gate-dialog";
 import { PropertyShareDialog } from "@/components/property-share-dialog";
 import { createLead, type LeadContactMethod } from "@/lib/leads-db";
 import { createViewingRequest } from "@/lib/viewings-db";
-import { VerificationBadge } from "@/components/trust/verification-badge";
+import { VerifiedBadge } from "@/components/trust/verified-badge";
 import { TrustScoreRing } from "@/components/trust/trust-score-ring";
 import { QualityScorePill } from "@/components/trust/quality-score";
 import { computeTrustScore, MOCK_TRUST_SIGNALS } from "@/lib/trust-engine";
