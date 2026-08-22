@@ -67,6 +67,9 @@ function mapRow(row: Row, images: string[]): Property {
     views: row.view_count ?? 0,
     agentId: row.owner_id ?? "",
     createdAt: row.created_at,
+    latitude: row.latitude ?? null,
+    longitude: row.longitude ?? null,
+    landmark: row.landmark ?? null,
   };
 }
 
