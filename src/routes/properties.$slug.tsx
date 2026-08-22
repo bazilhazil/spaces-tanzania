@@ -23,7 +23,7 @@ import { TrustScoreRing } from "@/components/trust/trust-score-ring";
 import { QualityScorePill } from "@/components/trust/quality-score";
 import { computeTrustScore, MOCK_TRUST_SIGNALS } from "@/lib/trust-engine";
 import { formatPrice, type Property, type Agent } from "@/lib/mock-data";
-import { fetchLiveProperties, fetchPropertyById, contactAgentFromRow } from "@/lib/properties-db";
+import { fetchLiveProperties, fetchPropertyById, fetchPropertyContact, contactAgentFromRow } from "@/lib/properties-db";
 import { useAuth } from "@/hooks/use-auth";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useI18n } from "@/hooks/use-i18n";
