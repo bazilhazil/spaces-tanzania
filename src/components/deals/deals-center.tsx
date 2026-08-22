@@ -440,6 +440,8 @@ function DealDetailSheet({
   const [uploading, setUploading] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [lostReason, setLostReason] = useState<LostReason>("other");
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
