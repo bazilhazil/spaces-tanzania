@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Search, Filter, Plus, Phone, MessageCircle, Mail, Calendar as CalendarIcon,
@@ -29,11 +29,56 @@ import {
   propertyOfLead, agentOfLead, timeAgo, formatBudget, scoreTone, computeKpis,
   type Lead, type LeadStage, type LeadSource, type Task, type TaskPriority, type TaskType, type Note,
 } from "@/lib/leads-mock";
+import { fetchMyLeads, type LeadRow } from "@/lib/leads-db";
+
+/** Maps a real website inquiry (leads table) into the CRM lead shape. */
+function dbLeadToLead(row: LeadRow): Lead {
+  const source: LeadSource =
+    row.contact_method === "whatsapp" ? "whatsapp"
+    : row.contact_method === "call" ? "phone"
+    : "listing_inquiry";
+  return {
+    id: row.id,
+    customerName: row.visitor_name || "Website visitor",
+    phone: row.visitor_phone || "",
+    email: row.visitor_email || undefined,
+    propertyId: row.property_id,
+    budgetCurrency: "TZS",
+    stage: row.status === "contacted" ? "contacted" : "new",
+    score: 60,
+    source,
+    assignedAgentId: "",
+    createdAt: row.created_at,
+    lastActivityAt: row.created_at,
+    activity: [{ id: `${row.id}-a`, at: row.created_at, kind: "created", label: "Lead created from website" }],
+    tasks: [],
+    notes: row.message
+      ? [{
+          id: `${row.id}-n`,
+          body: row.message,
+          visibility: "public" as const,
+          authorName: row.visitor_name || "Website visitor",
+          createdAt: row.created_at,
+        }]
+      : [],
+  };
+}
 
 /* ============================ ROOT ============================ */
 
 export function LeadsCenter() {
   const [leads, setLeads] = useState<Lead[]>(LEADS);
+
+  // Real website inquiries recorded on the property details page.
+  useEffect(() => {
+    let alive = true;
+    fetchMyLeads().then((rows) => {
+      if (!alive || !rows.length) return;
+      const mapped = rows.map(dbLeadToLead);
+      setLeads((prev) => [...mapped, ...prev.filter((p) => !mapped.some((m) => m.id === p.id))]);
+    });
+    return () => { alive = false; };
+  }, []);
   const [tab, setTab] = useState<"overview" | "pipeline" | "list" | "analytics">("overview");
   const [query, setQuery] = useState("");
   const [stageFilter, setStageFilter] = useState<LeadStage | "all">("all");

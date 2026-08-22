@@ -46,6 +46,9 @@ export interface Property {
   views: number;
   agentId: string;
   createdAt: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  landmark?: string | null;
 }
 
 export interface Agent {

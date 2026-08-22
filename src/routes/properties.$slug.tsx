@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { PropertyCard } from "@/components/property-card";
 import { AuthGateDialog } from "@/components/auth-gate-dialog";
+import { PropertyShareDialog } from "@/components/property-share-dialog";
+import { createLead, type LeadContactMethod } from "@/lib/leads-db";
 import { VerificationBadge } from "@/components/trust/verification-badge";
 import { TrustScoreRing } from "@/components/trust/trust-score-ring";
 import { QualityScorePill } from "@/components/trust/quality-score";
@@ -70,6 +72,7 @@ function PropertyDetailPage() {
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [viewingOpen, setViewingOpen] = useState(false);
   const [authGate, setAuthGate] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const trust = useMemo(() => computeTrustScore(MOCK_TRUST_SIGNALS), []);
 
@@ -115,14 +118,18 @@ function PropertyDetailPage() {
     cb();
   }
 
+  function logLead(method: LeadContactMethod, message?: string) {
+    if (!property) return;
+    void createLead({
+      propertyId: property.id,
+      ownerId: property.agentId,
+      contactMethod: method,
+      message,
+    });
+  }
+
   function share() {
-    const url = typeof window !== "undefined" ? window.location.href : "";
-    if (typeof navigator !== "undefined" && (navigator as any).share) {
-      (navigator as any).share({ title: property!.title, url }).catch(() => {});
-    } else if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(url);
-      toast.success("Link copied");
-    }
+    setShareOpen(true);
   }
 
   const amenityIcons: Record<string, React.ReactNode> = {
@@ -416,17 +423,17 @@ function PropertyDetailPage() {
                     href={`https://wa.me/${agent.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={(e) => { if (!user) { e.preventDefault(); setAuthGate(true); } }}
+                    onClick={(e) => { if (!user) { e.preventDefault(); setAuthGate(true); return; } logLead("whatsapp"); }}
                   >
                     <Button className="w-full gap-2 bg-success text-success-foreground hover:bg-success/90">
                       <MessageCircle className="h-4 w-4" /> WhatsApp
                     </Button>
                   </a>
                   <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" className="gap-2" onClick={() => requireAuth(() => { window.location.href = `tel:${agent.phone.replace(/\s/g, "")}`; })}>
+                    <Button variant="outline" className="gap-2" onClick={() => requireAuth(() => { logLead("call"); window.location.href = `tel:${agent.phone.replace(/\s/g, "")}`; })}>
                       <Phone className="h-4 w-4" /> Call
                     </Button>
-                    <Button variant="outline" className="gap-2" onClick={() => requireAuth(() => { window.location.href = `mailto:${agent.email}`; })}>
+                    <Button variant="outline" className="gap-2" onClick={() => requireAuth(() => { logLead("email"); window.location.href = `mailto:${agent.email}`; })}>
                       <Mail className="h-4 w-4" /> Email
                     </Button>
                   </div>
@@ -485,7 +492,7 @@ function PropertyDetailPage() {
             <Button
               variant="outline"
               className="gap-1.5"
-              onClick={() => requireAuth(() => { window.location.href = `tel:${agent.phone.replace(/\s/g, "")}`; })}
+              onClick={() => requireAuth(() => { logLead("call"); window.location.href = `tel:${agent.phone.replace(/\s/g, "")}`; })}
             >
               <Phone className="h-4 w-4" /> Call
             </Button>
@@ -493,7 +500,7 @@ function PropertyDetailPage() {
               href={`https://wa.me/${agent.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => { if (!user) { e.preventDefault(); setAuthGate(true); } }}
+              onClick={(e) => { if (!user) { e.preventDefault(); setAuthGate(true); return; } logLead("whatsapp"); }}
               className="contents"
             >
               <Button className="w-full gap-1.5 bg-success text-success-foreground hover:bg-success/90">
@@ -527,6 +534,7 @@ function PropertyDetailPage() {
         open={inquiryOpen}
         onOpenChange={setInquiryOpen}
         propertyTitle={property.title}
+        onLead={(msg) => logLead("message", msg)}
       />
 
       {/* Viewing booking dialog */}
@@ -534,6 +542,14 @@ function PropertyDetailPage() {
         open={viewingOpen}
         onOpenChange={setViewingOpen}
         propertyTitle={property.title}
+        onLead={(msg) => logLead("viewing", msg)}
+      />
+
+      <PropertyShareDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        title={property.title}
+        url={typeof window !== "undefined" ? window.location.href : ""}
       />
 
       <AuthGateDialog open={authGate} onOpenChange={setAuthGate} />
@@ -665,10 +681,11 @@ function Lightbox({
   );
 }
 
-function InquiryDialog({ open, onOpenChange, propertyTitle }: { open: boolean; onOpenChange: (v: boolean) => void; propertyTitle: string }) {
+function InquiryDialog({ open, onOpenChange, propertyTitle, onLead }: { open: boolean; onOpenChange: (v: boolean) => void; propertyTitle: string; onLead: (message: string) => void }) {
   const [message, setMessage] = useState(`Hi, I'm interested in "${propertyTitle}". Is it still available?`);
   function submit() {
     if (message.trim().length < 10) { toast.error("Please write a longer message"); return; }
+    onLead(message);
     toast.success("Inquiry sent — the owner will get back to you shortly");
     onOpenChange(false);
   }
@@ -692,13 +709,14 @@ function InquiryDialog({ open, onOpenChange, propertyTitle }: { open: boolean; o
   );
 }
 
-function ViewingDialog({ open, onOpenChange, propertyTitle }: { open: boolean; onOpenChange: (v: boolean) => void; propertyTitle: string }) {
+function ViewingDialog({ open, onOpenChange, propertyTitle, onLead }: { open: boolean; onOpenChange: (v: boolean) => void; propertyTitle: string; onLead: (message: string) => void }) {
   const today = new Date().toISOString().slice(0, 10);
   const [date, setDate] = useState(today);
   const [time, setTime] = useState("10:00");
   const [notes, setNotes] = useState("");
   function submit() {
     if (!date || !time) { toast.error("Choose date and time"); return; }
+    onLead(`Viewing requested for ${date} at ${time}. ${notes}`.trim());
     toast.success(`Viewing requested for ${date} at ${time}`);
     onOpenChange(false);
   }
