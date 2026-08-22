@@ -1,5 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { LOST_REASONS, type LostReason } from "@/lib/crm-workflow";
+
+const LOST_REASON_LABEL: Record<LostReason, string> = {
+  price: "Price",
+  location: "Location",
+  changed_mind: "Customer changed mind",
+  unavailable: "Property unavailable",
+  chose_other: "Chose another property",
+  other: "Other",
+};
+
 
 import {
   DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors,
