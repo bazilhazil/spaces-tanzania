@@ -37,29 +37,50 @@ export type PropertyMetrics = {
   favorites: number;
   messages: number;
   bookings: number;
+  leads: number;
+  deals: number;
+  activeDeal: boolean;
 };
+
+const EMPTY_METRICS = (): PropertyMetrics => ({
+  views: 0, favorites: 0, messages: 0, bookings: 0, leads: 0, deals: 0, activeDeal: false,
+});
+
+/** Leads / viewing requests / deals per view — the listing's funnel conversion. */
+export function conversionRate(m: PropertyMetrics): number {
+  if (!m.views) return 0;
+  return Math.round(((m.leads + m.bookings) / m.views) * 100);
+}
 
 export async function fetchPropertyMetrics(propertyId: string): Promise<PropertyMetrics> {
   const m = await fetchPropertyMetricsBatch([propertyId]);
-  return m[propertyId] ?? { views: 0, favorites: 0, messages: 0, bookings: 0 };
+  return m[propertyId] ?? EMPTY_METRICS();
 }
 
 export async function fetchPropertyMetricsBatch(
   propertyIds: string[],
 ): Promise<Record<string, PropertyMetrics>> {
   const out: Record<string, PropertyMetrics> = {};
-  for (const id of propertyIds) out[id] = { views: 0, favorites: 0, messages: 0, bookings: 0 };
+  for (const id of propertyIds) out[id] = EMPTY_METRICS();
   if (!propertyIds.length) return out;
 
-  const [viewsRes, favsRes, booksRes, convosRes] = await Promise.all([
+  const [viewsRes, favsRes, booksRes, convosRes, leadsRes, dealsRes] = await Promise.all([
     supabase.from("property_views").select("property_id").in("property_id", propertyIds),
     supabase.from("favorites").select("property_id").in("property_id", propertyIds),
     supabase.from("bookings").select("property_id").in("property_id", propertyIds),
     supabase.from("conversations").select("id,property_id").in("property_id", propertyIds),
+    supabase.from("leads").select("property_id").in("property_id", propertyIds),
+    supabase.from("deals").select("property_id,stage").in("property_id", propertyIds),
   ]);
   for (const r of (viewsRes.data ?? []) as { property_id: string }[]) if (out[r.property_id]) out[r.property_id].views++;
   for (const r of (favsRes.data ?? []) as { property_id: string }[]) if (out[r.property_id]) out[r.property_id].favorites++;
   for (const r of (booksRes.data ?? []) as { property_id: string }[]) if (out[r.property_id]) out[r.property_id].bookings++;
+  for (const r of (leadsRes.data ?? []) as { property_id: string }[]) if (out[r.property_id]) out[r.property_id].leads++;
+  for (const r of (dealsRes.data ?? []) as { property_id: string | null; stage: string }[]) {
+    if (!r.property_id || !out[r.property_id]) continue;
+    out[r.property_id].deals++;
+    if (r.stage !== "completed" && r.stage !== "cancelled") out[r.property_id].activeDeal = true;
+  }
 
   const convos = (convosRes.data ?? []) as { id: string; property_id: string }[];
   if (convos.length) {
@@ -77,6 +98,7 @@ export async function fetchPropertyMetricsBatch(
   }
   return out;
 }
+
 
 /** Duplicate a property row (as draft) and copy its media entries. */
 export async function duplicateProperty(propertyId: string): Promise<string> {
