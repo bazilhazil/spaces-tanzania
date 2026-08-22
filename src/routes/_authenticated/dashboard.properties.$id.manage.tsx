@@ -83,11 +83,21 @@ function ManagePropertyPage() {
   const [media, setMedia] = useState<MediaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "details" | "photos" | "settings">("overview");
+  const { tab: tabParam } = Route.useSearch();
+  const [activeTab, setActiveTab] = useState<ManageTab>(tabParam ?? "overview");
   const [saving, setSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
 
-  function jumpToSection(tab: "overview" | "details" | "photos" | "settings") {
+  // Deep links such as ?tab=photos open (and scroll to) that section directly.
+  useEffect(() => {
+    if (!tabParam) return;
+    setActiveTab(tabParam);
+    requestAnimationFrame(() => {
+      document.getElementById(`section-${tabParam}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [tabParam]);
+
+  function jumpToSection(tab: ManageTab) {
     setActiveTab(tab);
     // Desktop: all sections are visible, so scroll to the anchor.
     // Defer to next frame so the mobile tab has switched first.
