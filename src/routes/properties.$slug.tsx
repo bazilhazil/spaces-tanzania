@@ -459,24 +459,31 @@ function PropertyDetailPage() {
                   <Button variant="outline" className="w-full gap-2" onClick={() => requireAuth(() => setInquiryOpen(true))}>
                     <Send className="h-4 w-4" /> Send inquiry
                   </Button>
-                  <a
-                    href={`https://wa.me/${agent.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => { if (!user) { e.preventDefault(); setAuthGate(true); return; } logLead("whatsapp"); }}
+                  <Button
+                    className="w-full gap-2 bg-success text-success-foreground hover:bg-success/90"
+                    onClick={() =>
+                      contactAndOpen("whatsapp", (a) =>
+                        a.whatsapp
+                          ? `https://wa.me/${a.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`
+                          : null,
+                      )
+                    }
                   >
-                    <Button className="w-full gap-2 bg-success text-success-foreground hover:bg-success/90">
-                      <MessageCircle className="h-4 w-4" /> WhatsApp
-                    </Button>
-                  </a>
+                    <MessageCircle className="h-4 w-4" /> WhatsApp
+                  </Button>
                   <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" className="gap-2" onClick={() => requireAuth(() => { logLead("call"); window.location.href = `tel:${agent.phone.replace(/\s/g, "")}`; })}>
+                    <Button
+                      variant="outline"
+                      className="gap-2"
+                      onClick={() => contactAndOpen("call", (a) => (a.phone ? `tel:${a.phone.replace(/\s/g, "")}` : null))}
+                    >
                       <Phone className="h-4 w-4" /> Call
                     </Button>
-                    <Button variant="outline" className="gap-2" onClick={() => requireAuth(() => { logLead("email"); window.location.href = `mailto:${agent.email}`; })}>
+                    <Button variant="outline" className="gap-2" onClick={() => requireAuth(() => setInquiryOpen(true))}>
                       <Mail className="h-4 w-4" /> Email
                     </Button>
                   </div>
+
                   <Button
                     variant="ghost"
                     size="sm"
