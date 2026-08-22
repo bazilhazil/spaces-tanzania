@@ -25,8 +25,15 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PROPERTY_TYPES } from "@/components/property-management/constants";
 
+type ManageTab = "overview" | "details" | "photos" | "settings";
+const MANAGE_TABS: ManageTab[] = ["overview", "details", "photos", "settings"];
+
 export const Route = createFileRoute("/_authenticated/dashboard/properties/$id/manage")({
   component: ManagePropertyPage,
+  validateSearch: (search: Record<string, unknown>): { tab?: ManageTab } => {
+    const tab = search.tab as ManageTab | undefined;
+    return tab && MANAGE_TABS.includes(tab) ? { tab } : {};
+  },
   head: () => ({
     meta: [
       { title: "Manage Listing — SPACES" },
