@@ -95,6 +95,19 @@ const SUBJECT_META: Record<VerificationSubject, {
       { key: "property_photos", labelKey: "verify.doc.propertyPhotos", fallback: "Property photos", required: true },
     ],
   },
+  business: {
+    icon: Building2,
+    titleKey: "verify.type.business", titleFallback: "Business Verification",
+    descKey: "verify.typeDesc.business", descFallback: "Verify your registered business details.",
+    fields: [
+      { key: "business_name", labelKey: "verify.field.business", fallback: "Business name", required: true },
+      { key: "phone", labelKey: "verify.field.phone", fallback: "Phone number", type: "tel", required: true },
+      { key: "email", labelKey: "verify.field.email", fallback: "Email", type: "email", required: true },
+    ],
+    docs: [
+      { key: "license", labelKey: "verify.doc.license", fallback: "Business / license document", required: true },
+    ],
+  },
 };
 
 const STATUS_CLS: Record<VerificationStatus, string> = {
