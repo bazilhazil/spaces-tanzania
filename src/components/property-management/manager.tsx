@@ -550,6 +550,8 @@ function PropertyManageCard({
   onSelect: () => void;
   onAction: (a: CardAction) => void;
 }) {
+  const { t } = useI18n();
+  const canEdit = !p.assignedPermission || canEditListing(p.assignedPermission);
   const location = [p.ward, p.district, p.region].filter(Boolean).join(", ") || "Tanzania";
   const dateStr = new Date(p.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
   const qualityTone =
