@@ -1,10 +1,13 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { Bath, BedDouble, Car, Eye, GitCompare, Heart, MapPin, Ruler } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice, type Property } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
 import { useFavorites } from "@/hooks/use-favorites";
+import { useAuth } from "@/hooks/use-auth";
+import { AuthGateDialog } from "@/components/auth-gate-dialog";
 import { ListingBadgeStrip } from "@/components/trust/listing-badge";
 import { QualityScorePill } from "@/components/trust/quality-score";
 import type { ListingBadgeKind } from "@/lib/trust-engine";
@@ -20,6 +23,8 @@ interface PropertyCardProps {
 export function PropertyCard({ property, className, qualityScore }: PropertyCardProps) {
   const { t } = useI18n();
   const { isFavorite, toggleFavorite, isComparing, toggleCompare, trackView } = useFavorites();
+  const { user } = useAuth();
+  const [authGate, setAuthGate] = useState(false);
   const favorited = isFavorite(property.id);
   const comparing = isComparing(property.id);
   const listingLabel =
@@ -80,6 +85,7 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
               aria-label={favorited ? "Remove favorite" : t("card.save")}
               onClick={(e) => {
                 e.preventDefault();
+                if (!user) { setAuthGate(true); return; }
                 const now = toggleFavorite(property.id);
                 toast.success(now ? "Saved to favorites" : "Removed from favorites");
               }}
@@ -138,7 +144,11 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
           )}
           <span className="ml-auto inline-flex items-center gap-1" title={t("card.size")}><Ruler className="h-3.5 w-3.5" /> {property.size} m²</span>
         </div>
+        <span className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition group-hover:bg-primary/90">
+          {t("card.viewSpace")}
+        </span>
       </div>
+      <AuthGateDialog open={authGate} onOpenChange={setAuthGate} />
     </Link>
   );
 }
