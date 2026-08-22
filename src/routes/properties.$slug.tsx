@@ -539,21 +539,23 @@ function PropertyDetailPage() {
             <Button
               variant="outline"
               className="gap-1.5"
-              onClick={() => requireAuth(() => { logLead("call"); window.location.href = `tel:${agent.phone.replace(/\s/g, "")}`; })}
+              onClick={() => contactAndOpen("call", (a) => (a.phone ? `tel:${a.phone.replace(/\s/g, "")}` : null))}
             >
               <Phone className="h-4 w-4" /> Call
             </Button>
-            <a
-              href={`https://wa.me/${agent.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => { if (!user) { e.preventDefault(); setAuthGate(true); return; } logLead("whatsapp"); }}
-              className="contents"
+            <Button
+              className="w-full gap-1.5 bg-success text-success-foreground hover:bg-success/90"
+              onClick={() =>
+                contactAndOpen("whatsapp", (a) =>
+                  a.whatsapp
+                    ? `https://wa.me/${a.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`
+                    : null,
+                )
+              }
             >
-              <Button className="w-full gap-1.5 bg-success text-success-foreground hover:bg-success/90">
-                <MessageCircle className="h-4 w-4" /> WhatsApp
-              </Button>
-            </a>
+              <MessageCircle className="h-4 w-4" /> WhatsApp
+            </Button>
+
             <Button
               className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => requireAuth(() => setViewingOpen(true))}
