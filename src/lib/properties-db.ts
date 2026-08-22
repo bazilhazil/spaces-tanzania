@@ -60,8 +60,9 @@ function mapRow(row: Row, images: string[]): Property {
     furnished: Array.isArray(row.amenities) && row.amenities.includes("furnished"),
     amenities: row.amenities ?? [],
     images: images.length ? images : ["https://placehold.co/1200x900/e2e8f0/64748b?text=No+Image"],
-    verified: false,
-    featured: false,
+    // Only an approved property verification sets `verified` on the row.
+    verified: row.verified === true,
+    featured: row.featured === true,
     premium: false,
     new: daysOld < 14,
     views: row.view_count ?? 0,
