@@ -359,3 +359,10 @@ function Row({ icon, label, value }: { icon: React.ReactNode; label: string; val
     </div>
   );
 }
+
+/** Translated timeline label, falling back to the stored label. */
+function eventLabel(t: (k: string) => string, e: TimelineEntry) {
+  const key = `crm.event.${e.kind}`;
+  const translated = t(key);
+  return translated === key ? e.label : translated;
+}
