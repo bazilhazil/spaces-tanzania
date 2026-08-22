@@ -4,7 +4,7 @@ import {
   Search, SlidersHorizontal, Plus, Grid3x3, Rows3, ChevronDown, X,
   Eye, Heart, MessageSquare, Calendar, Star, Sparkles, ShieldCheck,
   Edit3, Copy, Pause, Play, Trash2, BarChart3, Share2, Link2, Crown, MoreHorizontal,
-  Home, CheckCircle2, CircleDot,
+  Home, CheckCircle2, CircleDot, Camera, FileText, Users, Briefcase, UserCog,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,24 +19,36 @@ import {
 } from "@/components/ui/alert-dialog";
 import { StatusBadge, EmptyState, SkeletonCard } from "@/components/ds";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
-import { deletePropertyWithStorage, duplicateProperty, fetchPropertyMetricsBatch } from "@/lib/property-actions";
+import {
+  conversionRate, deletePropertyWithStorage, duplicateProperty, fetchPropertyMetricsBatch,
+  type PropertyMetrics,
+} from "@/lib/property-actions";
+import {
+  canEditListing, canManageLeads, canManageViewings, fetchMyAssignments, type AgentPermission,
+} from "@/lib/property-agents";
+import { AgentAccessDialog } from "./agent-access-dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PROPERTY_TYPES } from "./constants";
 import { TZ_REGIONS } from "@/lib/tz-locations";
 
+export type ManagedStatus =
+  | "draft" | "live" | "archived" | "pending" | "paused" | "sold" | "rented" | "rejected";
+
 export type ManagedProperty = {
   id: string;
   public_id: string;
+  owner_id: string;
   title: string;
   region: string | null;
   district: string | null;
   ward: string | null;
   price: number;
   currency: string;
-  status: "draft" | "live" | "archived" | "pending" | "paused" | "sold" | "rented";
+  status: ManagedStatus;
   listing_type: "rent" | "sale";
   property_type: string;
   view_count: number;
@@ -45,27 +57,36 @@ export type ManagedProperty = {
   favorites?: number;
   messages?: number;
   viewings?: number;
+  leads?: number;
+  deals?: number;
+  activeDeal?: boolean;
+  conversion?: number;
   quality?: number;
   verified?: boolean;
   featured?: boolean;
   premium?: boolean;
+  /** Set when the listing is not owned by the signed-in user but assigned to them. */
+  assignedPermission?: AgentPermission;
 };
 
 type SortKey = "newest" | "oldest" | "views_desc" | "views_asc" | "price_desc" | "price_asc";
 
-const STATUS_TABS: { key: string; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "live", label: "Live" },
-  { key: "pending", label: "Pending Review" },
-  { key: "draft", label: "Draft" },
-  { key: "paused", label: "Paused" },
-  { key: "sold", label: "Sold" },
-  { key: "rented", label: "Rented" },
-  { key: "archived", label: "Archived" },
+const STATUS_TABS: { key: string; labelKey: string }[] = [
+  { key: "all", labelKey: "spaces.status.all" },
+  { key: "live", labelKey: "spaces.status.live" },
+  { key: "pending", labelKey: "spaces.status.pending" },
+  { key: "draft", labelKey: "spaces.status.draft" },
+  { key: "paused", labelKey: "spaces.status.paused" },
+  { key: "sold", labelKey: "spaces.status.sold" },
+  { key: "rented", labelKey: "spaces.status.rented" },
+  { key: "rejected", labelKey: "spaces.status.rejected" },
+  { key: "archived", labelKey: "spaces.status.archived" },
 ];
+
 
 export function PropertiesManager() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [rows, setRows] = useState<ManagedProperty[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,9 +97,11 @@ export function PropertiesManager() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<{ ids: string[]; label: string } | null>(null);
+  const [agentDialog, setAgentDialog] = useState<ManagedProperty | null>(null);
   const [filters, setFilters] = useState<{
     region?: string; district?: string; type?: string; listing?: string;
-    verified?: boolean; featured?: boolean; premium?: boolean;
+    verified?: boolean; featured?: boolean; premium?: boolean; unverified?: boolean;
+    performance?: "top" | "low" | "no_leads" | "";
     minPrice?: string; maxPrice?: string; from?: string; to?: string;
   }>({});
 
@@ -87,15 +110,24 @@ export function PropertiesManager() {
     let alive = true;
     (async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("properties")
-        .select("id,title,region,district,ward,price,currency,status,view_count,created_at,listing_type,property_type")
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: false });
-      const list = (data ?? []) as any[];
+      // Owners see their own spaces; agents also see every space assigned to them.
+      const assignments = await fetchMyAssignments(user.id);
+      const assignedIds = Object.keys(assignments);
+      const cols =
+        "id,owner_id,title,region,district,ward,price,currency,status,view_count,created_at,listing_type,property_type,verified,featured";
+      const [ownedRes, assignedRes] = await Promise.all([
+        supabase.from("properties").select(cols).eq("owner_id", user.id).order("created_at", { ascending: false }),
+        assignedIds.length
+          ? supabase.from("properties").select(cols).in("id", assignedIds).order("created_at", { ascending: false })
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+      const byId = new Map<string, any>();
+      for (const p of ((ownedRes as any).data ?? []) as any[]) byId.set(p.id, p);
+      for (const p of ((assignedRes as any).data ?? []) as any[]) if (!byId.has(p.id)) byId.set(p.id, p);
+      const list = [...byId.values()];
       const ids = list.map((p) => p.id);
       const covers: Record<string, string> = {};
-      let metrics: Record<string, { views: number; favorites: number; messages: number; bookings: number }> = {};
+      let metrics: Record<string, PropertyMetrics> = {};
       if (ids.length) {
         const [mediaRes, metricsRes] = await Promise.all([
           supabase
@@ -116,19 +148,27 @@ export function PropertiesManager() {
         }
       }
       if (!alive) return;
-      setRows(list.map((p, i) => ({
-        ...p,
-        public_id: publicIdFrom(p.id, p.created_at),
-        cover: covers[p.id],
-        view_count: metrics[p.id]?.views ?? p.view_count ?? 0,
-        favorites: metrics[p.id]?.favorites ?? 0,
-        messages: metrics[p.id]?.messages ?? 0,
-        viewings: metrics[p.id]?.bookings ?? 0,
-        quality: 55 + (mulberry(p.id, 11) % 45),
-        verified: i % 3 !== 0,
-        featured: i % 5 === 0,
-        premium: i % 6 === 0,
-      })));
+      setRows(list.map((p) => {
+        const m = metrics[p.id];
+        return {
+          ...p,
+          public_id: publicIdFrom(p.id, p.created_at),
+          cover: covers[p.id],
+          view_count: m?.views ?? p.view_count ?? 0,
+          favorites: m?.favorites ?? 0,
+          messages: m?.messages ?? 0,
+          viewings: m?.bookings ?? 0,
+          leads: m?.leads ?? 0,
+          deals: m?.deals ?? 0,
+          activeDeal: m?.activeDeal ?? false,
+          conversion: m ? conversionRate(m) : 0,
+          quality: 55 + (mulberry(p.id, 11) % 45),
+          verified: !!p.verified,
+          featured: !!p.featured,
+          premium: false,
+          assignedPermission: p.owner_id === user.id ? undefined : assignments[p.id],
+        } as ManagedProperty;
+      }));
       setLoading(false);
     })();
     return () => { alive = false; };
@@ -153,8 +193,12 @@ export function PropertiesManager() {
     if (filters.type) out = out.filter((r) => r.property_type === filters.type);
     if (filters.listing) out = out.filter((r) => r.listing_type === filters.listing);
     if (filters.verified) out = out.filter((r) => r.verified);
+    if (filters.unverified) out = out.filter((r) => !r.verified);
     if (filters.featured) out = out.filter((r) => r.featured);
     if (filters.premium) out = out.filter((r) => r.premium);
+    if (filters.performance === "top") out = out.filter((r) => (r.conversion ?? 0) >= 5);
+    if (filters.performance === "low") out = out.filter((r) => (r.view_count ?? 0) < 10);
+    if (filters.performance === "no_leads") out = out.filter((r) => (r.leads ?? 0) === 0);
     if (filters.minPrice) out = out.filter((r) => r.price >= Number(filters.minPrice));
     if (filters.maxPrice) out = out.filter((r) => r.price <= Number(filters.maxPrice));
     if (filters.from) out = out.filter((r) => new Date(r.created_at) >= new Date(filters.from!));
@@ -232,22 +276,31 @@ export function PropertiesManager() {
   }
 
   async function onCardAction(a: CardAction, p: ManagedProperty) {
-    if (a === "edit") {
-      console.log("Edit source:", "dropdown menu");
-      console.log("Property object:", p);
-      console.log("Route ID:", p.id);
-      console.time("dropdown-edit");
-      navigate({ to: "/dashboard/properties/$id/manage", params: { id: p.id } });
-      console.timeEnd("dropdown-edit");
+    if (a === "edit" || a === "photos" || a === "details") {
+      const tab = a === "photos" ? "photos" : a === "details" ? "details" : undefined;
+      console.log("Edit source:", `manager card (${a})`);
+      console.log("Navigating to:", `/dashboard/properties/${p.id}/manage`, tab ?? "");
+      navigate({
+        to: "/dashboard/properties/$id/manage",
+        params: { id: p.id },
+        search: tab ? { tab } : {},
+      });
       return;
     }
     if (a === "view") {
-      console.log("View listing clicked");
-      console.log("Property object:", p);
-      console.log("Route ID (slug):", p.id);
-      console.time("dropdown-view");
       navigate({ to: "/properties/$slug", params: { slug: p.id } });
-      console.timeEnd("dropdown-view");
+      return;
+    }
+    if (a === "leads") {
+      navigate({ to: "/leads" });
+      return;
+    }
+    if (a === "viewings") {
+      navigate({ to: "/viewings" });
+      return;
+    }
+    if (a === "agents") {
+      setAgentDialog(p);
       return;
     }
     if (a === "delete") {
@@ -255,17 +308,15 @@ export function PropertiesManager() {
       return;
     }
     if (a === "duplicate") {
-      const tid = toast.loading("Duplicating listing…");
+      const tid = toast.loading(t("spaces.toast.duplicating"));
       try {
         const newId = await duplicateProperty(p.id);
         toast.dismiss(tid);
-        toast.success("Duplicated as draft");
-        console.log("Edit source:", "duplicate → manage");
-        console.log("Navigating to:", `/dashboard/properties/${newId}/manage`);
-        window.location.href = `/dashboard/properties/${newId}/manage`;
+        toast.success(t("spaces.toast.duplicated"));
+        navigate({ to: "/dashboard/properties/$id/manage", params: { id: newId }, search: {} });
       } catch (e: any) {
         toast.dismiss(tid);
-        toast.error(e?.message ?? "Could not duplicate");
+        toast.error(e?.message ?? t("spaces.toast.duplicateFailed"));
       }
       return;
     }
@@ -274,7 +325,7 @@ export function PropertiesManager() {
       const { error } = await supabase.from("properties").update({ status: next as never }).eq("id", p.id);
       if (error) return toast.error(error.message);
       setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: next } : x)));
-      toast.success(`Status changed to ${statusLabel(next)}`);
+      toast.success(t("spaces.toast.statusChanged", { status: statusLabel(next) }));
       return;
     }
     await handleCardAction(a, p, rows, setRows, setSelected);
@@ -282,11 +333,27 @@ export function PropertiesManager() {
 
   const hasFilters =
     !!filters.region || !!filters.district || !!filters.type || !!filters.listing ||
-    !!filters.verified || !!filters.featured || !!filters.premium ||
-    !!filters.minPrice || !!filters.maxPrice || !!filters.from || !!filters.to;
+    !!filters.verified || !!filters.unverified || !!filters.featured || !!filters.premium ||
+    !!filters.performance || !!filters.minPrice || !!filters.maxPrice || !!filters.from || !!filters.to;
 
   return (
     <div className="w-full min-w-0 max-w-full space-y-5">
+      {/* Quick actions */}
+      <div className="-mx-1 flex w-full max-w-full gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <Link to="/upload" className="shrink-0">
+          <Button className="h-10 gap-2 rounded-xl"><Plus className="h-4 w-4" /> {t("spaces.quick.addSpace")}</Button>
+        </Link>
+        <Link to="/leads" className="shrink-0">
+          <Button variant="outline" className="h-10 gap-2 rounded-xl"><Users className="h-4 w-4" /> {t("spaces.quick.leads")}</Button>
+        </Link>
+        <Link to="/viewings" className="shrink-0">
+          <Button variant="outline" className="h-10 gap-2 rounded-xl"><Calendar className="h-4 w-4" /> {t("spaces.quick.viewings")}</Button>
+        </Link>
+        <Link to="/messages" className="shrink-0">
+          <Button variant="outline" className="h-10 gap-2 rounded-xl"><MessageSquare className="h-4 w-4" /> {t("spaces.quick.messages")}</Button>
+        </Link>
+      </div>
+
       {/* Toolbar */}
       <div className="flex w-full min-w-0 flex-col gap-3">
         <div className="flex w-full min-w-0 flex-wrap items-center gap-2">
@@ -296,7 +363,7 @@ export function PropertiesManager() {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by ID, title, location, status…"
+              placeholder={t("spaces.searchPlaceholder")}
               className="h-11 rounded-xl pl-9"
             />
           </div>
@@ -305,24 +372,20 @@ export function PropertiesManager() {
             className={cn("h-11 gap-2 rounded-xl", hasFilters && "border-primary/60 text-primary")}
             onClick={() => setShowFilters((s) => !s)}
           >
-            <SlidersHorizontal className="h-4 w-4" /> Filters
+            <SlidersHorizontal className="h-4 w-4" /> {t("spaces.filters")}
             {hasFilters && <span className="ml-1 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">{Object.values(filters).filter(Boolean).length}</span>}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="h-11 gap-2 rounded-xl">
-                Sort <ChevronDown className="h-4 w-4" />
+                {t("spaces.sort.label")} <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              {([
-                ["newest", "Newest"], ["oldest", "Oldest"],
-                ["views_desc", "Highest views"], ["views_asc", "Lowest views"],
-                ["price_desc", "Highest price"], ["price_asc", "Lowest price"],
-              ] as [SortKey, string][]).map(([k, label]) => (
+              {(["newest", "oldest", "views_desc", "views_asc", "price_desc", "price_asc"] as SortKey[]).map((k) => (
                 <DropdownMenuItem key={k} onClick={() => setSort(k)}>
                   {sort === k && <CheckCircle2 className="mr-2 h-3.5 w-3.5 text-primary" />}
-                  <span className={cn(sort !== k && "pl-6")}>{label}</span>
+                  <span className={cn(sort !== k && "pl-6")}>{t(`spaces.sort.${k}`)}</span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -343,11 +406,6 @@ export function PropertiesManager() {
               <Rows3 className="h-4 w-4" />
             </button>
           </div>
-          <Link to="/upload" className="hidden md:block">
-            <Button className="h-11 gap-2 rounded-xl">
-              <Plus className="h-4 w-4" /> New Property
-            </Button>
-          </Link>
         </div>
 
         {/* Status tabs */}
@@ -367,19 +425,12 @@ export function PropertiesManager() {
                     : "bg-background text-foreground/70 ring-border hover:bg-accent"
                 )}
               >
-                {s.label} <span className={cn("ml-1 rounded-full px-1.5 text-[10px] font-semibold", active ? "bg-primary-foreground/20" : "bg-secondary text-muted-foreground")}>{n}</span>
+                {t(s.labelKey)} <span className={cn("ml-1 rounded-full px-1.5 text-[10px] font-semibold", active ? "bg-primary-foreground/20" : "bg-secondary text-muted-foreground")}>{n}</span>
               </button>
             );
           })}
         </div>
 
-
-        {/* Mobile-only primary action */}
-        <Link to="/upload" className="block w-full md:hidden">
-          <Button className="h-12 w-full gap-2 rounded-xl text-base">
-            <Plus className="h-5 w-5" /> New Property
-          </Button>
-        </Link>
 
         {showFilters && (
           <FiltersPanel
@@ -417,8 +468,8 @@ export function PropertiesManager() {
         ) : (
           <EmptyState
             icon={Search}
-            title="No matches"
-            description="Try clearing filters or searching for a different term."
+            title={t("spaces.empty.noMatchesTitle")}
+            description={t("spaces.empty.noMatchesDesc")}
           />
         )
       ) : view === "grid" ? (
@@ -443,18 +494,25 @@ export function PropertiesManager() {
         />
       )}
 
+      {agentDialog && user && (
+        <AgentAccessDialog
+          open={!!agentDialog}
+          onOpenChange={(v) => !v && setAgentDialog(null)}
+          propertyId={agentDialog.id}
+          propertyTitle={agentDialog.title}
+          ownerId={user.id}
+        />
+      )}
+
       <AlertDialog open={!!confirmDelete} onOpenChange={(v) => !v && setConfirmDelete(null)}>
         <AlertDialogContent>
+          <AlertDialogTitle className="sr-only">{t("spaces.deleteTitle", { label: confirmDelete?.label ?? "" })}</AlertDialogTitle>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete {confirmDelete?.label}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This permanently removes the listing and all uploaded photos. It will
-              disappear from your dashboard, search results and the homepage. This
-              action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t("spaces.deleteTitle", { label: confirmDelete?.label ?? "" })}</AlertDialogTitle>
+            <AlertDialogDescription>{t("spaces.deleteDesc")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={async () => {
@@ -463,7 +521,7 @@ export function PropertiesManager() {
                 await performDelete(ids);
               }}
             >
-              Delete
+              {t("spaces.actions.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -475,18 +533,14 @@ export function PropertiesManager() {
 /* ------------------------------ card ------------------------------ */
 
 export type CardAction =
-  | "view" | "edit" | "duplicate" | "pause" | "resume" | "delete"
-  | "share" | "copy" | "promote" | "analytics"
+  | "view" | "edit" | "photos" | "details" | "duplicate" | "pause" | "resume" | "delete"
+  | "share" | "copy" | "promote" | "analytics" | "leads" | "viewings" | "agents"
   | `status:${ManagedProperty["status"]}`;
 
-const STATUS_CHOICES: { value: ManagedProperty["status"]; label: string }[] = [
-  { value: "draft", label: "Draft" },
-  { value: "live", label: "Live" },
-  { value: "paused", label: "Paused" },
-  { value: "sold", label: "Sold" },
-  { value: "rented", label: "Rented" },
-  { value: "archived", label: "Archived" },
+const STATUS_CHOICES: ManagedStatus[] = [
+  "draft", "pending", "live", "paused", "sold", "rented", "rejected", "archived",
 ];
+
 
 function PropertyManageCard({
   p, selected, onSelect, onAction,
@@ -496,6 +550,8 @@ function PropertyManageCard({
   onSelect: () => void;
   onAction: (a: CardAction) => void;
 }) {
+  const { t } = useI18n();
+  const canEdit = !p.assignedPermission || canEditListing(p.assignedPermission);
   const location = [p.ward, p.district, p.region].filter(Boolean).join(", ") || "Tanzania";
   const dateStr = new Date(p.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
   const qualityTone =
@@ -586,30 +642,55 @@ function PropertyManageCard({
           </span>
         </div>
 
-        {/* Metrics — 2×2 on mobile, 4 columns on desktop */}
-        <div className="grid grid-cols-2 gap-1 border-t border-border/50 pt-3 sm:grid-cols-4 sm:border-t-0 sm:pt-0">
-          <Metric icon={Eye} value={p.view_count} label="Views" />
-          <Metric icon={Heart} value={p.favorites ?? 0} label="Saves" />
-          <Metric icon={MessageSquare} value={p.messages ?? 0} label="Messages" />
-          <Metric icon={Calendar} value={p.viewings ?? 0} label="Tours" />
+        {/* Performance — 2×2 on mobile, 3 columns on desktop */}
+        <div className="grid grid-cols-2 gap-1 border-t border-border/50 pt-3 sm:grid-cols-3 sm:border-t-0 sm:pt-0">
+          <Metric icon={Eye} value={p.view_count} label={t("spaces.metric.views")} />
+          <Metric icon={Heart} value={p.favorites ?? 0} label={t("spaces.metric.saves")} />
+          <Metric icon={Users} value={p.leads ?? 0} label={t("spaces.metric.leads")} />
+          <Metric icon={Calendar} value={p.viewings ?? 0} label={t("spaces.metric.viewings")} />
+          <Metric icon={MessageSquare} value={p.messages ?? 0} label={t("spaces.metric.messages")} />
+          <Metric icon={BarChart3} value={p.conversion ?? 0} label={t("spaces.metric.conversion")} suffix="%" />
         </div>
 
-        {/* Mobile quick actions */}
-        <div className="grid grid-cols-4 gap-2 md:hidden">
-          <ActionBtn icon={Eye} label="View" onClick={() => onAction("view")} />
-          <ActionBtn icon={Edit3} label="Edit" onClick={() => onAction("edit")} />
-          <ActionBtn icon={Share2} label="Share" onClick={() => onAction("share")} />
-          <ActionBtn icon={BarChart3} label="Stats" onClick={() => onAction("analytics")} />
+        {(p.activeDeal || p.assignedPermission) && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {p.activeDeal && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                <Briefcase className="h-3 w-3" /> {t("spaces.activeDeal")}
+              </span>
+            )}
+            {p.assignedPermission && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <UserCog className="h-3 w-3" /> {t(`spaces.agents.permission.${p.assignedPermission}`)}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Mobile quick actions — equal width View / Edit + full action sheet */}
+        <div className="grid grid-cols-2 gap-2 md:hidden">
+          <Button variant="outline" className="h-10 w-full rounded-lg text-xs" onClick={() => onAction("view")}>
+            <Eye className="mr-1.5 h-4 w-4" /> {t("spaces.actions.view")}
+          </Button>
+          {canEdit ? (
+            <Button className="h-10 w-full rounded-lg text-xs" onClick={() => onAction("edit")}>
+              <Edit3 className="mr-1.5 h-4 w-4" /> {t("spaces.actions.edit")}
+            </Button>
+          ) : (
+            <Button variant="outline" className="h-10 w-full rounded-lg text-xs" onClick={() => onAction("share")}>
+              <Share2 className="mr-1.5 h-4 w-4" /> {t("spaces.actions.share")}
+            </Button>
+          )}
         </div>
 
         <div className="flex items-center justify-between text-[11px] text-muted-foreground max-md:text-[10px]">
-          <span>Listed {dateStr}</span>
+          <span>{t("spaces.listedOn", { date: dateStr })}</span>
           <Link
             to="/property/$id"
             params={{ id: p.id }}
             className="hidden md:inline-flex items-center gap-1 font-medium text-primary hover:underline"
           >
-            View details <BarChart3 className="h-3 w-3" />
+            {t("spaces.actions.performance")} <BarChart3 className="h-3 w-3" />
           </Link>
         </div>
       </div>
@@ -618,11 +699,11 @@ function PropertyManageCard({
 }
 
 
-function Metric({ icon: Icon, value, label }: { icon: any; value: number; label: string }) {
+function Metric({ icon: Icon, value, label, suffix }: { icon: any; value: number; label: string; suffix?: string }) {
   return (
     <div className="flex flex-col items-center gap-0.5 rounded-lg bg-secondary/40 py-1.5 max-md:py-1">
       <span className="inline-flex items-center gap-1 text-sm font-semibold text-foreground max-md:text-xs">
-        <Icon className="h-3 w-3 text-muted-foreground" /> {value}
+        <Icon className="h-3 w-3 text-muted-foreground" /> {value}{suffix ?? ""}
       </span>
       <span className="text-[10px] uppercase tracking-wider text-muted-foreground max-md:text-[9px]">{label}</span>
     </div>
@@ -630,67 +711,71 @@ function Metric({ icon: Icon, value, label }: { icon: any; value: number; label:
 }
 
 
-function ActionBtn({
-  icon: Icon, label, onClick, destructive,
-}: { icon: any; label: string; onClick: () => void; destructive?: boolean }) {
-  return (
-    <button
-      onClick={() => {
-        console.log("BUTTON CLICKED:", label);
-        onClick();
-      }}
-      aria-label={label}
-      className={cn(
-        "inline-flex flex-col items-center justify-center gap-0.5 rounded-lg border border-border/60 bg-background py-1.5 text-[10px] font-medium uppercase tracking-wider transition hover:bg-secondary hover:text-foreground max-md:py-1 max-md:text-[9px]",
-        destructive ? "text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30" : "text-muted-foreground",
-      )}
-    >
-      <Icon className="h-3.5 w-3.5 max-md:h-3 max-md:w-3" />
-      {label}
-    </button>
-  );
-}
-
-
 function CardMenu({ p, onAction }: { p: ManagedProperty; onAction: (a: CardAction) => void }) {
+  const { t } = useI18n();
   const isLive = p.status === "live";
+  const assigned = p.assignedPermission;
+  const isOwner = !assigned;
+  const mayEdit = isOwner || canEditListing(assigned);
+  const mayLeads = isOwner || canManageLeads(assigned);
+  const mayViewings = isOwner || canManageViewings(assigned);
   return (
-    <DropdownMenuContent align="end" className="w-52">
-      <DropdownMenuItem onClick={() => onAction("view")}><Eye className="mr-2 h-3.5 w-3.5" /> View listing</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onAction("edit")}><Edit3 className="mr-2 h-3.5 w-3.5" /> Edit</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onAction("duplicate")}><Copy className="mr-2 h-3.5 w-3.5" /> Duplicate</DropdownMenuItem>
-      {isLive ? (
-        <DropdownMenuItem onClick={() => onAction("pause")}><Pause className="mr-2 h-3.5 w-3.5" /> Pause listing</DropdownMenuItem>
-      ) : p.status === "paused" || p.status === "draft" ? (
-        <DropdownMenuItem onClick={() => onAction("resume")}><Play className="mr-2 h-3.5 w-3.5" /> Resume listing</DropdownMenuItem>
-      ) : null}
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger><CircleDot className="mr-2 h-3.5 w-3.5" /> Change status</DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-40">
-          {STATUS_CHOICES.map((s) => (
-            <DropdownMenuItem
-              key={s.value}
-              disabled={p.status === s.value}
-              onClick={() => onAction(`status:${s.value}` as CardAction)}
-            >
-              {p.status === s.value && <CheckCircle2 className="mr-2 h-3.5 w-3.5 text-primary" />}
-              <span className={cn(p.status !== s.value && "pl-6")}>{s.label}</span>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
+    <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuItem onClick={() => onAction("view")}><Eye className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.view")}</DropdownMenuItem>
+      {mayEdit && <DropdownMenuItem onClick={() => onAction("edit")}><Edit3 className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.edit")}</DropdownMenuItem>}
+      {mayEdit && <DropdownMenuItem onClick={() => onAction("photos")}><Camera className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.photos")}</DropdownMenuItem>}
+      {mayEdit && <DropdownMenuItem onClick={() => onAction("details")}><FileText className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.details")}</DropdownMenuItem>}
       <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={() => onAction("share")}><Share2 className="mr-2 h-3.5 w-3.5" /> Share</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onAction("copy")}><Link2 className="mr-2 h-3.5 w-3.5" /> Copy link</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onAction("promote")}><Crown className="mr-2 h-3.5 w-3.5" /> Promote</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onAction("analytics")}><BarChart3 className="mr-2 h-3.5 w-3.5" /> Analytics</DropdownMenuItem>
+      {mayLeads && <DropdownMenuItem onClick={() => onAction("leads")}><Users className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.leads")}</DropdownMenuItem>}
+      {mayViewings && <DropdownMenuItem onClick={() => onAction("viewings")}><Calendar className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.viewings")}</DropdownMenuItem>}
+      <DropdownMenuItem onClick={() => onAction("analytics")}><BarChart3 className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.performance")}</DropdownMenuItem>
       <DropdownMenuSeparator />
-      <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onAction("delete")}>
-        <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
-      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => onAction("share")}><Share2 className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.share")}</DropdownMenuItem>
+      <DropdownMenuItem onClick={() => onAction("copy")}><Link2 className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.copyLink")}</DropdownMenuItem>
+      {isOwner && (
+        <>
+          <DropdownMenuItem onClick={() => onAction("duplicate")}><Copy className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.duplicate")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onAction("agents")}><UserCog className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.agentAccess")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onAction("promote")}><Crown className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.promote")}</DropdownMenuItem>
+        </>
+      )}
+      {mayEdit && (
+        <>
+          <DropdownMenuSeparator />
+          {isLive ? (
+            <DropdownMenuItem onClick={() => onAction("pause")}><Pause className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.pause")}</DropdownMenuItem>
+          ) : p.status === "paused" || p.status === "draft" ? (
+            <DropdownMenuItem onClick={() => onAction("resume")}><Play className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.resume")}</DropdownMenuItem>
+          ) : null}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger><CircleDot className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.changeStatus")}</DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-44">
+              {STATUS_CHOICES.map((s) => (
+                <DropdownMenuItem
+                  key={s}
+                  disabled={p.status === s}
+                  onClick={() => onAction(`status:${s}` as CardAction)}
+                >
+                  {p.status === s && <CheckCircle2 className="mr-2 h-3.5 w-3.5 text-primary" />}
+                  <span className={cn(p.status !== s && "pl-6")}>{t(`spaces.status.${s}`)}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        </>
+      )}
+      {isOwner && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onAction("delete")}>
+            <Trash2 className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.delete")}
+          </DropdownMenuItem>
+        </>
+      )}
     </DropdownMenuContent>
   );
 }
+
 
 /* ------------------------------ list view ------------------------------ */
 
@@ -787,15 +872,24 @@ function FiltersPanel({
             <Input type="date" value={filters.to ?? ""} onChange={(e) => set("to", e.target.value)} className="rounded-lg" />
           </div>
         </div>
+        <FilterSelect label="Performance" value={filters.performance ?? ""} onChange={(v) => set("performance", v || undefined)}
+          options={[
+            { v: "", l: "Any performance" },
+            { v: "top", l: "Top performing" },
+            { v: "low", l: "Low visibility" },
+            { v: "no_leads", l: "No leads yet" },
+          ]} />
 
         <div className="col-span-full flex flex-wrap items-center gap-2 pt-1">
-          <FilterChip label="Verified" active={!!filters.verified} onClick={() => set("verified", !filters.verified)} icon={ShieldCheck} />
+          <FilterChip label="Verified" active={!!filters.verified} onClick={() => onChange({ ...filters, verified: !filters.verified, unverified: false })} icon={ShieldCheck} />
+          <FilterChip label="Not verified" active={!!filters.unverified} onClick={() => onChange({ ...filters, unverified: !filters.unverified, verified: false })} icon={ShieldCheck} />
           <FilterChip label="Featured" active={!!filters.featured} onClick={() => set("featured", !filters.featured)} icon={Sparkles} />
           <FilterChip label="Premium" active={!!filters.premium} onClick={() => set("premium", !filters.premium)} icon={Crown} />
           <Button variant="ghost" size="sm" onClick={onClear} className="ml-auto text-muted-foreground">
             <X className="mr-1 h-3.5 w-3.5" /> Clear all
           </Button>
         </div>
+
       </div>
     </div>
   );
@@ -833,6 +927,7 @@ function FilterChip({ label, active, onClick, icon: Icon }: { label: string; act
 /* ------------------------------ empty ------------------------------ */
 
 function EmptyPropertiesIllustration() {
+  const { t } = useI18n();
   return (
     <div className="rounded-3xl border border-dashed border-border bg-gradient-to-br from-secondary/40 to-background p-10 text-center animate-fade-in">
       <div className="mx-auto flex h-40 w-40 items-center justify-center">
@@ -853,13 +948,11 @@ function EmptyPropertiesIllustration() {
           <path d="M145 55 L145 45 M155 65 L165 65 M138 58 L131 51 M152 58 L159 51" stroke="hsl(var(--gold, 45 90% 55%))" strokeWidth="2" strokeLinecap="round" />
         </svg>
       </div>
-      <h3 className="mt-2 font-display text-2xl font-semibold text-foreground">You haven't published any properties yet</h3>
-      <p className="mx-auto mt-2 max-w-md text-muted-foreground">
-        Start showcasing your space to thousands of buyers and renters across Tanzania. It takes less than 3 minutes.
-      </p>
+      <h3 className="mt-2 font-display text-2xl font-semibold text-foreground">{t("spaces.empty.title")}</h3>
+      <p className="mx-auto mt-2 max-w-md text-muted-foreground">{t("spaces.empty.desc")}</p>
       <Link to="/upload" className="mt-6 inline-block">
         <Button size="lg" className="h-12 gap-2 rounded-xl px-6 text-base shadow-[var(--shadow-elevated)]">
-          <Plus className="h-4 w-4" /> Upload Your First Property
+          <Plus className="h-4 w-4" /> {t("spaces.empty.cta")}
         </Button>
       </Link>
     </div>
@@ -874,6 +967,7 @@ function statusToKind(s: string): any {
     case "pending": return "pending";
     case "sold": return "sold";
     case "rented": return "rented";
+    case "rejected": return "pending";
     case "paused": return "draft";
     case "archived": return "draft";
     case "draft":
@@ -882,8 +976,9 @@ function statusToKind(s: string): any {
 }
 function statusLabel(s: string) {
   const map: Record<string, string> = {
-    live: "Live", draft: "Draft", archived: "Archived",
-    pending: "Pending Review", paused: "Paused", sold: "Sold", rented: "Rented",
+    live: "Published", draft: "Draft", archived: "Unavailable",
+    pending: "Pending Review", paused: "Paused", sold: "Sold",
+    rented: "Rented", rejected: "Rejected",
   };
   return map[s] ?? s;
 }

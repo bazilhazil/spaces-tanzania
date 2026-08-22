@@ -713,6 +713,7 @@ export type Database = {
           currency: string
           description: string | null
           district: string | null
+          featured: boolean
           floor: number | null
           id: string
           landmark: string | null
@@ -726,10 +727,12 @@ export type Database = {
           price: number
           property_type: Database["public"]["Enums"]["property_type"]
           region: string | null
+          rejection_reason: string | null
           status: Database["public"]["Enums"]["property_status"]
           street: string | null
           title: string
           updated_at: string
+          verified: boolean
           view_count: number
           ward: string | null
           year_built: number | null
@@ -744,6 +747,7 @@ export type Database = {
           currency?: string
           description?: string | null
           district?: string | null
+          featured?: boolean
           floor?: number | null
           id?: string
           landmark?: string | null
@@ -757,10 +761,12 @@ export type Database = {
           price?: number
           property_type: Database["public"]["Enums"]["property_type"]
           region?: string | null
+          rejection_reason?: string | null
           status?: Database["public"]["Enums"]["property_status"]
           street?: string | null
           title: string
           updated_at?: string
+          verified?: boolean
           view_count?: number
           ward?: string | null
           year_built?: number | null
@@ -775,6 +781,7 @@ export type Database = {
           currency?: string
           description?: string | null
           district?: string | null
+          featured?: boolean
           floor?: number | null
           id?: string
           landmark?: string | null
@@ -788,15 +795,62 @@ export type Database = {
           price?: number
           property_type?: Database["public"]["Enums"]["property_type"]
           region?: string | null
+          rejection_reason?: string | null
           status?: Database["public"]["Enums"]["property_status"]
           street?: string | null
           title?: string
           updated_at?: string
+          verified?: boolean
           view_count?: number
           ward?: string | null
           year_built?: number | null
         }
         Relationships: []
+      }
+      property_agents: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          owner_id: string
+          permission: Database["public"]["Enums"]["agent_permission"]
+          property_id: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          owner_id: string
+          permission?: Database["public"]["Enums"]["agent_permission"]
+          property_id: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          owner_id?: string
+          permission?: Database["public"]["Enums"]["agent_permission"]
+          property_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_agents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_agents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       property_contacts: {
         Row: {
@@ -1225,6 +1279,10 @@ export type Database = {
       }
     }
     Functions: {
+      agent_permission_for: {
+        Args: { _agent_id: string; _property_id: string }
+        Returns: Database["public"]["Enums"]["agent_permission"]
+      }
       get_property_contact: {
         Args: { _property_id: string }
         Returns: {
@@ -1241,12 +1299,27 @@ export type Database = {
         Returns: boolean
       }
       recompute_deal_health: { Args: { _deal_id: string }; Returns: undefined }
+      search_agents: {
+        Args: { _q: string }
+        Returns: {
+          agency_name: string
+          avatar_url: string
+          full_name: string
+          id: string
+        }[]
+      }
       set_lead_status: {
         Args: { _force?: boolean; _lead_id: string; _status: string }
         Returns: undefined
       }
     }
     Enums: {
+      agent_permission:
+        | "view_only"
+        | "manage_leads"
+        | "manage_viewings"
+        | "edit_listing"
+        | "full_management"
       app_role: "buyer" | "owner" | "agent" | "admin" | "super_admin"
       deal_activity_kind:
         | "lead_created"
@@ -1295,6 +1368,7 @@ export type Database = {
         | "paused"
         | "sold"
         | "rented"
+        | "rejected"
       property_type:
         | "house"
         | "apartment"
@@ -1430,6 +1504,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      agent_permission: [
+        "view_only",
+        "manage_leads",
+        "manage_viewings",
+        "edit_listing",
+        "full_management",
+      ],
       app_role: ["buyer", "owner", "agent", "admin", "super_admin"],
       deal_activity_kind: [
         "lead_created",
@@ -1481,6 +1562,7 @@ export const Constants = {
         "paused",
         "sold",
         "rented",
+        "rejected",
       ],
       property_type: [
         "house",

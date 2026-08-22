@@ -25,8 +25,15 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PROPERTY_TYPES } from "@/components/property-management/constants";
 
+type ManageTab = "overview" | "details" | "photos" | "settings";
+const MANAGE_TABS: ManageTab[] = ["overview", "details", "photos", "settings"];
+
 export const Route = createFileRoute("/_authenticated/dashboard/properties/$id/manage")({
   component: ManagePropertyPage,
+  validateSearch: (search: Record<string, unknown>): { tab?: ManageTab } => {
+    const tab = search.tab as ManageTab | undefined;
+    return tab && MANAGE_TABS.includes(tab) ? { tab } : {};
+  },
   head: () => ({
     meta: [
       { title: "Manage Listing — SPACES" },
@@ -76,11 +83,21 @@ function ManagePropertyPage() {
   const [media, setMedia] = useState<MediaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "details" | "photos" | "settings">("overview");
+  const { tab: tabParam } = Route.useSearch();
+  const [activeTab, setActiveTab] = useState<ManageTab>(tabParam ?? "overview");
   const [saving, setSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
 
-  function jumpToSection(tab: "overview" | "details" | "photos" | "settings") {
+  // Deep links such as ?tab=photos open (and scroll to) that section directly.
+  useEffect(() => {
+    if (!tabParam) return;
+    setActiveTab(tabParam);
+    requestAnimationFrame(() => {
+      document.getElementById(`section-${tabParam}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [tabParam]);
+
+  function jumpToSection(tab: ManageTab) {
     setActiveTab(tab);
     // Desktop: all sections are visible, so scroll to the anchor.
     // Defer to next frame so the mobile tab has switched first.
