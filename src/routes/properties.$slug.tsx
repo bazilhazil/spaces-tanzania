@@ -486,14 +486,15 @@ function PropertyDetailPage() {
                     </Button>
                   </div>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full gap-2 text-muted-foreground hover:text-destructive"
-                    onClick={() => toast.success("Thanks — our trust team will review this listing")}
-                  >
-                    <Flag className="h-3.5 w-3.5" /> Report listing
-                  </Button>
+                  <ReportDialog
+                    target={property.title}
+                    propertyId={property.id}
+                    trigger={
+                      <Button variant="ghost" size="sm" className="w-full gap-2 text-muted-foreground hover:text-destructive">
+                        <Flag className="h-3.5 w-3.5" /> {t("verify.reportSpace")}
+                      </Button>
+                    }
+                  />
                 </div>
 
                 <div className="mt-5 flex items-center gap-2 rounded-lg bg-primary/5 p-3 text-xs text-primary">
