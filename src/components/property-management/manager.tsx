@@ -86,6 +86,7 @@ const STATUS_TABS: { key: string; labelKey: string }[] = [
 
 export function PropertiesManager() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [rows, setRows] = useState<ManagedProperty[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,9 +97,11 @@ export function PropertiesManager() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<{ ids: string[]; label: string } | null>(null);
+  const [agentDialog, setAgentDialog] = useState<ManagedProperty | null>(null);
   const [filters, setFilters] = useState<{
     region?: string; district?: string; type?: string; listing?: string;
-    verified?: boolean; featured?: boolean; premium?: boolean;
+    verified?: boolean; featured?: boolean; premium?: boolean; unverified?: boolean;
+    performance?: "top" | "low" | "no_leads" | "";
     minPrice?: string; maxPrice?: string; from?: string; to?: string;
   }>({});
 
@@ -107,15 +110,24 @@ export function PropertiesManager() {
     let alive = true;
     (async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("properties")
-        .select("id,title,region,district,ward,price,currency,status,view_count,created_at,listing_type,property_type")
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: false });
-      const list = (data ?? []) as any[];
+      // Owners see their own spaces; agents also see every space assigned to them.
+      const assignments = await fetchMyAssignments(user.id);
+      const assignedIds = Object.keys(assignments);
+      const cols =
+        "id,owner_id,title,region,district,ward,price,currency,status,view_count,created_at,listing_type,property_type,verified,featured";
+      const [ownedRes, assignedRes] = await Promise.all([
+        supabase.from("properties").select(cols).eq("owner_id", user.id).order("created_at", { ascending: false }),
+        assignedIds.length
+          ? supabase.from("properties").select(cols).in("id", assignedIds).order("created_at", { ascending: false })
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+      const byId = new Map<string, any>();
+      for (const p of ((ownedRes as any).data ?? []) as any[]) byId.set(p.id, p);
+      for (const p of ((assignedRes as any).data ?? []) as any[]) if (!byId.has(p.id)) byId.set(p.id, p);
+      const list = [...byId.values()];
       const ids = list.map((p) => p.id);
       const covers: Record<string, string> = {};
-      let metrics: Record<string, { views: number; favorites: number; messages: number; bookings: number }> = {};
+      let metrics: Record<string, PropertyMetrics> = {};
       if (ids.length) {
         const [mediaRes, metricsRes] = await Promise.all([
           supabase
@@ -136,19 +148,27 @@ export function PropertiesManager() {
         }
       }
       if (!alive) return;
-      setRows(list.map((p, i) => ({
-        ...p,
-        public_id: publicIdFrom(p.id, p.created_at),
-        cover: covers[p.id],
-        view_count: metrics[p.id]?.views ?? p.view_count ?? 0,
-        favorites: metrics[p.id]?.favorites ?? 0,
-        messages: metrics[p.id]?.messages ?? 0,
-        viewings: metrics[p.id]?.bookings ?? 0,
-        quality: 55 + (mulberry(p.id, 11) % 45),
-        verified: i % 3 !== 0,
-        featured: i % 5 === 0,
-        premium: i % 6 === 0,
-      })));
+      setRows(list.map((p) => {
+        const m = metrics[p.id];
+        return {
+          ...p,
+          public_id: publicIdFrom(p.id, p.created_at),
+          cover: covers[p.id],
+          view_count: m?.views ?? p.view_count ?? 0,
+          favorites: m?.favorites ?? 0,
+          messages: m?.messages ?? 0,
+          viewings: m?.bookings ?? 0,
+          leads: m?.leads ?? 0,
+          deals: m?.deals ?? 0,
+          activeDeal: m?.activeDeal ?? false,
+          conversion: m ? conversionRate(m) : 0,
+          quality: 55 + (mulberry(p.id, 11) % 45),
+          verified: !!p.verified,
+          featured: !!p.featured,
+          premium: false,
+          assignedPermission: p.owner_id === user.id ? undefined : assignments[p.id],
+        } as ManagedProperty;
+      }));
       setLoading(false);
     })();
     return () => { alive = false; };
