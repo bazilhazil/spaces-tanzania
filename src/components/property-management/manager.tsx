@@ -918,6 +918,7 @@ function FilterChip({ label, active, onClick, icon: Icon }: { label: string; act
 /* ------------------------------ empty ------------------------------ */
 
 function EmptyPropertiesIllustration() {
+  const { t } = useI18n();
   return (
     <div className="rounded-3xl border border-dashed border-border bg-gradient-to-br from-secondary/40 to-background p-10 text-center animate-fade-in">
       <div className="mx-auto flex h-40 w-40 items-center justify-center">
