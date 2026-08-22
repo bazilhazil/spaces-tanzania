@@ -78,6 +78,8 @@ export type Deal = {
   id: string;
   reference: string;
   property_id: string | null;
+  lead_id?: string | null;
+
   conversation_id: string | null;
   buyer_id: string | null;
   buyer_name: string | null;
