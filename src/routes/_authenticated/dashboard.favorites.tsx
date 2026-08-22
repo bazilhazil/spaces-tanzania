@@ -8,6 +8,7 @@ import { useFavorites } from "@/hooks/use-favorites";
 import { useI18n } from "@/hooks/use-i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
+import { fetchPropertyContact } from "@/lib/properties-db";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard/favorites")({
@@ -29,8 +30,6 @@ type FavRow = {
   region: string | null;
   district: string | null;
   property_type: string | null;
-  contact_phone: string | null;
-  contact_whatsapp: string | null;
   image?: string | null;
 };
 
@@ -62,7 +61,7 @@ function FavoritesPage() {
       setLoading(true);
       const { data } = await supabase
         .from("properties")
-        .select("id,title,price,currency,region,district,property_type,contact_phone,contact_whatsapp")
+        .select("id,title,price,currency,region,district,property_type")
         .in("id", ids);
       const { data: media } = await supabase
         .from("property_media")
@@ -96,8 +95,9 @@ function FavoritesPage() {
     day: "numeric", month: "short", year: "numeric",
   });
 
-  const handleContact = (row: FavRow) => {
-    const phone = (row.contact_whatsapp || row.contact_phone || "").replace(/[^\d]/g, "");
+  const handleContact = async (row: FavRow) => {
+    const contact = await fetchPropertyContact(row.id);
+    const phone = (contact?.contact_whatsapp || contact?.contact_phone || "").replace(/[^\d]/g, "");
     if (phone) {
       window.open(`https://wa.me/${phone}`, "_blank", "noopener");
     } else {
@@ -171,7 +171,7 @@ function FavoritesPage() {
                     {t("favoritesPage.savedOn", { date: dateFmt.format(new Date(fav.savedAt)) })}
                   </p>
                   <div className="mt-auto flex items-center gap-2 pt-2">
-                    <Button size="sm" className="flex-1 gap-1.5 rounded-xl" onClick={() => handleContact(row)}>
+                    <Button size="sm" className="flex-1 gap-1.5 rounded-xl" onClick={() => void handleContact(row)}>
                       <Phone className="h-3.5 w-3.5" />
                       {t("favoritesPage.contact")}
                     </Button>

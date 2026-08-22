@@ -55,8 +55,8 @@ type Property = {
   ward: string | null;
   street: string | null;
   address: string | null;
-  contact_phone: string | null;
-  contact_name: string | null;
+  contact_phone?: string | null;
+  contact_name?: string | null;
 };
 
 type MediaRow = {
@@ -109,7 +109,12 @@ function ManagePropertyPage() {
         ...r, url: (await signedUrl(r.storage_path)) ?? undefined,
       })));
       if (!alive) return;
-      setProp(p as Property);
+      const { data: c } = await supabase
+        .from("property_contacts")
+        .select("contact_name,contact_phone")
+        .eq("property_id", id)
+        .maybeSingle();
+      setProp({ ...(p as unknown as Property), contact_name: c?.contact_name ?? null, contact_phone: c?.contact_phone ?? null });
       setMedia(withUrls);
       setLoading(false);
     })();
@@ -119,8 +124,21 @@ function ManagePropertyPage() {
   async function patch(fields: Partial<Property>, label?: string) {
     if (!prop) return false;
     setSaving(true);
-    const { error } = await supabase
-      .from("properties").update(fields as never).eq("id", prop.id);
+    const { contact_name, contact_phone, ...propertyFields } = fields;
+    let error: { message: string } | null = null;
+    if (contact_name !== undefined || contact_phone !== undefined) {
+      const res = await supabase.from("property_contacts").upsert({
+        property_id: prop.id,
+        contact_name: contact_name ?? prop.contact_name ?? null,
+        contact_phone: contact_phone ?? prop.contact_phone ?? null,
+      } as never, { onConflict: "property_id" });
+      error = res.error;
+    }
+    if (!error && Object.keys(propertyFields).length) {
+      const res = await supabase
+        .from("properties").update(propertyFields as never).eq("id", prop.id);
+      error = res.error;
+    }
     setSaving(false);
     if (error) { toast.error(error.message); return false; }
     setProp({ ...prop, ...fields });

@@ -137,6 +137,11 @@ function UploadWizardPage() {
         navigate({ to: "/dashboard/properties" });
         return;
       }
+      const { data: contactRow } = await supabase
+        .from("property_contacts")
+        .select("contact_name,contact_phone,contact_whatsapp")
+        .eq("property_id", editId)
+        .maybeSingle();
       if (row.owner_id !== user.id) {
         toast.error("You don't have permission to edit this property");
         navigate({ to: "/dashboard/properties" });
@@ -166,9 +171,9 @@ function UploadWizardPage() {
         latitude: row.latitude ?? undefined,
         longitude: row.longitude ?? undefined,
         amenities: (row.amenities as string[] | null) ?? [],
-        contact_name: row.contact_name ?? undefined,
-        contact_phone: row.contact_phone ?? undefined,
-        contact_whatsapp: row.contact_whatsapp ?? undefined,
+        contact_name: contactRow?.contact_name ?? undefined,
+        contact_phone: contactRow?.contact_phone ?? undefined,
+        contact_whatsapp: contactRow?.contact_whatsapp ?? undefined,
         preferred_contact: (row.preferred_contact ?? "both") as "phone" | "whatsapp" | "both",
       });
       const { count } = await supabase
@@ -295,9 +300,6 @@ function UploadWizardPage() {
         latitude: draft.latitude ?? null,
         longitude: draft.longitude ?? null,
         amenities: draft.amenities ?? [],
-        contact_name: draft.contact_name ?? null,
-        contact_phone: draft.contact_phone ?? null,
-        contact_whatsapp: draft.contact_whatsapp ?? null,
         preferred_contact: draft.preferred_contact ?? null,
       };
 
@@ -328,6 +330,13 @@ function UploadWizardPage() {
         if (pErr) throw pErr;
         propertyId = prop.id as string;
       }
+
+      await supabase.from("property_contacts").upsert({
+        property_id: propertyId,
+        contact_name: draft.contact_name ?? null,
+        contact_phone: draft.contact_phone ?? null,
+        contact_whatsapp: draft.contact_whatsapp ?? null,
+      } as never, { onConflict: "property_id" });
 
       const wantWatermark = !!draft.watermark;
       const images = media.filter((m) => m.kind === "image");

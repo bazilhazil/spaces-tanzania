@@ -89,6 +89,22 @@ export async function fetchLiveProperties(limit = 60): Promise<Property[]> {
   return rows.map((r) => mapRow(r, media[r.id] ?? []));
 }
 
+/**
+ * Owner contact details live in the protected `property_contacts` table and are
+ * only reachable through a controlled RPC for signed-in users.
+ */
+export async function fetchPropertyContact(propertyId: string): Promise<{
+  contact_name: string | null;
+  contact_phone: string | null;
+  contact_whatsapp: string | null;
+} | null> {
+  const { data: session } = await supabase.auth.getSession();
+  if (!session.session) return null;
+  const { data } = await supabase.rpc("get_property_contact", { _property_id: propertyId } as never);
+  const row = Array.isArray(data) ? (data[0] as any) : (data as any);
+  return row ?? null;
+}
+
 export async function fetchPropertyById(id: string): Promise<{ property: Property; row: Row } | null> {
   const { data: session } = await supabase.auth.getSession();
   const result = session.session
@@ -96,6 +112,10 @@ export async function fetchPropertyById(id: string): Promise<{ property: Propert
     : await supabase.from("public_properties").select("*").eq("id", id).maybeSingle();
   if (!result.data) return null;
   const row = result.data as Row;
+  if (session.session) {
+    const contact = await fetchPropertyContact(id);
+    if (contact) Object.assign(row, contact);
+  }
   const media = await mediaForProperties([row.id]);
   return { property: mapRow(row, media[row.id] ?? []), row };
 }
