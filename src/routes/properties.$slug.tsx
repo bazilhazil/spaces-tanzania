@@ -266,11 +266,13 @@ function PropertyDetailPage() {
                   <MapPin className="h-4 w-4" /> {property.street}, {property.ward}, {property.district}, {property.city}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {property.verified && <VerificationBadge kind="property" size="sm" />}
-                  {property.verified && <VerificationBadge kind="identity" size="sm" />}
-                  {agent?.verified && <VerificationBadge kind="agent" size="sm" />}
+                  {property.verified && <VerifiedBadge kind="space" label={t("verify.badge.space")} size="sm" />}
+                  {agent?.verified && <VerifiedBadge kind="agent" label={t("verify.badge.agent")} size="sm" />}
                   <QualityScorePill score={78} />
                 </div>
+                {property.verified && (
+                  <p className="mt-2 text-xs text-muted-foreground">{t("verify.spaceExplainer")}</p>
+                )}
               </div>
               <div className="text-right">
                 <p className="font-display text-3xl font-semibold text-primary md:text-4xl">
