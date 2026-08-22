@@ -21,6 +21,30 @@ export async function createLead(input: CreateLeadInput): Promise<boolean> {
     const { data: session } = await supabase.auth.getSession();
     const user = session.session?.user;
     if (!user || !input.ownerId) return false;
+
+    // Duplicate protection: one active lead per visitor + property.
+    const { data: existing } = await supabase
+      .from("leads")
+      .select("id,status")
+      .eq("property_id", input.propertyId)
+      .eq("visitor_id", user.id)
+      .not("status", "in", "(won,lost)")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      const { error: upErr } = await supabase
+        .from("leads")
+        .update({
+          contact_method: input.contactMethod,
+          message: input.message ?? undefined,
+          last_activity_at: new Date().toISOString(),
+        } as never)
+        .eq("id", (existing as { id: string }).id);
+      return !upErr;
+    }
+
     const { error } = await supabase.from("leads" as never).insert({
       property_id: input.propertyId,
       owner_id: input.ownerId,
@@ -37,6 +61,7 @@ export async function createLead(input: CreateLeadInput): Promise<boolean> {
     return false;
   }
 }
+
 
 export interface LeadRow {
   id: string;
