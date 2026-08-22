@@ -691,7 +691,18 @@ function DealDetailSheet({
             This moves <strong>{deal.reference}</strong> to Cancelled and notifies participants.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <Textarea placeholder="Optional reason…" value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} rows={3} />
+        <div className="space-y-2">
+          <Select value={lostReason} onValueChange={(v) => setLostReason(v as LostReason)}>
+            <SelectTrigger className="h-10"><SelectValue placeholder="Reason" /></SelectTrigger>
+            <SelectContent>
+              {LOST_REASONS.map((r) => (
+                <SelectItem key={r} value={r}>{LOST_REASON_LABEL[r]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Textarea placeholder="More detail (optional)…" value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} rows={3} />
+        </div>
+
         <AlertDialogFooter>
           <AlertDialogCancel>Keep deal</AlertDialogCancel>
           <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={doCancel}>
