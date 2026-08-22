@@ -640,30 +640,55 @@ function PropertyManageCard({
           </span>
         </div>
 
-        {/* Metrics — 2×2 on mobile, 4 columns on desktop */}
-        <div className="grid grid-cols-2 gap-1 border-t border-border/50 pt-3 sm:grid-cols-4 sm:border-t-0 sm:pt-0">
-          <Metric icon={Eye} value={p.view_count} label="Views" />
-          <Metric icon={Heart} value={p.favorites ?? 0} label="Saves" />
-          <Metric icon={MessageSquare} value={p.messages ?? 0} label="Messages" />
-          <Metric icon={Calendar} value={p.viewings ?? 0} label="Tours" />
+        {/* Performance — 2×2 on mobile, 3 columns on desktop */}
+        <div className="grid grid-cols-2 gap-1 border-t border-border/50 pt-3 sm:grid-cols-3 sm:border-t-0 sm:pt-0">
+          <Metric icon={Eye} value={p.view_count} label={t("spaces.metric.views")} />
+          <Metric icon={Heart} value={p.favorites ?? 0} label={t("spaces.metric.saves")} />
+          <Metric icon={Users} value={p.leads ?? 0} label={t("spaces.metric.leads")} />
+          <Metric icon={Calendar} value={p.viewings ?? 0} label={t("spaces.metric.viewings")} />
+          <Metric icon={MessageSquare} value={p.messages ?? 0} label={t("spaces.metric.messages")} />
+          <Metric icon={BarChart3} value={p.conversion ?? 0} label={t("spaces.metric.conversion")} suffix="%" />
         </div>
 
-        {/* Mobile quick actions */}
-        <div className="grid grid-cols-4 gap-2 md:hidden">
-          <ActionBtn icon={Eye} label="View" onClick={() => onAction("view")} />
-          <ActionBtn icon={Edit3} label="Edit" onClick={() => onAction("edit")} />
-          <ActionBtn icon={Share2} label="Share" onClick={() => onAction("share")} />
-          <ActionBtn icon={BarChart3} label="Stats" onClick={() => onAction("analytics")} />
+        {(p.activeDeal || p.assignedPermission) && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {p.activeDeal && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                <Briefcase className="h-3 w-3" /> {t("spaces.activeDeal")}
+              </span>
+            )}
+            {p.assignedPermission && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <UserCog className="h-3 w-3" /> {t(`spaces.agents.permission.${p.assignedPermission}`)}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Mobile quick actions — equal width View / Edit + full action sheet */}
+        <div className="grid grid-cols-2 gap-2 md:hidden">
+          <Button variant="outline" className="h-10 w-full rounded-lg text-xs" onClick={() => onAction("view")}>
+            <Eye className="mr-1.5 h-4 w-4" /> {t("spaces.actions.view")}
+          </Button>
+          {canEdit ? (
+            <Button className="h-10 w-full rounded-lg text-xs" onClick={() => onAction("edit")}>
+              <Edit3 className="mr-1.5 h-4 w-4" /> {t("spaces.actions.edit")}
+            </Button>
+          ) : (
+            <Button variant="outline" className="h-10 w-full rounded-lg text-xs" onClick={() => onAction("share")}>
+              <Share2 className="mr-1.5 h-4 w-4" /> {t("spaces.actions.share")}
+            </Button>
+          )}
         </div>
 
         <div className="flex items-center justify-between text-[11px] text-muted-foreground max-md:text-[10px]">
-          <span>Listed {dateStr}</span>
+          <span>{t("spaces.listedOn", { date: dateStr })}</span>
           <Link
             to="/property/$id"
             params={{ id: p.id }}
             className="hidden md:inline-flex items-center gap-1 font-medium text-primary hover:underline"
           >
-            View details <BarChart3 className="h-3 w-3" />
+            {t("spaces.actions.performance")} <BarChart3 className="h-3 w-3" />
           </Link>
         </div>
       </div>
@@ -672,11 +697,11 @@ function PropertyManageCard({
 }
 
 
-function Metric({ icon: Icon, value, label }: { icon: any; value: number; label: string }) {
+function Metric({ icon: Icon, value, label, suffix }: { icon: any; value: number; label: string; suffix?: string }) {
   return (
     <div className="flex flex-col items-center gap-0.5 rounded-lg bg-secondary/40 py-1.5 max-md:py-1">
       <span className="inline-flex items-center gap-1 text-sm font-semibold text-foreground max-md:text-xs">
-        <Icon className="h-3 w-3 text-muted-foreground" /> {value}
+        <Icon className="h-3 w-3 text-muted-foreground" /> {value}{suffix ?? ""}
       </span>
       <span className="text-[10px] uppercase tracking-wider text-muted-foreground max-md:text-[9px]">{label}</span>
     </div>
@@ -684,67 +709,71 @@ function Metric({ icon: Icon, value, label }: { icon: any; value: number; label:
 }
 
 
-function ActionBtn({
-  icon: Icon, label, onClick, destructive,
-}: { icon: any; label: string; onClick: () => void; destructive?: boolean }) {
-  return (
-    <button
-      onClick={() => {
-        console.log("BUTTON CLICKED:", label);
-        onClick();
-      }}
-      aria-label={label}
-      className={cn(
-        "inline-flex flex-col items-center justify-center gap-0.5 rounded-lg border border-border/60 bg-background py-1.5 text-[10px] font-medium uppercase tracking-wider transition hover:bg-secondary hover:text-foreground max-md:py-1 max-md:text-[9px]",
-        destructive ? "text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30" : "text-muted-foreground",
-      )}
-    >
-      <Icon className="h-3.5 w-3.5 max-md:h-3 max-md:w-3" />
-      {label}
-    </button>
-  );
-}
-
-
 function CardMenu({ p, onAction }: { p: ManagedProperty; onAction: (a: CardAction) => void }) {
+  const { t } = useI18n();
   const isLive = p.status === "live";
+  const assigned = p.assignedPermission;
+  const isOwner = !assigned;
+  const mayEdit = isOwner || canEditListing(assigned);
+  const mayLeads = isOwner || canManageLeads(assigned);
+  const mayViewings = isOwner || canManageViewings(assigned);
   return (
-    <DropdownMenuContent align="end" className="w-52">
-      <DropdownMenuItem onClick={() => onAction("view")}><Eye className="mr-2 h-3.5 w-3.5" /> View listing</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onAction("edit")}><Edit3 className="mr-2 h-3.5 w-3.5" /> Edit</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onAction("duplicate")}><Copy className="mr-2 h-3.5 w-3.5" /> Duplicate</DropdownMenuItem>
-      {isLive ? (
-        <DropdownMenuItem onClick={() => onAction("pause")}><Pause className="mr-2 h-3.5 w-3.5" /> Pause listing</DropdownMenuItem>
-      ) : p.status === "paused" || p.status === "draft" ? (
-        <DropdownMenuItem onClick={() => onAction("resume")}><Play className="mr-2 h-3.5 w-3.5" /> Resume listing</DropdownMenuItem>
-      ) : null}
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger><CircleDot className="mr-2 h-3.5 w-3.5" /> Change status</DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-40">
-          {STATUS_CHOICES.map((s) => (
-            <DropdownMenuItem
-              key={s.value}
-              disabled={p.status === s.value}
-              onClick={() => onAction(`status:${s.value}` as CardAction)}
-            >
-              {p.status === s.value && <CheckCircle2 className="mr-2 h-3.5 w-3.5 text-primary" />}
-              <span className={cn(p.status !== s.value && "pl-6")}>{s.label}</span>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
+    <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuItem onClick={() => onAction("view")}><Eye className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.view")}</DropdownMenuItem>
+      {mayEdit && <DropdownMenuItem onClick={() => onAction("edit")}><Edit3 className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.edit")}</DropdownMenuItem>}
+      {mayEdit && <DropdownMenuItem onClick={() => onAction("photos")}><Camera className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.photos")}</DropdownMenuItem>}
+      {mayEdit && <DropdownMenuItem onClick={() => onAction("details")}><FileText className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.details")}</DropdownMenuItem>}
       <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={() => onAction("share")}><Share2 className="mr-2 h-3.5 w-3.5" /> Share</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onAction("copy")}><Link2 className="mr-2 h-3.5 w-3.5" /> Copy link</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onAction("promote")}><Crown className="mr-2 h-3.5 w-3.5" /> Promote</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onAction("analytics")}><BarChart3 className="mr-2 h-3.5 w-3.5" /> Analytics</DropdownMenuItem>
+      {mayLeads && <DropdownMenuItem onClick={() => onAction("leads")}><Users className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.leads")}</DropdownMenuItem>}
+      {mayViewings && <DropdownMenuItem onClick={() => onAction("viewings")}><Calendar className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.viewings")}</DropdownMenuItem>}
+      <DropdownMenuItem onClick={() => onAction("analytics")}><BarChart3 className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.performance")}</DropdownMenuItem>
       <DropdownMenuSeparator />
-      <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onAction("delete")}>
-        <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
-      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => onAction("share")}><Share2 className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.share")}</DropdownMenuItem>
+      <DropdownMenuItem onClick={() => onAction("copy")}><Link2 className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.copyLink")}</DropdownMenuItem>
+      {isOwner && (
+        <>
+          <DropdownMenuItem onClick={() => onAction("duplicate")}><Copy className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.duplicate")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onAction("agents")}><UserCog className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.agentAccess")}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onAction("promote")}><Crown className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.promote")}</DropdownMenuItem>
+        </>
+      )}
+      {mayEdit && (
+        <>
+          <DropdownMenuSeparator />
+          {isLive ? (
+            <DropdownMenuItem onClick={() => onAction("pause")}><Pause className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.pause")}</DropdownMenuItem>
+          ) : p.status === "paused" || p.status === "draft" ? (
+            <DropdownMenuItem onClick={() => onAction("resume")}><Play className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.resume")}</DropdownMenuItem>
+          ) : null}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger><CircleDot className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.changeStatus")}</DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-44">
+              {STATUS_CHOICES.map((s) => (
+                <DropdownMenuItem
+                  key={s}
+                  disabled={p.status === s}
+                  onClick={() => onAction(`status:${s}` as CardAction)}
+                >
+                  {p.status === s && <CheckCircle2 className="mr-2 h-3.5 w-3.5 text-primary" />}
+                  <span className={cn(p.status !== s && "pl-6")}>{t(`spaces.status.${s}`)}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        </>
+      )}
+      {isOwner && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onAction("delete")}>
+            <Trash2 className="mr-2 h-3.5 w-3.5" /> {t("spaces.actions.delete")}
+          </DropdownMenuItem>
+        </>
+      )}
     </DropdownMenuContent>
   );
 }
+
 
 /* ------------------------------ list view ------------------------------ */
 
