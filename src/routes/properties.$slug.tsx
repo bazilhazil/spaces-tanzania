@@ -129,6 +129,45 @@ function PropertyDetailPage() {
     });
   }
 
+  /**
+   * Owner contact details are only released to visitors who have actually
+   * engaged with the listing. We record the lead first, then fetch the
+   * contact row and hydrate the sidebar before performing the action.
+   */
+  async function contactVia(method: LeadContactMethod): Promise<Agent | null> {
+    if (!property || !agent) return null;
+    await createLead({
+      propertyId: property.id,
+      ownerId: property.agentId,
+      contactMethod: method,
+    });
+    const c = await fetchPropertyContact(property.id);
+    if (!c) return agent;
+    const next: Agent = {
+      ...agent,
+      name: c.contact_name || agent.name,
+      phone: c.contact_phone || agent.phone,
+      whatsapp: (c.contact_whatsapp || c.contact_phone || agent.whatsapp || "").replace(/\D/g, ""),
+    };
+    setAgent(next);
+    return next;
+  }
+
+  function contactAndOpen(method: LeadContactMethod, build: (a: Agent) => string | null) {
+    requireAuth(() => {
+      void (async () => {
+        const a = await contactVia(method);
+        const href = a ? build(a) : null;
+        if (!href) {
+          toast.error(t("properties.detail.contactUnavailable"));
+          return;
+        }
+        window.location.href = href;
+      })();
+    });
+  }
+
+
   function share() {
     setShareOpen(true);
   }
