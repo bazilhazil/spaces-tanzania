@@ -558,5 +558,87 @@
       "date": "Date",
       "time": "Time"
     }
+  },
+  "crm": {
+    "kpi": {
+      "today": "New today",
+      "active": "Active leads",
+      "deals": "With deals",
+      "won": "Won"
+    },
+    "tabs": {
+      "active": "Active",
+      "won": "Won",
+      "lost": "Lost"
+    },
+    "searchPlaceholder": "Search name, phone, property…",
+    "allStatuses": "All statuses",
+    "empty": "No leads yet. Inquiries, messages and viewing requests appear here automatically.",
+    "status": {
+      "new": "New Inquiry",
+      "contacted": "Contacted",
+      "viewing_scheduled": "Viewing Scheduled",
+      "viewing_completed": "Viewing Completed",
+      "negotiating": "Negotiating",
+      "offer_made": "Offer Made",
+      "won": "Won",
+      "lost": "Lost"
+    },
+    "field": {
+      "phone": "Phone",
+      "email": "Email",
+      "property": "Property",
+      "owner": "Owner / Agent",
+      "viewing": "Viewing status",
+      "deal": "Deal status"
+    },
+    "none": "None",
+    "lastActivity": "Last activity",
+    "createDeal": "Create Deal",
+    "dealCreated": "Deal created from this lead",
+    "dealExists": "This lead is already linked to a deal",
+    "relatedDeal": "Related Deal",
+    "relatedLead": "Related Lead",
+    "statusUpdated": "Lead status updated",
+    "actionFailed": "Something went wrong. Please try again.",
+    "notes": "Notes",
+    "notesPlaceholder": "Add context about this lead…",
+    "saveNote": "Save note",
+    "noteSaved": "Note saved",
+    "timeline": "Activity timeline",
+    "call": "Call",
+    "viewings": "Viewings",
+    "event": {
+      "lead_created": "Lead created",
+      "message_sent": "Message sent",
+      "viewing_requested": "Viewing requested",
+      "viewing_approved": "Viewing approved",
+      "viewing_scheduled": "Viewing scheduled",
+      "viewing_completed": "Viewing completed",
+      "offer_made": "Offer made",
+      "offer_accepted": "Offer accepted",
+      "offer_rejected": "Offer rejected",
+      "stage_changed": "Stage changed",
+      "note_added": "Note added",
+      "document_uploaded": "Document uploaded",
+      "agent_assigned": "Agent assigned",
+      "call_made": "Call made",
+      "follow_up_scheduled": "Follow-up scheduled",
+      "deal_completed": "Deal completed",
+      "deal_cancelled": "Deal cancelled",
+      "reminder": "Reminder"
+    },
+    "lostReasonTitle": "Why was this deal lost?",
+    "lostReasonDesc": "Choose a reason so your team can learn from it.",
+    "lostReason": {
+      "price": "Price",
+      "location": "Location",
+      "changed_mind": "Customer changed mind",
+      "unavailable": "Property unavailable",
+      "chose_other": "Chose another property",
+      "other": "Other"
+    },
+    "lostReasonNotes": "Add more detail (optional)",
+    "confirmLost": "Mark as lost"
   }
 }

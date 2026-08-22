@@ -558,5 +558,87 @@
       "date": "Tarehe",
       "time": "Saa"
     }
+  },
+  "crm": {
+    "kpi": {
+      "today": "Mpya leo",
+      "active": "Wateja hai",
+      "deals": "Zenye mikataba",
+      "won": "Zilizoshinda"
+    },
+    "tabs": {
+      "active": "Hai",
+      "won": "Zilizoshinda",
+      "lost": "Zilizopotea"
+    },
+    "searchPlaceholder": "Tafuta jina, simu, mali…",
+    "allStatuses": "Hali zote",
+    "empty": "Bado hakuna wateja. Maulizo, ujumbe na maombi ya kutembelea yataonekana hapa moja kwa moja.",
+    "status": {
+      "new": "Ulizo Jipya",
+      "contacted": "Amewasiliana",
+      "viewing_scheduled": "Ziara Imepangwa",
+      "viewing_completed": "Ziara Imekamilika",
+      "negotiating": "Mazungumzo",
+      "offer_made": "Ofa Imetolewa",
+      "won": "Imeshinda",
+      "lost": "Imepotea"
+    },
+    "field": {
+      "phone": "Simu",
+      "email": "Barua pepe",
+      "property": "Mali",
+      "owner": "Mmiliki / Wakala",
+      "viewing": "Hali ya ziara",
+      "deal": "Hali ya mkataba"
+    },
+    "none": "Hakuna",
+    "lastActivity": "Shughuli ya mwisho",
+    "createDeal": "Tengeneza Mkataba",
+    "dealCreated": "Mkataba umetengenezwa kutoka kwa mteja huyu",
+    "dealExists": "Mteja huyu tayari ameunganishwa na mkataba",
+    "relatedDeal": "Mkataba Husika",
+    "relatedLead": "Mteja Husika",
+    "statusUpdated": "Hali ya mteja imesasishwa",
+    "actionFailed": "Kuna hitilafu. Tafadhali jaribu tena.",
+    "notes": "Maelezo",
+    "notesPlaceholder": "Ongeza maelezo kuhusu mteja huyu…",
+    "saveNote": "Hifadhi maelezo",
+    "noteSaved": "Maelezo yamehifadhiwa",
+    "timeline": "Ratiba ya shughuli",
+    "call": "Piga simu",
+    "viewings": "Ziara",
+    "event": {
+      "lead_created": "Mteja ameongezwa",
+      "message_sent": "Ujumbe umetumwa",
+      "viewing_requested": "Ziara imeombwa",
+      "viewing_approved": "Ziara imeidhinishwa",
+      "viewing_scheduled": "Ziara imepangwa",
+      "viewing_completed": "Ziara imekamilika",
+      "offer_made": "Ofa imetolewa",
+      "offer_accepted": "Ofa imekubaliwa",
+      "offer_rejected": "Ofa imekataliwa",
+      "stage_changed": "Hatua imebadilika",
+      "note_added": "Maelezo yameongezwa",
+      "document_uploaded": "Hati imepakiwa",
+      "agent_assigned": "Wakala amepangwa",
+      "call_made": "Simu imepigwa",
+      "follow_up_scheduled": "Ufuatiliaji umepangwa",
+      "deal_completed": "Mkataba umekamilika",
+      "deal_cancelled": "Mkataba umeghairiwa",
+      "reminder": "Kumbusho"
+    },
+    "lostReasonTitle": "Kwa nini mkataba huu umepotea?",
+    "lostReasonDesc": "Chagua sababu ili timu yako ijifunze.",
+    "lostReason": {
+      "price": "Bei",
+      "location": "Eneo",
+      "changed_mind": "Mteja amebadili mawazo",
+      "unavailable": "Mali haipatikani",
+      "chose_other": "Amechagua mali nyingine",
+      "other": "Nyingine"
+    },
+    "lostReasonNotes": "Ongeza maelezo zaidi (hiari)",
+    "confirmLost": "Weka kama imepotea"
   }
 }
