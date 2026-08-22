@@ -319,6 +319,7 @@ export type Database = {
           buyer_name: string | null
           buyer_phone: string | null
           cancel_reason: string | null
+          completed_at: string | null
           conversation_id: string | null
           created_at: string
           currency: string
@@ -327,6 +328,7 @@ export type Database = {
           id: string
           kanban_position: number
           last_activity_at: string
+          lead_id: string | null
           next_follow_up_at: string | null
           notes: string | null
           owner_id: string | null
@@ -344,6 +346,7 @@ export type Database = {
           buyer_name?: string | null
           buyer_phone?: string | null
           cancel_reason?: string | null
+          completed_at?: string | null
           conversation_id?: string | null
           created_at?: string
           currency?: string
@@ -352,6 +355,7 @@ export type Database = {
           id?: string
           kanban_position?: number
           last_activity_at?: string
+          lead_id?: string | null
           next_follow_up_at?: string | null
           notes?: string | null
           owner_id?: string | null
@@ -369,6 +373,7 @@ export type Database = {
           buyer_name?: string | null
           buyer_phone?: string | null
           cancel_reason?: string | null
+          completed_at?: string | null
           conversation_id?: string | null
           created_at?: string
           currency?: string
@@ -377,6 +382,7 @@ export type Database = {
           id?: string
           kanban_position?: number
           last_activity_at?: string
+          lead_id?: string | null
           next_follow_up_at?: string | null
           notes?: string | null
           owner_id?: string | null
@@ -393,6 +399,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
             referencedColumns: ["id"]
           },
           {
@@ -451,8 +464,11 @@ export type Database = {
         Row: {
           contact_method: string
           created_at: string
+          deal_id: string | null
           id: string
+          last_activity_at: string
           message: string | null
+          notes: string | null
           owner_id: string
           property_id: string
           status: string
@@ -465,8 +481,11 @@ export type Database = {
         Insert: {
           contact_method: string
           created_at?: string
+          deal_id?: string | null
           id?: string
+          last_activity_at?: string
           message?: string | null
+          notes?: string | null
           owner_id: string
           property_id: string
           status?: string
@@ -479,8 +498,11 @@ export type Database = {
         Update: {
           contact_method?: string
           created_at?: string
+          deal_id?: string | null
           id?: string
+          last_activity_at?: string
           message?: string | null
+          notes?: string | null
           owner_id?: string
           property_id?: string
           status?: string
@@ -491,6 +513,13 @@ export type Database = {
           visitor_phone?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_property_id_fkey"
             columns: ["property_id"]
@@ -1212,6 +1241,10 @@ export type Database = {
         Returns: boolean
       }
       recompute_deal_health: { Args: { _deal_id: string }; Returns: undefined }
+      set_lead_status: {
+        Args: { _force?: boolean; _lead_id: string; _status: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "buyer" | "owner" | "agent" | "admin" | "super_admin"
