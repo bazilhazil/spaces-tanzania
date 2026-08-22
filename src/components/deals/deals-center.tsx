@@ -525,7 +525,9 @@ function DealDetailSheet({
   }
   async function doCancel() {
     try {
-      await cancelDeal(deal!.id, cancelReason.trim() || "No reason provided");
+      const detail = cancelReason.trim();
+      await cancelDeal(deal!.id, detail ? `${LOST_REASON_LABEL[lostReason]} — ${detail}` : LOST_REASON_LABEL[lostReason]);
+
       toast.success("Deal cancelled"); setCancelOpen(false); setCancelReason(""); onChanged(); await refresh();
     } catch (e: any) { toast.error(e?.message ?? "Failed"); }
   }
