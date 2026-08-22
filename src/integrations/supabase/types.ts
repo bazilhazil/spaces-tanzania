@@ -88,45 +88,83 @@ export type Database = {
       }
       bookings: {
         Row: {
+          agent_id: string | null
+          buyer_email: string | null
           buyer_id: string
+          buyer_name: string | null
           contact_phone: string | null
           created_at: string
+          deal_id: string | null
           duration_minutes: number
           id: string
+          lead_id: string | null
+          message: string | null
           notes: string | null
           owner_id: string
           property_id: string
+          recipient_id: string | null
           scheduled_at: string
           status: string
+          suggested_at: string | null
           updated_at: string
         }
         Insert: {
+          agent_id?: string | null
+          buyer_email?: string | null
           buyer_id: string
+          buyer_name?: string | null
           contact_phone?: string | null
           created_at?: string
+          deal_id?: string | null
           duration_minutes?: number
           id?: string
+          lead_id?: string | null
+          message?: string | null
           notes?: string | null
           owner_id: string
           property_id: string
+          recipient_id?: string | null
           scheduled_at: string
           status?: string
+          suggested_at?: string | null
           updated_at?: string
         }
         Update: {
+          agent_id?: string | null
+          buyer_email?: string | null
           buyer_id?: string
+          buyer_name?: string | null
           contact_phone?: string | null
           created_at?: string
+          deal_id?: string | null
           duration_minutes?: number
           id?: string
+          lead_id?: string | null
+          message?: string | null
           notes?: string | null
           owner_id?: string
           property_id?: string
+          recipient_id?: string | null
           scheduled_at?: string
           status?: string
+          suggested_at?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "bookings_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "bookings_property_id_fkey"
             columns: ["property_id"]
