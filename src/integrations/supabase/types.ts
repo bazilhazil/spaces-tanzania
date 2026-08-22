@@ -671,6 +671,10 @@ export type Database = {
           national_id: string | null
           phone: string | null
           updated_at: string
+          verified_agent: boolean
+          verified_business: boolean
+          verified_identity: boolean
+          verified_owner: boolean
         }
         Insert: {
           agency_name?: string | null
@@ -685,6 +689,10 @@ export type Database = {
           national_id?: string | null
           phone?: string | null
           updated_at?: string
+          verified_agent?: boolean
+          verified_business?: boolean
+          verified_identity?: boolean
+          verified_owner?: boolean
         }
         Update: {
           agency_name?: string | null
@@ -699,6 +707,10 @@ export type Database = {
           national_id?: string | null
           phone?: string | null
           updated_at?: string
+          verified_agent?: boolean
+          verified_business?: boolean
+          verified_identity?: boolean
+          verified_owner?: boolean
         }
         Relationships: []
       }
@@ -1086,9 +1098,54 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_events: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          internal: boolean
+          reason: string | null
+          request_id: string
+          to_status: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          internal?: boolean
+          reason?: string | null
+          request_id: string
+          to_status?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          internal?: boolean
+          reason?: string | null
+          request_id?: string
+          to_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_events_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "verification_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       verification_requests: {
         Row: {
           created_at: string
+          details: Json
           documents: Json
           expires_at: string | null
           id: string
@@ -1104,6 +1161,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          details?: Json
           documents?: Json
           expires_at?: string | null
           id?: string
@@ -1119,6 +1177,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          details?: Json
           documents?: Json
           expires_at?: string | null
           id?: string
@@ -1161,6 +1220,10 @@ export type Database = {
           full_name: string | null
           id: string | null
           location: string | null
+          verified_agent: boolean | null
+          verified_business: boolean | null
+          verified_identity: boolean | null
+          verified_owner: boolean | null
         }
         Insert: {
           agency_name?: string | null
@@ -1171,6 +1234,10 @@ export type Database = {
           full_name?: string | null
           id?: string | null
           location?: string | null
+          verified_agent?: boolean | null
+          verified_business?: boolean | null
+          verified_identity?: boolean | null
+          verified_owner?: boolean | null
         }
         Update: {
           agency_name?: string | null
@@ -1181,6 +1248,10 @@ export type Database = {
           full_name?: string | null
           id?: string | null
           location?: string | null
+          verified_agent?: boolean | null
+          verified_business?: boolean | null
+          verified_identity?: boolean | null
+          verified_owner?: boolean | null
         }
         Relationships: []
       }
@@ -1195,6 +1266,7 @@ export type Database = {
           currency: string | null
           description: string | null
           district: string | null
+          featured: boolean | null
           floor: number | null
           id: string | null
           landmark: string | null
@@ -1211,6 +1283,7 @@ export type Database = {
           street: string | null
           title: string | null
           updated_at: string | null
+          verified: boolean | null
           view_count: number | null
           ward: string | null
           year_built: number | null
@@ -1225,6 +1298,7 @@ export type Database = {
           currency?: string | null
           description?: string | null
           district?: string | null
+          featured?: boolean | null
           floor?: number | null
           id?: string | null
           landmark?: string | null
@@ -1241,6 +1315,7 @@ export type Database = {
           street?: string | null
           title?: string | null
           updated_at?: string | null
+          verified?: boolean | null
           view_count?: number | null
           ward?: string | null
           year_built?: number | null
@@ -1255,6 +1330,7 @@ export type Database = {
           currency?: string | null
           description?: string | null
           district?: string | null
+          featured?: boolean | null
           floor?: number | null
           id?: string | null
           landmark?: string | null
@@ -1271,6 +1347,7 @@ export type Database = {
           street?: string | null
           title?: string | null
           updated_at?: string | null
+          verified?: boolean | null
           view_count?: number | null
           ward?: string | null
           year_built?: number | null

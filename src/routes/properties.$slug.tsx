@@ -18,7 +18,8 @@ import { AuthGateDialog } from "@/components/auth-gate-dialog";
 import { PropertyShareDialog } from "@/components/property-share-dialog";
 import { createLead, type LeadContactMethod } from "@/lib/leads-db";
 import { createViewingRequest } from "@/lib/viewings-db";
-import { VerificationBadge } from "@/components/trust/verification-badge";
+import { VerifiedBadge } from "@/components/trust/verified-badge";
+import { ReportDialog } from "@/components/trust/report-dialog";
 import { TrustScoreRing } from "@/components/trust/trust-score-ring";
 import { QualityScorePill } from "@/components/trust/quality-score";
 import { computeTrustScore, MOCK_TRUST_SIGNALS } from "@/lib/trust-engine";
@@ -266,11 +267,13 @@ function PropertyDetailPage() {
                   <MapPin className="h-4 w-4" /> {property.street}, {property.ward}, {property.district}, {property.city}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {property.verified && <VerificationBadge kind="property" size="sm" />}
-                  {property.verified && <VerificationBadge kind="identity" size="sm" />}
-                  {agent?.verified && <VerificationBadge kind="agent" size="sm" />}
+                  {property.verified && <VerifiedBadge kind="space" label={t("verify.badge.space")} size="sm" />}
+                  {agent?.verified && <VerifiedBadge kind="agent" label={t("verify.badge.agent")} size="sm" />}
                   <QualityScorePill score={78} />
                 </div>
+                {property.verified && (
+                  <p className="mt-2 text-xs text-muted-foreground">{t("verify.spaceExplainer")}</p>
+                )}
               </div>
               <div className="text-right">
                 <p className="font-display text-3xl font-semibold text-primary md:text-4xl">
@@ -484,14 +487,15 @@ function PropertyDetailPage() {
                     </Button>
                   </div>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full gap-2 text-muted-foreground hover:text-destructive"
-                    onClick={() => toast.success("Thanks — our trust team will review this listing")}
-                  >
-                    <Flag className="h-3.5 w-3.5" /> Report listing
-                  </Button>
+                  <ReportDialog
+                    target={property.title}
+                    propertyId={property.id}
+                    trigger={
+                      <Button variant="ghost" size="sm" className="w-full gap-2 text-muted-foreground hover:text-destructive">
+                        <Flag className="h-3.5 w-3.5" /> {t("verify.reportSpace")}
+                      </Button>
+                    }
+                  />
                 </div>
 
                 <div className="mt-5 flex items-center gap-2 rounded-lg bg-primary/5 p-3 text-xs text-primary">

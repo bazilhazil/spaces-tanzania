@@ -37,7 +37,9 @@
     "no": "Hapana",
     "or": "au",
     "listings": "matangazo",
-    "listing": "tangazo"
+    "listing": "tangazo",
+    "all": "Zote",
+    "remove": "Ondoa"
   },
   "home": {
     "hero": {
@@ -736,6 +738,105 @@
         "edit_listing": "Kuhariri tangazo",
         "full_management": "Usimamizi kamili"
       }
+    }
+  },
+  "verify": {
+    "kicker": "Uaminifu na Uhakiki",
+    "title": "Kituo cha Uhakiki",
+    "subtitle": "Hakiki utambulisho, umiliki, wakala au tangazo lako. Uhakiki ulioidhinishwa hupata beji ya SPACES.",
+    "trustLink": "Angalia Alama yangu ya Uaminifu",
+    "trustLinkDesc": "Ona jinsi alama yako inavyokokotolewa.",
+    "myBadges": "Beji zangu",
+    "noBadges": "Bado hakuna beji. Kamilisha uhakiki ili kupata moja.",
+    "privacyNote": "Nyaraka zako ni za siri. Ni wewe na wasimamizi wa SPACES pekee mnaoweza kuzifungua.",
+    "start": "Anza uhakiki",
+    "resubmit": "Wasilisha tena",
+    "submit": "Wasilisha kwa ukaguzi",
+    "alreadySubmitted": "Ombi lako liko kwa timu yetu ya ukaguzi.",
+    "submittedToast": "Ombi la uhakiki limewasilishwa",
+    "submitFailed": "Imeshindikana kuwasilisha uhakiki",
+    "reviewerNote": "Ujumbe kutoka SPACES",
+    "docsPrivate": "Nyaraka huhifadhiwa kwa siri na haziwekwi kwenye kurasa za umma.",
+    "upload": "Pakia",
+    "camera": "Kamera",
+    "reportSpace": "Ripoti Nafasi hii",
+    "spaceExplainer": "SPACES imekagua taarifa za uhakiki zilizopo kwa tangazo hili.",
+    "badge": {
+      "owner": "Mmiliki Aliyehakikiwa",
+      "agent": "Wakala Aliyehakikiwa",
+      "space": "Nafasi Iliyohakikiwa",
+      "business": "Biashara Iliyohakikiwa",
+      "identity": "Mtumiaji Aliyehakikiwa"
+    },
+    "type": {
+      "user": "Uhakiki wa Mtumiaji",
+      "owner": "Uhakiki wa Mmiliki",
+      "agent": "Uhakiki wa Wakala",
+      "property": "Uhakiki wa Mali",
+      "business": "Uhakiki wa Biashara"
+    },
+    "typeDesc": {
+      "user": "Thibitisha wewe ni nani ili watu wajue wanashughulika na mtu halisi.",
+      "owner": "Jihakikishe kama mmiliki wa mali ili kupata beji ya Mmiliki Aliyehakikiwa.",
+      "agent": "Hakiki taarifa za wakala wako ili kupata beji ya Wakala Aliyehakikiwa.",
+      "property": "Wasilisha taarifa za umiliki wa tangazo ili kupata beji ya Nafasi Iliyohakikiwa.",
+      "business": "Hakiki taarifa za biashara yako iliyosajiliwa."
+    },
+    "status": {
+      "not_verified": "Haijahakikiwa",
+      "pending": "Inasubiri ukaguzi",
+      "under_review": "Inakaguliwa",
+      "more_info": "Taarifa zaidi zinahitajika",
+      "approved": "Imehakikiwa",
+      "rejected": "Imekataliwa"
+    },
+    "step": {
+      "details": "Taarifa zako",
+      "documents": "Nyaraka",
+      "review": "Kagua na uwasilishe"
+    },
+    "field": {
+      "fullName": "Jina kamili",
+      "phone": "Namba ya simu",
+      "email": "Barua pepe",
+      "business": "Taarifa za biashara",
+      "agency": "Jina la wakala / biashara",
+      "ownership": "Taarifa za umiliki",
+      "location": "Mahali / taarifa za kiwanja",
+      "extra": "Taarifa za ziada",
+      "notes": "Kuna jambo lingine tunapaswa kujua?",
+      "property": "Nafasi ipi?",
+      "propertyPlaceholder": "Chagua tangazo"
+    },
+    "doc": {
+      "photo": "Picha ya wasifu",
+      "id": "Kitambulisho",
+      "license": "Hati ya biashara / leseni",
+      "ownership": "Hati ya umiliki",
+      "propertyPhotos": "Picha za mali"
+    },
+    "event": {
+      "submitted": "Imewasilishwa",
+      "under_review": "Inakaguliwa",
+      "more_info": "Taarifa zaidi zimeombwa",
+      "approved": "Imeidhinishwa",
+      "rejected": "Imekataliwa",
+      "note": "Kumbukumbu ya ndani"
+    },
+    "admin": {
+      "title": "Ukaguzi wa uhakiki",
+      "subtitle": "Kagua maombi, fungua nyaraka na rekodi kila uamuzi.",
+      "search": "Tafuta maombi…",
+      "empty": "Hakuna la kukagua hapa.",
+      "documents": "Nyaraka",
+      "reason": "Sababu itakayoshirikiwa na mwombaji",
+      "internalNote": "Kumbukumbu ya ndani (wasimamizi pekee)",
+      "reasonRequired": "Tafadhali ongeza sababu",
+      "approve": "Idhinisha",
+      "reject": "Kataa",
+      "requestInfo": "Omba taarifa",
+      "decisionSaved": "Uamuzi umerekodiwa",
+      "docFailed": "Imeshindikana kufungua hati"
     }
   }
 }

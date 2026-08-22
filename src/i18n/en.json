@@ -37,7 +37,9 @@
     "no": "No",
     "or": "or",
     "listings": "listings",
-    "listing": "listing"
+    "listing": "listing",
+    "all": "All",
+    "remove": "Remove"
   },
   "home": {
     "hero": {
@@ -736,6 +738,105 @@
         "edit_listing": "Edit listing",
         "full_management": "Full management"
       }
+    }
+  },
+  "verify": {
+    "kicker": "Trust & Verification",
+    "title": "Verification Center",
+    "subtitle": "Verify your identity, ownership, agency or listing. Approved verifications earn a SPACES badge.",
+    "trustLink": "View my Trust Score",
+    "trustLinkDesc": "See exactly how your score is calculated.",
+    "myBadges": "My badges",
+    "noBadges": "No badges yet. Complete a verification to earn one.",
+    "privacyNote": "Your documents are private. Only you and SPACES administrators can open them.",
+    "start": "Start verification",
+    "resubmit": "Submit again",
+    "submit": "Submit for review",
+    "alreadySubmitted": "Your submission is with our review team.",
+    "submittedToast": "Verification submitted for review",
+    "submitFailed": "Could not submit verification",
+    "reviewerNote": "Note from SPACES",
+    "docsPrivate": "Documents are stored privately and are never shown on public pages.",
+    "upload": "Upload",
+    "camera": "Camera",
+    "reportSpace": "Report this Space",
+    "spaceExplainer": "SPACES has reviewed the available verification information for this listing.",
+    "badge": {
+      "owner": "Verified Owner",
+      "agent": "Verified Agent",
+      "space": "Verified Space",
+      "business": "Verified Business",
+      "identity": "Verified User"
+    },
+    "type": {
+      "user": "User Verification",
+      "owner": "Owner Verification",
+      "agent": "Agent Verification",
+      "property": "Property Verification",
+      "business": "Business Verification"
+    },
+    "typeDesc": {
+      "user": "Confirm who you are so people know they are dealing with a real person.",
+      "owner": "Verify yourself as a property owner to earn the Verified Owner badge.",
+      "agent": "Verify your agency details to earn the Verified Agent badge.",
+      "property": "Submit ownership information for a listing to earn the Verified Space badge.",
+      "business": "Verify your registered business details."
+    },
+    "status": {
+      "not_verified": "Not verified",
+      "pending": "Pending review",
+      "under_review": "Under review",
+      "more_info": "More information required",
+      "approved": "Verified",
+      "rejected": "Rejected"
+    },
+    "step": {
+      "details": "Your details",
+      "documents": "Documents",
+      "review": "Review & submit"
+    },
+    "field": {
+      "fullName": "Full name",
+      "phone": "Phone number",
+      "email": "Email",
+      "business": "Business information",
+      "agency": "Agency / business name",
+      "ownership": "Ownership information",
+      "location": "Location / plot details",
+      "extra": "Additional information",
+      "notes": "Anything else we should know?",
+      "property": "Which space?",
+      "propertyPlaceholder": "Select a listing"
+    },
+    "doc": {
+      "photo": "Profile photo",
+      "id": "Identification document",
+      "license": "Business / license document",
+      "ownership": "Supporting ownership document",
+      "propertyPhotos": "Property photos"
+    },
+    "event": {
+      "submitted": "Submitted",
+      "under_review": "Under review",
+      "more_info": "More information requested",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "note": "Internal note"
+    },
+    "admin": {
+      "title": "Verification review",
+      "subtitle": "Review submissions, open documents and record every decision.",
+      "search": "Search submissions…",
+      "empty": "Nothing to review here.",
+      "documents": "Documents",
+      "reason": "Reason shared with the applicant",
+      "internalNote": "Internal note (admins only)",
+      "reasonRequired": "Please add a reason",
+      "approve": "Approve",
+      "reject": "Reject",
+      "requestInfo": "Request info",
+      "decisionSaved": "Decision recorded",
+      "docFailed": "Could not open document"
     }
   }
 }
