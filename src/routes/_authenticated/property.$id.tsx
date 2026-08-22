@@ -39,7 +39,12 @@ function PropertyDetail() {
       const { data } = await supabase.from("properties").select("*").eq("id", id).maybeSingle();
       if (!alive) return;
       if (!data) { setLoading(false); return; }
-      setRow(data);
+      const { data: contact } = await supabase
+        .from("property_contacts")
+        .select("contact_name,contact_phone,contact_whatsapp")
+        .eq("property_id", id)
+        .maybeSingle();
+      setRow({ ...(data as any), ...(contact ?? {}) });
       const [{ data: media }, m] = await Promise.all([
         supabase
           .from("property_media")

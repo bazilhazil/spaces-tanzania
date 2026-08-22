@@ -88,45 +88,83 @@ export type Database = {
       }
       bookings: {
         Row: {
+          agent_id: string | null
+          buyer_email: string | null
           buyer_id: string
+          buyer_name: string | null
           contact_phone: string | null
           created_at: string
+          deal_id: string | null
           duration_minutes: number
           id: string
+          lead_id: string | null
+          message: string | null
           notes: string | null
           owner_id: string
           property_id: string
+          recipient_id: string | null
           scheduled_at: string
           status: string
+          suggested_at: string | null
           updated_at: string
         }
         Insert: {
+          agent_id?: string | null
+          buyer_email?: string | null
           buyer_id: string
+          buyer_name?: string | null
           contact_phone?: string | null
           created_at?: string
+          deal_id?: string | null
           duration_minutes?: number
           id?: string
+          lead_id?: string | null
+          message?: string | null
           notes?: string | null
           owner_id: string
           property_id: string
+          recipient_id?: string | null
           scheduled_at: string
           status?: string
+          suggested_at?: string | null
           updated_at?: string
         }
         Update: {
+          agent_id?: string | null
+          buyer_email?: string | null
           buyer_id?: string
+          buyer_name?: string | null
           contact_phone?: string | null
           created_at?: string
+          deal_id?: string | null
           duration_minutes?: number
           id?: string
+          lead_id?: string | null
+          message?: string | null
           notes?: string | null
           owner_id?: string
           property_id?: string
+          recipient_id?: string | null
           scheduled_at?: string
           status?: string
+          suggested_at?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "bookings_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "bookings_property_id_fkey"
             columns: ["property_id"]
@@ -642,9 +680,6 @@ export type Database = {
           area_sqm: number | null
           bathrooms: number | null
           bedrooms: number | null
-          contact_name: string | null
-          contact_phone: string | null
-          contact_whatsapp: string | null
           created_at: string
           currency: string
           description: string | null
@@ -676,9 +711,6 @@ export type Database = {
           area_sqm?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
-          contact_name?: string | null
-          contact_phone?: string | null
-          contact_whatsapp?: string | null
           created_at?: string
           currency?: string
           description?: string | null
@@ -710,9 +742,6 @@ export type Database = {
           area_sqm?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
-          contact_name?: string | null
-          contact_phone?: string | null
-          contact_whatsapp?: string | null
           created_at?: string
           currency?: string
           description?: string | null
@@ -739,6 +768,48 @@ export type Database = {
           year_built?: number | null
         }
         Relationships: []
+      }
+      property_contacts: {
+        Row: {
+          contact_name: string | null
+          contact_phone: string | null
+          contact_whatsapp: string | null
+          created_at: string
+          property_id: string
+          updated_at: string
+        }
+        Insert: {
+          contact_name?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string
+          property_id: string
+          updated_at?: string
+        }
+        Update: {
+          contact_name?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          created_at?: string
+          property_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_contacts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_contacts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       property_media: {
         Row: {
@@ -1125,6 +1196,14 @@ export type Database = {
       }
     }
     Functions: {
+      get_property_contact: {
+        Args: { _property_id: string }
+        Returns: {
+          contact_name: string
+          contact_phone: string
+          contact_whatsapp: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
