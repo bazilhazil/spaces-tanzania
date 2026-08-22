@@ -292,11 +292,11 @@ export function PropertiesManager() {
       return;
     }
     if (a === "leads") {
-      navigate({ to: "/leads", search: { property: p.id } as never });
+      navigate({ to: "/leads" });
       return;
     }
     if (a === "viewings") {
-      navigate({ to: "/viewings", search: { property: p.id } as never });
+      navigate({ to: "/viewings" });
       return;
     }
     if (a === "agents") {
