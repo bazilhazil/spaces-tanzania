@@ -872,15 +872,24 @@ function FiltersPanel({
             <Input type="date" value={filters.to ?? ""} onChange={(e) => set("to", e.target.value)} className="rounded-lg" />
           </div>
         </div>
+        <FilterSelect label="Performance" value={filters.performance ?? ""} onChange={(v) => set("performance", v || undefined)}
+          options={[
+            { v: "", l: "Any performance" },
+            { v: "top", l: "Top performing" },
+            { v: "low", l: "Low visibility" },
+            { v: "no_leads", l: "No leads yet" },
+          ]} />
 
         <div className="col-span-full flex flex-wrap items-center gap-2 pt-1">
-          <FilterChip label="Verified" active={!!filters.verified} onClick={() => set("verified", !filters.verified)} icon={ShieldCheck} />
+          <FilterChip label="Verified" active={!!filters.verified} onClick={() => onChange({ ...filters, verified: !filters.verified, unverified: false })} icon={ShieldCheck} />
+          <FilterChip label="Not verified" active={!!filters.unverified} onClick={() => onChange({ ...filters, unverified: !filters.unverified, verified: false })} icon={ShieldCheck} />
           <FilterChip label="Featured" active={!!filters.featured} onClick={() => set("featured", !filters.featured)} icon={Sparkles} />
           <FilterChip label="Premium" active={!!filters.premium} onClick={() => set("premium", !filters.premium)} icon={Crown} />
           <Button variant="ghost" size="sm" onClick={onClear} className="ml-auto text-muted-foreground">
             <X className="mr-1 h-3.5 w-3.5" /> Clear all
           </Button>
         </div>
+
       </div>
     </div>
   );
