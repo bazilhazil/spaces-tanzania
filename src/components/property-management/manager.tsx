@@ -276,22 +276,31 @@ export function PropertiesManager() {
   }
 
   async function onCardAction(a: CardAction, p: ManagedProperty) {
-    if (a === "edit") {
-      console.log("Edit source:", "dropdown menu");
-      console.log("Property object:", p);
-      console.log("Route ID:", p.id);
-      console.time("dropdown-edit");
-      navigate({ to: "/dashboard/properties/$id/manage", params: { id: p.id } });
-      console.timeEnd("dropdown-edit");
+    if (a === "edit" || a === "photos" || a === "details") {
+      const tab = a === "photos" ? "photos" : a === "details" ? "details" : undefined;
+      console.log("Edit source:", `manager card (${a})`);
+      console.log("Navigating to:", `/dashboard/properties/${p.id}/manage`, tab ?? "");
+      navigate({
+        to: "/dashboard/properties/$id/manage",
+        params: { id: p.id },
+        search: tab ? { tab } : {},
+      });
       return;
     }
     if (a === "view") {
-      console.log("View listing clicked");
-      console.log("Property object:", p);
-      console.log("Route ID (slug):", p.id);
-      console.time("dropdown-view");
       navigate({ to: "/properties/$slug", params: { slug: p.id } });
-      console.timeEnd("dropdown-view");
+      return;
+    }
+    if (a === "leads") {
+      navigate({ to: "/leads", search: { property: p.id } as never });
+      return;
+    }
+    if (a === "viewings") {
+      navigate({ to: "/viewings", search: { property: p.id } as never });
+      return;
+    }
+    if (a === "agents") {
+      setAgentDialog(p);
       return;
     }
     if (a === "delete") {
@@ -299,17 +308,15 @@ export function PropertiesManager() {
       return;
     }
     if (a === "duplicate") {
-      const tid = toast.loading("Duplicating listing…");
+      const tid = toast.loading(t("spaces.toast.duplicating"));
       try {
         const newId = await duplicateProperty(p.id);
         toast.dismiss(tid);
-        toast.success("Duplicated as draft");
-        console.log("Edit source:", "duplicate → manage");
-        console.log("Navigating to:", `/dashboard/properties/${newId}/manage`);
-        window.location.href = `/dashboard/properties/${newId}/manage`;
+        toast.success(t("spaces.toast.duplicated"));
+        navigate({ to: "/dashboard/properties/$id/manage", params: { id: newId }, search: {} });
       } catch (e: any) {
         toast.dismiss(tid);
-        toast.error(e?.message ?? "Could not duplicate");
+        toast.error(e?.message ?? t("spaces.toast.duplicateFailed"));
       }
       return;
     }
@@ -318,7 +325,7 @@ export function PropertiesManager() {
       const { error } = await supabase.from("properties").update({ status: next as never }).eq("id", p.id);
       if (error) return toast.error(error.message);
       setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: next } : x)));
-      toast.success(`Status changed to ${statusLabel(next)}`);
+      toast.success(t("spaces.toast.statusChanged", { status: statusLabel(next) }));
       return;
     }
     await handleCardAction(a, p, rows, setRows, setSelected);
@@ -326,8 +333,8 @@ export function PropertiesManager() {
 
   const hasFilters =
     !!filters.region || !!filters.district || !!filters.type || !!filters.listing ||
-    !!filters.verified || !!filters.featured || !!filters.premium ||
-    !!filters.minPrice || !!filters.maxPrice || !!filters.from || !!filters.to;
+    !!filters.verified || !!filters.unverified || !!filters.featured || !!filters.premium ||
+    !!filters.performance || !!filters.minPrice || !!filters.maxPrice || !!filters.from || !!filters.to;
 
   return (
     <div className="w-full min-w-0 max-w-full space-y-5">
