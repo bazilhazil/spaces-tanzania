@@ -572,6 +572,14 @@ function DealDetailSheet({
           </Field>
           <Field label="Buyer"><div className="text-sm">{deal.buyer_name ?? "—"} <span className="text-muted-foreground">{deal.buyer_email ?? ""}</span></div></Field>
           <Field label="Owner / Agent"><div className="text-sm">{deal.owner_name ?? "—"}{deal.agent_name ? ` · ${deal.agent_name}` : ""}</div></Field>
+          {deal.lead_id && (
+            <Field label="Related Lead">
+              <Link to="/leads" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                View lead <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </Field>
+          )}
+
         </div>
 
         <Tabs defaultValue="timeline" className="mt-6">
