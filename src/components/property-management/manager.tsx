@@ -193,8 +193,12 @@ export function PropertiesManager() {
     if (filters.type) out = out.filter((r) => r.property_type === filters.type);
     if (filters.listing) out = out.filter((r) => r.listing_type === filters.listing);
     if (filters.verified) out = out.filter((r) => r.verified);
+    if (filters.unverified) out = out.filter((r) => !r.verified);
     if (filters.featured) out = out.filter((r) => r.featured);
     if (filters.premium) out = out.filter((r) => r.premium);
+    if (filters.performance === "top") out = out.filter((r) => (r.conversion ?? 0) >= 5);
+    if (filters.performance === "low") out = out.filter((r) => (r.view_count ?? 0) < 10);
+    if (filters.performance === "no_leads") out = out.filter((r) => (r.leads ?? 0) === 0);
     if (filters.minPrice) out = out.filter((r) => r.price >= Number(filters.minPrice));
     if (filters.maxPrice) out = out.filter((r) => r.price <= Number(filters.maxPrice));
     if (filters.from) out = out.filter((r) => new Date(r.created_at) >= new Date(filters.from!));
