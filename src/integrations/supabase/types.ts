@@ -1299,6 +1299,15 @@ export type Database = {
         Returns: boolean
       }
       recompute_deal_health: { Args: { _deal_id: string }; Returns: undefined }
+      search_agents: {
+        Args: { _q: string }
+        Returns: {
+          agency_name: string
+          avatar_url: string
+          full_name: string
+          id: string
+        }[]
+      }
       set_lead_status: {
         Args: { _force?: boolean; _lead_id: string; _status: string }
         Returns: undefined
