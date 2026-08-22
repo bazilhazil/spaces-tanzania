@@ -11,10 +11,12 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   target: string;
+  /** When provided the report is stored against this listing. */
+  propertyId?: string;
   trigger?: React.ReactNode;
 };
 
-export function ReportDialog({ target, trigger }: Props) {
+export function ReportDialog({ target, propertyId, trigger }: Props) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState<ReportReason | "">("");
   const [details, setDetails] = useState("");
@@ -23,12 +25,26 @@ export function ReportDialog({ target, trigger }: Props) {
   async function handleSubmit() {
     if (!reason) return toast.error("Please choose a reason");
     setSubmitting(true);
-    // TODO: wire to backend report endpoint
-    await new Promise((r) => setTimeout(r, 600));
-    setSubmitting(false);
-    setOpen(false);
-    setReason(""); setDetails("");
-    toast.success("Report submitted", { description: "Our moderation team will review within 24 hours." });
+    try {
+      if (propertyId) {
+        const { data: auth } = await supabase.auth.getUser();
+        const { error } = await supabase.from("property_reports").insert({
+          property_id: propertyId,
+          reporter_id: auth.user?.id ?? null,
+          reason,
+          details: details.trim() || null,
+          status: "open",
+        } as never);
+        if (error) throw error;
+      }
+      setOpen(false);
+      setReason(""); setDetails("");
+      toast.success("Report submitted", { description: "Our moderation team will review within 24 hours." });
+    } catch (e) {
+      toast.error((e as Error).message || "Could not submit report");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
