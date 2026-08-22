@@ -52,7 +52,15 @@ function dbLeadToLead(row: LeadRow): Lead {
     lastActivityAt: row.created_at,
     activity: [{ id: `${row.id}-a`, at: row.created_at, kind: "created", label: "Lead created from website" }],
     tasks: [],
-    notes: row.message ? [{ id: `${row.id}-n`, at: row.created_at, body: row.message, by: row.visitor_name || "Visitor" }] : [],
+    notes: row.message
+      ? [{
+          id: `${row.id}-n`,
+          body: row.message,
+          visibility: "public" as const,
+          authorName: row.visitor_name || "Website visitor",
+          createdAt: row.created_at,
+        }]
+      : [],
   };
 }
 
