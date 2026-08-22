@@ -57,7 +57,7 @@ function mapRow(row: Row, images: string[]): Property {
     parking: row.parking ?? 0,
     size: Number(row.area_sqm ?? 0),
     yearBuilt: row.year_built ?? 0,
-    furnished: false,
+    furnished: Array.isArray(row.amenities) && row.amenities.includes("furnished"),
     amenities: row.amenities ?? [],
     images: images.length ? images : ["https://placehold.co/1200x900/e2e8f0/64748b?text=No+Image"],
     verified: false,
