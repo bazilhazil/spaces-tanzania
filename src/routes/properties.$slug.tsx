@@ -17,6 +17,7 @@ import { PropertyCard } from "@/components/property-card";
 import { AuthGateDialog } from "@/components/auth-gate-dialog";
 import { PropertyShareDialog } from "@/components/property-share-dialog";
 import { createLead, type LeadContactMethod } from "@/lib/leads-db";
+import { createViewingRequest } from "@/lib/viewings-db";
 import { VerificationBadge } from "@/components/trust/verification-badge";
 import { TrustScoreRing } from "@/components/trust/trust-score-ring";
 import { QualityScorePill } from "@/components/trust/quality-score";
@@ -542,7 +543,8 @@ function PropertyDetailPage() {
         open={viewingOpen}
         onOpenChange={setViewingOpen}
         propertyTitle={property.title}
-        onLead={(msg) => logLead("viewing", msg)}
+        propertyId={property.id}
+        ownerId={property.agentId}
       />
 
       <PropertyShareDialog
@@ -709,15 +711,28 @@ function InquiryDialog({ open, onOpenChange, propertyTitle, onLead }: { open: bo
   );
 }
 
-function ViewingDialog({ open, onOpenChange, propertyTitle, onLead }: { open: boolean; onOpenChange: (v: boolean) => void; propertyTitle: string; onLead: (message: string) => void }) {
+function ViewingDialog({ open, onOpenChange, propertyTitle, propertyId, ownerId }: { open: boolean; onOpenChange: (v: boolean) => void; propertyTitle: string; propertyId: string; ownerId: string }) {
   const today = new Date().toISOString().slice(0, 10);
   const [date, setDate] = useState(today);
   const [time, setTime] = useState("10:00");
   const [notes, setNotes] = useState("");
-  function submit() {
+  const [sending, setSending] = useState(false);
+  async function submit() {
     if (!date || !time) { toast.error("Choose date and time"); return; }
-    onLead(`Viewing requested for ${date} at ${time}. ${notes}`.trim());
+    setSending(true);
+    const res = await createViewingRequest({
+      propertyId,
+      ownerId,
+      scheduledAt: new Date(`${date}T${time}`).toISOString(),
+      message: notes.trim() || undefined,
+    });
+    setSending(false);
+    if (!res.ok) {
+      toast.error(res.error === "auth" ? "Please sign in to request a viewing" : "Could not send the request");
+      return;
+    }
     toast.success(`Viewing requested for ${date} at ${time}`);
+    setNotes("");
     onOpenChange(false);
   }
   return (
@@ -742,7 +757,7 @@ function ViewingDialog({ open, onOpenChange, propertyTitle, onLead }: { open: bo
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={submit} className="gap-1.5"><Calendar className="h-4 w-4" /> Request viewing</Button>
+          <Button onClick={() => void submit()} disabled={sending} className="gap-1.5"><Calendar className="h-4 w-4" /> Request viewing</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
