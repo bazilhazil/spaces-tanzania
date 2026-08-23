@@ -75,6 +75,8 @@ export async function createLead(input: CreateLeadInput): Promise<boolean> {
       visitor_email: input.visitorEmail ?? user.email ?? null,
       contact_method: input.contactMethod,
       message: input.message ?? null,
+      notes: appendTimeline(null, input.contactMethod, input.message),
+
     } as never);
     return !error;
   } catch {
