@@ -769,33 +769,68 @@ function Lightbox({
   );
 }
 
-function InquiryDialog({ open, onOpenChange, propertyTitle, onLead }: { open: boolean; onOpenChange: (v: boolean) => void; propertyTitle: string; onLead: (message: string) => void }) {
-  const [message, setMessage] = useState(`Hi, I'm interested in "${propertyTitle}". Is it still available?`);
-  function submit() {
-    if (message.trim().length < 10) { toast.error("Please write a longer message"); return; }
-    onLead(message);
-    toast.success("Inquiry sent — the owner will get back to you shortly");
+function InquiryDialog({
+  open,
+  onOpenChange,
+  propertyTitle,
+  propertyId,
+  ownerId,
+  ownerName,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  propertyTitle: string;
+  propertyId: string;
+  ownerId: string;
+  ownerName: string;
+}) {
+  const { t } = useI18n();
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    if (open) setMessage(t("inquiry.suggested"));
+  }, [open, t]);
+
+  async function submit() {
+    if (message.trim().length < 10) { toast.error(t("inquiry.tooShort")); return; }
+    setSending(true);
+    const res = await sendPropertyMessage({ propertyId, ownerId, body: message });
+    setSending(false);
+    if (!res.ok) {
+      toast.error(res.error === "auth" ? t("inquiry.signInRequired") : t("inquiry.sendFailed"));
+      return;
+    }
+    toast.success(t("inquiry.sent"));
     onOpenChange(false);
   }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Send inquiry</DialogTitle>
-          <DialogDescription>Your name and contact details are shared securely with the owner.</DialogDescription>
+          <DialogTitle>{t("inquiry.message")}</DialogTitle>
+          <DialogDescription>{t("inquiry.formHint")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
+          <div className="rounded-lg bg-secondary/60 p-3 text-xs">
+            <div className="font-medium text-foreground">{propertyTitle}</div>
+            {ownerName && <div className="mt-0.5 text-muted-foreground">{ownerName}</div>}
+          </div>
           <Textarea rows={5} value={message} onChange={(e) => setMessage(e.target.value)} maxLength={1000} />
           <p className="text-[11px] text-muted-foreground">{message.length}/1000</p>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={submit} className="gap-1.5"><Send className="h-4 w-4" /> Send</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
+          <Button onClick={submit} disabled={sending} className="gap-1.5">
+            <Send className="h-4 w-4" /> {t("inquiry.sendMessage")}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
 
 function ViewingDialog({ open, onOpenChange, propertyTitle, propertyId, ownerId }: { open: boolean; onOpenChange: (v: boolean) => void; propertyTitle: string; propertyId: string; ownerId: string }) {
   const today = new Date().toISOString().slice(0, 10);
