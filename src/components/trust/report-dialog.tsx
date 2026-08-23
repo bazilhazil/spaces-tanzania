@@ -25,28 +25,29 @@ export function ReportDialog({ target, propertyId, trigger }: Props) {
 
   async function handleSubmit() {
     if (!reason) return toast.error("Please choose a reason");
+    if (submitting) return; // guard against double clicks / slow connections
+    if (!propertyId) return toast.error("This listing can't be reported right now.");
     setSubmitting(true);
-    try {
-      if (propertyId) {
-        const { data: auth } = await supabase.auth.getUser();
-        const { error } = await supabase.from("property_reports").insert({
-          property_id: propertyId,
-          reporter_id: auth.user?.id ?? null,
-          reason,
-          details: details.trim() || null,
-          status: "open",
-        } as never);
-        if (error) throw error;
-      }
-      setOpen(false);
-      setReason(""); setDetails("");
-      toast.success("Report submitted", { description: "Our moderation team will review within 24 hours." });
-    } catch (e) {
-      toast.error((e as Error).message || "Could not submit report");
-    } finally {
-      setSubmitting(false);
+    const res = await submitReport({
+      targetType: "property",
+      reason: LEGACY_REASON_MAP[reason] ?? "other",
+      description: details,
+      propertyId,
+    });
+    setSubmitting(false);
+
+    if (!res.ok) {
+      if (res.error === "auth") toast.error("Please sign in to report this listing.");
+      else if (res.error === "duplicate") toast.error("You have already reported this listing.");
+      else toast.error("Report couldn't be submitted. Please try again.");
+      return; // keep the form open so nothing typed is lost
     }
+
+    setOpen(false);
+    setReason(""); setDetails("");
+    toast.success("Report submitted", { description: `Reference ${res.reference}` });
   }
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
