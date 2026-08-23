@@ -51,7 +51,7 @@ export function SaveSearchDialog({ open, onOpenChange, filters, existing, onSave
       const res = await createSavedSearch({ name, filters, alertsEnabled: alerts, frequency });
       setBusy(false);
       if (!res.ok) { toast.error(res.message); return; }
-      toast.success(t("saved.created"));
+      toast.success(t("saved.createdToast"));
     }
     onOpenChange(false);
     onSaved?.();
