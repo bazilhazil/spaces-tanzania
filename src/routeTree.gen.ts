@@ -19,6 +19,7 @@ import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
+import { Route as SpacesLocationRouteImport } from './routes/spaces.$location'
 import { Route as PropertiesSlugRouteImport } from './routes/properties.$slug'
 import { Route as ProfileHandleRouteImport } from './routes/profile.$handle'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
@@ -98,6 +99,11 @@ const IndexRoute = IndexRouteImport.update({
 const PropertiesIndexRoute = PropertiesIndexRouteImport.update({
   id: '/properties/',
   path: '/properties/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpacesLocationRoute = SpacesLocationRouteImport.update({
+  id: '/spaces/$location',
+  path: '/spaces/$location',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PropertiesSlugRoute = PropertiesSlugRouteImport.update({
@@ -297,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/profile/$handle': typeof ProfileHandleRoute
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/spaces/$location': typeof SpacesLocationRoute
   '/properties/': typeof PropertiesIndexRoute
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/billing/history': typeof AuthenticatedBillingHistoryRoute
@@ -338,6 +345,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/profile/$handle': typeof ProfileHandleRoute
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/spaces/$location': typeof SpacesLocationRoute
   '/properties': typeof PropertiesIndexRoute
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/billing/history': typeof AuthenticatedBillingHistoryRoute
@@ -382,6 +390,7 @@ export interface FileRoutesById {
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/profile/$handle': typeof ProfileHandleRoute
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/spaces/$location': typeof SpacesLocationRoute
   '/properties/': typeof PropertiesIndexRoute
   '/_authenticated/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/_authenticated/billing/history': typeof AuthenticatedBillingHistoryRoute
@@ -426,6 +435,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/profile/$handle'
     | '/properties/$slug'
+    | '/spaces/$location'
     | '/properties/'
     | '/admin/$section'
     | '/billing/history'
@@ -467,6 +477,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/profile/$handle'
     | '/properties/$slug'
+    | '/spaces/$location'
     | '/properties'
     | '/admin/$section'
     | '/billing/history'
@@ -510,6 +521,7 @@ export interface FileRouteTypes {
     | '/_authenticated/welcome'
     | '/profile/$handle'
     | '/properties/$slug'
+    | '/spaces/$location'
     | '/properties/'
     | '/_authenticated/admin/$section'
     | '/_authenticated/billing/history'
@@ -537,6 +549,7 @@ export interface RootRouteChildren {
   TrustSystemRoute: typeof TrustSystemRoute
   ProfileHandleRoute: typeof ProfileHandleRoute
   PropertiesSlugRoute: typeof PropertiesSlugRoute
+  SpacesLocationRoute: typeof SpacesLocationRoute
   PropertiesIndexRoute: typeof PropertiesIndexRoute
   ApiPublicOgPropertyIdRoute: typeof ApiPublicOgPropertyIdRoute
 }
@@ -611,6 +624,13 @@ declare module '@tanstack/react-router' {
       path: '/properties'
       fullPath: '/properties/'
       preLoaderRoute: typeof PropertiesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/spaces/$location': {
+      id: '/spaces/$location'
+      path: '/spaces/$location'
+      fullPath: '/spaces/$location'
+      preLoaderRoute: typeof SpacesLocationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/properties/$slug': {
@@ -957,6 +977,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrustSystemRoute: TrustSystemRoute,
   ProfileHandleRoute: ProfileHandleRoute,
   PropertiesSlugRoute: PropertiesSlugRoute,
+  SpacesLocationRoute: SpacesLocationRoute,
   PropertiesIndexRoute: PropertiesIndexRoute,
   ApiPublicOgPropertyIdRoute: ApiPublicOgPropertyIdRoute,
 }
