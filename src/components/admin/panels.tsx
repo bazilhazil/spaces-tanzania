@@ -271,11 +271,11 @@ export function DashboardPanel() {
 
 // ---------- Property Moderation ----------
 
-const QUEUE_FILTERS: { id: QueueFilter; label: string }[] = [
-  { id: "review", label: t("admin.kpi.awaiting") },
-  { id: "live", label: t("admin.filter.live") },
-  { id: "rejected", label: t("admin.filter.rejected") },
-  { id: "all", label: t("admin.filter.all") },
+const QUEUE_FILTERS: { id: QueueFilter; labelKey: string }[] = [
+  { id: "review", labelKey: "admin.kpi.awaiting" },
+  { id: "live", labelKey: "admin.filter.live" },
+  { id: "rejected", labelKey: "admin.filter.rejected" },
+  { id: "all", labelKey: "admin.filter.all" },
 ];
 
 export function PropertiesPanel() {
