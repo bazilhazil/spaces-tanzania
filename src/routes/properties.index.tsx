@@ -382,6 +382,13 @@ function PropertiesPage() {
         </section>
       </main>
       <SiteFooter />
+      <SaveSearchDialog
+        open={saveSearchOpen}
+        onOpenChange={setSaveSearchOpen}
+        filters={currentFilters}
+      />
+      <AuthGateDialog open={authGate} onOpenChange={setAuthGate} />
+
     </div>
   );
 }
