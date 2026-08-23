@@ -42,6 +42,15 @@ export interface DbConversation {
   inquiryId: string | null;
 }
 
+type LeadLite = {
+  id: string;
+  property_id: string;
+  visitor_id: string | null;
+  status: string;
+  conversation_id: string | null;
+  created_at?: string;
+};
+
 const UNKNOWN_PEER = (id: string): Peer => ({
   id,
   name: "SPACES user",
