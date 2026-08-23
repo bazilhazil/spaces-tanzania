@@ -209,7 +209,15 @@ export function Messenger() {
   async function handleSend(body: string) {
     if (!active || !userId) return;
     const res = await sendMessageDb(active.id, userId, body);
-    if (!res.ok) { toast.error("Message could not be sent"); return; }
+    if (!res.ok) {
+      const key = safetyErrorKey((res as { error?: string }).error);
+      toast.error(
+        key === "blocked" ? "You can't message this user."
+        : key === "restricted" ? "Your account is restricted. Contact SPACES support."
+        : "Message could not be sent",
+      );
+      return;
+    }
     setMessages((ms) => [...ms, res.message]);
     setConversations((cs) =>
       cs.map((c) => (c.id === active.id ? { ...c, lastMessage: body, lastAt: res.message.createdAt } : c))
