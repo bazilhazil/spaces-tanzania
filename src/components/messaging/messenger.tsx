@@ -580,42 +580,58 @@ function ChatPane({
         </div>
       </div>
 
-      <div className="border-t border-border/70 bg-card p-3">
-        <div className="flex items-end gap-2">
-          <Button asChild variant="ghost" size="icon" className="rounded-full text-muted-foreground" aria-label="Viewings">
-            <Link to="/viewings"><Calendar className="h-5 w-5" /></Link>
-          </Button>
-          <div className="relative flex-1">
-            <Input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              placeholder="Write a message…"
-              className="rounded-2xl pr-12"
-            />
-          </div>
-          <Button onClick={handleSend} disabled={!text.trim()} size="icon" className="rounded-full">
-            <Send className="h-4 w-4" />
+      {blocked ? (
+        <div className="border-t border-border/70 bg-muted/50 p-4 text-center text-sm text-muted-foreground">
+          <Ban className="mr-1.5 inline h-4 w-4" /> This user is blocked.
+          <Button variant="link" size="sm" className="px-1.5" onClick={() => setBlockOpen(true)}>
+            Unblock
           </Button>
         </div>
-      </div>
+      ) : (
+        <div className="border-t border-border/70 bg-card p-3">
+          <div className="flex items-end gap-2">
+            <Button asChild variant="ghost" size="icon" className="rounded-full text-muted-foreground" aria-label="Viewings">
+              <Link to="/viewings"><Calendar className="h-5 w-5" /></Link>
+            </Button>
+            <div className="relative flex-1">
+              <Input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                placeholder="Write a message…"
+                className="rounded-2xl pr-12"
+              />
+            </div>
+            <Button onClick={handleSend} disabled={!text.trim()} size="icon" className="rounded-full">
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
-      <ConfirmDialog
+      <ReportSheet
         open={reportOpen}
         onOpenChange={setReportOpen}
-        title={`Report ${p.name}?`}
-        description="Our Trust & Safety team reviews reports within 24 hours."
-        confirmLabel="Submit report"
-        onConfirm={() => { toast.success("Report submitted"); setReportOpen(false); }}
+        target={{ type: "user", label: p.name, userId: p.id, conversationId: conv.id }}
       />
-      <ConfirmDialog
+      <ReportSheet
+        open={!!reportMessageId}
+        onOpenChange={(v) => !v && setReportMessageId(null)}
+        target={{
+          type: "message",
+          label: p.name,
+          messageId: reportMessageId,
+          conversationId: conv.id,
+          userId: p.id,
+        }}
+      />
+      <BlockUserDialog
         open={blockOpen}
         onOpenChange={setBlockOpen}
-        title={`Block ${p.name}?`}
-        description="They won't be able to message you or see your listings."
-        confirmLabel="Block user"
-        destructive
-        onConfirm={() => { toast.success("User blocked"); setBlockOpen(false); onToggleArchive(); }}
+        userId={p.id}
+        name={p.name}
+        blocked={blocked}
+        onChanged={setBlocked}
       />
     </>
   );
