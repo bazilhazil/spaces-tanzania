@@ -125,6 +125,10 @@ export async function fetchCrmLeads(opts?: { all?: boolean }): Promise<CrmLead[]
   const props = new Map((((propsRes as Raw).data as Raw[]) ?? []).map((p) => [p.id, p]));
   const profs = new Map((((profRes as Raw).data as Raw[]) ?? []).map((p) => [p.id, p]));
   const deals = new Map((((dealRes as Raw).data as Raw[]) ?? []).map((d) => [d.id, d]));
+  const convByPair = new Map<string, string>();
+  for (const c of (((convRes as Raw).data as Raw[]) ?? [])) {
+    convByPair.set(`${c.property_id}:${c.buyer_id ?? ""}`, c.id);
+  }
   const bookings = new Map<string, Raw>();
   for (const b of (((bookRes as Raw).data as Raw[]) ?? [])) {
     if (b.lead_id) bookings.set(b.lead_id, b);
@@ -157,6 +161,8 @@ export async function fetchCrmLeads(opts?: { all?: boolean }): Promise<CrmLead[]
       viewingId: b?.id ?? null,
       viewingStatus: b?.status ?? null,
       viewingAt: b?.scheduled_at ?? null,
+      conversationId:
+        r.conversation_id ?? convByPair.get(`${r.property_id}:${r.visitor_id ?? ""}`) ?? null,
     };
   });
 }
