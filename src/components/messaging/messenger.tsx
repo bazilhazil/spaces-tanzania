@@ -459,7 +459,7 @@ function ChatPane({
             <span className="truncate">{conv.propertyTitle ? conv.propertyTitle : "Direct conversation"}</span>
             {conv.inquiryStatus && (
               <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-foreground">
-                {t(`crm.status.${conv.inquiryStatus}`)}
+                {INQUIRY_STATUS_LABEL[conv.inquiryStatus] ?? conv.inquiryStatus}
               </span>
             )}
           </div>
