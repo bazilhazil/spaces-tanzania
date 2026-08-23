@@ -1,22 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, Heart, MapPin, Phone, Trash2, Home as HomeIcon } from "lucide-react";
+import { CalendarPlus, ChevronLeft, Heart, MapPin, Share2, ShieldCheck, Trash2, Home as HomeIcon } from "lucide-react";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Button } from "@/components/ui/button";
+import { PropertyShareDialog } from "@/components/property-share-dialog";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useI18n } from "@/hooks/use-i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
-import { fetchPropertyContact } from "@/lib/properties-db";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard/favorites")({
   component: FavoritesPage,
   head: () => ({
     meta: [
-      { title: "Favorites — SPACES" },
-      { name: "description", content: "Properties you've saved on SPACES." },
+      { title: "My Saved Spaces — SPACES" },
+      { name: "description", content: "Spaces you've saved on SPACES." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -30,6 +30,8 @@ type FavRow = {
   region: string | null;
   district: string | null;
   property_type: string | null;
+  listing_type: string | null;
+  verified: boolean | null;
   image?: string | null;
 };
 
@@ -42,6 +44,7 @@ function formatPrice(price: number | null, currency: string | null) {
     return `${cur} ${price.toLocaleString()}`;
   }
 }
+
 
 function FavoritesPage() {
   const { t, lang } = useI18n();
