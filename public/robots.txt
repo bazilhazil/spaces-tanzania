@@ -1,3 +1,25 @@
 User-agent: *
 Allow: /
-Sitemap: /sitemap.xml
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /billing
+Disallow: /messages
+Disallow: /notifications
+Disallow: /verification
+Disallow: /verification-hub
+Disallow: /trust
+Disallow: /safety
+Disallow: /deals
+Disallow: /leads
+Disallow: /viewings
+Disallow: /reviews
+Disallow: /upload
+Disallow: /compare
+Disallow: /welcome
+Disallow: /business-intelligence
+Disallow: /auth
+Disallow: /login
+Disallow: /register
+Disallow: /api/
+
+Sitemap: https://spacestz.com/sitemap.xml
