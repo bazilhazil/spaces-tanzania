@@ -25,6 +25,9 @@ import {
   searchRecipients, ensureConversation, subscribeToMessaging, relativeTime,
   type DbConversation, type DbMessage, type Peer, type ParticipantRole,
 } from "@/lib/messaging-db";
+import { ReportSheet } from "@/components/safety/report-sheet";
+import { BlockUserDialog, useBlockState } from "@/components/safety/block-user-dialog";
+import { safetyErrorKey } from "@/lib/safety-db";
 
 type MessageFolder = "inbox" | "unread" | "starred" | "sent" | "archived" | "deleted";
 
@@ -206,7 +209,15 @@ export function Messenger() {
   async function handleSend(body: string) {
     if (!active || !userId) return;
     const res = await sendMessageDb(active.id, userId, body);
-    if (!res.ok) { toast.error("Message could not be sent"); return; }
+    if (!res.ok) {
+      const key = safetyErrorKey((res as { error?: string }).error);
+      toast.error(
+        key === "blocked" ? "You can't message this user."
+        : key === "restricted" ? "Your account is restricted. Contact SPACES support."
+        : "Message could not be sent",
+      );
+      return;
+    }
     setMessages((ms) => [...ms, res.message]);
     setConversations((cs) =>
       cs.map((c) => (c.id === active.id ? { ...c, lastMessage: body, lastAt: res.message.createdAt } : c))
@@ -443,6 +454,8 @@ function ChatPane({
   const [text, setText] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
   const [blockOpen, setBlockOpen] = useState(false);
+  const [reportMessageId, setReportMessageId] = useState<string | null>(null);
+  const { blocked, setBlocked } = useBlockState(p.id);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -539,9 +552,25 @@ function ChatPane({
           {messages.length === 0 && (
             <div className="py-10 text-center text-sm text-muted-foreground">No messages yet — say hello.</div>
           )}
-          {messages.map((m, i) => (
-            <MessageBubble key={m.id} msg={m} peer={p} mine={m.senderId === meId} prev={messages[i - 1]} />
-          ))}
+          {messages.map((m, i) => {
+            const mine = m.senderId === meId;
+            return (
+              <div key={m.id} className={cn("group flex items-center gap-1", mine ? "flex-row-reverse" : "flex-row")}>
+                <div className="min-w-0 flex-1">
+                  <MessageBubble msg={m} peer={p} mine={mine} prev={messages[i - 1]} />
+                </div>
+                {!mine && (
+                  <button
+                    onClick={() => setReportMessageId(m.id)}
+                    aria-label="Report message"
+                    className="shrink-0 rounded-full p-1 text-muted-foreground opacity-0 transition group-hover:opacity-100 focus:opacity-100 hover:text-destructive"
+                  >
+                    <Flag className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -559,42 +588,58 @@ function ChatPane({
         </div>
       </div>
 
-      <div className="border-t border-border/70 bg-card p-3">
-        <div className="flex items-end gap-2">
-          <Button asChild variant="ghost" size="icon" className="rounded-full text-muted-foreground" aria-label="Viewings">
-            <Link to="/viewings"><Calendar className="h-5 w-5" /></Link>
-          </Button>
-          <div className="relative flex-1">
-            <Input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              placeholder="Write a message…"
-              className="rounded-2xl pr-12"
-            />
-          </div>
-          <Button onClick={handleSend} disabled={!text.trim()} size="icon" className="rounded-full">
-            <Send className="h-4 w-4" />
+      {blocked ? (
+        <div className="border-t border-border/70 bg-muted/50 p-4 text-center text-sm text-muted-foreground">
+          <Ban className="mr-1.5 inline h-4 w-4" /> This user is blocked.
+          <Button variant="link" size="sm" className="px-1.5" onClick={() => setBlockOpen(true)}>
+            Unblock
           </Button>
         </div>
-      </div>
+      ) : (
+        <div className="border-t border-border/70 bg-card p-3">
+          <div className="flex items-end gap-2">
+            <Button asChild variant="ghost" size="icon" className="rounded-full text-muted-foreground" aria-label="Viewings">
+              <Link to="/viewings"><Calendar className="h-5 w-5" /></Link>
+            </Button>
+            <div className="relative flex-1">
+              <Input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                placeholder="Write a message…"
+                className="rounded-2xl pr-12"
+              />
+            </div>
+            <Button onClick={handleSend} disabled={!text.trim()} size="icon" className="rounded-full">
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
-      <ConfirmDialog
+      <ReportSheet
         open={reportOpen}
         onOpenChange={setReportOpen}
-        title={`Report ${p.name}?`}
-        description="Our Trust & Safety team reviews reports within 24 hours."
-        confirmLabel="Submit report"
-        onConfirm={() => { toast.success("Report submitted"); setReportOpen(false); }}
+        target={{ type: "user", label: p.name, userId: p.id, conversationId: conv.id }}
       />
-      <ConfirmDialog
+      <ReportSheet
+        open={!!reportMessageId}
+        onOpenChange={(v) => !v && setReportMessageId(null)}
+        target={{
+          type: "message",
+          label: p.name,
+          messageId: reportMessageId,
+          conversationId: conv.id,
+          userId: p.id,
+        }}
+      />
+      <BlockUserDialog
         open={blockOpen}
         onOpenChange={setBlockOpen}
-        title={`Block ${p.name}?`}
-        description="They won't be able to message you or see your listings."
-        confirmLabel="Block user"
-        destructive
-        onConfirm={() => { toast.success("User blocked"); setBlockOpen(false); onToggleArchive(); }}
+        userId={p.id}
+        name={p.name}
+        blocked={blocked}
+        onChanged={setBlocked}
       />
     </>
   );

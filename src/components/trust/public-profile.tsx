@@ -1,15 +1,20 @@
-import { Star, MessageCircle, Timer, Building2, Award, Calendar, MapPin } from "lucide-react";
+import { Star, MessageCircle, Timer, Building2, Award, Calendar, MapPin, Flag } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { VerificationBadge } from "./verification-badge";
 import { TrustScoreRing } from "./trust-score-ring";
-import { ReportDialog } from "./report-dialog";
+import { ReportSheet } from "@/components/safety/report-sheet";
+import { BlockUserDialog, useBlockState } from "@/components/safety/block-user-dialog";
+import { Ban } from "lucide-react";
+import { useState } from "react";
 import { computeTrustScore, MOCK_TRUST_SIGNALS, type PublicProfileData } from "@/lib/trust-engine";
 import { PersonReviews } from "@/components/reviews/person-reviews";
 import { cn } from "@/lib/utils";
 
 export function PublicProfile({ profile, userId, className }: { profile: PublicProfileData; userId?: string; className?: string }) {
   const trust = computeTrustScore(MOCK_TRUST_SIGNALS);
+  const [blockOpen, setBlockOpen] = useState(false);
+  const { blocked, setBlocked } = useBlockState(userId ?? null);
 
   return (
     <div className={cn("space-y-6", className)}>
@@ -39,7 +44,19 @@ export function PublicProfile({ profile, userId, className }: { profile: PublicP
             </div>
             <div className="flex items-center gap-2">
               <Button className="rounded-full">Contact</Button>
-              <ReportDialog target={profile.displayName} />
+              <ReportSheet
+                target={{ type: "user", label: profile.displayName, userId: userId ?? null }}
+                trigger={
+                  <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-destructive">
+                    <Flag className="h-4 w-4" /> Report
+                  </Button>
+                }
+              />
+              {userId && (
+                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" onClick={() => setBlockOpen(true)}>
+                  <Ban className="h-4 w-4" /> {blocked ? "Unblock" : "Block"}
+                </Button>
+              )}
             </div>
           </div>
 
@@ -63,6 +80,17 @@ export function PublicProfile({ profile, userId, className }: { profile: PublicP
           <Stat icon={Calendar}      label="Member since"     value={profile.memberSince} />
         </div>
       </div>
+
+      {userId && (
+        <BlockUserDialog
+          open={blockOpen}
+          onOpenChange={setBlockOpen}
+          userId={userId}
+          name={profile.displayName}
+          blocked={blocked}
+          onChanged={setBlocked}
+        />
+      )}
 
       {userId && <PersonReviews userId={userId} responseTime={profile.stats.responseTime} />}
     </div>

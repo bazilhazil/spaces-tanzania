@@ -1,0 +1,10 @@
+REVOKE ALL ON FUNCTION public.tg_guard_conversation() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_guard_message() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_guard_booking() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_guard_lead() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_guard_property() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_report_submitted() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_report_after_insert() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_report_status_change() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_account_status_change() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_property_under_review() FROM PUBLIC, anon, authenticated;

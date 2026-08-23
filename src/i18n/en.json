@@ -973,5 +973,78 @@
     "thisProperty": "This space",
     "thisPerson": "This member",
     "done": "Reviewed"
+  },
+  "safety": {
+    "reasons": {
+      "fake_listing": "Fake or non-existent listing",
+      "incorrect_information": "Incorrect information",
+      "wrong_price": "Wrong price",
+      "wrong_location": "Wrong location",
+      "duplicate_listing": "Duplicate listing",
+      "unavailable": "No longer available",
+      "suspicious_activity": "Suspicious activity",
+      "fraud": "Fraud or scam",
+      "other": "Something else",
+      "fake_account": "Fake account",
+      "harassment": "Harassment or abuse",
+      "misleading_information": "Misleading information",
+      "spam": "Spam",
+      "suspicious_payment": "Suspicious payment request",
+      "inappropriate": "Inappropriate content"
+    },
+    "report": {
+      "titleProperty": "Report this Space",
+      "titleUser": "Report this user",
+      "titleMessage": "Report this message",
+      "confidential": "Reports are confidential.",
+      "chooseReason": "Please choose a reason",
+      "detailsLabel": "Tell us more (optional)",
+      "detailsPlaceholder": "Share anything that helps our team investigate…",
+      "evidenceLabel": "Evidence (optional)",
+      "evidenceHint": "Add a screenshot or photo",
+      "privacyNote": "Your name is never shown to the person you report.",
+      "submit": "Submit report",
+      "submitting": "Submitting…",
+      "cancel": "Cancel",
+      "sent": "Report submitted",
+      "sentDetail": "Reference {reference}. Our Trust & Safety team reviews reports within 24 hours.",
+      "duplicate": "You already reported this.",
+      "self": "You cannot report yourself.",
+      "signIn": "Please sign in to report.",
+      "failed": "Could not submit the report"
+    },
+    "block": {
+      "blockTitle": "Block {name}?",
+      "unblockTitle": "Unblock {name}?",
+      "blockBody": "They will no longer be able to message you or send you inquiries.",
+      "unblockBody": "They will be able to contact you again.",
+      "blockAction": "Block user",
+      "unblockAction": "Unblock",
+      "blocked": "{name} is blocked",
+      "unblocked": "{name} is unblocked",
+      "unblockedShort": "User unblocked",
+      "failed": "Could not update the block",
+      "isBlocked": "This user is blocked."
+    },
+    "status": {
+      "new": "New",
+      "under_review": "Investigating",
+      "more_info": "Needs info",
+      "resolved": "Resolved",
+      "dismissed": "Dismissed"
+    },
+    "center": {
+      "title": "Safety Center",
+      "subtitle": "Track your reports and manage blocked users.",
+      "myReports": "My reports",
+      "blockedUsers": "Blocked users",
+      "noReports": "No reports yet",
+      "noReportsBody": "Anything you report will appear here with its status.",
+      "noBlocked": "No blocked users",
+      "noBlockedBody": "People you block will be listed here."
+    },
+    "reportUser": "Report user",
+    "reportMessage": "Report message",
+    "underReview": "Under review"
   }
 }

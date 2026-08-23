@@ -21,7 +21,7 @@ import { sendPropertyMessage } from "@/lib/inquiry";
 
 import { createViewingRequest } from "@/lib/viewings-db";
 import { VerifiedBadge } from "@/components/trust/verified-badge";
-import { ReportDialog } from "@/components/trust/report-dialog";
+import { ReportSheet } from "@/components/safety/report-sheet";
 import { TrustScoreRing } from "@/components/trust/trust-score-ring";
 import { QualityScorePill } from "@/components/trust/quality-score";
 import { computeTrustScore, MOCK_TRUST_SIGNALS } from "@/lib/trust-engine";
@@ -523,9 +523,8 @@ function PropertyDetailPage() {
                     </>
                   )}
 
-                  <ReportDialog
-                    target={property.title}
-                    propertyId={property.id}
+                  <ReportSheet
+                    target={{ type: "property", label: property.title, propertyId: property.id, userId: ownerId }}
                     trigger={
                       <Button variant="ghost" size="sm" className="w-full gap-2 text-muted-foreground hover:text-destructive">
                         <Flag className="h-3.5 w-3.5" /> {t("verify.reportSpace")}
