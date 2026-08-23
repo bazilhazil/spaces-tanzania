@@ -168,10 +168,33 @@ function PropertyDetailPage() {
     });
   }
 
+  function openWhatsApp() {
+    contactAndOpen("whatsapp", (a) =>
+      a.whatsapp ? `https://wa.me/${a.whatsapp}?text=${encodeURIComponent(whatsappText)}` : null,
+    );
+  }
+
+  /** Mobile: one-tap dial. Desktop: reveal the verified number safely. */
+  function callAction() {
+    requireAuth(() => {
+      void (async () => {
+        const a = await contactVia("call");
+        const phone = a?.phone?.trim();
+        if (!phone) {
+          toast.error(t("properties.detail.contactUnavailable"));
+          return;
+        }
+        const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches;
+        if (isMobile) window.location.href = `tel:${phone.replace(/\s/g, "")}`;
+        else setRevealedPhone(phone);
+      })();
+    });
+  }
 
   function share() {
     setShareOpen(true);
   }
+
 
   const amenityIcons: Record<string, React.ReactNode> = {
     Security: <ShieldCheck className="h-3.5 w-3.5" />,
