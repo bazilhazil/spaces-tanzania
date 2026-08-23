@@ -523,9 +523,8 @@ function PropertyDetailPage() {
                     </>
                   )}
 
-                  <ReportDialog
-                    target={property.title}
-                    propertyId={property.id}
+                  <ReportSheet
+                    target={{ type: "property", label: property.title, propertyId: property.id, userId: property.ownerId ?? null }}
                     trigger={
                       <Button variant="ghost" size="sm" className="w-full gap-2 text-muted-foreground hover:text-destructive">
                         <Flag className="h-3.5 w-3.5" /> {t("verify.reportSpace")}

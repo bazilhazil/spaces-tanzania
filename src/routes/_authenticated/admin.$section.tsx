@@ -1,6 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import {
-  PropertiesPanel, UsersPanel, AgentsPanel, VerificationPanel, ReportsPanel,
+  PropertiesPanel, UsersPanel, AgentsPanel, VerificationPanel,
   BookingsPanel, MessagesPanel, SupportPanel, PaymentsPanel, SubscriptionsPanel,
   AnalyticsPanel, AuditPanel, MarketingPanel, NotificationsPanel, SettingsPanel,
   SuperAdminPanel,
