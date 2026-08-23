@@ -289,6 +289,7 @@ function PropertyDetailPage() {
   }
 
   function share() {
+    track("property_shared", { property_id: property?.id ?? "" });
     setShareOpen(true);
   }
 
