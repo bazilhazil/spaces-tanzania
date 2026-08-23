@@ -1,7 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { ChevronRight, Map as MapIcon, MapPin, Rows3, Search, SlidersHorizontal, X } from "lucide-react";
+import { BookmarkPlus, ChevronRight, Map as MapIcon, MapPin, Rows3, Search, SlidersHorizontal, X } from "lucide-react";
+import { AuthGateDialog } from "@/components/auth-gate-dialog";
+import { SaveSearchDialog } from "@/components/favorites/save-search-dialog";
+import { useAuth } from "@/hooks/use-auth";
+import type { SavedSearchFilters } from "@/lib/saved-searches-db";
+
 import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
