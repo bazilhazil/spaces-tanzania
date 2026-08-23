@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
 import { TZ_REGION_NAMES, searchLocations } from "@/lib/tz-locations";
+import { track } from "@/lib/analytics";
 
 type Tab = "rent" | "sale" | "commercial";
 
@@ -63,6 +64,7 @@ export function HeroSearch() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          track("search_performed", { listing_type: tab, city, category, query: q });
           navigate({
             to: "/properties",
             search: {

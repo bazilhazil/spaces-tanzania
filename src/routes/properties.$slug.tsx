@@ -32,16 +32,94 @@ import { useAuth } from "@/hooks/use-auth";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
+import { getListingSeo } from "@/lib/public-listings.functions";
+import { canonicalPropertyUrl, idFromSlug, propertySlug, SITE_URL } from "@/lib/seo";
+import { track } from "@/lib/analytics";
 
 export const Route = createFileRoute("/properties/$slug")({
+  loader: async ({ params }) => {
+    const listing = await getListingSeo({ data: { id: idFromSlug(params.slug) } });
+    return { listing };
+  },
   component: PropertyDetailPage,
-  head: () => ({
-    meta: [
-      { title: "Property details · SPACES" },
-      { name: "description", content: "View verified property listings across Tanzania on SPACES." },
-    ],
-  }),
+  head: ({ params, loaderData }) => {
+    const listing = loaderData?.listing;
+    if (!listing) {
+      return {
+        meta: [
+          { title: "Space unavailable · SPACES" },
+          { name: "description", content: "This space is no longer available on SPACES." },
+          { name: "robots", content: "noindex" },
+        ],
+      };
+    }
+    const place = [listing.ward, listing.district, listing.city].filter(Boolean).join(", ");
+    const action = listing.listingType === "sale" ? "for Sale" : listing.listingType === "lease" ? "for Lease" : "for Rent";
+    const bed = listing.bedrooms ? `${listing.bedrooms} Bedroom ` : "";
+    const title = `${bed}${listing.category} ${action} in ${place || "Tanzania"} | SPACES`;
+    const priceText = `${listing.currency} ${listing.price.toLocaleString()}`;
+    const description =
+      (listing.description || "").replace(/\s+/g, " ").trim().slice(0, 150) ||
+      `${bed}${listing.category} ${action.toLowerCase()} in ${place || "Tanzania"} at ${priceText}. Verified listings on SPACES.`;
+    const canonical = canonicalPropertyUrl(propertySlug({ ...listing, id: listing.id }));
+    const image = `${SITE_URL}/api/public/og/property/${listing.id}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { name: "keywords", content: [listing.category, action, place, "Tanzania property", "SPACES"].filter(Boolean).join(", ") },
+        { property: "og:title", content: `${title.replace(" | SPACES", "")} — ${priceText}` },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: canonical },
+        { property: "og:image", content: image },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: image },
+      ],
+      links: [{ rel: "canonical", href: canonical }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "RealEstateListing",
+            name: listing.title,
+            description,
+            url: canonical,
+            image,
+            datePosted: listing.createdAt ?? undefined,
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: listing.district || listing.city || undefined,
+              addressRegion: listing.city || undefined,
+              addressCountry: "TZ",
+            },
+            offers: {
+              "@type": "Offer",
+              price: listing.price,
+              priceCurrency: listing.currency,
+              availability: "https://schema.org/InStock",
+              url: canonical,
+            },
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+              { "@type": "ListItem", position: 2, name: "Spaces", item: `${SITE_URL}/properties` },
+              { "@type": "ListItem", position: 3, name: listing.title, item: canonical },
+            ],
+          }),
+        },
+      ],
+    };
+  },
 });
+
 
 function PropertyDetailPage() {
   const { slug } = Route.useParams();
@@ -55,17 +133,20 @@ function PropertyDetailPage() {
   const [similar, setSimilar] = useState<Property[]>([]);
   const [ownerId, setOwnerId] = useState<string | null>(null);
 
+  const propertyId = idFromSlug(slug);
+
   useEffect(() => {
     let alive = true;
     setLoading(true);
     (async () => {
-      const res = await fetchPropertyById(slug);
+      const res = await fetchPropertyById(propertyId);
       if (!alive) return;
       if (res) {
         setProperty(res.property);
         setAgent(contactAgentFromRow(res.row));
         setStatus((res.row?.status as string) ?? "live");
         setOwnerId(((res.row as unknown as { owner_id?: string })?.owner_id) ?? null);
+        track("property_viewed", { property_id: res.property.id, category: res.property.category });
         const others = await fetchLiveProperties(12);
         if (!alive) return;
         setSimilar(others.filter((p) => p.id !== res.property.id).slice(0, 4));
@@ -73,7 +154,7 @@ function PropertyDetailPage() {
       setLoading(false);
     })();
     return () => { alive = false; };
-  }, [slug]);
+  }, [propertyId]);
 
 
   const [activeImage, setActiveImage] = useState(0);
@@ -106,13 +187,18 @@ function PropertyDetailPage() {
 
   if (!property) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-center">
-          <h1 className="font-display text-3xl">{t("properties.notFoundTitle")}</h1>
-          <Link to="/properties" className="mt-4 inline-block text-primary underline">
-            {t("properties.notFoundBack")}
+      <div className="flex min-h-screen flex-col bg-background">
+        <SiteHeader />
+        <main className="container-page flex-1 py-20 text-center">
+          <h1 className="font-display text-3xl font-semibold">{t("properties.notFoundTitle")}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            This space may have been rented, sold or removed.
+          </p>
+          <Link to="/properties" className="mt-6 inline-block">
+            <Button>View similar spaces</Button>
           </Link>
-        </div>
+        </main>
+        <SiteFooter />
       </div>
     );
   }
@@ -144,6 +230,10 @@ function PropertyDetailPage() {
    */
   async function contactVia(method: LeadContactMethod): Promise<Agent | null> {
     if (!property || !agent) return null;
+    track(method === "whatsapp" ? "whatsapp_clicked" : "contact_clicked", {
+      property_id: property.id,
+      method,
+    });
     await createLead({
       propertyId: property.id,
       ownerId: property.agentId,
@@ -199,6 +289,7 @@ function PropertyDetailPage() {
   }
 
   function share() {
+    track("property_shared", { property_id: property?.id ?? "" });
     setShareOpen(true);
   }
 

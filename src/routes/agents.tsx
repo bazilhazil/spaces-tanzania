@@ -17,6 +17,7 @@ export const Route = createFileRoute("/agents")({
           "Meet verified real estate agents across Tanzania. Connect directly for viewings, listings, and expert local advice.",
       },
     ],
+    links: [{ rel: "canonical", href: "https://spacestz.com/agents" }],
   }),
 });
 
