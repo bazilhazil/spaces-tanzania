@@ -101,7 +101,7 @@ export async function listConversations(userId: string): Promise<DbConversation[
   const ids = rows.map((c) => c.id);
   const propertyIds = [...new Set(rows.map((c) => c.property_id).filter(Boolean))] as string[];
 
-  const [peers, msgRes, propRes] = await Promise.all([
+  const [peers, msgRes, propRes, leadRes] = await Promise.all([
     loadPeers(),
     supabase
       .from("messages")
@@ -111,6 +111,13 @@ export async function listConversations(userId: string): Promise<DbConversation[
     propertyIds.length
       ? supabase.from("properties").select("id, title").in("id", propertyIds)
       : Promise.resolve({ data: [] as { id: string; title: string }[] }),
+    propertyIds.length
+      ? supabase
+          .from("leads")
+          .select("property_id, visitor_id, status, created_at")
+          .in("property_id", propertyIds)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] as { property_id: string; visitor_id: string | null; status: string }[] }),
   ]);
 
   const msgs = (msgRes.data ?? []) as {
@@ -120,6 +127,11 @@ export async function listConversations(userId: string): Promise<DbConversation[
   const titles = new Map(
     ((propRes.data ?? []) as { id: string; title: string }[]).map((p) => [p.id, p.title]),
   );
+  const leadStatus = new Map<string, string>();
+  for (const l of ((leadRes.data ?? []) as { property_id: string; visitor_id: string | null; status: string }[])) {
+    const key = `${l.property_id}:${l.visitor_id ?? ""}`;
+    if (!leadStatus.has(key)) leadStatus.set(key, l.status);
+  }
 
   return rows.map((c) => {
     const mine = msgs.filter((m) => m.conversation_id === c.id);
@@ -135,6 +147,7 @@ export async function listConversations(userId: string): Promise<DbConversation[
       lastMessage: last?.body ?? "No messages yet",
       lastAt: last?.created_at ?? c.last_message_at ?? c.created_at,
       unread: mine.filter((m) => m.sender_id !== userId && !m.read_at).length,
+      inquiryStatus: c.property_id ? leadStatus.get(`${c.property_id}:${c.buyer_id}`) ?? null : null,
     };
   }).sort((a, b) => +new Date(b.lastAt) - +new Date(a.lastAt));
 }
