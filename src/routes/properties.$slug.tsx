@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BadgeCheck, Bath, BedDouble, Building2, Calendar, Car, ChevronLeft, ChevronRight,
   Heart, Mail, MapPin, MessageCircle, Phone, Ruler, Share2, ShieldCheck, Sparkles,
-  Star, X, Play, Calculator, Send, Timer, CheckCircle2, Maximize2, FileText,
+  Star, X, Play, Calculator, Send, CheckCircle2, Maximize2, FileText,
   Flag, ZoomIn, ZoomOut, Eye,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
