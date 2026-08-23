@@ -116,10 +116,10 @@ export async function listConversations(userId: string): Promise<DbConversation[
     propertyIds.length
       ? supabase
           .from("leads")
-          .select("property_id, visitor_id, status, created_at")
+          .select("id, property_id, visitor_id, status, conversation_id, created_at")
           .in("property_id", propertyIds)
           .order("created_at", { ascending: false })
-      : Promise.resolve({ data: [] as { property_id: string; visitor_id: string | null; status: string }[] }),
+      : Promise.resolve({ data: [] as LeadLite[] }),
   ]);
 
   const msgs = (msgRes.data ?? []) as {
