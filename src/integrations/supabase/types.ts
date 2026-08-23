@@ -81,6 +81,13 @@ export type Database = {
             foreignKeyName: "agent_clients_interested_property_id_fkey"
             columns: ["interested_property_id"]
             isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_clients_interested_property_id_fkey"
+            columns: ["interested_property_id"]
+            isOneToOne: false
             referencedRelation: "public_properties"
             referencedColumns: ["id"]
           },
@@ -176,6 +183,13 @@ export type Database = {
             foreignKeyName: "bookings_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "public_properties"
             referencedColumns: ["id"]
           },
@@ -215,6 +229,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
             referencedColumns: ["id"]
           },
           {
@@ -419,6 +440,13 @@ export type Database = {
             foreignKeyName: "deals_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "public_properties"
             referencedColumns: ["id"]
           },
@@ -449,6 +477,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
             referencedColumns: ["id"]
           },
           {
@@ -535,6 +570,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
             referencedColumns: ["id"]
           },
           {
@@ -884,6 +926,13 @@ export type Database = {
             foreignKeyName: "property_agents_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_agents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "public_properties"
             referencedColumns: ["id"]
           },
@@ -920,6 +969,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: true
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_contacts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "public_listing_pages"
             referencedColumns: ["id"]
           },
           {
@@ -965,6 +1021,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
             referencedColumns: ["id"]
           },
           {
@@ -1019,6 +1082,13 @@ export type Database = {
             foreignKeyName: "property_reports_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "public_properties"
             referencedColumns: ["id"]
           },
@@ -1052,6 +1122,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_views_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
             referencedColumns: ["id"]
           },
           {
@@ -1276,6 +1353,13 @@ export type Database = {
             foreignKeyName: "reviews_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "public_properties"
             referencedColumns: ["id"]
           },
@@ -1362,6 +1446,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
             referencedColumns: ["id"]
           },
           {
@@ -1598,6 +1689,13 @@ export type Database = {
             foreignKeyName: "verification_requests_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "public_properties"
             referencedColumns: ["id"]
           },
@@ -1605,6 +1703,105 @@ export type Database = {
       }
     }
     Views: {
+      public_listing_pages: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          area_sqm: number | null
+          bathrooms: number | null
+          bedrooms: number | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          district: string | null
+          featured: boolean | null
+          floor: number | null
+          id: string | null
+          landmark: string | null
+          latitude: number | null
+          listing_type: Database["public"]["Enums"]["listing_type"] | null
+          longitude: number | null
+          negotiable: boolean | null
+          owner_id: string | null
+          parking: number | null
+          price: number | null
+          property_type: Database["public"]["Enums"]["property_type"] | null
+          region: string | null
+          status: Database["public"]["Enums"]["property_status"] | null
+          street: string | null
+          title: string | null
+          updated_at: string | null
+          verified: boolean | null
+          view_count: number | null
+          ward: string | null
+          year_built: number | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          area_sqm?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          district?: string | null
+          featured?: boolean | null
+          floor?: number | null
+          id?: string | null
+          landmark?: string | null
+          latitude?: number | null
+          listing_type?: Database["public"]["Enums"]["listing_type"] | null
+          longitude?: number | null
+          negotiable?: boolean | null
+          owner_id?: string | null
+          parking?: number | null
+          price?: number | null
+          property_type?: Database["public"]["Enums"]["property_type"] | null
+          region?: string | null
+          status?: Database["public"]["Enums"]["property_status"] | null
+          street?: string | null
+          title?: string | null
+          updated_at?: string | null
+          verified?: boolean | null
+          view_count?: number | null
+          ward?: string | null
+          year_built?: number | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          area_sqm?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          district?: string | null
+          featured?: boolean | null
+          floor?: number | null
+          id?: string | null
+          landmark?: string | null
+          latitude?: number | null
+          listing_type?: Database["public"]["Enums"]["listing_type"] | null
+          longitude?: number | null
+          negotiable?: boolean | null
+          owner_id?: string | null
+          parking?: number | null
+          price?: number | null
+          property_type?: Database["public"]["Enums"]["property_type"] | null
+          region?: string | null
+          status?: Database["public"]["Enums"]["property_status"] | null
+          street?: string | null
+          title?: string | null
+          updated_at?: string | null
+          verified?: boolean | null
+          view_count?: number | null
+          ward?: string | null
+          year_built?: number | null
+        }
+        Relationships: []
+      }
       public_profiles: {
         Row: {
           agency_name: string | null
