@@ -841,23 +841,38 @@ function ViewingDialog({ open, onOpenChange, propertyTitle, propertyId, ownerId 
   const [notes, setNotes] = useState("");
   const [sending, setSending] = useState(false);
   async function submit() {
-    if (!date || !time) { toast.error("Choose date and time"); return; }
+    if (sending) return; // guard against double taps
+    if (!date || !time) { toast.error("Choose a date and a time"); return; }
+    const when = new Date(`${date}T${time}`);
+    if (Number.isNaN(when.getTime()) || when.getTime() < Date.now() - 60_000) {
+      toast.error("Please choose a future date and time");
+      return;
+    }
     setSending(true);
     const res = await createViewingRequest({
       propertyId,
       ownerId,
-      scheduledAt: new Date(`${date}T${time}`).toISOString(),
+      scheduledAt: when.toISOString(),
       message: notes.trim() || undefined,
     });
     setSending(false);
     if (!res.ok) {
-      toast.error(res.error === "auth" ? "Please sign in to request a viewing" : "Could not send the request");
+      const msg =
+        res.error === "auth" ? "Please sign in to request a viewing."
+        : res.error === "property_missing" ? "This property could not be found."
+        : res.error === "invalid_date" ? "Please choose a future date and time."
+        : res.error === "permission" ? "You don't have permission to submit this request."
+        : "We couldn't send your request. Please try again.";
+      toast.error(msg);
       return;
     }
-    toast.success(`Viewing requested for ${date} at ${time}`);
+    toast.success("Viewing request sent successfully.", {
+      description: "Waiting for the owner/agent to confirm.",
+    });
     setNotes("");
     onOpenChange(false);
   }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -880,7 +895,7 @@ function ViewingDialog({ open, onOpenChange, propertyTitle, propertyId, ownerId 
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={() => void submit()} disabled={sending} className="gap-1.5"><Calendar className="h-4 w-4" /> Request viewing</Button>
+          <Button onClick={() => void submit()} disabled={sending} className="gap-1.5"><Calendar className="h-4 w-4" /> {sending ? "Sending request..." : "Request viewing"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

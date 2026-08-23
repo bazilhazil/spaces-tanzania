@@ -35,7 +35,7 @@ export interface ViewingRequest {
 
 export interface CreateViewingInput {
   propertyId: string;
-  ownerId: string;
+  ownerId?: string | null;
   agentId?: string | null;
   scheduledAt: string; // ISO
   durationMinutes?: number;
@@ -43,13 +43,55 @@ export interface CreateViewingInput {
   contactPhone?: string;
 }
 
-/** Creates a Pending viewing request routed to the agent when set, else the owner. */
+export type ViewingErrorCode =
+  | "auth"
+  | "property_missing"
+  | "invalid_date"
+  | "permission"
+  | "failed";
+
+/**
+ * Creates a Pending viewing request. The property row (and any assigned agent)
+ * is resolved from the database at submit time so the request always references
+ * the real listing and the real recipient — never stale props.
+ */
 export async function createViewingRequest(
   input: CreateViewingInput,
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: ViewingErrorCode; detail?: string }> {
   const { data: session } = await supabase.auth.getSession();
   const user = session.session?.user;
   if (!user) return { ok: false, error: "auth" };
+
+  if (!input.propertyId) return { ok: false, error: "property_missing" };
+
+  const when = new Date(input.scheduledAt);
+  if (Number.isNaN(when.getTime()) || when.getTime() < Date.now() - 60_000) {
+    return { ok: false, error: "invalid_date" };
+  }
+
+  // 1. Validate the property really exists and grab its true owner.
+  const { data: prop, error: propErr } = await supabase
+    .from("properties")
+    .select("id,owner_id")
+    .eq("id", input.propertyId)
+    .maybeSingle();
+  if (propErr) console.error("Viewing request property lookup failed:", propErr);
+  const ownerId = (prop as { owner_id?: string } | null)?.owner_id ?? input.ownerId ?? null;
+  const propertyId = (prop as { id?: string } | null)?.id ?? input.propertyId;
+  if (!ownerId) return { ok: false, error: "property_missing" };
+
+  // 2. Route to an assigned agent when one manages viewings for this listing.
+  let agentId = input.agentId ?? null;
+  if (!agentId) {
+    const { data: assigned } = await supabase
+      .from("property_agents")
+      .select("agent_id,permission")
+      .eq("property_id", propertyId)
+      .in("permission", ["manage_viewings", "full_management"])
+      .limit(1)
+      .maybeSingle();
+    agentId = (assigned as { agent_id?: string } | null)?.agent_id ?? null;
+  }
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -57,25 +99,37 @@ export async function createViewingRequest(
     .eq("id", user.id)
     .maybeSingle();
 
-  const recipient = input.agentId || input.ownerId;
+  const recipient = agentId || ownerId;
   const { error } = await supabase.from("bookings").insert({
-    property_id: input.propertyId,
+    property_id: propertyId,
     buyer_id: user.id,
-    owner_id: input.ownerId,
-    agent_id: input.agentId ?? null,
+    owner_id: ownerId,
+    agent_id: agentId,
     recipient_id: recipient,
     buyer_name: profile?.full_name ?? (user.user_metadata?.full_name as string | undefined) ?? null,
     buyer_email: profile?.email ?? user.email ?? null,
     contact_phone: input.contactPhone ?? profile?.phone ?? null,
-    scheduled_at: input.scheduledAt,
+    scheduled_at: when.toISOString(),
     duration_minutes: input.durationMinutes ?? 30,
     message: input.message ?? null,
     status: "pending",
   } as never);
 
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    console.error("Viewing request submission failed:", error);
+    const code = (error as { code?: string }).code ?? "";
+    if (code === "42501" || /row-level security|permission denied/i.test(error.message)) {
+      return { ok: false, error: "permission", detail: error.message };
+    }
+    if (/JWT|token|not authenticated/i.test(error.message)) {
+      return { ok: false, error: "auth", detail: error.message };
+    }
+    if (code === "23503") return { ok: false, error: "property_missing", detail: error.message };
+    return { ok: false, error: "failed", detail: error.message };
+  }
   return { ok: true };
 }
+
 
 type Raw = Record<string, any>;
 
