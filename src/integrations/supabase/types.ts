@@ -1360,6 +1360,17 @@ export type Database = {
         Args: { _agent_id: string; _property_id: string }
         Returns: Database["public"]["Enums"]["agent_permission"]
       }
+      get_conversation_peers: {
+        Args: never
+        Returns: {
+          agency_name: string
+          avatar_url: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          verified: boolean
+        }[]
+      }
       get_property_contact: {
         Args: { _property_id: string }
         Returns: {
@@ -1383,6 +1394,17 @@ export type Database = {
           avatar_url: string
           full_name: string
           id: string
+        }[]
+      }
+      search_message_recipients: {
+        Args: { _q: string }
+        Returns: {
+          agency_name: string
+          avatar_url: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          verified: boolean
         }[]
       }
       set_lead_status: {
