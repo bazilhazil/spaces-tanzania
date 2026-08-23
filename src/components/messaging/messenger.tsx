@@ -25,6 +25,9 @@ import {
   searchRecipients, ensureConversation, subscribeToMessaging, relativeTime,
   type DbConversation, type DbMessage, type Peer, type ParticipantRole,
 } from "@/lib/messaging-db";
+import { ReportSheet } from "@/components/safety/report-sheet";
+import { BlockUserDialog, useBlockState } from "@/components/safety/block-user-dialog";
+import { safetyErrorKey } from "@/lib/safety-db";
 
 type MessageFolder = "inbox" | "unread" | "starred" | "sent" | "archived" | "deleted";
 
