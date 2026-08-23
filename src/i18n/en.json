@@ -601,6 +601,7 @@
     "createDeal": "Start deal",
     "dealCreated": "Deal started from this inquiry",
     "dealExists": "This inquiry is already linked to a deal",
+    "viewConversation": "View conversation",
     "relatedDeal": "Related Deal",
     "relatedLead": "Related inquiry",
     "statusUpdated": "Status updated",
