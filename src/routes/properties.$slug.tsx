@@ -481,36 +481,42 @@ function PropertyDetailPage() {
                 </div>
 
                 <div className="mt-4 grid gap-2">
-                  <Button className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => requireAuth(() => setViewingOpen(true))}>
-                    <Calendar className="h-4 w-4" /> {t("properties.detail.bookViewing")}
-                  </Button>
-                  <Button variant="outline" className="w-full gap-2" onClick={() => requireAuth(() => setInquiryOpen(true))}>
-                    <Send className="h-4 w-4" /> Send inquiry
-                  </Button>
-                  <Button
-                    className="w-full gap-2 bg-success text-success-foreground hover:bg-success/90"
-                    onClick={() =>
-                      contactAndOpen("whatsapp", (a) =>
-                        a.whatsapp
-                          ? `https://wa.me/${a.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`
-                          : null,
-                      )
-                    }
-                  >
-                    <MessageCircle className="h-4 w-4" /> WhatsApp
-                  </Button>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      variant="outline"
-                      className="gap-2"
-                      onClick={() => contactAndOpen("call", (a) => (a.phone ? `tel:${a.phone.replace(/\s/g, "")}` : null))}
-                    >
-                      <Phone className="h-4 w-4" /> Call
-                    </Button>
-                    <Button variant="outline" className="gap-2" onClick={() => requireAuth(() => setInquiryOpen(true))}>
-                      <Mail className="h-4 w-4" /> Email
-                    </Button>
-                  </div>
+                  {unavailable ? (
+                    <div className="rounded-xl border border-border bg-secondary/50 p-4 text-center">
+                      <p className="text-sm font-medium text-foreground">{t("inquiry.unavailable")}</p>
+                      <Button variant="outline" className="mt-3 w-full" asChild>
+                        <Link to="/properties">{t("inquiry.viewSimilar")}</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Button className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => requireAuth(() => setInquiryOpen(true))}>
+                        <Send className="h-4 w-4" /> {t("inquiry.message")}
+                      </Button>
+                      <Button
+                        className="w-full gap-2 bg-success text-success-foreground hover:bg-success/90"
+                        onClick={openWhatsApp}
+                      >
+                        <MessageCircle className="h-4 w-4" /> {t("inquiry.whatsapp")}
+                      </Button>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button variant="outline" className="gap-2" onClick={callAction}>
+                          <Phone className="h-4 w-4" /> {t("inquiry.call")}
+                        </Button>
+                        <Button variant="outline" className="gap-2" onClick={() => requireAuth(() => setViewingOpen(true))}>
+                          <Calendar className="h-4 w-4" /> {t("inquiry.requestViewing")}
+                        </Button>
+                      </div>
+                      {revealedPhone && (
+                        <a
+                          href={`tel:${revealedPhone.replace(/\s/g, "")}`}
+                          className="rounded-lg bg-secondary/60 p-2 text-center font-display text-sm font-semibold text-foreground"
+                        >
+                          {revealedPhone}
+                        </a>
+                      )}
+                    </>
+                  )}
 
                   <ReportDialog
                     target={property.title}
@@ -522,6 +528,7 @@ function PropertyDetailPage() {
                     }
                   />
                 </div>
+
 
                 <div className="mt-5 flex items-center gap-2 rounded-lg bg-primary/5 p-3 text-xs text-primary">
                   <ShieldCheck className="h-4 w-4" />
