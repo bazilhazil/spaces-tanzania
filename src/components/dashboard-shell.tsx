@@ -183,7 +183,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
 
           <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-            {items.map((item) => {
+            {primaryItems.map((item) => {
               const active = pathname === item.to;
               const Icon = item.icon;
               return (
@@ -203,7 +203,45 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 </Link>
               );
             })}
+
+            {moreItems.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setMoreOpen((v) => !v)}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                    moreActive ? "text-primary" : "text-foreground/75 hover:bg-accent hover:text-foreground",
+                  )}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  More
+                  <ChevronDown className={cn("ml-auto h-4 w-4 transition-transform", (moreOpen || moreActive) && "rotate-180")} />
+                </button>
+                {(moreOpen || moreActive) && moreItems.map((item) => {
+                  const active = pathname === item.to;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-xl py-2 pl-9 pr-3 text-sm transition-colors",
+                        active
+                          ? "bg-primary text-primary-foreground shadow-[var(--shadow-soft)]"
+                          : "text-foreground/65 hover:bg-accent hover:text-foreground",
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </>
+            )}
           </nav>
+
 
           <div className="space-y-2 border-t border-border/60 p-3">
             <div className="px-1"><LanguageSwitcher /></div>
