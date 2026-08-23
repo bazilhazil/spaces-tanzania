@@ -286,7 +286,7 @@ function AgentPerformancePage() {
             </div>
             <div className="inline-flex rounded-full border border-border/60 bg-secondary/40 p-1">
               <button onClick={() => setPipelineView("kanban")} className={cn("inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold", pipelineView === "kanban" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
-                <LayoutGrid className="h-3.5 w-3.5" /> Kanban
+                <LayoutGrid className="h-3.5 w-3.5" /> Pipeline
               </button>
               <button onClick={() => setPipelineView("list")} className={cn("inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold", pipelineView === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
                 <ListIcon className="h-3.5 w-3.5" /> List

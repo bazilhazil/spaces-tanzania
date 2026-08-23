@@ -236,7 +236,7 @@ export function DealsCenter() {
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as "kanban" | "overview")}>
         <TabsList>
-          <TabsTrigger value="kanban">Kanban</TabsTrigger>
+          <TabsTrigger value="kanban">Pipeline</TabsTrigger>
           <TabsTrigger value="overview">Overview</TabsTrigger>
         </TabsList>
 
