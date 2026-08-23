@@ -108,9 +108,11 @@ export async function fetchPropertyContact(propertyId: string): Promise<{
 
 export async function fetchPropertyById(id: string): Promise<{ property: Property; row: Row } | null> {
   const { data: session } = await supabase.auth.getSession();
+  // `public_listing_pages` also exposes sold/rented listings so shared links keep
+  // working; search surfaces still read the live-only `public_properties` view.
   const result = session.session
     ? await supabase.from("properties").select("*").eq("id", id).maybeSingle()
-    : await supabase.from("public_properties").select("*").eq("id", id).maybeSingle();
+    : await supabase.from("public_listing_pages" as never).select("*").eq("id", id).maybeSingle();
   if (!result.data) return null;
   const row = result.data as Row;
   if (session.session) {
