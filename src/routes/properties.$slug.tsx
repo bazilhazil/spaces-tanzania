@@ -17,6 +17,8 @@ import { PropertyCard } from "@/components/property-card";
 import { AuthGateDialog } from "@/components/auth-gate-dialog";
 import { PropertyShareDialog } from "@/components/property-share-dialog";
 import { createLead, type LeadContactMethod } from "@/lib/leads-db";
+import { sendPropertyMessage } from "@/lib/inquiry";
+
 import { createViewingRequest } from "@/lib/viewings-db";
 import { VerifiedBadge } from "@/components/trust/verified-badge";
 import { ReportDialog } from "@/components/trust/report-dialog";
@@ -47,6 +49,7 @@ function PropertyDetailPage() {
   const { isFavorite, toggleFavorite } = useFavorites();
   const [property, setProperty] = useState<Property | null>(null);
   const [agent, setAgent] = useState<Agent | null>(null);
+  const [status, setStatus] = useState<string>("live");
   const [loading, setLoading] = useState(true);
   const [similar, setSimilar] = useState<Property[]>([]);
 
@@ -59,6 +62,7 @@ function PropertyDetailPage() {
       if (res) {
         setProperty(res.property);
         setAgent(contactAgentFromRow(res.row));
+        setStatus((res.row?.status as string) ?? "live");
         const others = await fetchLiveProperties(12);
         if (!alive) return;
         setSimilar(others.filter((p) => p.id !== res.property.id).slice(0, 4));
@@ -68,6 +72,7 @@ function PropertyDetailPage() {
     return () => { alive = false; };
   }, [slug]);
 
+
   const [activeImage, setActiveImage] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
@@ -75,6 +80,8 @@ function PropertyDetailPage() {
   const [viewingOpen, setViewingOpen] = useState(false);
   const [authGate, setAuthGate] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [revealedPhone, setRevealedPhone] = useState<string | null>(null);
+
 
   const trust = useMemo(() => computeTrustScore(MOCK_TRUST_SIGNALS), []);
 
@@ -114,21 +121,18 @@ function PropertyDetailPage() {
     : property.listingType === "rent" ? t("card.forRent")
     : t("card.forLease");
 
+  const unavailable = ["sold", "rented", "archived", "paused"].includes(status);
+  const locationLine = [property.ward, property.district, property.city].filter(Boolean).join(", ");
+  const whatsappText = t("properties.detail.whatsappMessageFull", {
+    title: property.title,
+    location: locationLine,
+  });
 
   function requireAuth(cb: () => void) {
     if (!user) { setAuthGate(true); return; }
     cb();
   }
 
-  function logLead(method: LeadContactMethod, message?: string) {
-    if (!property) return;
-    void createLead({
-      propertyId: property.id,
-      ownerId: property.agentId,
-      contactMethod: method,
-      message,
-    });
-  }
 
   /**
    * Owner contact details are only released to visitors who have actually
@@ -168,10 +172,33 @@ function PropertyDetailPage() {
     });
   }
 
+  function openWhatsApp() {
+    contactAndOpen("whatsapp", (a) =>
+      a.whatsapp ? `https://wa.me/${a.whatsapp}?text=${encodeURIComponent(whatsappText)}` : null,
+    );
+  }
+
+  /** Mobile: one-tap dial. Desktop: reveal the verified number safely. */
+  function callAction() {
+    requireAuth(() => {
+      void (async () => {
+        const a = await contactVia("call");
+        const phone = a?.phone?.trim();
+        if (!phone) {
+          toast.error(t("properties.detail.contactUnavailable"));
+          return;
+        }
+        const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches;
+        if (isMobile) window.location.href = `tel:${phone.replace(/\s/g, "")}`;
+        else setRevealedPhone(phone);
+      })();
+    });
+  }
 
   function share() {
     setShareOpen(true);
   }
+
 
   const amenityIcons: Record<string, React.ReactNode> = {
     Security: <ShieldCheck className="h-3.5 w-3.5" />,
@@ -456,36 +483,42 @@ function PropertyDetailPage() {
                 </div>
 
                 <div className="mt-4 grid gap-2">
-                  <Button className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => requireAuth(() => setViewingOpen(true))}>
-                    <Calendar className="h-4 w-4" /> {t("properties.detail.bookViewing")}
-                  </Button>
-                  <Button variant="outline" className="w-full gap-2" onClick={() => requireAuth(() => setInquiryOpen(true))}>
-                    <Send className="h-4 w-4" /> Send inquiry
-                  </Button>
-                  <Button
-                    className="w-full gap-2 bg-success text-success-foreground hover:bg-success/90"
-                    onClick={() =>
-                      contactAndOpen("whatsapp", (a) =>
-                        a.whatsapp
-                          ? `https://wa.me/${a.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`
-                          : null,
-                      )
-                    }
-                  >
-                    <MessageCircle className="h-4 w-4" /> WhatsApp
-                  </Button>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      variant="outline"
-                      className="gap-2"
-                      onClick={() => contactAndOpen("call", (a) => (a.phone ? `tel:${a.phone.replace(/\s/g, "")}` : null))}
-                    >
-                      <Phone className="h-4 w-4" /> Call
-                    </Button>
-                    <Button variant="outline" className="gap-2" onClick={() => requireAuth(() => setInquiryOpen(true))}>
-                      <Mail className="h-4 w-4" /> Email
-                    </Button>
-                  </div>
+                  {unavailable ? (
+                    <div className="rounded-xl border border-border bg-secondary/50 p-4 text-center">
+                      <p className="text-sm font-medium text-foreground">{t("inquiry.unavailable")}</p>
+                      <Button variant="outline" className="mt-3 w-full" asChild>
+                        <Link to="/properties">{t("inquiry.viewSimilar")}</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Button className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => requireAuth(() => setInquiryOpen(true))}>
+                        <Send className="h-4 w-4" /> {t("inquiry.message")}
+                      </Button>
+                      <Button
+                        className="w-full gap-2 bg-success text-success-foreground hover:bg-success/90"
+                        onClick={openWhatsApp}
+                      >
+                        <MessageCircle className="h-4 w-4" /> {t("inquiry.whatsapp")}
+                      </Button>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button variant="outline" className="gap-2" onClick={callAction}>
+                          <Phone className="h-4 w-4" /> {t("inquiry.call")}
+                        </Button>
+                        <Button variant="outline" className="gap-2" onClick={() => requireAuth(() => setViewingOpen(true))}>
+                          <Calendar className="h-4 w-4" /> {t("inquiry.requestViewing")}
+                        </Button>
+                      </div>
+                      {revealedPhone && (
+                        <a
+                          href={`tel:${revealedPhone.replace(/\s/g, "")}`}
+                          className="rounded-lg bg-secondary/60 p-2 text-center font-display text-sm font-semibold text-foreground"
+                        >
+                          {revealedPhone}
+                        </a>
+                      )}
+                    </>
+                  )}
 
                   <ReportDialog
                     target={property.title}
@@ -497,6 +530,7 @@ function PropertyDetailPage() {
                     }
                   />
                 </div>
+
 
                 <div className="mt-5 flex items-center gap-2 rounded-lg bg-primary/5 p-3 text-xs text-primary">
                   <ShieldCheck className="h-4 w-4" />
@@ -537,38 +571,37 @@ function PropertyDetailPage() {
       <SiteFooter />
 
       {/* Mobile sticky action bar */}
-      {agent && (
+      {agent && !unavailable && (
         <div className="sticky bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur lg:hidden">
-          <div className="grid grid-cols-3 gap-2 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-            <Button
-              variant="outline"
-              className="gap-1.5"
-              onClick={() => contactAndOpen("call", (a) => (a.phone ? `tel:${a.phone.replace(/\s/g, "")}` : null))}
-            >
-              <Phone className="h-4 w-4" /> Call
+          <div className="grid grid-cols-4 gap-1.5 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+            <Button size="sm" className="flex-col gap-0.5 py-2 text-[11px]" onClick={() => requireAuth(() => setInquiryOpen(true))}>
+              <Send className="h-4 w-4" /> {t("inquiry.message")}
             </Button>
             <Button
-              className="w-full gap-1.5 bg-success text-success-foreground hover:bg-success/90"
-              onClick={() =>
-                contactAndOpen("whatsapp", (a) =>
-                  a.whatsapp
-                    ? `https://wa.me/${a.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`
-                    : null,
-                )
-              }
+              size="sm"
+              className="flex-col gap-0.5 bg-success py-2 text-[11px] text-success-foreground hover:bg-success/90"
+              onClick={openWhatsApp}
             >
-              <MessageCircle className="h-4 w-4" /> WhatsApp
+              <MessageCircle className="h-4 w-4" /> {t("inquiry.whatsapp")}
             </Button>
-
-            <Button
-              className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => requireAuth(() => setViewingOpen(true))}
-            >
-              <Calendar className="h-4 w-4" /> Viewing
+            <Button size="sm" variant="outline" className="flex-col gap-0.5 py-2 text-[11px]" onClick={callAction}>
+              <Phone className="h-4 w-4" /> {t("inquiry.call")}
+            </Button>
+            <Button size="sm" variant="outline" className="flex-col gap-0.5 py-2 text-[11px]" onClick={() => requireAuth(() => setViewingOpen(true))}>
+              <Calendar className="h-4 w-4" /> {t("inquiry.viewing")}
             </Button>
           </div>
         </div>
       )}
+      {agent && unavailable && (
+        <div className="sticky bottom-0 z-40 border-t border-border bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+          <p className="mb-2 text-center text-xs text-muted-foreground">{t("inquiry.unavailable")}</p>
+          <Button variant="outline" className="w-full" asChild>
+            <Link to="/properties">{t("inquiry.viewSimilar")}</Link>
+          </Button>
+        </div>
+      )}
+
 
 
       {/* Fullscreen lightbox */}
@@ -587,8 +620,11 @@ function PropertyDetailPage() {
         open={inquiryOpen}
         onOpenChange={setInquiryOpen}
         propertyTitle={property.title}
-        onLead={(msg) => logLead("message", msg)}
+        propertyId={property.id}
+        ownerId={property.agentId}
+        ownerName={agent?.name ?? ""}
       />
+
 
       {/* Viewing booking dialog */}
       <ViewingDialog
@@ -735,33 +771,68 @@ function Lightbox({
   );
 }
 
-function InquiryDialog({ open, onOpenChange, propertyTitle, onLead }: { open: boolean; onOpenChange: (v: boolean) => void; propertyTitle: string; onLead: (message: string) => void }) {
-  const [message, setMessage] = useState(`Hi, I'm interested in "${propertyTitle}". Is it still available?`);
-  function submit() {
-    if (message.trim().length < 10) { toast.error("Please write a longer message"); return; }
-    onLead(message);
-    toast.success("Inquiry sent — the owner will get back to you shortly");
+function InquiryDialog({
+  open,
+  onOpenChange,
+  propertyTitle,
+  propertyId,
+  ownerId,
+  ownerName,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  propertyTitle: string;
+  propertyId: string;
+  ownerId: string;
+  ownerName: string;
+}) {
+  const { t } = useI18n();
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    if (open) setMessage(t("inquiry.suggested"));
+  }, [open, t]);
+
+  async function submit() {
+    if (message.trim().length < 10) { toast.error(t("inquiry.tooShort")); return; }
+    setSending(true);
+    const res = await sendPropertyMessage({ propertyId, ownerId, body: message });
+    setSending(false);
+    if (!res.ok) {
+      toast.error(res.error === "auth" ? t("inquiry.signInRequired") : t("inquiry.sendFailed"));
+      return;
+    }
+    toast.success(t("inquiry.sent"));
     onOpenChange(false);
   }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Send inquiry</DialogTitle>
-          <DialogDescription>Your name and contact details are shared securely with the owner.</DialogDescription>
+          <DialogTitle>{t("inquiry.message")}</DialogTitle>
+          <DialogDescription>{t("inquiry.formHint")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
+          <div className="rounded-lg bg-secondary/60 p-3 text-xs">
+            <div className="font-medium text-foreground">{propertyTitle}</div>
+            {ownerName && <div className="mt-0.5 text-muted-foreground">{ownerName}</div>}
+          </div>
           <Textarea rows={5} value={message} onChange={(e) => setMessage(e.target.value)} maxLength={1000} />
           <p className="text-[11px] text-muted-foreground">{message.length}/1000</p>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={submit} className="gap-1.5"><Send className="h-4 w-4" /> Send</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
+          <Button onClick={submit} disabled={sending} className="gap-1.5">
+            <Send className="h-4 w-4" /> {t("inquiry.sendMessage")}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
 
 function ViewingDialog({ open, onOpenChange, propertyTitle, propertyId, ownerId }: { open: boolean; onOpenChange: (v: boolean) => void; propertyTitle: string; propertyId: string; ownerId: string }) {
   const today = new Date().toISOString().slice(0, 10);

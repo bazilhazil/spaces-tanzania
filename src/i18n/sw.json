@@ -200,6 +200,7 @@
       "bookViewing": "Panga kutazama",
       "trustLine": "Wakala aliyethibitishwa. Majibu ndani ya masaa 24.",
       "whatsappMessage": "Habari, nina hamu ya {title} kwenye SPACES.",
+      "whatsappMessageFull": "Habari, nina hamu ya {title} ({location}) kwenye SPACES. Bado ipo?",
       "contactUnavailable": "Maelezo ya mawasiliano hayapatikani bado. Tuma ujumbe wa maombi badala yake."
     }
   },
@@ -840,5 +841,21 @@
       "decisionSaved": "Uamuzi umerekodiwa",
       "docFailed": "Imeshindikana kufungua hati"
     }
+  },
+  "inquiry": {
+    "message": "Ujumbe",
+    "whatsapp": "WhatsApp",
+    "call": "Piga simu",
+    "viewing": "Kutembelea",
+    "requestViewing": "Omba Kutembelea",
+    "sendMessage": "Tuma Ujumbe",
+    "suggested": "Habari, nina hamu ya nafasi hii. Bado ipo?",
+    "formHint": "Ujumbe wako unakwenda moja kwa moja kwa mmiliki au wakala.",
+    "tooShort": "Tafadhali andika ujumbe mrefu zaidi",
+    "sent": "Ujumbe umetumwa — mmiliki atakujibu hivi karibuni",
+    "sendFailed": "Imeshindikana kutuma ujumbe. Jaribu tena.",
+    "signInRequired": "Tafadhali ingia ili kutuma ujumbe",
+    "unavailable": "Nafasi hii haipatikani tena.",
+    "viewSimilar": "Angalia Nafasi Zinazofanana"
   }
 }

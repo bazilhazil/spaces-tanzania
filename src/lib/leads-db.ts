@@ -12,6 +12,23 @@ export interface CreateLeadInput {
   visitorEmail?: string;
 }
 
+const ACTIVITY_LABEL: Record<LeadContactMethod, string> = {
+  call: "Call selected",
+  whatsapp: "WhatsApp selected",
+  message: "Message sent",
+  viewing: "Viewing requested",
+  email: "Email inquiry sent",
+};
+
+/** Appends one dated line to the lead timeline kept in `notes`. */
+function appendTimeline(existing: string | null | undefined, method: LeadContactMethod, message?: string) {
+  const line = `${new Date().toISOString()} — ${ACTIVITY_LABEL[method]}${message ? `: ${message.slice(0, 200)}` : ""}`;
+  const prev = (existing ?? "").trim();
+  const next = prev ? `${prev}\n${line}` : line;
+  // Keep the timeline bounded so the column never grows unbounded.
+  return next.split("\n").slice(-50).join("\n");
+}
+
 /**
  * Records a lead whenever a visitor contacts an owner/agent about a property.
  * Fire-and-forget: never blocks or breaks the contact action.
@@ -25,7 +42,7 @@ export async function createLead(input: CreateLeadInput): Promise<boolean> {
     // Duplicate protection: one active lead per visitor + property.
     const { data: existing } = await supabase
       .from("leads")
-      .select("id,status")
+      .select("id,status,notes")
       .eq("property_id", input.propertyId)
       .eq("visitor_id", user.id)
       .not("status", "in", "(won,lost)")
@@ -34,16 +51,19 @@ export async function createLead(input: CreateLeadInput): Promise<boolean> {
       .maybeSingle();
 
     if (existing) {
+      const row = existing as { id: string; notes: string | null };
       const { error: upErr } = await supabase
         .from("leads")
         .update({
           contact_method: input.contactMethod,
           message: input.message ?? undefined,
+          notes: appendTimeline(row.notes, input.contactMethod, input.message),
           last_activity_at: new Date().toISOString(),
         } as never)
-        .eq("id", (existing as { id: string }).id);
+        .eq("id", row.id);
       return !upErr;
     }
+
 
     const { error } = await supabase.from("leads" as never).insert({
       property_id: input.propertyId,
@@ -55,6 +75,8 @@ export async function createLead(input: CreateLeadInput): Promise<boolean> {
       visitor_email: input.visitorEmail ?? user.email ?? null,
       contact_method: input.contactMethod,
       message: input.message ?? null,
+      notes: appendTimeline(null, input.contactMethod, input.message),
+
     } as never);
     return !error;
   } catch {
