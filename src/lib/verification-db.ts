@@ -115,11 +115,12 @@ export async function submitVerification(input: {
 }
 
 export async function fetchMyVerifications(userId: string): Promise<VerificationRequest[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("verification_requests")
     .select("*")
     .eq("requester_id", userId)
     .order("created_at", { ascending: false });
+  if (error) throw error;
   return ((data ?? []) as Record<string, unknown>[]).map(normalise);
 }
 
@@ -127,16 +128,18 @@ export async function fetchMyVerifications(userId: string): Promise<Verification
 export async function fetchAllVerifications(status?: VerificationStatus | "all"): Promise<VerificationRequest[]> {
   let q = supabase.from("verification_requests").select("*").order("created_at", { ascending: false });
   if (status && status !== "all") q = q.eq("status", status);
-  const { data } = await q;
+  const { data, error } = await q;
+  if (error) throw error;
   return ((data ?? []) as Record<string, unknown>[]).map(normalise);
 }
 
 export async function fetchVerificationEvents(requestId: string): Promise<VerificationEvent[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("verification_events")
     .select("*")
     .eq("request_id", requestId)
     .order("created_at", { ascending: true });
+  if (error) throw error;
   return (data ?? []) as VerificationEvent[];
 }
 

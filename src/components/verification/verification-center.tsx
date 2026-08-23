@@ -147,6 +147,19 @@ export function VerificationCenter() {
 
   useEffect(() => { void load(); }, [load]);
 
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`my-verifications-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "verification_requests", filter: `requester_id=eq.${user.id}` },
+        () => { void load(); },
+      )
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [load, user]);
+
   const latest = useMemo(() => {
     const map: Partial<Record<VerificationSubject, VerificationRequest>> = {};
     for (const r of requests) if (!map[r.subject_type]) map[r.subject_type] = r;
