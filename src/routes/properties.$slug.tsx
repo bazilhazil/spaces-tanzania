@@ -895,7 +895,7 @@ function ViewingDialog({ open, onOpenChange, propertyTitle, propertyId, ownerId 
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={() => void submit()} disabled={sending} className="gap-1.5"><Calendar className="h-4 w-4" /> Request viewing</Button>
+          <Button onClick={() => void submit()} disabled={sending} className="gap-1.5"><Calendar className="h-4 w-4" /> {sending ? "Sending request..." : "Request viewing"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
