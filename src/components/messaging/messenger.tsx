@@ -97,10 +97,13 @@ export function Messenger() {
   const activeIdRef = useRef<string | null>(null);
 
   // Deep link from an inquiry: /messages?c=<conversationId> opens that exact chat.
-  const search = useSearch({ strict: false }) as { c?: string };
+  // Deep link from a property page: /messages?property=<propertyId> filters to that listing.
+  const search = useSearch({ strict: false }) as { c?: string; property?: string };
+  const propertyFilter = search.property ?? null;
   useEffect(() => {
     if (search.c) { setActiveId(search.c); setMobileView("chat"); }
   }, [search.c]);
+
 
   useEffect(() => { setFlags(readFlags()); }, []);
   useEffect(() => { activeIdRef.current = activeId; }, [activeId]);
