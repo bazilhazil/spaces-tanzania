@@ -19,7 +19,7 @@ import {
   type VerificationRequest, type VerificationEvent, type VerificationStatus,
 } from "@/lib/verification-db";
 
-type SubjectFilter = VerificationRequest["subject_type"] | "all";
+type SubjectFilter = Exclude<VerificationRequest["subject_type"], "business"> | "all";
 const SUBJECT_FILTERS: SubjectFilter[] = ["all", "user", "owner", "agent", "property"];
 
 export function VerificationReviewQueue() {
