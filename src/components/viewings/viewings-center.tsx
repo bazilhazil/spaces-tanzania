@@ -49,11 +49,15 @@ export function ViewingsCenter({ role = "buyer", propertyId = null }: { role?: R
       fetchMyViewings(),
       role === "admin" ? fetchAllViewings() : Promise.resolve([]),
     ]);
-    setIncoming(inc);
-    setMine(own);
-    setAll(everything);
+    // When opened from a property page, show only that listing's requests.
+    const only = (list: ViewingRequest[]) =>
+      propertyId ? list.filter((v) => v.propertyId === propertyId) : list;
+    setIncoming(only(inc));
+    setMine(only(own));
+    setAll(only(everything));
     setLoading(false);
-  }, [isRecipientView, role]);
+  }, [isRecipientView, role, propertyId]);
+
 
   useEffect(() => { void load(); }, [load]);
 
