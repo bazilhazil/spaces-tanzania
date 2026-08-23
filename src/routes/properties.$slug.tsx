@@ -24,10 +24,9 @@ import { VerifiedBadge } from "@/components/trust/verified-badge";
 import { ReportSheet } from "@/components/safety/report-sheet";
 import { TrustScoreRing } from "@/components/trust/trust-score-ring";
 import { QualityScorePill } from "@/components/trust/quality-score";
-import { computeTrustScore, MOCK_TRUST_SIGNALS } from "@/lib/trust-engine";
 import { PropertyReviews } from "@/components/reviews/property-reviews";
 import { formatPrice, type Property, type Agent } from "@/lib/mock-data";
-import { fetchLiveProperties, fetchPropertyById, fetchPropertyContact, contactAgentFromRow } from "@/lib/properties-db";
+import { fetchLiveProperties, fetchPropertyById, fetchPropertyContact, contactAgentFromRow, fetchOwnerPublicProfile, type OwnerPublicProfile } from "@/lib/properties-db";
 import { useAuth } from "@/hooks/use-auth";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useI18n } from "@/hooks/use-i18n";
@@ -178,7 +177,6 @@ function PropertyDetailPage() {
   const [revealedPhone, setRevealedPhone] = useState<string | null>(null);
 
 
-  const trust = useMemo(() => computeTrustScore(MOCK_TRUST_SIGNALS), []);
 
   if (loading) {
     return (
