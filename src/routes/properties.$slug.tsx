@@ -618,8 +618,11 @@ function PropertyDetailPage() {
         open={inquiryOpen}
         onOpenChange={setInquiryOpen}
         propertyTitle={property.title}
-        onLead={(msg) => logLead("message", msg)}
+        propertyId={property.id}
+        ownerId={property.agentId}
+        ownerName={agent?.name ?? ""}
       />
+
 
       {/* Viewing booking dialog */}
       <ViewingDialog
