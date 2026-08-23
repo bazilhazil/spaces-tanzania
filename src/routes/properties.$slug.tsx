@@ -47,6 +47,7 @@ function PropertyDetailPage() {
   const { isFavorite, toggleFavorite } = useFavorites();
   const [property, setProperty] = useState<Property | null>(null);
   const [agent, setAgent] = useState<Agent | null>(null);
+  const [status, setStatus] = useState<string>("live");
   const [loading, setLoading] = useState(true);
   const [similar, setSimilar] = useState<Property[]>([]);
 
@@ -59,6 +60,7 @@ function PropertyDetailPage() {
       if (res) {
         setProperty(res.property);
         setAgent(contactAgentFromRow(res.row));
+        setStatus((res.row?.status as string) ?? "live");
         const others = await fetchLiveProperties(12);
         if (!alive) return;
         setSimilar(others.filter((p) => p.id !== res.property.id).slice(0, 4));
@@ -67,6 +69,7 @@ function PropertyDetailPage() {
     })();
     return () => { alive = false; };
   }, [slug]);
+
 
   const [activeImage, setActiveImage] = useState(0);
   const [lightbox, setLightbox] = useState(false);
