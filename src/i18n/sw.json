@@ -973,5 +973,78 @@
     "thisProperty": "Nafasi hii",
     "thisPerson": "Mwanachama huyu",
     "done": "Imekadiriwa"
+  },
+  "safety": {
+    "reasons": {
+      "fake_listing": "Tangazo la uongo",
+      "incorrect_information": "Taarifa si sahihi",
+      "wrong_price": "Bei si sahihi",
+      "wrong_location": "Eneo si sahihi",
+      "duplicate_listing": "Tangazo limerudiwa",
+      "unavailable": "Halipatikani tena",
+      "suspicious_activity": "Vitendo vya kutiliwa shaka",
+      "fraud": "Udanganyifu",
+      "other": "Sababu nyingine",
+      "fake_account": "Akaunti ya uongo",
+      "harassment": "Unyanyasaji",
+      "misleading_information": "Taarifa potofu",
+      "spam": "Ujumbe taka",
+      "suspicious_payment": "Ombi la malipo la kutiliwa shaka",
+      "inappropriate": "Maudhui yasiyofaa"
+    },
+    "report": {
+      "titleProperty": "Ripoti Nafasi hii",
+      "titleUser": "Ripoti mtumiaji huyu",
+      "titleMessage": "Ripoti ujumbe huu",
+      "confidential": "Ripoti ni siri.",
+      "chooseReason": "Tafadhali chagua sababu",
+      "detailsLabel": "Eleza zaidi (hiari)",
+      "detailsPlaceholder": "Andika lolote litakalosaidia timu yetu kuchunguza…",
+      "evidenceLabel": "Ushahidi (hiari)",
+      "evidenceHint": "Ambatanisha picha",
+      "privacyNote": "Jina lako halionyeshwi kwa unayemripoti.",
+      "submit": "Tuma ripoti",
+      "submitting": "Inatuma…",
+      "cancel": "Ghairi",
+      "sent": "Ripoti imetumwa",
+      "sentDetail": "Kumbukumbu {reference}. Timu yetu itapitia ndani ya saa 24.",
+      "duplicate": "Tayari umeripoti hili.",
+      "self": "Huwezi kujiripoti mwenyewe.",
+      "signIn": "Tafadhali ingia ili kuripoti.",
+      "failed": "Imeshindikana kutuma ripoti"
+    },
+    "block": {
+      "blockTitle": "Zuia {name}?",
+      "unblockTitle": "Ondoa zuio kwa {name}?",
+      "blockBody": "Hataweza tena kukutumia ujumbe wala maombi.",
+      "unblockBody": "Ataweza kuwasiliana nawe tena.",
+      "blockAction": "Zuia mtumiaji",
+      "unblockAction": "Ondoa zuio",
+      "blocked": "{name} amezuiwa",
+      "unblocked": "{name} hajazuiwa tena",
+      "unblockedShort": "Zuio limeondolewa",
+      "failed": "Imeshindikana kubadilisha zuio",
+      "isBlocked": "Mtumiaji huyu amezuiwa."
+    },
+    "status": {
+      "new": "Mpya",
+      "under_review": "Inachunguzwa",
+      "more_info": "Inahitaji taarifa",
+      "resolved": "Imetatuliwa",
+      "dismissed": "Imeondolewa"
+    },
+    "center": {
+      "title": "Kituo cha Usalama",
+      "subtitle": "Fuatilia ripoti zako na dhibiti watumiaji uliowazuia.",
+      "myReports": "Ripoti zangu",
+      "blockedUsers": "Waliozuiwa",
+      "noReports": "Hakuna ripoti bado",
+      "noReportsBody": "Ripoti zako zitaonekana hapa pamoja na hali yake.",
+      "noBlocked": "Hakuna aliyezuiwa",
+      "noBlockedBody": "Watu utakaowazuia wataorodheshwa hapa."
+    },
+    "reportUser": "Ripoti mtumiaji",
+    "reportMessage": "Ripoti ujumbe",
+    "underReview": "Inakaguliwa"
   }
 }
