@@ -54,7 +54,7 @@ export function VerificationReviewQueue() {
   const counts = useMemo(() => SUBJECT_FILTERS.reduce<Record<SubjectFilter, number>>((result, item) => {
     result[item] = item === "all" ? rows.length : rows.filter((row) => row.subject_type === item).length;
     return result;
-  }, { all: 0, user: 0, owner: 0, agent: 0, property: 0, business: 0 }), [rows]);
+  }, { all: 0, user: 0, owner: 0, agent: 0, property: 0 }), [rows]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
