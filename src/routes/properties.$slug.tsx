@@ -672,40 +672,6 @@ function PropertyDetailPage() {
       </main>
       <SiteFooter />
 
-      {/* Mobile sticky action bar */}
-      {agent && !unavailable && (
-        <div className="sticky bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur lg:hidden">
-          <div className="grid grid-cols-4 gap-1.5 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-            <Button size="sm" className="flex-col gap-0.5 py-2 text-[11px]" onClick={() => requireAuth(() => setInquiryOpen(true))}>
-              <Send className="h-4 w-4" /> {t("inquiry.message")}
-            </Button>
-            <Button
-              size="sm"
-              className="flex-col gap-0.5 bg-success py-2 text-[11px] text-success-foreground hover:bg-success/90"
-              onClick={openWhatsApp}
-            >
-              <MessageCircle className="h-4 w-4" /> {t("inquiry.whatsapp")}
-            </Button>
-            <Button size="sm" variant="outline" className="flex-col gap-0.5 py-2 text-[11px]" onClick={callAction}>
-              <Phone className="h-4 w-4" /> {t("inquiry.call")}
-            </Button>
-            <Button size="sm" variant="outline" className="flex-col gap-0.5 py-2 text-[11px]" onClick={() => requireAuth(() => setViewingOpen(true))}>
-              <Calendar className="h-4 w-4" /> {t("inquiry.viewing")}
-            </Button>
-          </div>
-        </div>
-      )}
-      {agent && unavailable && (
-        <div className="sticky bottom-0 z-40 border-t border-border bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
-          <p className="mb-2 text-center text-xs text-muted-foreground">{t("inquiry.unavailable")}</p>
-          <Button variant="outline" className="w-full" asChild>
-            <Link to="/properties">{t("inquiry.viewSimilar")}</Link>
-          </Button>
-        </div>
-      )}
-
-
-
       {/* Fullscreen lightbox */}
       {lightbox && (
         <Lightbox
@@ -964,11 +930,12 @@ function ViewingDialog({ open, onOpenChange, propertyTitle, propertyId, ownerId 
         : res.error === "property_missing" ? "This property could not be found."
         : res.error === "invalid_date" ? "Please choose a future date and time."
         : res.error === "permission" ? "You don't have permission to submit this request."
+        : res.error === "duplicate" ? "You already have an active viewing request for this space."
         : "We couldn't send your request. Please try again.";
       toast.error(msg);
       return;
     }
-    toast.success("Viewing request sent successfully.", {
+    toast.success(res.updated ? "Viewing request updated." : "Viewing request sent successfully.", {
       description: "Waiting for the owner/agent to confirm.",
     });
     setNotes("");
@@ -977,7 +944,7 @@ function ViewingDialog({ open, onOpenChange, propertyTitle, propertyId, ownerId 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[calc(100%-24px)] max-w-[520px] max-h-[calc(100dvh-32px)] overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
         <DialogHeader>
           <DialogTitle>Request a viewing</DialogTitle>
           <DialogDescription>Choose a date and time. The owner will confirm or suggest a new slot.</DialogDescription>

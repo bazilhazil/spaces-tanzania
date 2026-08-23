@@ -48,6 +48,7 @@ export type ViewingErrorCode =
   | "property_missing"
   | "invalid_date"
   | "permission"
+  | "duplicate"
   | "failed";
 
 /**
@@ -57,7 +58,7 @@ export type ViewingErrorCode =
  */
 export async function createViewingRequest(
   input: CreateViewingInput,
-): Promise<{ ok: boolean; error?: ViewingErrorCode; detail?: string }> {
+): Promise<{ ok: boolean; error?: ViewingErrorCode; detail?: string; updated?: boolean }> {
   const { data: session } = await supabase.auth.getSession();
   const user = session.session?.user;
   if (!user) return { ok: false, error: "auth" };
@@ -100,7 +101,7 @@ export async function createViewingRequest(
     .maybeSingle();
 
   const recipient = agentId || ownerId;
-  const { error } = await supabase.from("bookings").insert({
+  const payload = {
     property_id: propertyId,
     buyer_id: user.id,
     owner_id: ownerId,
@@ -113,11 +114,65 @@ export async function createViewingRequest(
     duration_minutes: input.durationMinutes ?? 30,
     message: input.message ?? null,
     status: "pending",
-  } as never);
+  };
+
+  // A partial unique index allows only one ACTIVE request per (property, buyer).
+  // Reuse it instead of failing so a buyer can simply change their requested slot.
+  const { data: active } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("property_id", propertyId)
+    .eq("buyer_id", user.id)
+    .in("status", ["pending", "approved", "rescheduled"])
+    .limit(1)
+    .maybeSingle();
+
+  if (active) {
+    const { error: updErr } = await supabase
+      .from("bookings")
+      .update({
+        scheduled_at: payload.scheduled_at,
+        duration_minutes: payload.duration_minutes,
+        message: payload.message,
+        contact_phone: payload.contact_phone,
+        suggested_at: null,
+        status: "pending",
+      } as never)
+      .eq("id", (active as { id: string }).id);
+    if (updErr) {
+      console.error("[viewings] update existing request failed", {
+        operation: "createViewingRequest:update",
+        bookingId: (active as { id: string }).id,
+        userId: user.id,
+        propertyId,
+        ownerId,
+        agentId,
+        code: (updErr as { code?: string }).code,
+        message: updErr.message,
+      });
+      return { ok: false, error: "failed", detail: updErr.message };
+    }
+    return { ok: true, updated: true };
+  }
+
+  const { error } = await supabase.from("bookings").insert(payload as never);
 
   if (error) {
-    console.error("Viewing request submission failed:", error);
     const code = (error as { code?: string }).code ?? "";
+    console.error("[viewings] request submission failed", {
+      operation: "createViewingRequest:insert",
+      userId: user.id,
+      propertyId,
+      ownerId,
+      agentId,
+      recipientId: recipient,
+      scheduledAt: payload.scheduled_at,
+      code,
+      message: error.message,
+      details: (error as { details?: string }).details,
+      hint: (error as { hint?: string }).hint,
+    });
+    if (code === "23505") return { ok: false, error: "duplicate", detail: error.message };
     if (code === "42501" || /row-level security|permission denied/i.test(error.message)) {
       return { ok: false, error: "permission", detail: error.message };
     }
@@ -129,6 +184,7 @@ export async function createViewingRequest(
   }
   return { ok: true };
 }
+
 
 
 type Raw = Record<string, any>;
