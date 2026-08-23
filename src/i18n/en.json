@@ -857,5 +857,120 @@
     "signInRequired": "Please sign in to send a message",
     "unavailable": "This space is no longer available.",
     "viewSimilar": "View Similar Spaces"
+  },
+  "reviews": {
+    "center": {
+      "title": "Reviews & Ratings",
+      "subtitle": "Rate the spaces and people you actually dealt with on SPACES.",
+      "yourRating": "Your rating",
+      "trustScore": "Trust score",
+      "trustNote": "Balanced across reviews, verification, completed deals, response time, listing quality and activity.",
+      "tabs": {
+        "eligible": "To review",
+        "mine": "My reviews",
+        "about": "About me"
+      },
+      "noEligible": "You have no completed viewings or deals waiting for a review.",
+      "noneWritten": "You haven't written a review yet.",
+      "noneAbout": "No one has reviewed you yet.",
+      "reviewProperty": "Review the space",
+      "reviewPerson": "Review the person",
+      "eligibilityNote": "Reviews unlock after a completed viewing or deal.",
+      "viewViewings": "View your viewings"
+    },
+    "form": {
+      "title": "How was your experience?",
+      "tapStars": "Tap the stars to rate",
+      "optionalCategories": "Optional details",
+      "commentLabel": "Comment",
+      "commentPlaceholder": "Tell us about your experience.",
+      "submit": "Submit Review",
+      "submitting": "Submitting…",
+      "cancel": "Cancel",
+      "pickRating": "Please choose a star rating",
+      "published": "Thanks! Your review is now live.",
+      "pending": "Thanks! Your review is being checked by our trust team.",
+      "moderationNote": "Please don't include phone numbers, emails or links — those reviews are held for moderation."
+    },
+    "categories": {
+      "accuracy": "Accuracy",
+      "location": "Location",
+      "cleanliness": "Cleanliness",
+      "value": "Value",
+      "overall": "Overall experience",
+      "communication": "Communication",
+      "professionalism": "Professionalism",
+      "responseTime": "Response time"
+    },
+    "status": {
+      "pending": "Pending",
+      "published": "Published",
+      "flagged": "Flagged",
+      "removed": "Removed"
+    },
+    "trust": {
+      "reviews": "Reviews",
+      "verification": "Verification",
+      "deals": "Completed deals",
+      "response": "Response time",
+      "quality": "Listing quality",
+      "activity": "Account activity"
+    },
+    "report": {
+      "cta": "Report review",
+      "title": "Report this review",
+      "subtitle": "Tell us what's wrong and our trust team will look into it.",
+      "submit": "Report",
+      "sent": "Thanks — our trust team will review this.",
+      "already": "You already reported this review.",
+      "detailsPlaceholder": "Add any details (optional)",
+      "reasons": {
+        "spam": "Spam",
+        "fake": "Fake review",
+        "offensive": "Offensive content",
+        "personal_info": "Personal information",
+        "misleading": "Misleading information",
+        "other": "Other"
+      }
+    },
+    "response": {
+      "cta": "Respond",
+      "submit": "Post response",
+      "placeholder": "Write a short, professional reply.",
+      "sent": "Your response was posted.",
+      "owner": "Owner response",
+      "agent": "Agent response"
+    },
+    "property": {
+      "title": "Reviews",
+      "note": "Only people who completed a viewing or deal can review this space.",
+      "empty": "No reviews for this space yet."
+    },
+    "person": {
+      "title": "Reviews",
+      "note": "Based on completed viewings and deals on SPACES.",
+      "empty": "No reviews yet.",
+      "responseTime": "Response time"
+    },
+    "source": {
+      "viewing": "Completed viewing",
+      "deal": "Completed deal"
+    },
+    "errors": {
+      "duplicate": "You already reviewed this interaction.",
+      "notEligible": "You can only review after a completed viewing or deal.",
+      "auth": "Please sign in to leave a review.",
+      "failed": "Something went wrong. Please try again."
+    },
+    "basedOn": "Based on {count} reviews",
+    "noRatingsYet": "No ratings yet",
+    "empty": "No reviews yet.",
+    "readMore": "Read more",
+    "showLess": "Show less",
+    "showAllCount": "Show all {count} reviews",
+    "with": "With",
+    "thisProperty": "This space",
+    "thisPerson": "This member",
+    "done": "Reviewed"
   }
 }

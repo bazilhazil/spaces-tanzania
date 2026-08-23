@@ -857,5 +857,120 @@
     "signInRequired": "Tafadhali ingia ili kutuma ujumbe",
     "unavailable": "Nafasi hii haipatikani tena.",
     "viewSimilar": "Angalia Nafasi Zinazofanana"
+  },
+  "reviews": {
+    "center": {
+      "title": "Maoni na Ukadiriaji",
+      "subtitle": "Kadiria nafasi na watu uliofanya nao kazi kwenye SPACES.",
+      "yourRating": "Ukadiriaji wako",
+      "trustScore": "Alama ya kuaminika",
+      "trustNote": "Imeundwa kwa maoni, uthibitisho, mikataba iliyokamilika, muda wa kujibu, ubora wa tangazo na uhai wa akaunti.",
+      "tabs": {
+        "eligible": "Za kukadiria",
+        "mine": "Maoni yangu",
+        "about": "Kunihusu"
+      },
+      "noEligible": "Huna matembezi wala mikataba iliyokamilika inayosubiri maoni.",
+      "noneWritten": "Bado hujaandika maoni.",
+      "noneAbout": "Bado hakuna aliyekukadiria.",
+      "reviewProperty": "Kadiria nafasi",
+      "reviewPerson": "Kadiria mtu",
+      "eligibilityNote": "Maoni hufunguliwa baada ya matembezi au mkataba kukamilika.",
+      "viewViewings": "Angalia matembezi yako"
+    },
+    "form": {
+      "title": "Uzoefu wako ulikuwaje?",
+      "tapStars": "Gusa nyota kukadiria",
+      "optionalCategories": "Maelezo ya hiari",
+      "commentLabel": "Maoni",
+      "commentPlaceholder": "Tuambie kuhusu uzoefu wako.",
+      "submit": "Tuma Maoni",
+      "submitting": "Inatuma…",
+      "cancel": "Ghairi",
+      "pickRating": "Tafadhali chagua idadi ya nyota",
+      "published": "Asante! Maoni yako sasa yanaonekana.",
+      "pending": "Asante! Maoni yako yanakaguliwa na timu yetu.",
+      "moderationNote": "Tafadhali usiweke namba za simu, barua pepe au viungo — maoni hayo hukaguliwa kwanza."
+    },
+    "categories": {
+      "accuracy": "Usahihi",
+      "location": "Eneo",
+      "cleanliness": "Usafi",
+      "value": "Thamani",
+      "overall": "Uzoefu kwa ujumla",
+      "communication": "Mawasiliano",
+      "professionalism": "Weledi",
+      "responseTime": "Muda wa kujibu"
+    },
+    "status": {
+      "pending": "Inasubiri",
+      "published": "Imechapishwa",
+      "flagged": "Imetiwa alama",
+      "removed": "Imeondolewa"
+    },
+    "trust": {
+      "reviews": "Maoni",
+      "verification": "Uthibitisho",
+      "deals": "Mikataba iliyokamilika",
+      "response": "Muda wa kujibu",
+      "quality": "Ubora wa tangazo",
+      "activity": "Uhai wa akaunti"
+    },
+    "report": {
+      "cta": "Ripoti maoni",
+      "title": "Ripoti maoni haya",
+      "subtitle": "Tuambie tatizo na timu yetu itachunguza.",
+      "submit": "Ripoti",
+      "sent": "Asante — timu yetu itakagua.",
+      "already": "Tayari umeripoti maoni haya.",
+      "detailsPlaceholder": "Ongeza maelezo (hiari)",
+      "reasons": {
+        "spam": "Taka",
+        "fake": "Maoni ya uongo",
+        "offensive": "Maudhui ya matusi",
+        "personal_info": "Taarifa binafsi",
+        "misleading": "Taarifa potofu",
+        "other": "Nyingine"
+      }
+    },
+    "response": {
+      "cta": "Jibu",
+      "submit": "Tuma jibu",
+      "placeholder": "Andika jibu fupi na la kitaalamu.",
+      "sent": "Jibu lako limetumwa.",
+      "owner": "Jibu la mmiliki",
+      "agent": "Jibu la wakala"
+    },
+    "property": {
+      "title": "Maoni",
+      "note": "Ni watu waliokamilisha matembezi au mkataba pekee wanaoweza kukadiria nafasi hii.",
+      "empty": "Bado hakuna maoni kwa nafasi hii."
+    },
+    "person": {
+      "title": "Maoni",
+      "note": "Kutokana na matembezi na mikataba iliyokamilika kwenye SPACES.",
+      "empty": "Bado hakuna maoni.",
+      "responseTime": "Muda wa kujibu"
+    },
+    "source": {
+      "viewing": "Matembezi yaliyokamilika",
+      "deal": "Mkataba uliokamilika"
+    },
+    "errors": {
+      "duplicate": "Tayari umetoa maoni kwa muamala huu.",
+      "notEligible": "Unaweza kutoa maoni baada ya matembezi au mkataba kukamilika.",
+      "auth": "Tafadhali ingia ili kutoa maoni.",
+      "failed": "Hitilafu imetokea. Jaribu tena."
+    },
+    "basedOn": "Kutokana na maoni {count}",
+    "noRatingsYet": "Bado hakuna ukadiriaji",
+    "empty": "Bado hakuna maoni.",
+    "readMore": "Soma zaidi",
+    "showLess": "Onyesha kidogo",
+    "showAllCount": "Onyesha maoni yote {count}",
+    "with": "Na",
+    "thisProperty": "Nafasi hii",
+    "thisPerson": "Mwanachama huyu",
+    "done": "Imekadiriwa"
   }
 }

@@ -5,9 +5,10 @@ import { VerificationBadge } from "./verification-badge";
 import { TrustScoreRing } from "./trust-score-ring";
 import { ReportDialog } from "./report-dialog";
 import { computeTrustScore, MOCK_TRUST_SIGNALS, type PublicProfileData } from "@/lib/trust-engine";
+import { PersonReviews } from "@/components/reviews/person-reviews";
 import { cn } from "@/lib/utils";
 
-export function PublicProfile({ profile, className }: { profile: PublicProfileData; className?: string }) {
+export function PublicProfile({ profile, userId, className }: { profile: PublicProfileData; userId?: string; className?: string }) {
   const trust = computeTrustScore(MOCK_TRUST_SIGNALS);
 
   return (
@@ -62,6 +63,8 @@ export function PublicProfile({ profile, className }: { profile: PublicProfileDa
           <Stat icon={Calendar}      label="Member since"     value={profile.memberSince} />
         </div>
       </div>
+
+      {userId && <PersonReviews userId={userId} responseTime={profile.stats.responseTime} />}
     </div>
   );
 }

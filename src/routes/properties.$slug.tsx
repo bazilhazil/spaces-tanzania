@@ -25,6 +25,7 @@ import { ReportDialog } from "@/components/trust/report-dialog";
 import { TrustScoreRing } from "@/components/trust/trust-score-ring";
 import { QualityScorePill } from "@/components/trust/quality-score";
 import { computeTrustScore, MOCK_TRUST_SIGNALS } from "@/lib/trust-engine";
+import { PropertyReviews } from "@/components/reviews/property-reviews";
 import { formatPrice, type Property, type Agent } from "@/lib/mock-data";
 import { fetchLiveProperties, fetchPropertyById, fetchPropertyContact, contactAgentFromRow } from "@/lib/properties-db";
 import { useAuth } from "@/hooks/use-auth";
@@ -52,6 +53,7 @@ function PropertyDetailPage() {
   const [status, setStatus] = useState<string>("live");
   const [loading, setLoading] = useState(true);
   const [similar, setSimilar] = useState<Property[]>([]);
+  const [ownerId, setOwnerId] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -63,6 +65,7 @@ function PropertyDetailPage() {
         setProperty(res.property);
         setAgent(contactAgentFromRow(res.row));
         setStatus((res.row?.status as string) ?? "live");
+        setOwnerId(((res.row as unknown as { owner_id?: string })?.owner_id) ?? null);
         const others = await fetchLiveProperties(12);
         if (!alive) return;
         setSimilar(others.filter((p) => p.id !== res.property.id).slice(0, 4));
@@ -552,6 +555,12 @@ function PropertyDetailPage() {
             </div>
           </aside>
         </section>
+
+        {property && (
+          <div className="container-page">
+            <PropertyReviews propertyId={property.id} canRespond={!!user && !!ownerId && user.id === ownerId} />
+          </div>
+        )}
 
         {similar.length > 0 && (
           <section className="mt-16 bg-secondary/40">
