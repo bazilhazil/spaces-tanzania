@@ -182,32 +182,41 @@ const toneMap: Record<string, { bg: string; text: string; ring: string }> = {
   violet:  { bg: "bg-violet-500/10",  text: "text-violet-600",  ring: "ring-violet-500/20" },
 };
 
-function StatsGrid({ items }: {
-  items: { label: string; value: number | string; icon: React.ComponentType<{ className?: string }>; delta: string; tone: string }[]
-}) {
+type StatItem = {
+  label: string; value: number | string; icon: React.ComponentType<{ className?: string }>;
+  delta: string; tone: string; to?: string;
+};
+
+function StatsGrid({ items, loading }: { items: StatItem[]; loading?: boolean }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((s) => {
         const Icon = s.icon; const tone = toneMap[s.tone] ?? toneMap.primary;
-        return (
-          <div key={s.label}
-            className="group relative overflow-hidden rounded-2xl border border-border/60 bg-background p-5 shadow-[var(--shadow-soft)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]">
+        const card = (
+          <div
+            className="group relative h-full overflow-hidden rounded-2xl border border-border/60 bg-background p-5 shadow-[var(--shadow-soft)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]">
             <div className="flex items-start justify-between">
               <p className="text-sm font-medium text-muted-foreground">{s.label}</p>
               <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl ring-1", tone.bg, tone.text, tone.ring)}>
                 <Icon className="h-4 w-4" />
               </div>
             </div>
-            <p className="mt-4 font-display text-3xl font-semibold tracking-tight text-foreground">{s.value}</p>
+            <p className="mt-4 font-display text-3xl font-semibold tracking-tight text-foreground">
+              {loading ? <span className="text-base font-normal text-muted-foreground">Loading…</span> : s.value}
+            </p>
             <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
               <TrendingUp className="h-3 w-3 text-emerald-500" /> {s.delta}
             </div>
           </div>
         );
+        return s.to
+          ? <Link key={s.label} to={s.to} className="block h-full">{card}</Link>
+          : <div key={s.label}>{card}</div>;
       })}
     </div>
   );
 }
+
 
 function QuickActions() {
   const actions: Array<{
