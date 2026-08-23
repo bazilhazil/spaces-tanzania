@@ -74,8 +74,6 @@ function UploadWizardPage() {
   // Unified editor: any legacy ?id=... link must land in the new manage page.
   useEffect(() => {
     if (editId) {
-      console.log("Edit source:", "legacy /upload?id");
-      console.log("Navigating to:", `/dashboard/properties/${editId}/manage`);
       navigate({ to: "/dashboard/properties/$id/manage", params: { id: editId }, replace: true });
     }
   }, [editId, navigate]);
