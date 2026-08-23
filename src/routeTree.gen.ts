@@ -14,6 +14,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DesignSystemRouteImport } from './routes/design-system'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AboutRouteImport } from './routes/about'
@@ -76,6 +77,11 @@ const LoginRoute = LoginRouteImport.update({
 const DesignSystemRoute = DesignSystemRouteImport.update({
   id: '/design-system',
   path: '/design-system',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -286,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
   '/design-system': typeof DesignSystemRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -330,6 +337,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
   '/design-system': typeof DesignSystemRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -375,6 +383,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
   '/design-system': typeof DesignSystemRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -421,6 +430,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/agents'
     | '/auth'
+    | '/contact'
     | '/design-system'
     | '/login'
     | '/register'
@@ -465,6 +475,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/agents'
     | '/auth'
+    | '/contact'
     | '/design-system'
     | '/login'
     | '/register'
@@ -509,6 +520,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/agents'
     | '/auth'
+    | '/contact'
     | '/design-system'
     | '/login'
     | '/register'
@@ -555,6 +567,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AgentsRoute: typeof AgentsRoute
   AuthRoute: typeof AuthRoute
+  ContactRoute: typeof ContactRoute
   DesignSystemRoute: typeof DesignSystemRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
@@ -602,6 +615,13 @@ declare module '@tanstack/react-router' {
       path: '/design-system'
       fullPath: '/design-system'
       preLoaderRoute: typeof DesignSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -991,6 +1011,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AgentsRoute: AgentsRoute,
   AuthRoute: AuthRoute,
+  ContactRoute: ContactRoute,
   DesignSystemRoute: DesignSystemRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
