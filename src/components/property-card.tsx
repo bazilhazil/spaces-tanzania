@@ -4,6 +4,8 @@ import { Bath, BedDouble, Car, Eye, GitCompare, Heart, MapPin, Ruler } from "luc
 import { toast } from "sonner";
 import { formatPrice, type Property } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { propertySlug } from "@/lib/seo";
+import { track } from "@/lib/analytics";
 import { useI18n } from "@/hooks/use-i18n";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useAuth } from "@/hooks/use-auth";
@@ -44,7 +46,7 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
   return (
     <Link
       to="/properties/$slug"
-      params={{ slug: property.id }}
+      params={{ slug: propertySlug(property) }}
       onClick={() => trackView(property.id)}
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-elevated)]",
@@ -55,6 +57,8 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img
           src={property.images[0]}
+          decoding="async"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           alt={property.title}
           loading="lazy"
           width={1200}
@@ -87,6 +91,7 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
                 e.preventDefault();
                 if (!user) { setAuthGate(true); return; }
                 const now = toggleFavorite(property.id);
+                if (now) track("favorite_added", { property_id: property.id });
                 toast.success(now ? "Saved to favorites" : "Removed from favorites");
               }}
               className={cn(
