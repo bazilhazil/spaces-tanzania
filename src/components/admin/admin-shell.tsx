@@ -107,8 +107,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   async function handleSignOut() {
     await signOut();
-    toast.success("Signed out");
     navigate({ to: "/" });
+    toast.success("Signed out", { duration: 1500 });
   }
 
   const initials = (profile?.full_name || user?.email || "SA")
