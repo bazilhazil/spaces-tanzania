@@ -544,9 +544,25 @@ function ChatPane({
           {messages.length === 0 && (
             <div className="py-10 text-center text-sm text-muted-foreground">No messages yet — say hello.</div>
           )}
-          {messages.map((m, i) => (
-            <MessageBubble key={m.id} msg={m} peer={p} mine={m.senderId === meId} prev={messages[i - 1]} />
-          ))}
+          {messages.map((m, i) => {
+            const mine = m.senderId === meId;
+            return (
+              <div key={m.id} className={cn("group flex items-center gap-1", mine ? "flex-row-reverse" : "flex-row")}>
+                <div className="min-w-0 flex-1">
+                  <MessageBubble msg={m} peer={p} mine={mine} prev={messages[i - 1]} />
+                </div>
+                {!mine && (
+                  <button
+                    onClick={() => setReportMessageId(m.id)}
+                    aria-label="Report message"
+                    className="shrink-0 rounded-full p-1 text-muted-foreground opacity-0 transition group-hover:opacity-100 focus:opacity-100 hover:text-destructive"
+                  >
+                    <Flag className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
