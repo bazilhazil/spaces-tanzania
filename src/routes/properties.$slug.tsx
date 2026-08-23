@@ -78,6 +78,8 @@ function PropertyDetailPage() {
   const [viewingOpen, setViewingOpen] = useState(false);
   const [authGate, setAuthGate] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [revealedPhone, setRevealedPhone] = useState<string | null>(null);
+
 
   const trust = useMemo(() => computeTrustScore(MOCK_TRUST_SIGNALS), []);
 
