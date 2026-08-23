@@ -1360,6 +1360,15 @@ export type Database = {
         Args: { _agent_id: string; _property_id: string }
         Returns: Database["public"]["Enums"]["agent_permission"]
       }
+      crm_lead_status_for_stage: {
+        Args: { _stage: Database["public"]["Enums"]["deal_stage"] }
+        Returns: string
+      }
+      crm_rank: { Args: { _status: string }; Returns: number }
+      crm_stage_for_lead_status: {
+        Args: { _status: string }
+        Returns: Database["public"]["Enums"]["deal_stage"]
+      }
       get_conversation_peers: {
         Args: never
         Returns: {
