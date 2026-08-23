@@ -15,7 +15,7 @@ export function LanguageWelcome() {
         <div className="mx-auto flex items-center justify-center">
           <Brand size="xl" variant="mark" />
         </div>
-        <h1 className="mt-5 font-display text-3xl font-semibold text-primary">{t("welcome.title")}</h1>
+        <p className="mt-5 font-display text-3xl font-semibold text-primary">{t("welcome.title")}</p>
         <p className="mt-2 text-sm text-muted-foreground">{t("welcome.sub")}</p>
 
         <div className="mt-7 grid gap-3">
