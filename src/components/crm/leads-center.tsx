@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { STAGE_LABEL } from "@/lib/deals-db";
 import {
@@ -47,6 +48,16 @@ export function LeadsCenter() {
   }, [isAdmin]);
 
   useEffect(() => { void load(); }, [load]);
+
+  // Keep inquiries in sync when a reply changes the status elsewhere.
+  useEffect(() => {
+    const channel = supabase
+      .channel("leads-center-sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => void load())
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [load]);
 
   // Deep link from Messages: /leads?lead=<id> opens that inquiry.
   const search = useSearch({ strict: false }) as { lead?: string };
