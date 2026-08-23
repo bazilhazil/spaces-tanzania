@@ -51,6 +51,7 @@ function FavoritesPage() {
   const { favorites, removeFavorite } = useFavorites();
   const [rows, setRows] = useState<Record<string, FavRow>>({});
   const [loading, setLoading] = useState(true);
+  const [share, setShare] = useState<FavRow | null>(null);
 
   const ids = useMemo(
     () => favorites.map((f) => f.propertyId).filter((id) => /^[0-9a-f-]{36}$/i.test(id)),
@@ -64,7 +65,7 @@ function FavoritesPage() {
       setLoading(true);
       const { data } = await supabase
         .from("properties")
-        .select("id,title,price,currency,region,district,property_type")
+        .select("id,title,price,currency,region,district,property_type,listing_type,verified")
         .in("id", ids);
       const { data: media } = await supabase
         .from("property_media")
@@ -98,15 +99,10 @@ function FavoritesPage() {
     day: "numeric", month: "short", year: "numeric",
   });
 
-  const handleContact = async (row: FavRow) => {
-    const contact = await fetchPropertyContact(row.id);
-    const phone = (contact?.contact_whatsapp || contact?.contact_phone || "").replace(/[^\d]/g, "");
-    if (phone) {
-      window.open(`https://wa.me/${phone}`, "_blank", "noopener");
-    } else {
-      toast.info("No contact info available");
-    }
-  };
+  const shareUrl = share
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/properties/${share.id}`
+    : "";
+
 
   return (
     <DashboardShell>
