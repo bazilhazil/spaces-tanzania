@@ -3,6 +3,9 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { LeadsCenter } from "@/components/crm/leads-center";
 
 export const Route = createFileRoute("/_authenticated/leads")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    lead: typeof search.lead === "string" ? search.lead : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Inquiries — SPACES" },

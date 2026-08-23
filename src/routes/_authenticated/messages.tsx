@@ -3,6 +3,9 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { Messenger } from "@/components/messaging/messenger";
 
 export const Route = createFileRoute("/_authenticated/messages")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    c: typeof search.c === "string" ? search.c : undefined,
+  }),
   component: MessagesPage,
   head: () => ({
     meta: [
