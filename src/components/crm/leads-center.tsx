@@ -38,6 +38,10 @@ export function LeadsCenter() {
   const [tab, setTab] = useState<"active" | "won" | "lost">("active");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const refresh = useCallback(async () => {
+    setLeads(await fetchCrmLeads({ all: isAdmin }));
+  }, [isAdmin]);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -53,11 +57,11 @@ export function LeadsCenter() {
   useEffect(() => {
     const channel = supabase
       .channel("leads-center-sync")
-      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, () => void load())
-      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => void load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, () => void refresh())
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => void refresh())
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
-  }, [load]);
+  }, [refresh]);
 
   // Deep link from Messages: /leads?lead=<id> opens that inquiry.
   const search = useSearch({ strict: false }) as { lead?: string };
