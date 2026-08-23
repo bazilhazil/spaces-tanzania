@@ -38,6 +38,8 @@ export interface DbConversation {
   unread: number;
   /** Shared inquiry status (single source of truth) for this property conversation. */
   inquiryStatus: string | null;
+  /** The inquiry this conversation belongs to, when there is one. */
+  inquiryId: string | null;
 }
 
 const UNKNOWN_PEER = (id: string): Peer => ({
