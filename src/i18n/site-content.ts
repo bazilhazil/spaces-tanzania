@@ -527,7 +527,7 @@ const en: SiteContent = {
     reportBody: "Tell us about a listing or a user that looks unsafe. Reports are confidential.",
     reportSpace: "Report a Space",
     reportUser: "Report a User",
-    signInNote: "You need to be signed in to send a report.",
+    signInNote: "Signed in? You can also report directly from any listing or profile using the Report button.",
   },
   footer: {
     findSpace: "Find a Space",
@@ -971,7 +971,7 @@ const sw: SiteContent = {
     reportBody: "Tuambie kuhusu tangazo au mtumiaji anayeonekana si salama. Ripoti ni za siri.",
     reportSpace: "Ripoti Nafasi",
     reportUser: "Ripoti Mtumiaji",
-    signInNote: "Unahitaji kuingia kwenye akaunti ili kutuma ripoti.",
+    signInNote: "Umeingia kwenye akaunti? Unaweza pia kuripoti moja kwa moja kutoka kwenye tangazo au wasifu kwa kitufe cha Ripoti.",
   },
   footer: {
     findSpace: "Tafuta Nafasi",
