@@ -14,6 +14,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { StatCard } from "@/components/ds";
+import { supabase } from "@/integrations/supabase/client";
+
 import {
   evidenceUrl, listAllReports, listReportActions, logModerationAction, REPORT_STATUSES,
   setAccountStatus, setPropertyUnderReview, updateReport,
@@ -53,13 +55,28 @@ export function SafetyPanel() {
 
   useEffect(() => { void load(); }, [load]);
 
+  // New reports must land here without a manual refresh.
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-safety-reports")
+      .on("postgres_changes", { event: "*", schema: "public", table: "safety_reports" }, () => void load())
+      .subscribe();
+    const onFocus = () => { if (document.visibilityState === "visible") void load(); };
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      document.removeEventListener("visibilitychange", onFocus);
+      void supabase.removeChannel(channel);
+    };
+  }, [load]);
+
+
   const filtered = useMemo(
     () => (tab === "all" ? reports : reports.filter((r) => r.status === tab)),
     [reports, tab],
   );
 
   const stats = useMemo(() => ({
-    open: reports.filter((r) => r.status === "new" || r.status === "under_review").length,
+    open: reports.filter((r) => r.status === "new" || r.status === "under_review" || r.status === "more_info").length,
     urgent: reports.filter((r) => r.priority === "urgent" && r.status !== "resolved" && r.status !== "dismissed").length,
     resolved: reports.filter((r) => r.status === "resolved").length,
     total: reports.length,

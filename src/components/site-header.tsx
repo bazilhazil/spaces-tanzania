@@ -50,8 +50,8 @@ export function SiteHeader() {
 
   async function handleSignOut() {
     await signOut();
-    toast.success(t("common.signedOut"));
     navigate({ to: "/" });
+    toast.success(t("common.signedOut"), { duration: 1500 });
   }
 
   const initials = (profile?.full_name || user?.email || "S")
