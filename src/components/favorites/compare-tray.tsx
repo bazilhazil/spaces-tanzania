@@ -1,16 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { GitCompare, X } from "lucide-react";
-import { properties } from "@/lib/mock-data";
+import { usePropertiesByIds } from "@/hooks/use-properties-by-ids";
+import type { Property } from "@/lib/mock-data";
 import { useFavorites, MAX_COMPARE_ITEMS } from "@/hooks/use-favorites";
 import { Button } from "@/components/ui/button";
 
 export function CompareTray() {
   const { compare, removeFromCompare, clearCompare } = useFavorites();
+  const { map: propertyMap } = usePropertiesByIds(compare);
   if (compare.length === 0) return null;
 
   const items = compare
-    .map((id) => properties.find((p) => p.id === id))
-    .filter((p): p is typeof properties[number] => Boolean(p));
+    .map((id) => propertyMap.get(id))
+    .filter((p): p is Property => Boolean(p));
 
   return (
     <div className="fixed inset-x-3 bottom-3 z-40 mx-auto max-w-3xl rounded-2xl border border-border/70 bg-background/95 p-3 shadow-[var(--shadow-elevated)] backdrop-blur">

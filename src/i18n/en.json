@@ -209,7 +209,9 @@
   "agents": {
     "eyebrow": "Featured people",
     "title": "Trusted agents across Tanzania",
-    "subtitle": "Every SPACES agent is vetted for professionalism, licensing, and response time."
+    "subtitle": "Every SPACES agent is vetted for professionalism, licensing, and response time.",
+    "emptyTitle": "No verified agents yet",
+    "emptyBody": "Verified agents will appear here as they join SPACES."
   },
   "footer": {
     "explore": "Explore",
@@ -1091,5 +1093,214 @@
     "previousPrice": "Previous price",
     "newPrice": "New price",
     "createdToast": "Saved search created"
+  },
+  "admin": {
+    "kicker": {
+      "control": "Control Center",
+      "moderation": "Moderation",
+      "community": "Community",
+      "trust": "Trust & Safety",
+      "operations": "Operations",
+      "revenue": "Revenue",
+      "insights": "Insights",
+      "system": "System",
+      "growth": "Growth"
+    },
+    "dash": {
+      "title": "Administrator overview",
+      "sub": "Every figure below is calculated live from the SPACES database.",
+      "noDataTitle": "No data available",
+      "noDataBody": "Platform metrics will appear once records exist.",
+      "newListings": "New listings",
+      "last12": "last 12 months",
+      "noHistory": "Not enough history yet",
+      "noHistoryBody": "Charts fill in as listings are published.",
+      "recent": "Recent activity",
+      "noActivity": "No activity yet",
+      "noActivityBody": "New listings, sign-ups and viewings will show here.",
+      "views": "Property views",
+      "perMonth": "per month",
+      "noViews": "No view history recorded yet.",
+      "newMembers": "New members",
+      "noSignups": "No sign-up history recorded yet.",
+      "conversion": "Inquiry conversion",
+      "conversionSub": "inquiries → completed deals"
+    },
+    "kpi": {
+      "totalListings": "Total listings",
+      "liveListings": "Live listings",
+      "awaiting": "Awaiting review",
+      "users": "Registered users",
+      "inquiries": "Inquiries",
+      "viewings": "Viewings",
+      "openReports": "Open reports",
+      "revenue": "Confirmed revenue",
+      "verifiedListings": "Verified listings",
+      "owners": "Owners",
+      "agents": "Agents",
+      "dealsCompleted": "Deals completed",
+      "verificationsPending": "Verifications pending"
+    },
+    "loading": {
+      "live": "Loading live data…",
+      "listings": "Loading listings…",
+      "users": "Loading users…",
+      "agents": "Loading agents…",
+      "reports": "Loading reports…",
+      "viewings": "Loading viewings…",
+      "payments": "Loading payments…",
+      "subscriptions": "Loading subscriptions…"
+    },
+    "action": {
+      "refresh": "Refresh",
+      "approve": "Approve",
+      "requestChanges": "Request Changes",
+      "reject": "Reject",
+      "feature": "Feature",
+      "pause": "Pause",
+      "archive": "Archive"
+    },
+    "queue": {
+      "title": "Property Queue",
+      "sub": "Review, approve, or escalate real listings submitted by owners and agents.",
+      "emptyTitle": "Queue is clear",
+      "emptyBody": "There are no listings matching this filter right now.",
+      "noPhoto": "No photo uploaded",
+      "completeness": "Listing completeness",
+      "submittedBy": "Submitted by",
+      "verification": "Verification",
+      "nothingSelected": "Nothing selected",
+      "pick": "Pick a listing from the queue to review."
+    },
+    "filter": {
+      "live": "Live",
+      "rejected": "Rejected",
+      "all": "All"
+    },
+    "label": {
+      "verified": "Verified",
+      "unverified": "Unverified"
+    },
+    "users": {
+      "title": "User Management",
+      "sub": "Every registered SPACES account, straight from the database.",
+      "emptyTitle": "No users found",
+      "emptyBody": "No accounts match this search."
+    },
+    "th": {
+      "user": "User",
+      "roles": "Roles",
+      "status": "Status",
+      "joined": "Joined",
+      "listings": "Listings",
+      "actions": "Actions",
+      "reference": "Reference",
+      "target": "Target",
+      "reason": "Reason",
+      "priority": "Priority",
+      "filed": "Filed",
+      "provider": "Provider",
+      "amount": "Amount",
+      "when": "When"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "banned": "Banned",
+      "dismissed": "Dismissed",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded",
+      "paid": "Paid"
+    },
+    "agents": {
+      "sub": "Accounts holding the agent role on SPACES.",
+      "emptyTitle": "No agents yet",
+      "emptyBody": "Accounts granted the agent role will appear here.",
+      "memberSince": "Member since"
+    },
+    "verification": {
+      "title": "Verification Center",
+      "sub": "Review identities, businesses, and property documents."
+    },
+    "reports": {
+      "title": "Reports",
+      "sub": "User-submitted reports across listings, users, and messages.",
+      "open": "Open",
+      "resolved": "Resolved",
+      "high": "High priority",
+      "total": "Total",
+      "emptyTitle": "No reports",
+      "emptyBody": "Nothing has been reported on SPACES yet."
+    },
+    "viewings": {
+      "sub": "All scheduled viewings across SPACES.",
+      "emptyTitle": "No viewings booked",
+      "emptyBody": "Viewing requests will appear here as buyers schedule them."
+    },
+    "messages": {
+      "title": "Messages",
+      "sub": "Moderate flagged conversations and support threads.",
+      "emptyTitle": "Nothing flagged",
+      "emptyBody": "Flagged conversations appear here from the Safety queue."
+    },
+    "support": {
+      "title": "Support",
+      "sub": "User support tickets.",
+      "emptyTitle": "Support inbox not connected",
+      "emptyBody": "No ticketing system is connected to SPACES yet, so there are no tickets to show."
+    },
+    "payments": {
+      "title": "Payments",
+      "sub": "All transactions recorded on SPACES.",
+      "successRate": "Success rate",
+      "emptyTitle": "No payments yet",
+      "emptyBody": "A payment gateway is not connected, so no transactions exist."
+    },
+    "subs": {
+      "title": "Subscriptions",
+      "sub": "Recurring plans currently held by SPACES accounts.",
+      "emptyTitle": "No subscriptions yet",
+      "emptyBody": "Plans will appear here once accounts subscribe."
+    },
+    "analytics": {
+      "title": "Analytics",
+      "sub": "Growth and distribution calculated from real SPACES records.",
+      "listingsChart": "New listings per month",
+      "viewsChart": "Property views per month",
+      "noData": "Not enough data",
+      "noDataListings": "This chart fills in as listings are published.",
+      "noDataViews": "This chart fills in as buyers browse listings.",
+      "byRegion": "Listings by region",
+      "byType": "Listings by property type",
+      "noRegions": "No regional data yet.",
+      "noTypes": "No property data yet."
+    },
+    "audit": {
+      "title": "Audit Logs",
+      "sub": "Administrative actions recorded on SPACES.",
+      "emptyTitle": "No audit trail recorded",
+      "emptyBody": "Moderation decisions are written directly to each record. A dedicated audit log is not enabled on this platform yet."
+    },
+    "marketing": {
+      "title": "Marketing",
+      "sub": "Campaigns and lifecycle broadcasts.",
+      "emptyTitle": "No campaigns",
+      "emptyBody": "Campaign management is not connected yet, so there are no campaigns to display."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "sub": "In-app notifications are delivered automatically by the platform.",
+      "emptyTitle": "No broadcast tools connected",
+      "emptyBody": "SPACES currently sends transactional in-app notifications only; broadcast channels are not configured."
+    },
+    "toast": {
+      "approved": "Listing approved and published",
+      "changes": "Changes requested from the owner",
+      "rejected": "Listing rejected",
+      "featured": "Listing featured",
+      "paused": "Listing paused",
+      "archived": "Listing archived"
+    }
   }
 }

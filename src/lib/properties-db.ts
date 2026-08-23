@@ -139,3 +139,41 @@ export function contactAgentFromRow(row: Row): Agent {
     verified: false,
   };
 }
+
+/**
+ * Fetch a specific set of properties by their real database IDs.
+ * Used by favorites / compare / recently-viewed so those surfaces never
+ * depend on hardcoded example listings.
+ */
+export async function fetchPropertiesByIds(ids: string[]): Promise<Property[]> {
+  const clean = Array.from(new Set(ids.filter(Boolean)));
+  if (!clean.length) return [];
+  const { data: session } = await supabase.auth.getSession();
+  const result = session.session
+    ? await supabase.from("properties").select("*").in("id", clean)
+    : await supabase.from("public_properties").select("*").in("id", clean);
+  if (result.error || !result.data) return [];
+  const rows = result.data as Row[];
+  const media = await mediaForProperties(rows.map((r) => r.id));
+  return rows.map((r) => mapRow(r, media[r.id] ?? []));
+}
+
+/** Real, database-derived platform statistics for public marketing surfaces. */
+export async function fetchPlatformStats(): Promise<{
+  liveListings: number;
+  verifiedListings: number;
+  cities: number;
+  partners: number;
+}> {
+  const { data } = await supabase
+    .from("public_properties")
+    .select("id,region,verified,owner_id")
+    .limit(5000);
+  const rows = (data ?? []) as Row[];
+  return {
+    liveListings: rows.length,
+    verifiedListings: rows.filter((r) => r.verified === true).length,
+    cities: new Set(rows.map((r) => r.region).filter(Boolean)).size,
+    partners: new Set(rows.map((r) => r.owner_id).filter(Boolean)).size,
+  };
+}

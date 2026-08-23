@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { properties } from "@/lib/mock-data";
+import { usePropertiesByIds } from "@/hooks/use-properties-by-ids";
+import type { Property } from "@/lib/mock-data";
 import { PropertyCard } from "@/components/property-card";
 import { useFavorites } from "@/hooks/use-favorites";
 import { cn } from "@/lib/utils";
@@ -20,13 +21,14 @@ export function FavoritesPanel() {
   const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
   const [noteFor, setNoteFor] = useState<string | null>(null);
 
+  const { map: propertyMap } = usePropertiesByIds(favorites.map((f) => f.propertyId));
+
   const items = useMemo(() => {
-    const map = new Map(properties.map((p) => [p.id, p]));
     return favorites
       .filter((f) => active === "all" || f.folderId === active)
-      .map((f) => ({ fav: f, property: map.get(f.propertyId) }))
-      .filter((x): x is { fav: typeof favorites[number]; property: typeof properties[number] } => Boolean(x.property));
-  }, [favorites, active]);
+      .map((f) => ({ fav: f, property: propertyMap.get(f.propertyId) }))
+      .filter((x): x is { fav: typeof favorites[number]; property: Property } => Boolean(x.property));
+  }, [favorites, active, propertyMap]);
 
   const noteFav = noteFor ? favorites.find((f) => f.propertyId === noteFor) : null;
   const [noteDraft, setNoteDraft] = useState("");

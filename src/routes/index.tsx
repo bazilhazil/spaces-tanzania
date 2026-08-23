@@ -23,7 +23,16 @@ import { HeroSearch } from "@/components/hero-search";
 import { PropertyCard } from "@/components/property-card";
 import { Button } from "@/components/ui/button";
 import heroVilla from "@/assets/hero-villa.jpg";
-import { agents, locations, stats, testimonials, type Property } from "@/lib/mock-data";
+import { locations, type Property } from "@/lib/mock-data";
+import { fetchPlatformStats } from "@/lib/properties-db";
+import {
+  fetchRegionSummaries,
+  fetchVerifiedAgents,
+  fetchPublishedTestimonials,
+  type RegionSummary,
+  type PublicAgent,
+  type PublicTestimonial,
+} from "@/lib/homepage-db";
 import { fetchLiveProperties } from "@/lib/properties-db";
 import { useI18n } from "@/hooks/use-i18n";
 import { useEffect, useState } from "react";
@@ -170,12 +179,30 @@ function Hero() {
 }
 
 function Stats() {
+  const { t } = useI18n();
+  const [stats, setStats] = useState<{ liveListings: number; verifiedListings: number; cities: number; partners: number } | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetchPlatformStats().then((s) => { if (alive) setStats(s); });
+    return () => { alive = false; };
+  }, []);
+
+  // Real, database-derived platform statistics.
+  const items = [
+    { label: t("home.stats.liveListings"), value: stats?.liveListings },
+    { label: t("home.stats.verifiedListings"), value: stats?.verifiedListings },
+    { label: t("home.stats.cities"), value: stats?.cities },
+    { label: t("home.stats.partners"), value: stats?.partners },
+  ];
+
   return (
     <section className="border-b border-border/60 bg-secondary/40">
       <div className="container-page grid grid-cols-2 gap-6 py-10 md:grid-cols-4">
-        {stats.map((s) => (
+        {items.map((s) => (
           <div key={s.label}>
-            <p className="font-display text-3xl font-semibold text-primary md:text-4xl">{s.value}</p>
+            <p className="font-display text-3xl font-semibold text-primary md:text-4xl">
+              {s.value === undefined ? "—" : s.value.toLocaleString()}
+            </p>
             <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground md:text-sm">
               {s.label}
             </p>
@@ -261,6 +288,19 @@ function FeaturedSection({
 
 function Locations() {
   const { t } = useI18n();
+  const [regions, setRegions] = useState<RegionSummary[]>([]);
+  useEffect(() => {
+    let alive = true;
+    fetchRegionSummaries().then((r) => { if (alive) setRegions(r.slice(0, 4)); });
+    return () => { alive = false; };
+  }, []);
+
+  if (regions.length === 0) return null;
+
+  // Decorative imagery only — names and counts come from the database.
+  const imageFor = (name: string) =>
+    locations.find((l) => l.name.toLowerCase() === name.toLowerCase())?.image ?? locations[0].image;
+
   return (
     <section>
       <div className="container-page py-16 md:py-20">
@@ -270,15 +310,15 @@ function Locations() {
           subtitle={t("home.locationsSub")}
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {locations.map((l) => (
+          {regions.map((l) => (
             <Link
-              key={l.slug}
+              key={l.name}
               to="/properties"
               search={{ city: l.name }}
               className="group relative aspect-[4/5] overflow-hidden rounded-2xl"
             >
               <img
-                src={l.image}
+                src={imageFor(l.name)}
                 alt={l.name}
                 loading="lazy"
                 width={1200}
@@ -287,7 +327,6 @@ function Locations() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-5 text-white">
-                <p className="text-[10px] uppercase tracking-widest text-white/70">{l.region}</p>
                 <h3 className="mt-1 font-display text-2xl font-semibold">{l.name}</h3>
                 <p className="mt-1 text-sm text-white/80">{l.listings.toLocaleString()} {t("common.listings")}</p>
               </div>
@@ -346,6 +385,15 @@ function Verified({ verified }: { verified: Property[] }) {
 
 function Agents() {
   const { t } = useI18n();
+  const [list, setList] = useState<PublicAgent[]>([]);
+  useEffect(() => {
+    let alive = true;
+    fetchVerifiedAgents(4).then((a) => { if (alive) setList(a); });
+    return () => { alive = false; };
+  }, []);
+
+  if (list.length === 0) return null;
+
   return (
     <section className="bg-secondary/40">
       <div className="container-page py-16 md:py-20">
@@ -355,34 +403,35 @@ function Agents() {
           subtitle={t("home.agentsSub")}
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {agents.map((a) => (
+          {list.map((a) => (
             <div
               key={a.id}
               className="rounded-2xl border border-border/70 bg-card p-6 text-center transition hover:shadow-[var(--shadow-elevated)]"
             >
               <div className="relative mx-auto h-20 w-20">
-                <img
-                  src={a.avatar}
-                  alt={a.name}
-                  loading="lazy"
-                  width={240}
-                  height={240}
-                  className="h-20 w-20 rounded-full object-cover"
-                />
-                {a.verified && (
-                  <span className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full bg-primary text-primary-foreground ring-4 ring-card">
-                    <BadgeCheck className="h-3.5 w-3.5" />
+                {a.avatar ? (
+                  <img
+                    src={a.avatar}
+                    alt={a.name}
+                    loading="lazy"
+                    width={240}
+                    height={240}
+                    className="h-20 w-20 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="grid h-20 w-20 place-items-center rounded-full bg-primary/10 font-display text-2xl font-semibold text-primary">
+                    {a.name.slice(0, 1).toUpperCase()}
                   </span>
                 )}
+                <span className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full bg-primary text-primary-foreground ring-4 ring-card">
+                  <BadgeCheck className="h-3.5 w-3.5" />
+                </span>
               </div>
-              <h3 className="mt-4 font-display text-base font-semibold text-foreground">
-                {a.name}
-              </h3>
-              <p className="text-xs text-muted-foreground">{a.agency}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{a.city}</p>
-              <div className="mt-3 inline-flex items-center gap-1 text-xs text-gold">
-                <Star className="h-3.5 w-3.5 fill-current" /> {a.rating.toFixed(1)}
-                <span className="text-muted-foreground">· {a.listings} {t("common.listings")}</span>
+              <h3 className="mt-4 font-display text-base font-semibold text-foreground">{a.name}</h3>
+              {a.agency && <p className="text-xs text-muted-foreground">{a.agency}</p>}
+              {a.location && <p className="mt-1 text-xs text-muted-foreground">{a.location}</p>}
+              <div className="mt-3 inline-flex items-center gap-1 text-xs text-muted-foreground">
+                {a.listings} {t("common.listings")}
               </div>
             </div>
           ))}
@@ -394,6 +443,15 @@ function Agents() {
 
 function Testimonials() {
   const { t } = useI18n();
+  const [list, setList] = useState<PublicTestimonial[]>([]);
+  useEffect(() => {
+    let alive = true;
+    fetchPublishedTestimonials(3).then((r) => { if (alive) setList(r); });
+    return () => { alive = false; };
+  }, []);
+
+  if (list.length === 0) return null;
+
   return (
     <section>
       <div className="container-page py-16 md:py-20">
@@ -402,7 +460,7 @@ function Testimonials() {
           title={t("home.testimonialsTitle")}
         />
         <div className="grid gap-6 md:grid-cols-3">
-          {testimonials.map((ti) => (
+          {list.map((ti) => (
             <figure
               key={ti.id}
               className="relative rounded-2xl border border-border/70 bg-card p-6 shadow-[var(--shadow-soft)]"
@@ -414,12 +472,9 @@ function Testimonials() {
               <figcaption className="mt-5 flex items-center justify-between text-sm">
                 <div>
                   <p className="font-semibold text-foreground">{ti.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {ti.role} · {ti.city}
-                  </p>
                 </div>
                 <div className="flex text-gold">
-                  {Array.from({ length: ti.rating }).map((_, i) => (
+                  {Array.from({ length: Math.max(1, Math.min(5, ti.rating)) }).map((_, i) => (
                     <Star key={i} className="h-3.5 w-3.5 fill-current" />
                   ))}
                 </div>

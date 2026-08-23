@@ -1,19 +1,44 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { X, MapPin, BedDouble, Bath, Ruler, Car, Star, ShieldCheck, GitCompare, Trash2 } from "lucide-react";
+import { X, MapPin, BedDouble, Bath, Ruler, Car, ShieldCheck, GitCompare, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { properties, agents, formatPrice } from "@/lib/mock-data";
+import { formatPrice, type Property } from "@/lib/mock-data";
+import { usePropertiesByIds } from "@/hooks/use-properties-by-ids";
+import { supabase } from "@/integrations/supabase/client";
 import { useFavorites } from "@/hooks/use-favorites";
 import { cn } from "@/lib/utils";
 
 export function CompareView() {
   const { compare, removeFromCompare, clearCompare } = useFavorites();
 
-  const items = useMemo(() => {
-    const map = new Map(properties.map((p) => [p.id, p]));
-    return compare.map((id) => map.get(id)).filter((p): p is typeof properties[number] => Boolean(p));
-  }, [compare]);
+  const { map: propertyMap } = usePropertiesByIds(compare);
+  const items = useMemo(
+    () => compare.map((id) => propertyMap.get(id)).filter((p): p is Property => Boolean(p)),
+    [compare, propertyMap],
+  );
+
+  // Real owner/agent profiles for the compared listings.
+  const ownerIds = items.map((p) => p.agentId).filter(Boolean).join(",");
+  const [owners, setOwners] = useState<Record<string, { full_name: string | null; avatar_url: string | null; verified_agent: boolean; verified_owner: boolean }>>({});
+  useEffect(() => {
+    const ids = ownerIds ? ownerIds.split(",") : [];
+    if (!ids.length) return;
+    let cancelled = false;
+    supabase
+      .from("public_profiles")
+      .select("id,full_name,avatar_url,verified_agent,verified_owner")
+      .in("id", ids)
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        const next: Record<string, any> = {};
+        for (const row of data as any[]) next[row.id] = row;
+        setOwners(next);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ownerIds]);
 
   if (items.length === 0) {
     return (
@@ -32,7 +57,7 @@ export function CompareView() {
     );
   }
 
-  const rows: { label: string; render: (p: typeof properties[number]) => React.ReactNode }[] = [
+  const rows: { label: string; render: (p: Property) => React.ReactNode }[] = [
     { label: "Price", render: (p) => <span className="font-display text-lg font-semibold text-primary">{formatPrice(p.price, p.currency, p.listingType)}</span> },
     { label: "Location", render: (p) => <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5 text-muted-foreground" /> {p.ward}, {p.city}</span> },
     { label: "Category", render: (p) => p.category },
@@ -63,17 +88,25 @@ export function CompareView() {
     {
       label: "Owner / Agent",
       render: (p) => {
-        const agent = agents.find((a) => a.id === p.agentId);
-        if (!agent) return "—";
+        const owner = owners[p.agentId];
+        if (!owner) return "—";
+        const name = owner.full_name || "Listing owner";
         return (
           <div className="flex items-center gap-2">
-            <img src={agent.avatar} alt={agent.name} className="h-6 w-6 rounded-full object-cover" />
+            {owner.avatar_url ? (
+              <img src={owner.avatar_url} alt={name} className="h-6 w-6 rounded-full object-cover" />
+            ) : (
+              <span className="grid h-6 w-6 place-items-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+                {name.slice(0, 1).toUpperCase()}
+              </span>
+            )}
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-foreground">{agent.name}</p>
-              <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {agent.rating.toFixed(1)}
-                {agent.verified && <ShieldCheck className="h-3 w-3 text-primary" />}
-              </p>
+              <p className="truncate text-sm font-medium text-foreground">{name}</p>
+              {(owner.verified_agent || owner.verified_owner) && (
+                <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <ShieldCheck className="h-3 w-3 text-primary" /> Verified
+                </p>
+              )}
             </div>
           </div>
         );
