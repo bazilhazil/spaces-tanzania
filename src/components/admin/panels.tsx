@@ -174,7 +174,7 @@ export function DashboardPanel() {
         kicker={t("admin.kicker.control")}
         title={t("admin.dash.title")}
         subtitle={t("admin.dash.sub")}
-        actions={<Button size="sm" className="gap-2" onClick={reload}><RefreshCw className="h-4 w-4" /> Refresh</Button>}
+        actions={<Button size="sm" className="gap-2" onClick={reload}><RefreshCw className="h-4 w-4" /> {t("admin.action.refresh")}</Button>}
       />
 
       {loading && !overview ? (
@@ -302,7 +302,7 @@ export function PropertiesPanel() {
   return (
     <>
       <PageHeader kicker={t("admin.kicker.moderation")} title={t("admin.queue.title")} subtitle={t("admin.queue.sub")}
-        actions={<Button size="sm" variant="outline" className="gap-2" onClick={reload}><RefreshCw className="h-4 w-4" /> Refresh</Button>} />
+        actions={<Button size="sm" variant="outline" className="gap-2" onClick={reload}><RefreshCw className="h-4 w-4" /> {t("admin.action.refresh")}</Button>} />
 
       <div className="mb-5 flex flex-wrap gap-2">
         {QUEUE_FILTERS.map((f) => (
@@ -394,13 +394,13 @@ export function PropertiesPanel() {
               </div>
 
               <div className="flex flex-wrap gap-2 border-t border-border/60 bg-secondary/30 p-4">
-                <Button variant="success" size="sm" className="gap-2" onClick={() => act(item.id, "approve", "Listing approved and published")}><CheckCircle2 className="h-4 w-4" /> Approve</Button>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => act(item.id, "request_changes", "Changes requested from the owner")}><RefreshCw className="h-4 w-4" /> Request Changes</Button>
-                <Button variant="destructive" size="sm" className="gap-2" onClick={() => act(item.id, "reject", "Listing rejected")}><XCircle className="h-4 w-4" /> Reject</Button>
+                <Button variant="success" size="sm" className="gap-2" onClick={() => act(item.id, "approve", t("admin.toast.approved"))}><CheckCircle2 className="h-4 w-4" /> {t("admin.action.approve")}</Button>
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => act(item.id, "request_changes", t("admin.toast.changes"))}><RefreshCw className="h-4 w-4" /> {t("admin.action.requestChanges")}</Button>
+                <Button variant="destructive" size="sm" className="gap-2" onClick={() => act(item.id, "reject", t("admin.toast.rejected"))}><XCircle className="h-4 w-4" /> {t("admin.action.reject")}</Button>
                 <div className="mx-2 h-6 w-px bg-border" />
-                <Button variant="gold" size="sm" className="gap-2" onClick={() => act(item.id, "feature", "Listing featured")}><Sparkles className="h-4 w-4" /> Feature</Button>
-                <Button variant="ghost" size="sm" className="gap-2 ml-auto" onClick={() => act(item.id, "suspend", "Listing paused")}><Power className="h-4 w-4" /> Pause</Button>
-                <Button variant="ghost" size="sm" className="gap-2" onClick={() => act(item.id, "archive", "Listing archived")}><Database className="h-4 w-4" /> Archive</Button>
+                <Button variant="gold" size="sm" className="gap-2" onClick={() => act(item.id, "feature", t("admin.toast.featured"))}><Sparkles className="h-4 w-4" /> {t("admin.action.feature")}</Button>
+                <Button variant="ghost" size="sm" className="gap-2 ml-auto" onClick={() => act(item.id, "suspend", t("admin.toast.paused"))}><Power className="h-4 w-4" /> {t("admin.action.pause")}</Button>
+                <Button variant="ghost" size="sm" className="gap-2" onClick={() => act(item.id, "archive", t("admin.toast.archived"))}><Database className="h-4 w-4" /> {t("admin.action.archive")}</Button>
               </div>
             </div>
           ) : <EmptyState icon={Home} title={t("admin.queue.nothingSelected")} description={t("admin.queue.pick")} />}

@@ -1293,6 +1293,14 @@
       "sub": "Arifa za ndani ya programu hutumwa kiotomatiki na mfumo.",
       "emptyTitle": "Hakuna zana za matangazo",
       "emptyBody": "Kwa sasa SPACES hutuma arifa za ndani ya programu pekee; njia za matangazo hazijasanidiwa."
+    },
+    "toast": {
+      "approved": "Tangazo limeidhinishwa na kuchapishwa",
+      "changes": "Mabadiliko yameombwa kwa mmiliki",
+      "rejected": "Tangazo limekataliwa",
+      "featured": "Tangazo limeangaziwa",
+      "paused": "Tangazo limesimamishwa",
+      "archived": "Tangazo limehifadhiwa"
     }
   }
 }

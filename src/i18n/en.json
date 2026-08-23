@@ -1293,6 +1293,14 @@
       "sub": "In-app notifications are delivered automatically by the platform.",
       "emptyTitle": "No broadcast tools connected",
       "emptyBody": "SPACES currently sends transactional in-app notifications only; broadcast channels are not configured."
+    },
+    "toast": {
+      "approved": "Listing approved and published",
+      "changes": "Changes requested from the owner",
+      "rejected": "Listing rejected",
+      "featured": "Listing featured",
+      "paused": "Listing paused",
+      "archived": "Listing archived"
     }
   }
 }
