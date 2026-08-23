@@ -274,9 +274,9 @@ function NotifList({ items, onRead, onDelete }: {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{alert.title}</p>
                     <p className="truncate text-xs text-muted-foreground">{alert.location || "—"}</p>
-                    {n.kind === "price_change" && n.data.old_price ? (
+                    {n.kind === "price_change" && n.data.previous_price ? (
                       <p className="mt-0.5 text-xs">
-                        <span className="text-muted-foreground line-through">{money(n.data.old_price, alert.currency)}</span>{" "}
+                        <span className="text-muted-foreground line-through">{money(n.data.previous_price, alert.currency)}</span>{" "}
                         <span className="font-semibold text-primary">{money(n.data.new_price ?? alert.price, alert.currency)}</span>
                       </p>
                     ) : (
