@@ -554,38 +554,42 @@ function PropertyDetailPage() {
                 <div className="flex items-center gap-4">
                   <div className="relative">
                     <img
-                      src={agent.avatar}
-                      alt={agent.name}
+                      src={ownerProfile?.avatar || agent.avatar}
+                      alt={ownerProfile?.name || agent.name}
                       loading="lazy"
                       width={120}
                       height={120}
                       className="h-14 w-14 rounded-full object-cover"
                     />
-                    {agent.verified && (
+                    {(ownerProfile?.verifiedAgent || ownerProfile?.verifiedOwner) && (
                       <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full bg-primary text-primary-foreground ring-2 ring-card">
                         <BadgeCheck className="h-3 w-3" />
                       </span>
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate font-semibold text-foreground">{agent.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">{agent.agency}</p>
-                    <p className="mt-1 inline-flex items-center gap-1 text-xs text-gold">
-                      <Star className="h-3.5 w-3.5 fill-current" /> {agent.rating.toFixed(1)}
-                    </p>
+                    <p className="truncate font-semibold text-foreground">{ownerProfile?.name || agent.name}</p>
+                    {ownerProfile?.agency && (
+                      <p className="truncate text-xs text-muted-foreground">{ownerProfile.agency}</p>
+                    )}
+                    {ownerProfile?.rating != null && (
+                      <p className="mt-1 inline-flex items-center gap-1 text-xs text-gold">
+                        <Star className="h-3.5 w-3.5 fill-current" /> {ownerProfile.rating.toFixed(1)}
+                        <span className="text-muted-foreground">({ownerProfile.reviews})</span>
+                      </p>
+                    )}
                   </div>
                 </div>
+                {ownerId && (
+                  <Link
+                    to="/profile/$handle"
+                    params={{ handle: ownerId }}
+                    className="mt-3 inline-block text-xs font-medium text-primary hover:underline"
+                  >
+                    {t("properties.detail.viewProfile")}
+                  </Link>
+                )}
 
-                <div className="mt-4 grid grid-cols-2 gap-2 text-[11px]">
-                  <div className="rounded-lg bg-secondary/60 p-2">
-                    <div className="inline-flex items-center gap-1 text-muted-foreground"><MessageCircle className="h-3 w-3" /> Response</div>
-                    <div className="mt-0.5 font-display text-sm font-semibold">98%</div>
-                  </div>
-                  <div className="rounded-lg bg-secondary/60 p-2">
-                    <div className="inline-flex items-center gap-1 text-muted-foreground"><Timer className="h-3 w-3" /> Avg reply</div>
-                    <div className="mt-0.5 font-display text-sm font-semibold">~1h</div>
-                  </div>
-                </div>
 
                 <div className="mt-4 grid gap-2">
                   {unavailable ? (
