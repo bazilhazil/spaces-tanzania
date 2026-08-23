@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BadgeCheck, Bath, BedDouble, Building2, Calendar, Car, ChevronLeft, ChevronRight,
   Heart, Mail, MapPin, MessageCircle, Phone, Ruler, Share2, ShieldCheck, Sparkles,
-  Star, X, Play, Calculator, Send, CheckCircle2, Maximize2, FileText,
+  Star, X, Play, Send, CheckCircle2, Maximize2, FileText,
   Flag, ZoomIn, ZoomOut, Eye,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -509,10 +509,10 @@ function PropertyDetailPage() {
             <div className="mt-8">
               <h2 className="font-display text-xl font-semibold text-foreground">{t("properties.detail.location")}</h2>
               <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-muted-foreground sm:grid-cols-4">
-                <LocationChip label="Region" value={property.district} />
-                <LocationChip label="District" value={property.district} />
-                <LocationChip label="Ward" value={property.ward} />
-                <LocationChip label="Street" value={property.street} />
+                <LocationChip label={t("discovery.region")} value={property.city} />
+                <LocationChip label={t("discovery.district")} value={property.district} />
+                <LocationChip label={t("discovery.area")} value={property.ward} />
+                <LocationChip label={t("discovery.street")} value={property.street} />
               </div>
               <div className="mt-3 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-border">
                 <iframe
@@ -522,29 +522,8 @@ function PropertyDetailPage() {
                   className="h-full w-full"
                 />
               </div>
-              <div className="mt-4 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
-                <NearbyItem label={t("properties.detail.nearbySchools")} />
-                <NearbyItem label={t("properties.detail.nearbyHospitals")} />
-                <NearbyItem label={t("properties.detail.nearbySupermarkets")} />
-                <NearbyItem label={t("properties.detail.nearbyBusStops")} />
-              </div>
             </div>
 
-            {/* Mortgage placeholder */}
-            <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/5 to-gold/5 p-6">
-              <div className="flex items-start gap-4">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-                  <Calculator className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-display text-lg font-semibold text-foreground">Mortgage & affordability</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Estimate your monthly repayment and check affordability with partner banks. Coming soon.
-                  </p>
-                </div>
-                <Button variant="outline" size="sm" disabled>Coming soon</Button>
-              </div>
-            </div>
           </div>
 
           {/* Sidebar: agent + contact */}
@@ -744,16 +723,6 @@ function LocationChip({ label, value }: { label: string; value: string }) {
     <div className="rounded-lg border border-border bg-card px-3 py-2">
       <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
       <p className="truncate text-sm font-medium text-foreground">{value || "—"}</p>
-    </div>
-  );
-}
-
-function NearbyItem({ label }: { label: string }) {
-  const { t } = useI18n();
-  return (
-    <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
-      <MapPin className="h-3.5 w-3.5 text-primary" />
-      <span>{t("properties.detail.nearby", { label })}</span>
     </div>
   );
 }

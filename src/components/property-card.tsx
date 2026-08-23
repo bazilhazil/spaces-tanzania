@@ -136,19 +136,24 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
             {typeof qualityScore === "number" && <QualityScorePill score={qualityScore} />}
           </div>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="h-3 w-3" /> {property.ward}, {property.city}
+            <MapPin className="h-3 w-3" /> {[property.ward, property.city].filter(Boolean).join(", ")}
           </p>
         </div>
         <div className="mt-auto flex items-center gap-4 border-t border-border/60 pt-3 text-xs text-muted-foreground">
           {property.bedrooms > 0 && (
             <span className="inline-flex items-center gap-1" title={t("card.bedrooms")}><BedDouble className="h-3.5 w-3.5" /> {property.bedrooms}</span>
           )}
-          <span className="inline-flex items-center gap-1" title={t("card.bathrooms")}><Bath className="h-3.5 w-3.5" /> {property.bathrooms}</span>
+          {property.bathrooms > 0 && (
+            <span className="inline-flex items-center gap-1" title={t("card.bathrooms")}><Bath className="h-3.5 w-3.5" /> {property.bathrooms}</span>
+          )}
           {property.parking > 0 && (
             <span className="inline-flex items-center gap-1" title={t("card.parking")}><Car className="h-3.5 w-3.5" /> {property.parking}</span>
           )}
-          <span className="ml-auto inline-flex items-center gap-1" title={t("card.size")}><Ruler className="h-3.5 w-3.5" /> {property.size} m²</span>
+          {property.size > 0 && (
+            <span className="ml-auto inline-flex items-center gap-1" title={t("card.size")}><Ruler className="h-3.5 w-3.5" /> {property.size} m²</span>
+          )}
         </div>
+
         <span className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition group-hover:bg-primary/90">
           {t("card.viewSpace")}
         </span>

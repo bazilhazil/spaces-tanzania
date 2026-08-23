@@ -279,8 +279,6 @@ export function PropertiesManager() {
   async function onCardAction(a: CardAction, p: ManagedProperty) {
     if (a === "edit" || a === "photos" || a === "details") {
       const tab = a === "photos" ? "photos" : a === "details" ? "details" : undefined;
-      console.log("Edit source:", `manager card (${a})`);
-      console.log("Navigating to:", `/dashboard/properties/${p.id}/manage`, tab ?? "");
       navigate({
         to: "/dashboard/properties/$id/manage",
         params: { id: p.id },
@@ -1011,8 +1009,6 @@ async function handleCardAction(
       break;
    case "edit": {
      const destination = `/dashboard/properties/${p.id}/manage`;
-     console.log("Edit source:", "properties manager card");
-     console.log("Navigating to:", destination);
      window.location.assign(destination);
    break;
    }

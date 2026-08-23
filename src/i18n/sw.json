@@ -518,7 +518,8 @@
     "sortViews": "Zilizotazamwa zaidi",
     "viewSpace": "Angalia Nafasi",
     "verified": "Imethibitishwa",
-    "activeFilters": "{count} hai"
+    "activeFilters": "{count} hai",
+    "street": "Mtaa"
   },
   "viewings": {
     "title": "Maombi ya kutazama",

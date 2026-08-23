@@ -518,7 +518,8 @@
     "sortViews": "Most viewed",
     "viewSpace": "View Space",
     "verified": "Verified",
-    "activeFilters": "{count} active"
+    "activeFilters": "{count} active",
+    "street": "Street"
   },
   "viewings": {
     "title": "Viewing requests",
