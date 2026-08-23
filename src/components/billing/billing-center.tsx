@@ -13,9 +13,10 @@ import { StatCard } from "@/components/ds/stat-card";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { CheckoutDialog } from "@/components/billing/checkout-dialog";
-import { isGatewayConfigured, setGatewayConfigured, VERIFICATION_FEES, type PaymentIntent } from "@/lib/payments-store";
+import { VERIFICATION_FEES, type PaymentIntent } from "@/lib/payments-store";
+import { useMyPayments, useMySubscription, useMyListingCount, type InvoiceLike } from "@/lib/billing-db";
 import {
-  PLANS, ADDONS, PAYMENT_METHODS, CURRENT_SUBSCRIPTION, INVOICES, COUPONS,
+  PLANS, ADDONS, PAYMENT_METHODS, COUPONS,
   REVENUE_KPI, REVENUE_BY_PLAN, REVENUE_TREND,
   formatTZS, planById, type PlanId, type BillingCycle, type AddOn,
 } from "@/lib/billing-mock";
