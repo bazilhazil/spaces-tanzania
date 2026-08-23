@@ -49,6 +49,28 @@ const KIND_ICON: Record<NotificationKind, React.ComponentType<{ className?: stri
   announcement: Megaphone,
 };
 
+/** Kinds emitted by database triggers that the legacy meta map doesn't cover. */
+const EXTRA_META: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+  price_change: { label: "Price Change", icon: Megaphone },
+  property_verified: { label: "Property Verified", icon: ShieldCheck },
+  property_available: { label: "Space Available", icon: Home },
+  saved_search_match: { label: "New Match", icon: Search },
+};
+
+function kindLabel(kind: string) {
+  return EXTRA_META[kind]?.label ?? KIND_META[kind as NotificationKind]?.label ?? "Update";
+}
+
+function kindIcon(kind: string) {
+  return EXTRA_META[kind]?.icon ?? KIND_ICON[kind as NotificationKind] ?? Bell;
+}
+
+function money(value: number | null | undefined, currency: string | null | undefined) {
+  if (!value) return "—";
+  return `${currency || "TZS"} ${Number(value).toLocaleString()}`;
+}
+
+
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60_000);
