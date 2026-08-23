@@ -4,6 +4,8 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { ProfileCompletionCard } from "@/components/profile-completion-card";
 import { useAuth } from "@/hooks/use-auth";
 import { useMode, type SpacesMode } from "@/hooks/use-mode";
+import { useDashboardStats } from "@/hooks/use-dashboard-stats";
+
 import {
   Home, Upload, MessageSquare, Calendar, Heart, Users, ShieldCheck, DollarSign,
   BarChart3, Eye, Sparkles, ArrowUpRight, TrendingUp, Crown,
