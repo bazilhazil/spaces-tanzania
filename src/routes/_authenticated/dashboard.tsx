@@ -4,6 +4,8 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { ProfileCompletionCard } from "@/components/profile-completion-card";
 import { useAuth } from "@/hooks/use-auth";
 import { useMode, type SpacesMode } from "@/hooks/use-mode";
+import { useDashboardStats } from "@/hooks/use-dashboard-stats";
+
 import {
   Home, Upload, MessageSquare, Calendar, Heart, Users, ShieldCheck, DollarSign,
   BarChart3, Eye, Sparkles, ArrowUpRight, TrendingUp, Crown,
@@ -76,7 +78,7 @@ function greeting() {
 
 function OwnerHome() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<OwnerStats>({ active: 0, views: 0, inquiries: 0, viewings: 0 });
+  const { stats, loading: statsLoading } = useDashboardStats();
   const [recent, setRecent] = useState<RecentProperty[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -91,8 +93,6 @@ function OwnerHome() {
         .order("created_at", { ascending: false })
         .limit(6);
       const list = props ?? [];
-      const active = list.filter((p) => p.status === "live").length;
-      const views = list.reduce((sum, p) => sum + (p.view_count ?? 0), 0);
 
       // Fetch cover for each
       const ids = list.map((p) => p.id);
@@ -115,7 +115,6 @@ function OwnerHome() {
       }
 
       if (!alive) return;
-      setStats({ active, views, inquiries: 0, viewings: 0 });
       setRecent(list.map((p) => ({ ...p, cover: coverByProp[p.id] })));
       setLoading(false);
     })();
@@ -125,13 +124,15 @@ function OwnerHome() {
   return (
     <>
       <StatsGrid
+        loading={statsLoading}
         items={[
-          { label: "Active Listings", value: stats.active, icon: Home, delta: "+0", tone: "primary" },
-          { label: "Total Property Views", value: stats.views, icon: Eye, delta: "+0%", tone: "emerald" },
-          { label: "New Inquiries", value: stats.inquiries, icon: MessageSquare, delta: "0 today", tone: "amber" },
-          { label: "Scheduled Viewings", value: stats.viewings, icon: Calendar, delta: "This week", tone: "violet" },
+          { label: "Active Listings", value: stats.listings, icon: Home, delta: `${stats.totalListings} total`, tone: "primary", to: "/dashboard/properties" },
+          { label: "Total Property Views", value: stats.propertyViews, icon: Eye, delta: "All listings", tone: "emerald", to: "/dashboard/properties" },
+          { label: "New Inquiries", value: stats.activeInquiries, icon: MessageSquare, delta: `${stats.completedInquiries} completed`, tone: "amber", to: "/leads" },
+          { label: "Scheduled Viewings", value: stats.viewings, icon: Calendar, delta: "Upcoming", tone: "violet", to: "/viewings" },
         ]}
       />
+
 
       <QuickActions />
 
@@ -183,32 +184,41 @@ const toneMap: Record<string, { bg: string; text: string; ring: string }> = {
   violet:  { bg: "bg-violet-500/10",  text: "text-violet-600",  ring: "ring-violet-500/20" },
 };
 
-function StatsGrid({ items }: {
-  items: { label: string; value: number | string; icon: React.ComponentType<{ className?: string }>; delta: string; tone: string }[]
-}) {
+type StatItem = {
+  label: string; value: number | string; icon: React.ComponentType<{ className?: string }>;
+  delta: string; tone: string; to?: string;
+};
+
+function StatsGrid({ items, loading }: { items: StatItem[]; loading?: boolean }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((s) => {
         const Icon = s.icon; const tone = toneMap[s.tone] ?? toneMap.primary;
-        return (
-          <div key={s.label}
-            className="group relative overflow-hidden rounded-2xl border border-border/60 bg-background p-5 shadow-[var(--shadow-soft)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]">
+        const card = (
+          <div
+            className="group relative h-full overflow-hidden rounded-2xl border border-border/60 bg-background p-5 shadow-[var(--shadow-soft)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]">
             <div className="flex items-start justify-between">
               <p className="text-sm font-medium text-muted-foreground">{s.label}</p>
               <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl ring-1", tone.bg, tone.text, tone.ring)}>
                 <Icon className="h-4 w-4" />
               </div>
             </div>
-            <p className="mt-4 font-display text-3xl font-semibold tracking-tight text-foreground">{s.value}</p>
+            <p className="mt-4 font-display text-3xl font-semibold tracking-tight text-foreground">
+              {loading ? <span className="text-base font-normal text-muted-foreground">Loading…</span> : s.value}
+            </p>
             <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
               <TrendingUp className="h-3 w-3 text-emerald-500" /> {s.delta}
             </div>
           </div>
         );
+        return s.to
+          ? <Link key={s.label} to={s.to} className="block h-full">{card}</Link>
+          : <div key={s.label}>{card}</div>;
       })}
     </div>
   );
 }
+
 
 function QuickActions() {
   const actions: Array<{
@@ -331,23 +341,24 @@ export function PropertyMiniCard({ p }: { p: RecentProperty }) {
 
 
 function NonOwnerHome({ role }: { role: SpacesMode }) {
-  const items = role === "agent"
+  const { stats, loading } = useDashboardStats();
+  const items: StatItem[] = role === "agent"
     ? [
-        { label: "Active Inquiries", value: 0, icon: Users, delta: "+0", tone: "primary" },
-        { label: "Listings", value: 0, icon: Home, delta: "+0", tone: "emerald" },
-        { label: "Deals", value: 0, icon: DollarSign, delta: "+0", tone: "amber" },
-        { label: "Rating", value: "—", icon: BarChart3, delta: "—", tone: "violet" },
+        { label: "Active Inquiries", value: stats.activeInquiries, icon: Users, delta: `${stats.completedInquiries} completed`, tone: "primary", to: "/leads" },
+        { label: "Listings", value: stats.listings, icon: Home, delta: `${stats.totalListings} total`, tone: "emerald", to: "/dashboard/properties" },
+        { label: "Deals", value: stats.activeDeals, icon: DollarSign, delta: `${stats.completedDeals} completed`, tone: "amber", to: "/deals" },
+        { label: "Rating", value: stats.rating ?? "—", icon: BarChart3, delta: stats.rating ? "Verified rating" : "No rating yet", tone: "violet" },
       ]
     : [
-
-        { label: "Favorites", value: 0, icon: Heart, delta: "+0", tone: "primary" },
-        { label: "Saved Searches", value: 0, icon: BarChart3, delta: "+0", tone: "emerald" },
-        { label: "Viewings", value: 0, icon: Calendar, delta: "0 upcoming", tone: "amber" },
-        { label: "Messages", value: 0, icon: MessageSquare, delta: "0 unread", tone: "violet" },
+        { label: "Favorites", value: stats.favorites, icon: Heart, delta: "Saved spaces", tone: "primary", to: "/dashboard/favorites" },
+        { label: "Inquiries", value: stats.activeInquiries, icon: BarChart3, delta: "Active", tone: "emerald", to: "/leads" },
+        { label: "Viewings", value: stats.viewings, icon: Calendar, delta: "Upcoming", tone: "amber", to: "/viewings" },
+        { label: "Messages", value: stats.unreadMessages, icon: MessageSquare, delta: "Unread", tone: "violet", to: "/messages" },
       ];
   return (
     <>
-      <StatsGrid items={items} />
+      <StatsGrid items={items} loading={loading} />
+
       <div className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary to-primary/85 p-6 text-primary-foreground shadow-[var(--shadow-elevated)]">
         <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
           <div>
