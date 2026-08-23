@@ -13,8 +13,8 @@ import { StatusPill, SUBJECT_META } from "@/components/verification/verification
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
-import {
 import { friendlyError } from "@/lib/errors";
+import {
   fetchAllVerifications, fetchVerificationEvents, decideVerification,
   addInternalNote, verificationDocUrl,
   type VerificationRequest, type VerificationEvent, type VerificationStatus,
