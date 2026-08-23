@@ -117,21 +117,18 @@ function PropertyDetailPage() {
     : property.listingType === "rent" ? t("card.forRent")
     : t("card.forLease");
 
+  const unavailable = ["sold", "rented", "archived", "paused"].includes(status);
+  const locationLine = [property.ward, property.district, property.city].filter(Boolean).join(", ");
+  const whatsappText = t("properties.detail.whatsappMessageFull", {
+    title: property.title,
+    location: locationLine,
+  });
 
   function requireAuth(cb: () => void) {
     if (!user) { setAuthGate(true); return; }
     cb();
   }
 
-  function logLead(method: LeadContactMethod, message?: string) {
-    if (!property) return;
-    void createLead({
-      propertyId: property.id,
-      ownerId: property.agentId,
-      contactMethod: method,
-      message,
-    });
-  }
 
   /**
    * Owner contact details are only released to visitors who have actually
