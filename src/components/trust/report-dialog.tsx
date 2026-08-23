@@ -8,7 +8,20 @@ import { REPORT_REASONS, type ReportReason } from "@/lib/trust-engine";
 import { Flag, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
+import { submitReport } from "@/lib/safety-db";
+
+/** The legacy dialog uses its own reason keys — map them onto the safety reasons. */
+const LEGACY_REASON_MAP: Record<string, string> = {
+  fake_listing: "fake_listing",
+  wrong_price: "wrong_price",
+  wrong_location: "wrong_location",
+  already_sold: "unavailable",
+  duplicate: "duplicate_listing",
+  spam: "suspicious_activity",
+  scam: "fraud",
+  offensive: "other",
+};
+
 
 type Props = {
   target: string;
