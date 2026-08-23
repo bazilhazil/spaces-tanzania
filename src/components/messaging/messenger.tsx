@@ -67,6 +67,17 @@ function readFlags(): LocalFlags {
   }
 }
 
+const INQUIRY_STATUS_LABEL: Record<string, string> = {
+  new: "New",
+  contacted: "Contacted",
+  viewing_scheduled: "Viewing",
+  viewing_completed: "Viewed",
+  negotiating: "Negotiating",
+  offer_made: "Offer made",
+  won: "Completed",
+  lost: "Closed",
+};
+
 export function Messenger() {
   const { user, initialized } = useAuth();
   const userId = user?.id ?? null;
