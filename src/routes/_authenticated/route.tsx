@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthLoadingScreen } from "@/components/auth-loading-screen";
@@ -9,22 +9,9 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthenticatedLayout() {
-  const { session, initialized, loading, roles, user } = useAuth();
+  const { session, initialized, loading } = useAuth();
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const redirected = useRef(false);
-
-  // Temporary diagnostics for the manage-listing routing bug.
-  // eslint-disable-next-line no-console
-  console.log("[auth-guard]", {
-    pathname,
-    userId: user?.id ?? null,
-    roles,
-    loading,
-    initialized,
-    hasSession: !!session,
-    redirectTarget: !session && initialized && !loading ? "/auth" : null,
-  });
 
   useEffect(() => {
     // Wait for BOTH: initialization finished AND not loading.
@@ -40,8 +27,6 @@ function AuthenticatedLayout() {
       typeof window !== "undefined"
         ? window.location.pathname + window.location.search
         : "/";
-    // eslint-disable-next-line no-console
-    console.log("[auth-guard] redirecting to /login from", here);
     navigate({ to: "/auth", replace: true, search: { redirect: here } });
     // navigate intentionally excluded — new ref each render would re-fire.
     // eslint-disable-next-line react-hooks/exhaustive-deps
