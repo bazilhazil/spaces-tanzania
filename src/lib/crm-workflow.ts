@@ -70,6 +70,8 @@ export interface CrmLead {
   viewingId: string | null;
   viewingStatus: string | null;
   viewingAt: string | null;
+  /** The message conversation this inquiry came from (when there is one). */
+  conversationId: string | null;
 }
 
 export interface TimelineEntry {
@@ -101,7 +103,7 @@ export async function fetchCrmLeads(opts?: { all?: boolean }): Promise<CrmLead[]
   const leadIds = rows.map((r) => r.id);
   const dealIds = [...new Set(rows.map((r) => r.deal_id).filter(Boolean))];
 
-  const [propsRes, profRes, bookRes, dealRes] = await Promise.all([
+  const [propsRes, profRes, bookRes, dealRes, convRes] = await Promise.all([
     propIds.length
       ? supabase.from("properties").select("id,title,region,district,ward").in("id", propIds)
       : Promise.resolve({ data: [] as Raw[] } as never),
@@ -115,11 +117,18 @@ export async function fetchCrmLeads(opts?: { all?: boolean }): Promise<CrmLead[]
     dealIds.length
       ? supabase.from("deals").select("id,reference,stage").in("id", dealIds)
       : Promise.resolve({ data: [] as Raw[] } as never),
-  ]);
+    propIds.length
+      ? supabase.from("conversations").select("id,property_id,buyer_id").in("property_id", propIds)
+      : Promise.resolve({ data: [] as Raw[] } as never),
+  ] as const);
 
   const props = new Map((((propsRes as Raw).data as Raw[]) ?? []).map((p) => [p.id, p]));
   const profs = new Map((((profRes as Raw).data as Raw[]) ?? []).map((p) => [p.id, p]));
   const deals = new Map((((dealRes as Raw).data as Raw[]) ?? []).map((d) => [d.id, d]));
+  const convByPair = new Map<string, string>();
+  for (const c of (((convRes as Raw).data as Raw[]) ?? [])) {
+    convByPair.set(`${c.property_id}:${c.buyer_id ?? ""}`, c.id);
+  }
   const bookings = new Map<string, Raw>();
   for (const b of (((bookRes as Raw).data as Raw[]) ?? [])) {
     if (b.lead_id) bookings.set(b.lead_id, b);
@@ -152,6 +161,8 @@ export async function fetchCrmLeads(opts?: { all?: boolean }): Promise<CrmLead[]
       viewingId: b?.id ?? null,
       viewingStatus: b?.status ?? null,
       viewingAt: b?.scheduled_at ?? null,
+      conversationId:
+        r.conversation_id ?? convByPair.get(`${r.property_id}:${r.visitor_id ?? ""}`) ?? null,
     };
   });
 }

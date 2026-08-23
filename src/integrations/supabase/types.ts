@@ -463,6 +463,7 @@ export type Database = {
       leads: {
         Row: {
           contact_method: string
+          conversation_id: string | null
           created_at: string
           deal_id: string | null
           id: string
@@ -480,6 +481,7 @@ export type Database = {
         }
         Insert: {
           contact_method: string
+          conversation_id?: string | null
           created_at?: string
           deal_id?: string | null
           id?: string
@@ -497,6 +499,7 @@ export type Database = {
         }
         Update: {
           contact_method?: string
+          conversation_id?: string | null
           created_at?: string
           deal_id?: string | null
           id?: string
@@ -513,6 +516,13 @@ export type Database = {
           visitor_phone?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_deal_id_fkey"
             columns: ["deal_id"]
