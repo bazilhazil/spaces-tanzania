@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Users, UserCheck, ShieldCheck, Calendar, MessageSquare,
   CreditCard, Receipt, Flag, LifeBuoy, Megaphone, Bell, BarChart3, FileClock,
@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 type Item = {
   label: string;
@@ -32,7 +33,7 @@ const NAV: { group: string; items: Item[] }[] = [
     group: "Operations",
     items: [
       { label: "Properties", section: "properties", icon: Home, badge: "27" },
-      { label: "Verification", section: "verification", icon: ShieldCheck, badge: "4" },
+      { label: "Verification", section: "verification", icon: ShieldCheck },
       { label: "Reports", section: "reports", icon: Flag, badge: "14" },
       { label: "Bookings", section: "bookings", icon: Calendar },
       { label: "Messages", section: "messages", icon: MessageSquare },
@@ -78,10 +79,30 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const [pendingVerifications, setPendingVerifications] = useState(0);
 
   const isSuperAdmin = roles.includes("super_admin");
   const isAdmin = isSuperAdmin || roles.includes("admin");
   const roleLabel = isSuperAdmin ? "Super Admin" : isAdmin ? "Admin" : primaryRole;
+
+  const loadPendingVerifications = useCallback(async () => {
+    if (!isAdmin) return;
+    const { count, error } = await supabase
+      .from("verification_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending");
+    if (!error) setPendingVerifications(count ?? 0);
+  }, [isAdmin]);
+
+  useEffect(() => {
+    void loadPendingVerifications();
+    if (!isAdmin) return;
+    const channel = supabase
+      .channel("admin-verification-count")
+      .on("postgres_changes", { event: "*", schema: "public", table: "verification_requests" }, loadPendingVerifications)
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [isAdmin, loadPendingVerifications]);
 
   async function handleSignOut() {
     await signOut();
@@ -171,13 +192,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
                       >
                         <Icon className="h-4 w-4" />
                         <span className="flex-1">{item.label}</span>
-                        {item.badge && (
+                        {(item.badge || (item.section === "verification" && pendingVerifications > 0)) && (
                           <span className={cn(
                             "rounded-full px-2 py-0.5 text-[10px] font-semibold",
                             active
                               ? "bg-primary-foreground/20 text-primary-foreground"
                               : "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]",
-                          )}>{item.badge}</span>
+                          )}>{item.section === "verification" ? pendingVerifications : item.badge}</span>
                         )}
                       </Link>
                     );

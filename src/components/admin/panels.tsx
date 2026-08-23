@@ -15,9 +15,10 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StatCard } from "@/components/ds/stat-card";
 import { StatusBadge } from "@/components/ds/status-badge";
 import { EmptyState } from "@/components/ds/empty-state";
+import { VerificationReviewQueue } from "@/components/verification/review-queue";
 import { cn } from "@/lib/utils";
 import {
-  KPI, HIGHLIGHTS, ACTIVITY, MODERATION, USERS, VERIFICATION_QUEUE, REPORTS,
+  KPI, HIGHLIGHTS, ACTIVITY, MODERATION, USERS, REPORTS,
   CHART_MONTHS, CHART_REVENUE, CHART_TRAFFIC, CHART_LISTINGS, TOP_KEYWORDS,
   BOOKINGS, PAYMENTS, AUDIT_LOGS, SUPPORT_TICKETS, NOTIFICATIONS, CAMPAIGNS,
   ROLE_LABELS, ROLE_MATRIX, type AdminRole,
@@ -392,43 +393,10 @@ export function AgentsPanel() {
 // ---------- Verification ----------
 
 export function VerificationPanel() {
-  const [tab, setTab] = useState("all");
-  const filtered = tab === "all" ? VERIFICATION_QUEUE : VERIFICATION_QUEUE.filter(v => v.type.toLowerCase() === tab);
   return (
     <>
       <PageHeader kicker="Trust & Safety" title="Verification Center" subtitle="Review identities, businesses, and property documents." />
-      <div className="mb-4 flex flex-wrap gap-2">
-        {["all","owner","agent","property"].map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={cn(
-            "rounded-full px-4 py-1.5 text-xs font-semibold capitalize transition-colors",
-            tab === t ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground",
-          )}>{t}</button>
-        ))}
-      </div>
-      <Panel>
-        <div className="space-y-3">
-          {filtered.map((v) => (
-            <div key={v.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-border/60 bg-background p-4">
-              <div className={cn("grid h-11 w-11 place-items-center rounded-2xl",
-                v.risk === "high" ? "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]"
-                : v.risk === "medium" ? "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)]"
-                : "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)]")}>
-                <ShieldCheck className="h-5 w-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="font-semibold">{v.name}</div>
-                <div className="text-xs text-muted-foreground">{v.type} • {v.doc}</div>
-              </div>
-              <div className="text-xs text-muted-foreground">{v.submitted}</div>
-              <Badge variant={v.risk === "high" ? "destructive" : v.risk === "medium" ? "warning" : "success"} className="capitalize">{v.risk} risk</Badge>
-              <div className="flex gap-2">
-                <Button size="sm" variant="success" onClick={() => toast.success("Approved")}><CheckCircle2 className="h-4 w-4" /></Button>
-                <Button size="sm" variant="destructive" onClick={() => toast.error("Rejected")}><XCircle className="h-4 w-4" /></Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Panel>
+      <VerificationReviewQueue />
     </>
   );
 }

@@ -4,12 +4,13 @@ import {
   Loader2, StickyNote, Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusPill, SUBJECT_META } from "@/components/verification/verification-center";
+import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 import {
@@ -18,11 +19,12 @@ import {
   type VerificationRequest, type VerificationEvent, type VerificationStatus,
 } from "@/lib/verification-db";
 
-const FILTERS: (VerificationStatus | "all")[] = ["pending", "under_review", "more_info", "approved", "rejected", "all"];
+type SubjectFilter = Exclude<VerificationRequest["subject_type"], "business"> | "all";
+const SUBJECT_FILTERS: SubjectFilter[] = ["all", "user", "owner", "agent", "property"];
 
 export function VerificationReviewQueue() {
   const { t } = useI18n();
-  const [filter, setFilter] = useState<VerificationStatus | "all">("pending");
+  const [subject, setSubject] = useState<SubjectFilter>("all");
   const [rows, setRows] = useState<VerificationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -30,18 +32,50 @@ export function VerificationReviewQueue() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    setRows(await fetchAllVerifications(filter));
-    setLoading(false);
-  }, [filter]);
+    try {
+      setRows(await fetchAllVerifications("all"));
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => { void load(); }, [load]);
 
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-verification-queue")
+      .on("postgres_changes", { event: "*", schema: "public", table: "verification_requests" }, () => { void load(); })
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [load]);
+
+  const counts = useMemo(() => SUBJECT_FILTERS.reduce<Record<SubjectFilter, number>>((result, item) => {
+    result[item] = item === "all" ? rows.length : rows.filter((row) => row.subject_type === item).length;
+    return result;
+  }, { all: 0, user: 0, owner: 0, agent: 0, property: 0 }), [rows]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) =>
-      `${r.subject_type} ${r.requester_id} ${Object.values(r.details).join(" ")}`.toLowerCase().includes(q));
-  }, [rows, query]);
+    return rows
+      .filter((row) => subject === "all" || row.subject_type === subject)
+      .filter((row) => !q || `${row.subject_type} ${row.requester_id} ${row.property_title ?? ""} ${Object.values(row.details).join(" ")}`.toLowerCase().includes(q))
+      .sort((a, b) => {
+        const pendingOrder = Number(b.status === "pending") - Number(a.status === "pending");
+        return pendingOrder || new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+  }, [rows, query, subject]);
+
+  async function approve(request: VerificationRequest) {
+    try {
+      await decideVerification(request.id, "approved", "");
+      toast.success(t("verify.admin.decisionSaved"));
+      await load();
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  }
 
   return (
     <div className="w-full min-w-0 space-y-4">
@@ -57,15 +91,15 @@ export function VerificationReviewQueue() {
         </div>
       </div>
 
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as VerificationStatus | "all")}>
-        <TabsList className="flex w-full justify-start overflow-x-auto rounded-2xl bg-muted p-1">
-          {FILTERS.map((f) => (
-            <TabsTrigger key={f} value={f} className="shrink-0 rounded-xl px-3">
-              {f === "all" ? t("common.all") : t(`verify.status.${f}`)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      <div className="flex w-full gap-2 overflow-x-auto pb-1">
+        {SUBJECT_FILTERS.map((filter) => (
+          <Button key={filter} type="button" size="sm" variant={subject === filter ? "default" : "outline"}
+            className="shrink-0" onClick={() => setSubject(filter)}>
+            {filter === "all" ? t("common.all") : t(`verify.type.${filter}`).replace(" Verification", "").replace("Uhakiki wa ", "")}
+            <span className="ml-1.5 text-xs opacity-70">{counts[filter]}</span>
+          </Button>
+        ))}
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
@@ -76,8 +110,7 @@ export function VerificationReviewQueue() {
           {filtered.map((r) => {
             const meta = SUBJECT_META[r.subject_type];
             return (
-              <button key={r.id} type="button" onClick={() => setSelected(r)}
-                className="ds-card w-full min-w-0 p-4 text-left transition hover:border-[color:var(--color-brand-300)]">
+              <article key={r.id} className="ds-card w-full min-w-0 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="inline-flex items-center gap-2 font-semibold">
                     <meta.icon className="h-4 w-4 text-[color:var(--color-brand-700)]" />
@@ -88,12 +121,19 @@ export function VerificationReviewQueue() {
                 <div className="mt-1 truncate text-sm text-muted-foreground">
                   {r.details.full_name || r.details.business_name || r.details.ownership || r.requester_id}
                 </div>
+                <div className="mt-1 break-all text-xs text-muted-foreground">ID: {r.id} · User: {r.requester_id}</div>
+                {r.property_id && <div className="mt-1 text-xs text-muted-foreground">Property: {r.property_title ?? r.property_id}</div>}
                 <div className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" /> {new Date(r.created_at).toLocaleString()}
                   <span className="mx-1">·</span>
                   <FileText className="h-3 w-3" /> {r.documents.length}
                 </div>
-              </button>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button size="sm" variant="outline" onClick={() => setSelected(r)}>{t("verify.admin.open")}</Button>
+                  {r.status !== "approved" && <Button size="sm" variant="success" onClick={() => void approve(r)}><Check className="mr-1 h-4 w-4" />{t("verify.admin.approve")}</Button>}
+                  {r.status !== "rejected" && <Button size="sm" variant="destructive" onClick={() => setSelected(r)}><X className="mr-1 h-4 w-4" />{t("verify.admin.reject")}</Button>}
+                </div>
+              </article>
             );
           })}
         </div>
@@ -147,8 +187,13 @@ function ReviewDialog({
       <DialogContent className="max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="ds-h-sm">{t(meta.titleKey)}</DialogTitle>
-          <DialogDescription>{new Date(request.created_at).toLocaleString()}</DialogDescription>
+          <DialogDescription>ID: {request.id} · {new Date(request.created_at).toLocaleString()}</DialogDescription>
         </DialogHeader>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusPill status={request.status} />
+          <Badge variant="muted">{t("verify.admin.riskNotCalculated")}</Badge>
+        </div>
 
         <div className="rounded-2xl border border-border bg-muted/30 p-3 text-sm">
           {Object.entries(request.details).map(([k, v]) => v ? (
@@ -158,6 +203,12 @@ function ReviewDialog({
             </div>
           ) : null)}
           {request.notes && <p className="mt-2 text-muted-foreground">{request.notes}</p>}
+          <div className="mt-2 border-t border-border pt-2 text-xs text-muted-foreground">
+            <div className="break-all">User ID: {request.requester_id}</div>
+            {request.property_id && <div>Property: {request.property_title ?? request.property_id}</div>}
+            {request.reviewer_id && <div className="break-all">Reviewed by: {request.reviewer_id}</div>}
+            {request.reviewed_at && <div>Reviewed: {new Date(request.reviewed_at).toLocaleString()}</div>}
+          </div>
         </div>
 
         <div className="space-y-2">

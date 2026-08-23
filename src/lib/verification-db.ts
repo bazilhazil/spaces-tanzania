@@ -42,6 +42,7 @@ export type VerificationRequest = {
   expires_at: string | null;
   created_at: string;
   updated_at: string;
+  property_title?: string | null;
 };
 
 export type VerificationEvent = {
@@ -115,11 +116,12 @@ export async function submitVerification(input: {
 }
 
 export async function fetchMyVerifications(userId: string): Promise<VerificationRequest[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("verification_requests")
     .select("*")
     .eq("requester_id", userId)
     .order("created_at", { ascending: false });
+  if (error) throw error;
   return ((data ?? []) as Record<string, unknown>[]).map(normalise);
 }
 
@@ -127,16 +129,30 @@ export async function fetchMyVerifications(userId: string): Promise<Verification
 export async function fetchAllVerifications(status?: VerificationStatus | "all"): Promise<VerificationRequest[]> {
   let q = supabase.from("verification_requests").select("*").order("created_at", { ascending: false });
   if (status && status !== "all") q = q.eq("status", status);
-  const { data } = await q;
-  return ((data ?? []) as Record<string, unknown>[]).map(normalise);
+  const { data, error } = await q;
+  if (error) throw error;
+  const requests = ((data ?? []) as Record<string, unknown>[]).map(normalise);
+  const propertyIds = [...new Set(requests.map((request) => request.property_id).filter((id): id is string => Boolean(id)))];
+  if (propertyIds.length === 0) return requests;
+  const { data: properties, error: propertiesError } = await supabase
+    .from("properties")
+    .select("id,title")
+    .in("id", propertyIds);
+  if (propertiesError) throw propertiesError;
+  const titles = new Map(((properties ?? []) as { id: string; title: string }[]).map((property) => [property.id, property.title]));
+  return requests.map((request) => ({
+    ...request,
+    property_title: request.property_id ? titles.get(request.property_id) ?? null : null,
+  }));
 }
 
 export async function fetchVerificationEvents(requestId: string): Promise<VerificationEvent[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("verification_events")
     .select("*")
     .eq("request_id", requestId)
     .order("created_at", { ascending: true });
+  if (error) throw error;
   return (data ?? []) as VerificationEvent[];
 }
 
@@ -149,11 +165,14 @@ export async function decideVerification(
   status: Exclude<VerificationStatus, "pending">,
   reason: string,
 ): Promise<void> {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("verification_requests")
     .update({ status, review_reason: reason || null } as never)
-    .eq("id", requestId);
+    .eq("id", requestId)
+    .select("id")
+    .single();
   if (error) throw error;
+  if (!data) throw new Error("The verification could not be updated.");
 }
 
 /** Admin-only note attached to the decision history. */

@@ -96,13 +96,6 @@ export const USERS = [
   { id: "u5", name: "Grace Mwangi", email: "grace.mw@yahoo.com", role: "user", status: "pending", joined: "Yesterday", listings: 0 },
 ];
 
-export const VERIFICATION_QUEUE = [
-  { id: "v1", name: "Amina Juma", type: "Owner", doc: "National ID + Title Deed", submitted: "2h ago", risk: "low" },
-  { id: "v2", name: "Atrio Properties Ltd", type: "Agent", doc: "TIN + Business License", submitted: "5h ago", risk: "low" },
-  { id: "v3", name: "Villa #4821", type: "Property", doc: "Title deed, land survey", submitted: "6h ago", risk: "medium" },
-  { id: "v4", name: "Peter Malongo", type: "Owner", doc: "National ID", submitted: "1d ago", risk: "high" },
-];
-
 export const REPORTS = [
   { id: "r1", target: "Listing #4801", reason: "Fake listing", reporter: "kelvin.m", status: "pending", severity: "high" },
   { id: "r2", target: "Listing #4772", reason: "Wrong location", reporter: "@grace", status: "pending", severity: "low" },

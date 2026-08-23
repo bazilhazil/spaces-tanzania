@@ -832,6 +832,8 @@
       "reason": "Sababu itakayoshirikiwa na mwombaji",
       "internalNote": "Kumbukumbu ya ndani (wasimamizi pekee)",
       "reasonRequired": "Tafadhali ongeza sababu",
+      "open": "Fungua",
+      "riskNotCalculated": "Hatari haijahesabiwa",
       "approve": "Idhinisha",
       "reject": "Kataa",
       "requestInfo": "Omba taarifa",
