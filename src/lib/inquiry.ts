@@ -63,6 +63,7 @@ export async function sendPropertyMessage(input: {
       ownerId: input.ownerId,
       contactMethod: "message",
       message: body,
+      conversationId,
     });
 
     return { ok: true };

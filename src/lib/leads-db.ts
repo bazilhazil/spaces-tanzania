@@ -10,6 +10,8 @@ export interface CreateLeadInput {
   visitorName?: string;
   visitorPhone?: string;
   visitorEmail?: string;
+  /** Message conversation this inquiry belongs to, when it came from a chat. */
+  conversationId?: string | null;
 }
 
 const ACTIVITY_LABEL: Record<LeadContactMethod, string> = {
@@ -42,7 +44,7 @@ export async function createLead(input: CreateLeadInput): Promise<boolean> {
     // Duplicate protection: one active lead per visitor + property.
     const { data: existing } = await supabase
       .from("leads")
-      .select("id,status,notes")
+      .select("id,status,notes,conversation_id")
       .eq("property_id", input.propertyId)
       .eq("visitor_id", user.id)
       .not("status", "in", "(won,lost)")
@@ -51,13 +53,14 @@ export async function createLead(input: CreateLeadInput): Promise<boolean> {
       .maybeSingle();
 
     if (existing) {
-      const row = existing as { id: string; notes: string | null };
+      const row = existing as { id: string; notes: string | null; conversation_id: string | null };
       const { error: upErr } = await supabase
         .from("leads")
         .update({
           contact_method: input.contactMethod,
           message: input.message ?? undefined,
           notes: appendTimeline(row.notes, input.contactMethod, input.message),
+          conversation_id: row.conversation_id ?? input.conversationId ?? null,
           last_activity_at: new Date().toISOString(),
         } as never)
         .eq("id", row.id);
@@ -76,6 +79,7 @@ export async function createLead(input: CreateLeadInput): Promise<boolean> {
       contact_method: input.contactMethod,
       message: input.message ?? null,
       notes: appendTimeline(null, input.contactMethod, input.message),
+      conversation_id: input.conversationId ?? null,
 
     } as never);
     return !error;
