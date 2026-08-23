@@ -31,7 +31,7 @@ const STATUS_TINT: Record<ViewingStatusDb, string> = {
   completed: "border-primary/30 bg-primary/10 text-primary",
 };
 
-export function ViewingsCenter({ role = "buyer" }: { role?: Role }) {
+export function ViewingsCenter({ role = "buyer", propertyId = null }: { role?: Role; propertyId?: string | null }) {
   const { t } = useI18n();
   const [incoming, setIncoming] = useState<ViewingRequest[]>([]);
   const [mine, setMine] = useState<ViewingRequest[]>([]);
