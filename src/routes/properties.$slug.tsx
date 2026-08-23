@@ -32,6 +32,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
+import { getListingSeo } from "@/lib/public-listings.functions";
+import { canonicalPropertyUrl, idFromSlug, propertySlug, SITE_URL } from "@/lib/seo";
+import { track } from "@/lib/analytics";
 
 export const Route = createFileRoute("/properties/$slug")({
   loader: async ({ params }) => {
