@@ -1093,5 +1093,206 @@
     "signInTitle": "Ingia ili kuhifadhi nafasi hii.",
     "previousPrice": "Bei ya awali",
     "newPrice": "Bei mpya"
+  },
+  "admin": {
+    "kicker": {
+      "control": "Kituo cha Udhibiti",
+      "moderation": "Usimamizi",
+      "community": "Jamii",
+      "trust": "Uaminifu na Usalama",
+      "operations": "Utendaji",
+      "revenue": "Mapato",
+      "insights": "Uchambuzi",
+      "system": "Mfumo",
+      "growth": "Ukuaji"
+    },
+    "dash": {
+      "title": "Muhtasari wa msimamizi",
+      "sub": "Kila takwimu hapa chini inahesabiwa moja kwa moja kutoka hifadhidata ya SPACES.",
+      "noDataTitle": "Hakuna data",
+      "noDataBody": "Takwimu za mfumo zitaonekana rekodi zikiwepo.",
+      "newListings": "Matangazo mapya",
+      "last12": "miezi 12 iliyopita",
+      "noHistory": "Bado hakuna historia ya kutosha",
+      "noHistoryBody": "Chati zitajaa matangazo yanapochapishwa.",
+      "recent": "Shughuli za hivi karibuni",
+      "noActivity": "Bado hakuna shughuli",
+      "noActivityBody": "Matangazo mapya, usajili na matembezi yataonekana hapa.",
+      "views": "Mionekano ya mali",
+      "perMonth": "kwa mwezi",
+      "noViews": "Bado hakuna historia ya mionekano.",
+      "newMembers": "Wanachama wapya",
+      "noSignups": "Bado hakuna historia ya usajili.",
+      "conversion": "Ubadilishaji wa maulizo",
+      "conversionSub": "maulizo → mikataba iliyokamilika"
+    },
+    "kpi": {
+      "totalListings": "Matangazo yote",
+      "liveListings": "Matangazo hai",
+      "awaiting": "Yanasubiri ukaguzi",
+      "users": "Watumiaji waliosajiliwa",
+      "inquiries": "Maulizo",
+      "viewings": "Matembezi",
+      "openReports": "Ripoti wazi",
+      "revenue": "Mapato yaliyothibitishwa",
+      "verifiedListings": "Matangazo yaliyothibitishwa",
+      "owners": "Wamiliki",
+      "agents": "Madalali",
+      "dealsCompleted": "Mikataba iliyokamilika",
+      "verificationsPending": "Uthibitisho unaosubiri"
+    },
+    "loading": {
+      "live": "Inapakia data hai…",
+      "listings": "Inapakia matangazo…",
+      "users": "Inapakia watumiaji…",
+      "agents": "Inapakia madalali…",
+      "reports": "Inapakia ripoti…",
+      "viewings": "Inapakia matembezi…",
+      "payments": "Inapakia malipo…",
+      "subscriptions": "Inapakia michango…"
+    },
+    "action": {
+      "refresh": "Onyesha upya",
+      "approve": "Idhinisha",
+      "requestChanges": "Omba mabadiliko",
+      "reject": "Kataa",
+      "feature": "Angazia",
+      "pause": "Simamisha",
+      "archive": "Hifadhi"
+    },
+    "queue": {
+      "title": "Foleni ya Mali",
+      "sub": "Kagua, idhinisha au panda matangazo halisi yaliyowasilishwa na wamiliki na madalali.",
+      "emptyTitle": "Foleni ipo wazi",
+      "emptyBody": "Hakuna matangazo yanayolingana na kichujio hiki kwa sasa.",
+      "noPhoto": "Hakuna picha iliyopakiwa",
+      "completeness": "Ukamilifu wa tangazo",
+      "submittedBy": "Imewasilishwa na",
+      "verification": "Uthibitisho",
+      "nothingSelected": "Hakuna kilichochaguliwa",
+      "pick": "Chagua tangazo kwenye foleni ili kukagua."
+    },
+    "filter": {
+      "live": "Hai",
+      "rejected": "Yamekataliwa",
+      "all": "Yote"
+    },
+    "label": {
+      "verified": "Imethibitishwa",
+      "unverified": "Haijathibitishwa"
+    },
+    "users": {
+      "title": "Usimamizi wa Watumiaji",
+      "sub": "Kila akaunti ya SPACES iliyosajiliwa, moja kwa moja kutoka hifadhidata.",
+      "emptyTitle": "Hakuna watumiaji",
+      "emptyBody": "Hakuna akaunti zinazolingana na utafutaji huu."
+    },
+    "th": {
+      "user": "Mtumiaji",
+      "roles": "Majukumu",
+      "status": "Hali",
+      "joined": "Alijiunga",
+      "listings": "Matangazo",
+      "actions": "Vitendo",
+      "reference": "Kumbukumbu",
+      "target": "Lengo",
+      "reason": "Sababu",
+      "priority": "Kipaumbele",
+      "filed": "Iliwasilishwa",
+      "provider": "Mtoa huduma",
+      "amount": "Kiasi",
+      "when": "Lini"
+    },
+    "status": {
+      "active": "Hai",
+      "suspended": "Imesimamishwa",
+      "banned": "Imepigwa marufuku",
+      "dismissed": "Imeondolewa",
+      "confirmed": "Imethibitishwa",
+      "cancelled": "Imeghairiwa",
+      "refunded": "Imerejeshwa",
+      "paid": "Imelipwa"
+    },
+    "agents": {
+      "sub": "Akaunti zenye jukumu la udalali kwenye SPACES.",
+      "emptyTitle": "Bado hakuna madalali",
+      "emptyBody": "Akaunti zilizopewa jukumu la udalali zitaonekana hapa.",
+      "memberSince": "Mwanachama tangu"
+    },
+    "verification": {
+      "title": "Kituo cha Uthibitisho",
+      "sub": "Kagua vitambulisho, biashara na nyaraka za mali."
+    },
+    "reports": {
+      "title": "Ripoti",
+      "sub": "Ripoti za watumiaji kuhusu matangazo, watumiaji na ujumbe.",
+      "open": "Wazi",
+      "resolved": "Zimetatuliwa",
+      "high": "Kipaumbele cha juu",
+      "total": "Jumla",
+      "emptyTitle": "Hakuna ripoti",
+      "emptyBody": "Bado hakuna kilichoripotiwa kwenye SPACES."
+    },
+    "viewings": {
+      "sub": "Matembezi yote yaliyopangwa kwenye SPACES.",
+      "emptyTitle": "Hakuna matembezi",
+      "emptyBody": "Maombi ya matembezi yataonekana hapa wanunuzi wanapopanga."
+    },
+    "messages": {
+      "title": "Ujumbe",
+      "sub": "Simamia mazungumzo yaliyoripotiwa na mijadala ya msaada.",
+      "emptyTitle": "Hakuna kilichoripotiwa",
+      "emptyBody": "Mazungumzo yaliyoripotiwa yanaonekana hapa kutoka foleni ya Usalama."
+    },
+    "support": {
+      "title": "Msaada",
+      "sub": "Tiketi za msaada kwa watumiaji.",
+      "emptyTitle": "Msaada haujaunganishwa",
+      "emptyBody": "Hakuna mfumo wa tiketi ulioungwanishwa na SPACES, hivyo hakuna tiketi za kuonyesha."
+    },
+    "payments": {
+      "title": "Malipo",
+      "sub": "Miamala yote iliyorekodiwa kwenye SPACES.",
+      "successRate": "Kiwango cha mafanikio",
+      "emptyTitle": "Bado hakuna malipo",
+      "emptyBody": "Lango la malipo halijaunganishwa, hivyo hakuna miamala."
+    },
+    "subs": {
+      "title": "Michango",
+      "sub": "Mipango ya kila mwezi inayoshikiliwa na akaunti za SPACES.",
+      "emptyTitle": "Bado hakuna michango",
+      "emptyBody": "Mipango itaonekana hapa akaunti zitakapojiunga."
+    },
+    "analytics": {
+      "title": "Takwimu",
+      "sub": "Ukuaji na mgawanyo uliohesabiwa kutoka rekodi halisi za SPACES.",
+      "listingsChart": "Matangazo mapya kwa mwezi",
+      "viewsChart": "Mionekano ya mali kwa mwezi",
+      "noData": "Data haitoshi",
+      "noDataListings": "Chati hii itajaa matangazo yanapochapishwa.",
+      "noDataViews": "Chati hii itajaa wanunuzi wanapovinjari matangazo.",
+      "byRegion": "Matangazo kwa mkoa",
+      "byType": "Matangazo kwa aina ya mali",
+      "noRegions": "Bado hakuna data ya mikoa.",
+      "noTypes": "Bado hakuna data ya mali."
+    },
+    "audit": {
+      "title": "Kumbukumbu za Ukaguzi",
+      "sub": "Vitendo vya kiutawala vilivyorekodiwa kwenye SPACES.",
+      "emptyTitle": "Hakuna kumbukumbu za ukaguzi",
+      "emptyBody": "Maamuzi ya usimamizi huandikwa moja kwa moja kwenye kila rekodi. Kumbukumbu maalum za ukaguzi hazijawashwa bado."
+    },
+    "marketing": {
+      "title": "Masoko",
+      "sub": "Kampeni na matangazo ya mzunguko.",
+      "emptyTitle": "Hakuna kampeni",
+      "emptyBody": "Usimamizi wa kampeni haujaunganishwa, hivyo hakuna kampeni za kuonyesha."
+    },
+    "notifications": {
+      "title": "Arifa",
+      "sub": "Arifa za ndani ya programu hutumwa kiotomatiki na mfumo.",
+      "emptyTitle": "Hakuna zana za matangazo",
+      "emptyBody": "Kwa sasa SPACES hutuma arifa za ndani ya programu pekee; njia za matangazo hazijasanidiwa."
+    }
   }
 }

@@ -27,6 +27,7 @@ import {
   type AdminSubscription, type MonthPoint, type QueueFilter,
 } from "@/lib/admin-db";
 import { friendlyError } from "@/lib/errors";
+import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 
 // ---------- Shared ----------
@@ -149,36 +150,37 @@ function BarChart({ points, color = "var(--color-brand-500)" }: { points: MonthP
 const EMPTY_SERIES: AdminSeries = { listings: [], users: [], views: [], hasData: false };
 
 export function DashboardPanel() {
+  const { t } = useI18n();
   const { data: overview, loading, reload } = useLive<AdminOverview | null>(fetchAdminOverview, null);
   const { data: activity } = useLive<AdminActivityItem[]>(() => fetchAdminActivity(10), []);
   const { data: series } = useLive<AdminSeries>(fetchAdminSeries, EMPTY_SERIES);
 
   const kpis = overview
     ? [
-        { label: "Total listings", value: nf.format(overview.properties.total), icon: Home, tone: "brand" as const },
-        { label: "Live listings", value: nf.format(overview.properties.live), icon: Home, tone: "success" as const },
-        { label: "Awaiting review", value: nf.format(overview.properties.pending + overview.properties.draft), icon: Clock, tone: "gold" as const },
-        { label: "Registered users", value: nf.format(overview.users.total), icon: Users, tone: "brand" as const },
-        { label: "Inquiries", value: nf.format(overview.activity.leads), icon: MessageSquare, tone: "brand" as const },
-        { label: "Viewings", value: nf.format(overview.activity.bookings), icon: Calendar, tone: "gold" as const },
-        { label: "Open reports", value: nf.format(overview.activity.reportsOpen), icon: Flag, tone: "danger" as const },
-        { label: "Confirmed revenue", value: money(overview.revenue.paidTotal, overview.revenue.currency), icon: DollarSign, tone: "success" as const },
+        { label: t("admin.kpi.totalListings"), value: nf.format(overview.properties.total), icon: Home, tone: "brand" as const },
+        { label: t("admin.kpi.liveListings"), value: nf.format(overview.properties.live), icon: Home, tone: "success" as const },
+        { label: t("admin.kpi.awaiting"), value: nf.format(overview.properties.pending + overview.properties.draft), icon: Clock, tone: "gold" as const },
+        { label: t("admin.kpi.users"), value: nf.format(overview.users.total), icon: Users, tone: "brand" as const },
+        { label: t("admin.kpi.inquiries"), value: nf.format(overview.activity.leads), icon: MessageSquare, tone: "brand" as const },
+        { label: t("admin.kpi.viewings"), value: nf.format(overview.activity.bookings), icon: Calendar, tone: "gold" as const },
+        { label: t("admin.kpi.openReports"), value: nf.format(overview.activity.reportsOpen), icon: Flag, tone: "danger" as const },
+        { label: t("admin.kpi.revenue"), value: money(overview.revenue.paidTotal, overview.revenue.currency), icon: DollarSign, tone: "success" as const },
       ]
     : [];
 
   return (
     <>
       <PageHeader
-        kicker="Control Center"
-        title="Administrator overview"
-        subtitle="Every figure below is calculated live from the SPACES database."
+        kicker={t("admin.kicker.control")}
+        title={t("admin.dash.title")}
+        subtitle={t("admin.dash.sub")}
         actions={<Button size="sm" className="gap-2" onClick={reload}><RefreshCw className="h-4 w-4" /> Refresh</Button>}
       />
 
       {loading && !overview ? (
-        <p className="text-sm text-muted-foreground">Loading live data…</p>
+        <p className="text-sm text-muted-foreground">{t("admin.loading.live")}</p>
       ) : !overview ? (
-        <EmptyState icon={Database} title="No data available" description="Platform metrics will appear once records exist." />
+        <EmptyState icon={Database} title={t("admin.dash.noDataTitle")} description={t("admin.dash.noDataBody")} />
       ) : (
         <>
           <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
@@ -189,11 +191,11 @@ export function DashboardPanel() {
 
           <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {[
-              { label: "Verified listings", value: nf.format(overview.properties.verified) },
-              { label: "Owners", value: nf.format(overview.users.owners) },
-              { label: "Agents", value: nf.format(overview.users.agents) },
-              { label: "Deals completed", value: nf.format(overview.activity.dealsCompleted) },
-              { label: "Verifications pending", value: nf.format(overview.activity.verificationsPending) },
+              { label: t("admin.kpi.verifiedListings"), value: nf.format(overview.properties.verified) },
+              { label: t("admin.kpi.owners"), value: nf.format(overview.users.owners) },
+              { label: t("admin.kpi.agents"), value: nf.format(overview.users.agents) },
+              { label: t("admin.kpi.dealsCompleted"), value: nf.format(overview.activity.dealsCompleted) },
+              { label: t("admin.kpi.verificationsPending"), value: nf.format(overview.activity.verificationsPending) },
             ].map((h) => (
               <div key={h.label} className="ds-card p-4">
                 <div className="ds-caption">{h.label}</div>
@@ -203,15 +205,15 @@ export function DashboardPanel() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
-            <Panel title="New listings" className="lg:col-span-2"
-              right={<span className="text-xs text-muted-foreground">last 12 months</span>}>
-              {series.hasData ? <BarChart points={series.listings} /> : <EmptyState icon={BarChart3} title="Not enough history yet" description="Charts fill in as listings are published." />}
+            <Panel title={t("admin.dash.newListings")} className="lg:col-span-2"
+              right={<span className="text-xs text-muted-foreground">{t("admin.dash.last12")}</span>}>
+              {series.hasData ? <BarChart points={series.listings} /> : <EmptyState icon={BarChart3} title={t("admin.dash.noHistory")} description={t("admin.dash.noHistoryBody")} />}
             </Panel>
 
-            <Panel title="Recent activity"
+            <Panel title={t("admin.dash.recent")}
               right={<span className="inline-flex items-center gap-1.5 text-xs font-medium text-[color:var(--color-success-700)]"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[color:var(--color-success-500)]" /> Live</span>}>
               {activity.length === 0 ? (
-                <EmptyState icon={Activity} title="No activity yet" description="New listings, sign-ups and viewings will show here." />
+                <EmptyState icon={Activity} title={t("admin.dash.noActivity")} description={t("admin.dash.noActivityBody")} />
               ) : (
                 <ul className="space-y-3">
                   {activity.map((a) => {
@@ -232,19 +234,19 @@ export function DashboardPanel() {
               )}
             </Panel>
 
-            <Panel title="Property views" right={<span className="text-xs text-muted-foreground">per month</span>}>
+            <Panel title={t("admin.dash.views")} right={<span className="text-xs text-muted-foreground">{t("admin.dash.perMonth")}</span>}>
               {series.hasData
                 ? <Sparkline data={series.views.map((p) => p.value)} />
-                : <p className="text-sm text-muted-foreground">No view history recorded yet.</p>}
+                : <p className="text-sm text-muted-foreground">{t("admin.dash.noViews")}</p>}
             </Panel>
 
-            <Panel title="New members" right={<span className="text-xs text-muted-foreground">per month</span>}>
+            <Panel title={t("admin.dash.newMembers")} right={<span className="text-xs text-muted-foreground">{t("admin.dash.perMonth")}</span>}>
               {series.hasData
                 ? <Sparkline data={series.users.map((p) => p.value)} color="var(--color-gold-600)" />
-                : <p className="text-sm text-muted-foreground">No sign-up history recorded yet.</p>}
+                : <p className="text-sm text-muted-foreground">{t("admin.dash.noSignups")}</p>}
             </Panel>
 
-            <Panel title="Inquiry conversion" right={<span className="text-xs text-muted-foreground">inquiries → completed deals</span>}>
+            <Panel title={t("admin.dash.conversion")} right={<span className="text-xs text-muted-foreground">{t("admin.dash.conversionSub")}</span>}>
               <div className="flex items-baseline gap-2">
                 <div className="font-display text-4xl font-semibold">
                   {overview.activity.leads > 0
@@ -270,13 +272,14 @@ export function DashboardPanel() {
 // ---------- Property Moderation ----------
 
 const QUEUE_FILTERS: { id: QueueFilter; label: string }[] = [
-  { id: "review", label: "Awaiting review" },
-  { id: "live", label: "Live" },
-  { id: "rejected", label: "Rejected" },
-  { id: "all", label: "All" },
+  { id: "review", label: t("admin.kpi.awaiting") },
+  { id: "live", label: t("admin.filter.live") },
+  { id: "rejected", label: t("admin.filter.rejected") },
+  { id: "all", label: t("admin.filter.all") },
 ];
 
 export function PropertiesPanel() {
+  const { t } = useI18n();
   const [filter, setFilter] = useState<QueueFilter>("review");
   const { data: items, loading, reload } = useLive<AdminQueueItem[]>(
     () => fetchModerationQueue(filter),
@@ -298,7 +301,7 @@ export function PropertiesPanel() {
 
   return (
     <>
-      <PageHeader kicker="Moderation" title="Property Queue" subtitle="Review, approve, or escalate real listings submitted by owners and agents."
+      <PageHeader kicker={t("admin.kicker.moderation")} title={t("admin.queue.title")} subtitle={t("admin.queue.sub")}
         actions={<Button size="sm" variant="outline" className="gap-2" onClick={reload}><RefreshCw className="h-4 w-4" /> Refresh</Button>} />
 
       <div className="mb-5 flex flex-wrap gap-2">
@@ -310,9 +313,9 @@ export function PropertiesPanel() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading listings…</p>
+        <p className="text-sm text-muted-foreground">{t("admin.loading.listings")}</p>
       ) : items.length === 0 ? (
-        <EmptyState icon={Home} title="Queue is clear" description="There are no listings matching this filter right now." />
+        <EmptyState icon={Home} title={t("admin.queue.emptyTitle")} description={t("admin.queue.emptyBody")} />
       ) : (
         <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
           <div className="space-y-3">
@@ -323,7 +326,7 @@ export function PropertiesPanel() {
                 <div className="relative aspect-[16/10] w-full bg-secondary">
                   {p.cover
                     ? <img src={p.cover} alt={p.title} className="h-full w-full object-cover" loading="lazy" />
-                    : <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">No photo uploaded</div>}
+                    : <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">{t("admin.queue.noPhoto")}</div>}
                   <div className="absolute right-2 top-2 flex gap-1.5">
                     {p.verified && <StatusBadge kind="verified" />}
                     <Badge variant="muted" className="capitalize">{titleCase(p.status)}</Badge>
@@ -356,7 +359,7 @@ export function PropertiesPanel() {
               <div className="relative aspect-[21/9] w-full bg-secondary">
                 {item.cover
                   ? <img src={item.cover} alt={item.title} className="h-full w-full object-cover" />
-                  : <div className="grid h-full w-full place-items-center text-sm text-muted-foreground">No photo uploaded</div>}
+                  : <div className="grid h-full w-full place-items-center text-sm text-muted-foreground">{t("admin.queue.noPhoto")}</div>}
                 <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 to-transparent p-6 text-white">
                   <div className="flex items-center gap-2">
                     {item.verified && <StatusBadge kind="verified" />}
@@ -371,17 +374,17 @@ export function PropertiesPanel() {
 
               <div className="grid gap-4 p-6 sm:grid-cols-3">
                 <div className="ds-card p-4">
-                  <div className="ds-caption">Listing completeness</div>
+                  <div className="ds-caption">{t("admin.queue.completeness")}</div>
                   <div className="mt-1 font-display text-2xl font-semibold">{item.quality}%</div>
                   <div className="mt-2 h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-[color:var(--color-success-500)]" style={{ width: `${item.quality}%` }} /></div>
                 </div>
                 <div className="ds-card p-4">
-                  <div className="ds-caption">Submitted by</div>
+                  <div className="ds-caption">{t("admin.queue.submittedBy")}</div>
                   <div className="mt-1 font-display text-lg font-semibold">{item.ownerName}</div>
                   <p className="mt-2 text-xs text-muted-foreground">{relative(item.createdAt)}</p>
                 </div>
                 <div className="ds-card p-4">
-                  <div className="ds-caption">Verification</div>
+                  <div className="ds-caption">{t("admin.queue.verification")}</div>
                   <div className="mt-1 flex items-center gap-2 font-display text-lg font-semibold">
                     {item.verified ? <><CheckCircle2 className="h-5 w-5 text-[color:var(--color-success-600)]" /> Verified</> : <><AlertTriangle className="h-5 w-5 text-[color:var(--color-warning-600)]" /> Unverified</>}
                   </div>
@@ -400,7 +403,7 @@ export function PropertiesPanel() {
                 <Button variant="ghost" size="sm" className="gap-2" onClick={() => act(item.id, "archive", "Listing archived")}><Database className="h-4 w-4" /> Archive</Button>
               </div>
             </div>
-          ) : <EmptyState icon={Home} title="Nothing selected" description="Pick a listing from the queue to review." />}
+          ) : <EmptyState icon={Home} title={t("admin.queue.nothingSelected")} description={t("admin.queue.pick")} />}
         </div>
       )}
     </>
@@ -410,6 +413,7 @@ export function PropertiesPanel() {
 // ---------- Users ----------
 
 export function UsersPanel() {
+  const { t } = useI18n();
   const { data: users, loading } = useLive<AdminUser[]>(fetchAdminUsers, []);
   const [q, setQ] = useState("");
   const rows = useMemo(
@@ -418,7 +422,7 @@ export function UsersPanel() {
   );
   return (
     <>
-      <PageHeader kicker="Community" title="User Management" subtitle="Every registered SPACES account, straight from the database." />
+      <PageHeader kicker={t("admin.kicker.community")} title={t("admin.users.title")} subtitle={t("admin.users.sub")} />
       <Panel>
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <div className="relative w-full sm:flex-1 sm:min-w-[240px]">
@@ -428,20 +432,20 @@ export function UsersPanel() {
         </div>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">Loading users…</p>
+          <p className="text-sm text-muted-foreground">{t("admin.loading.users")}</p>
         ) : rows.length === 0 ? (
-          <EmptyState icon={Users} title="No users found" description="No accounts match this search." />
+          <EmptyState icon={Users} title={t("admin.users.emptyTitle")} description={t("admin.users.emptyBody")} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
                 <tr className="border-b border-border/60">
-                  <th className="py-3 pr-4 font-medium">User</th>
-                  <th className="py-3 pr-4 font-medium">Roles</th>
-                  <th className="py-3 pr-4 font-medium">Status</th>
-                  <th className="py-3 pr-4 font-medium">Joined</th>
-                  <th className="py-3 pr-4 font-medium">Listings</th>
-                  <th className="py-3 pr-4 font-medium text-right">Actions</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.user")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.roles")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.status")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.joined")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.listings")}</th>
+                  <th className="py-3 pr-4 font-medium text-right">{t("admin.th.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -461,9 +465,9 @@ export function UsersPanel() {
                       </div>
                     </td>
                     <td className="py-3 pr-4">
-                      {u.status === "active" ? <Badge variant="success">Active</Badge>
-                        : u.status === "suspended" ? <Badge variant="warning">Suspended</Badge>
-                        : <Badge variant="destructive">Banned</Badge>}
+                      {u.status === "active" ? <Badge variant="success">{t("admin.status.active")}</Badge>
+                        : u.status === "suspended" ? <Badge variant="warning">{t("admin.status.suspended")}</Badge>
+                        : <Badge variant="destructive">{t("admin.status.banned")}</Badge>}
                     </td>
                     <td className="py-3 pr-4 text-muted-foreground">{new Date(u.joined).toLocaleDateString()}</td>
                     <td className="py-3 pr-4 font-medium">{u.listings}</td>
@@ -486,15 +490,16 @@ export function UsersPanel() {
 // ---------- Agents ----------
 
 export function AgentsPanel() {
+  const { t } = useI18n();
   const { data: users, loading } = useLive<AdminUser[]>(fetchAdminUsers, []);
   const agents = users.filter((u) => u.roles.includes("agent"));
   return (
     <>
-      <PageHeader kicker="Community" title="Agents" subtitle="Accounts holding the agent role on SPACES." />
+      <PageHeader kicker={t("admin.kicker.community")} title={t("admin.kpi.agents")} subtitle={t("admin.agents.sub")} />
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading agents…</p>
+        <p className="text-sm text-muted-foreground">{t("admin.loading.agents")}</p>
       ) : agents.length === 0 ? (
-        <EmptyState icon={Users} title="No agents yet" description="Accounts granted the agent role will appear here." />
+        <EmptyState icon={Users} title={t("admin.agents.emptyTitle")} description={t("admin.agents.emptyBody")} />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {agents.map((a) => (
@@ -504,11 +509,11 @@ export function AgentsPanel() {
                   <Avatar className="h-12 w-12"><AvatarFallback className="bg-[color:var(--color-brand-600)] text-white font-semibold">{a.name.split(" ").map((s) => s[0]).join("").slice(0, 2)}</AvatarFallback></Avatar>
                   <div><div className="font-semibold">{a.name}</div><div className="text-xs text-muted-foreground">{a.email ?? a.phone ?? "—"}</div></div>
                 </div>
-                {a.status === "active" ? <Badge variant="success">Active</Badge> : <Badge variant="warning" className="capitalize">{a.status}</Badge>}
+                {a.status === "active" ? <Badge variant="success">{t("admin.status.active")}</Badge> : <Badge variant="warning" className="capitalize">{a.status}</Badge>}
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-center">
-                <div><div className="font-display text-lg font-semibold">{a.listings}</div><div className="ds-caption">Listings</div></div>
-                <div><div className="font-display text-lg font-semibold">{new Date(a.joined).getFullYear()}</div><div className="ds-caption">Member since</div></div>
+                <div><div className="font-display text-lg font-semibold">{a.listings}</div><div className="ds-caption">{t("admin.th.listings")}</div></div>
+                <div><div className="font-display text-lg font-semibold">{new Date(a.joined).getFullYear()}</div><div className="ds-caption">{t("admin.agents.memberSince")}</div></div>
               </div>
             </div>
           ))}
@@ -521,9 +526,10 @@ export function AgentsPanel() {
 // ---------- Verification ----------
 
 export function VerificationPanel() {
+  const { t } = useI18n();
   return (
     <>
-      <PageHeader kicker="Trust & Safety" title="Verification Center" subtitle="Review identities, businesses, and property documents." />
+      <PageHeader kicker={t("admin.kicker.trust")} title={t("admin.verification.title")} subtitle={t("admin.verification.sub")} />
       <VerificationReviewQueue />
     </>
   );
@@ -532,35 +538,36 @@ export function VerificationPanel() {
 // ---------- Reports ----------
 
 export function ReportsPanel() {
+  const { t } = useI18n();
   const { data: reports, loading } = useLive<AdminReport[]>(fetchAdminReports, []);
   const open = reports.filter((r) => r.status === "new" || r.status === "under_review" || r.status === "more_info");
   const resolved = reports.filter((r) => r.status === "resolved");
   const urgent = reports.filter((r) => r.priority === "urgent" || r.priority === "high");
   return (
     <>
-      <PageHeader kicker="Trust & Safety" title="Reports" subtitle="User-submitted reports across listings, users, and messages." />
+      <PageHeader kicker={t("admin.kicker.trust")} title={t("admin.reports.title")} subtitle={t("admin.reports.sub")} />
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Open" value={nf.format(open.length)} tone="danger" icon={Flag} />
-        <StatCard label="Resolved" value={nf.format(resolved.length)} tone="success" icon={CheckCircle2} />
-        <StatCard label="High priority" value={nf.format(urgent.length)} tone="danger" icon={AlertTriangle} />
-        <StatCard label="Total" value={nf.format(reports.length)} tone="brand" icon={Clock} />
+        <StatCard label={t("admin.reports.open")} value={nf.format(open.length)} tone="danger" icon={Flag} />
+        <StatCard label={t("admin.reports.resolved")} value={nf.format(resolved.length)} tone="success" icon={CheckCircle2} />
+        <StatCard label={t("admin.reports.high")} value={nf.format(urgent.length)} tone="danger" icon={AlertTriangle} />
+        <StatCard label={t("admin.reports.total")} value={nf.format(reports.length)} tone="brand" icon={Clock} />
       </div>
       <Panel>
         {loading ? (
-          <p className="text-sm text-muted-foreground">Loading reports…</p>
+          <p className="text-sm text-muted-foreground">{t("admin.loading.reports")}</p>
         ) : reports.length === 0 ? (
-          <EmptyState icon={Flag} title="No reports" description="Nothing has been reported on SPACES yet." />
+          <EmptyState icon={Flag} title={t("admin.reports.emptyTitle")} description={t("admin.reports.emptyBody")} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
                 <tr className="border-b border-border/60">
-                  <th className="py-3 pr-4 font-medium">Reference</th>
-                  <th className="py-3 pr-4 font-medium">Target</th>
-                  <th className="py-3 pr-4 font-medium">Reason</th>
-                  <th className="py-3 pr-4 font-medium">Priority</th>
-                  <th className="py-3 pr-4 font-medium">Status</th>
-                  <th className="py-3 pr-4 font-medium">Filed</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.reference")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.target")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.reason")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.priority")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.status")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.filed")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -570,7 +577,7 @@ export function ReportsPanel() {
                     <td className="py-3 pr-4 capitalize">{titleCase(r.target)}</td>
                     <td className="py-3 pr-4">{titleCase(r.reason)}</td>
                     <td className="py-3 pr-4"><Badge variant={r.priority === "urgent" ? "destructive" : r.priority === "high" ? "warning" : "muted"} className="capitalize">{r.priority}</Badge></td>
-                    <td className="py-3 pr-4">{r.status === "resolved" ? <Badge variant="success">Resolved</Badge> : r.status === "dismissed" ? <Badge variant="muted">Dismissed</Badge> : <Badge variant="warning" className="capitalize">{titleCase(r.status)}</Badge>}</td>
+                    <td className="py-3 pr-4">{r.status === "resolved" ? <Badge variant="success">{t("admin.reports.resolved")}</Badge> : r.status === "dismissed" ? <Badge variant="muted">{t("admin.status.dismissed")}</Badge> : <Badge variant="warning" className="capitalize">{titleCase(r.status)}</Badge>}</td>
                     <td className="py-3 pr-4 text-muted-foreground">{relative(r.createdAt)}</td>
                   </tr>
                 ))}
@@ -586,15 +593,16 @@ export function ReportsPanel() {
 // ---------- Bookings / Messages / Support ----------
 
 export function BookingsPanel() {
+  const { t } = useI18n();
   const { data: bookings, loading } = useLive<AdminBooking[]>(fetchAdminBookings, []);
   return (
     <>
-      <PageHeader kicker="Operations" title="Viewings" subtitle="All scheduled viewings across SPACES." />
+      <PageHeader kicker={t("admin.kicker.operations")} title={t("admin.kpi.viewings")} subtitle={t("admin.viewings.sub")} />
       <Panel>
         {loading ? (
-          <p className="text-sm text-muted-foreground">Loading viewings…</p>
+          <p className="text-sm text-muted-foreground">{t("admin.loading.viewings")}</p>
         ) : bookings.length === 0 ? (
-          <EmptyState icon={Calendar} title="No viewings booked" description="Viewing requests will appear here as buyers schedule them." />
+          <EmptyState icon={Calendar} title={t("admin.viewings.emptyTitle")} description={t("admin.viewings.emptyBody")} />
         ) : (
           <div className="space-y-3">
             {bookings.map((b) => (
@@ -605,8 +613,8 @@ export function BookingsPanel() {
                   <div className="text-xs text-muted-foreground">{b.buyerName}</div>
                 </div>
                 <div className="text-sm font-medium">{new Date(b.scheduledAt).toLocaleString()}</div>
-                {b.status === "confirmed" ? <Badge variant="success">Confirmed</Badge>
-                  : b.status === "cancelled" ? <Badge variant="destructive">Cancelled</Badge>
+                {b.status === "confirmed" ? <Badge variant="success">{t("admin.status.confirmed")}</Badge>
+                  : b.status === "cancelled" ? <Badge variant="destructive">{t("admin.status.cancelled")}</Badge>
                   : <Badge variant="warning" className="capitalize">{titleCase(b.status)}</Badge>}
               </div>
             ))}
@@ -618,19 +626,21 @@ export function BookingsPanel() {
 }
 
 export function MessagesPanel() {
+  const { t } = useI18n();
   return (
     <>
-      <PageHeader kicker="Operations" title="Messages" subtitle="Moderate flagged conversations and support threads." />
-      <EmptyState icon={MessageSquare} title="Nothing flagged" description="Flagged conversations appear here from the Safety queue." />
+      <PageHeader kicker={t("admin.kicker.operations")} title={t("admin.messages.title")} subtitle={t("admin.messages.sub")} />
+      <EmptyState icon={MessageSquare} title={t("admin.messages.emptyTitle")} description={t("admin.messages.emptyBody")} />
     </>
   );
 }
 
 export function SupportPanel() {
+  const { t } = useI18n();
   return (
     <>
-      <PageHeader kicker="Operations" title="Support" subtitle="User support tickets." />
-      <EmptyState icon={LifeBuoy} title="Support inbox not connected" description="No ticketing system is connected to SPACES yet, so there are no tickets to show." />
+      <PageHeader kicker={t("admin.kicker.operations")} title={t("admin.support.title")} subtitle={t("admin.support.sub")} />
+      <EmptyState icon={LifeBuoy} title={t("admin.support.emptyTitle")} description={t("admin.support.emptyBody")} />
     </>
   );
 }
@@ -638,6 +648,7 @@ export function SupportPanel() {
 // ---------- Payments & Subscriptions ----------
 
 export function PaymentsPanel() {
+  const { t } = useI18n();
   const { data: payments, loading } = useLive<AdminPayment[]>(fetchAdminPayments, []);
   const paid = payments.filter((p) => p.status === "paid" || p.status === "succeeded");
   const refunded = payments.filter((p) => p.status === "refunded");
@@ -645,28 +656,28 @@ export function PaymentsPanel() {
   const currency = payments[0]?.currency ?? "TZS";
   return (
     <>
-      <PageHeader kicker="Revenue" title="Payments" subtitle="All transactions recorded on SPACES." />
+      <PageHeader kicker={t("admin.kicker.revenue")} title={t("admin.payments.title")} subtitle={t("admin.payments.sub")} />
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Confirmed revenue" value={money(total, currency)} tone="success" icon={DollarSign} />
-        <StatCard label="Payments" value={nf.format(payments.length)} tone="brand" icon={CreditCard} />
-        <StatCard label="Refunded" value={nf.format(refunded.length)} tone="danger" icon={RefreshCw} />
-        <StatCard label="Success rate" value={payments.length ? `${Math.round((paid.length / payments.length) * 100)}%` : "—"} tone="success" icon={CheckCircle2} />
+        <StatCard label={t("admin.kpi.revenue")} value={money(total, currency)} tone="success" icon={DollarSign} />
+        <StatCard label={t("admin.payments.title")} value={nf.format(payments.length)} tone="brand" icon={CreditCard} />
+        <StatCard label={t("admin.status.refunded")} value={nf.format(refunded.length)} tone="danger" icon={RefreshCw} />
+        <StatCard label={t("admin.payments.successRate")} value={payments.length ? `${Math.round((paid.length / payments.length) * 100)}%` : "—"} tone="success" icon={CheckCircle2} />
       </div>
       <Panel>
         {loading ? (
-          <p className="text-sm text-muted-foreground">Loading payments…</p>
+          <p className="text-sm text-muted-foreground">{t("admin.loading.payments")}</p>
         ) : payments.length === 0 ? (
-          <EmptyState icon={CreditCard} title="No payments yet" description="A payment gateway is not connected, so no transactions exist." />
+          <EmptyState icon={CreditCard} title={t("admin.payments.emptyTitle")} description={t("admin.payments.emptyBody")} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
                 <tr className="border-b border-border/60">
-                  <th className="py-3 pr-4 font-medium">Reference</th>
-                  <th className="py-3 pr-4 font-medium">Provider</th>
-                  <th className="py-3 pr-4 font-medium">Amount</th>
-                  <th className="py-3 pr-4 font-medium">When</th>
-                  <th className="py-3 pr-4 font-medium">Status</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.reference")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.provider")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.amount")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.when")}</th>
+                  <th className="py-3 pr-4 font-medium">{t("admin.th.status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -676,7 +687,7 @@ export function PaymentsPanel() {
                     <td className="py-3 pr-4 capitalize">{titleCase(p.provider)}</td>
                     <td className="py-3 pr-4 font-semibold">{money(p.amount, p.currency)}</td>
                     <td className="py-3 pr-4 text-muted-foreground">{relative(p.createdAt)}</td>
-                    <td className="py-3 pr-4">{p.status === "paid" || p.status === "succeeded" ? <Badge variant="success">Paid</Badge> : <Badge variant="warning" className="capitalize">{titleCase(p.status)}</Badge>}</td>
+                    <td className="py-3 pr-4">{p.status === "paid" || p.status === "succeeded" ? <Badge variant="success">{t("admin.status.paid")}</Badge> : <Badge variant="warning" className="capitalize">{titleCase(p.status)}</Badge>}</td>
                   </tr>
                 ))}
               </tbody>
@@ -689,14 +700,15 @@ export function PaymentsPanel() {
 }
 
 export function SubscriptionsPanel() {
+  const { t } = useI18n();
   const { data: plans, loading } = useLive<AdminSubscription[]>(fetchAdminSubscriptions, []);
   return (
     <>
-      <PageHeader kicker="Revenue" title="Subscriptions" subtitle="Recurring plans currently held by SPACES accounts." />
+      <PageHeader kicker={t("admin.kicker.revenue")} title={t("admin.subs.title")} subtitle={t("admin.subs.sub")} />
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading subscriptions…</p>
+        <p className="text-sm text-muted-foreground">{t("admin.loading.subscriptions")}</p>
       ) : plans.length === 0 ? (
-        <EmptyState icon={CreditCard} title="No subscriptions yet" description="Plans will appear here once accounts subscribe." />
+        <EmptyState icon={CreditCard} title={t("admin.subs.emptyTitle")} description={t("admin.subs.emptyBody")} />
       ) : (
         <div className="grid gap-4 md:grid-cols-3">
           {plans.map((p) => (
@@ -717,24 +729,25 @@ export function SubscriptionsPanel() {
 // ---------- Analytics ----------
 
 export function AnalyticsPanel() {
+  const { t } = useI18n();
   const { data: series } = useLive<AdminSeries>(fetchAdminSeries, EMPTY_SERIES);
   const { data: regions } = useLive<{ name: string; count: number; pct: number }[]>(fetchRegionMix, []);
   const { data: types } = useLive<{ name: string; count: number; pct: number }[]>(fetchPropertyTypeMix, []);
 
   return (
     <>
-      <PageHeader kicker="Insights" title="Analytics" subtitle="Growth and distribution calculated from real SPACES records." />
+      <PageHeader kicker={t("admin.kicker.insights")} title={t("admin.analytics.title")} subtitle={t("admin.analytics.sub")} />
       <div className="mb-6 grid gap-4 md:grid-cols-2">
-        <Panel title="New listings per month">
-          {series.hasData ? <BarChart points={series.listings} /> : <EmptyState icon={BarChart3} title="Not enough data" description="This chart fills in as listings are published." />}
+        <Panel title={t("admin.analytics.listingsChart")}>
+          {series.hasData ? <BarChart points={series.listings} /> : <EmptyState icon={BarChart3} title={t("admin.analytics.noData")} description={t("admin.analytics.noDataListings")} />}
         </Panel>
-        <Panel title="Property views per month">
-          {series.hasData ? <BarChart points={series.views} color="var(--color-gold-500)" /> : <EmptyState icon={TrendingUp} title="Not enough data" description="This chart fills in as buyers browse listings." />}
+        <Panel title={t("admin.analytics.viewsChart")}>
+          {series.hasData ? <BarChart points={series.views} color="var(--color-gold-500)" /> : <EmptyState icon={TrendingUp} title={t("admin.analytics.noData")} description={t("admin.analytics.noDataViews")} />}
         </Panel>
       </div>
       <div className="grid gap-6 md:grid-cols-2">
-        <Panel title="Listings by region">
-          {regions.length === 0 ? <p className="text-sm text-muted-foreground">No regional data yet.</p> : (
+        <Panel title={t("admin.analytics.byRegion")}>
+          {regions.length === 0 ? <p className="text-sm text-muted-foreground">{t("admin.analytics.noRegions")}</p> : (
             <ul className="space-y-3">
               {regions.map((r) => (
                 <li key={r.name}>
@@ -745,8 +758,8 @@ export function AnalyticsPanel() {
             </ul>
           )}
         </Panel>
-        <Panel title="Listings by property type">
-          {types.length === 0 ? <p className="text-sm text-muted-foreground">No property data yet.</p> : (
+        <Panel title={t("admin.analytics.byType")}>
+          {types.length === 0 ? <p className="text-sm text-muted-foreground">{t("admin.analytics.noTypes")}</p> : (
             <ul className="space-y-3">
               {types.map((t) => (
                 <li key={t.name}>
@@ -765,13 +778,14 @@ export function AnalyticsPanel() {
 // ---------- Audit Logs ----------
 
 export function AuditPanel() {
+  const { t } = useI18n();
   return (
     <>
-      <PageHeader kicker="System" title="Audit Logs" subtitle="Administrative actions recorded on SPACES." />
+      <PageHeader kicker={t("admin.kicker.system")} title={t("admin.audit.title")} subtitle={t("admin.audit.sub")} />
       <EmptyState
         icon={FileClock}
-        title="No audit trail recorded"
-        description="Moderation decisions are written directly to each record. A dedicated audit log is not enabled on this platform yet."
+        title={t("admin.audit.emptyTitle")}
+        description={t("admin.audit.emptyBody")}
       />
     </>
   );
@@ -780,19 +794,21 @@ export function AuditPanel() {
 // ---------- Marketing / Notifications ----------
 
 export function MarketingPanel() {
+  const { t } = useI18n();
   return (
     <>
-      <PageHeader kicker="Growth" title="Marketing" subtitle="Campaigns and lifecycle broadcasts." />
-      <EmptyState icon={Megaphone} title="No campaigns" description="Campaign management is not connected yet, so there are no campaigns to display." />
+      <PageHeader kicker={t("admin.kicker.growth")} title={t("admin.marketing.title")} subtitle={t("admin.marketing.sub")} />
+      <EmptyState icon={Megaphone} title={t("admin.marketing.emptyTitle")} description={t("admin.marketing.emptyBody")} />
     </>
   );
 }
 
 export function NotificationsPanel() {
+  const { t } = useI18n();
   return (
     <>
-      <PageHeader kicker="Growth" title="Notifications" subtitle="In-app notifications are delivered automatically by the platform." />
-      <EmptyState icon={Bell} title="No broadcast tools connected" description="SPACES currently sends transactional in-app notifications only; broadcast channels are not configured." />
+      <PageHeader kicker={t("admin.kicker.growth")} title={t("admin.notifications.title")} subtitle={t("admin.notifications.sub")} />
+      <EmptyState icon={Bell} title={t("admin.notifications.emptyTitle")} description={t("admin.notifications.emptyBody")} />
     </>
   );
 }
@@ -809,12 +825,13 @@ function SettingRow({ label, description, children }: { label: string; descripti
 }
 
 export function SettingsPanel() {
+  const { t } = useI18n();
   const [emails, setEmails] = useState(true);
   const [sms, setSms] = useState(true);
   const [ai, setAi] = useState(true);
   return (
     <>
-      <PageHeader kicker="System" title="System Settings" subtitle="Configure platform behavior, pricing, and integrations." />
+      <PageHeader kicker={t("admin.kicker.system")} title="System Settings" subtitle="Configure platform behavior, pricing, and integrations." />
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel title="Brand & Localization">
           <SettingRow label="Brand name"><Input defaultValue="SPACES Group Ltd" className="max-w-xs" /></SettingRow>
@@ -822,7 +839,7 @@ export function SettingsPanel() {
           <SettingRow label="Currency"><select className="rounded-md border border-border/60 bg-background px-3 py-1.5 text-sm"><option>TZS</option><option>USD</option></select></SettingRow>
         </Panel>
 
-        <Panel title="Notifications">
+        <Panel title={t("admin.notifications.title")}>
           <SettingRow label="Email notifications" description="Transactional + digests"><Switch checked={emails} onCheckedChange={setEmails} /></SettingRow>
           <SettingRow label="SMS alerts" description="Verification codes and reminders"><Switch checked={sms} onCheckedChange={setSms} /></SettingRow>
           <SettingRow label="AI-powered suggestions" description="Auto-triage & content help"><Switch checked={ai} onCheckedChange={setAi} /></SettingRow>
@@ -848,6 +865,7 @@ export function SettingsPanel() {
 // ---------- Super Admin ----------
 
 export function SuperAdminPanel() {
+  const { t } = useI18n();
   const { data: overview } = useLive<AdminOverview | null>(fetchAdminOverview, null);
   const [maintenance, setMaintenance] = useState(false);
   const [emergency, setEmergency] = useState(false);
@@ -884,8 +902,8 @@ export function SuperAdminPanel() {
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard label="Accounts" value={nf.format(overview.users.total)} tone="brand" icon={Users} />
           <StatCard label="Admin roles" value={nf.format(overview.users.admins)} tone="danger" icon={ShieldAlert} />
-          <StatCard label="Listings" value={nf.format(overview.properties.total)} tone="brand" icon={Home} />
-          <StatCard label="Open reports" value={nf.format(overview.activity.reportsOpen)} tone="danger" icon={Flag} />
+          <StatCard label={t("admin.th.listings")} value={nf.format(overview.properties.total)} tone="brand" icon={Home} />
+          <StatCard label={t("admin.kpi.openReports")} value={nf.format(overview.activity.reportsOpen)} tone="danger" icon={Flag} />
         </div>
       )}
 
