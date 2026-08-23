@@ -132,12 +132,14 @@ function PropertyDetailPage() {
   const [loading, setLoading] = useState(true);
   const [similar, setSimilar] = useState<Property[]>([]);
   const [ownerId, setOwnerId] = useState<string | null>(null);
+  const [ownerProfile, setOwnerProfile] = useState<OwnerPublicProfile | null>(null);
 
   const propertyId = idFromSlug(slug);
 
   useEffect(() => {
     let alive = true;
     setLoading(true);
+    setOwnerProfile(null);
     (async () => {
       const res = await fetchPropertyById(propertyId);
       if (!alive) return;
@@ -145,11 +147,20 @@ function PropertyDetailPage() {
         setProperty(res.property);
         setAgent(contactAgentFromRow(res.row));
         setStatus((res.row?.status as string) ?? "live");
-        setOwnerId(((res.row as unknown as { owner_id?: string })?.owner_id) ?? null);
+        const oid = ((res.row as unknown as { owner_id?: string })?.owner_id) ?? null;
+        setOwnerId(oid);
         track("property_viewed", { property_id: res.property.id, category: res.property.category });
-        const others = await fetchLiveProperties(12);
+        if (oid) {
+          void fetchOwnerPublicProfile(oid).then((p) => { if (alive) setOwnerProfile(p); });
+        }
+        const others = await fetchLiveProperties(24);
         if (!alive) return;
-        setSimilar(others.filter((p) => p.id !== res.property.id).slice(0, 4));
+        const pool = others.filter((p) => p.id !== res.property.id);
+        // Prefer spaces in the same city with the same listing type.
+        const near = pool.filter(
+          (p) => p.city === res.property.city && p.listingType === res.property.listingType,
+        );
+        setSimilar([...near, ...pool.filter((p) => !near.includes(p))].slice(0, 4));
       }
       setLoading(false);
     })();
