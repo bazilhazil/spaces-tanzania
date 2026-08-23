@@ -475,7 +475,7 @@ function PerfCharts({
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
-        <ChartCard title="Leads" subtitle="New buyer inquiries">
+        <ChartCard title="Inquiries" subtitle="New buyer inquiries">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={leadsSeries}>
               <CartesianGrid {...grid} />
@@ -567,7 +567,7 @@ function TopSpaces({ items, loading }: {
                   </div>
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
                     <Metric icon={Eye} label="Views" value={row.pViews} />
-                    <Metric icon={MessageSquare} label="Leads" value={row.pLeads} />
+                    <Metric icon={MessageSquare} label="Inquiries" value={row.pLeads} />
                     <Metric icon={Calendar} label="Viewings" value={row.pViewings} />
                     <Metric icon={CheckCircle2} label="Closed" value={row.pClosed} />
                     <Metric icon={DollarSign} label="Revenue" value={money(row.pRevenue, row.p.currency || "TZS")} />

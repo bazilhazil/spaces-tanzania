@@ -35,7 +35,7 @@ type Stage =
 const PIPELINE: { key: Stage; label: string; tone: string }[] = [
   { key: "new_inquiry",       label: "New Leads",         tone: "bg-blue-50 text-blue-700 border-blue-200" },
   { key: "contacted",         label: "Contacted",         tone: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  { key: "viewing_scheduled", label: "Viewing Scheduled", tone: "bg-violet-50 text-violet-700 border-violet-200" },
+  { key: "viewing_scheduled", label: "Viewing", tone: "bg-violet-50 text-violet-700 border-violet-200" },
   { key: "negotiation",       label: "Negotiating",       tone: "bg-amber-50 text-amber-700 border-amber-200" },
   { key: "offer_made",        label: "Offer Made",        tone: "bg-orange-50 text-orange-700 border-orange-200" },
   { key: "completed",         label: "Won",               tone: "bg-emerald-50 text-emerald-700 border-emerald-200" },
