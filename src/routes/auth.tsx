@@ -12,6 +12,7 @@ import { Brand } from "@/components/brand";
 import { GoogleIcon } from "@/components/auth-gate-dialog";
 import { redirectPathForRole, type AppRole } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { friendlyError } from "@/lib/errors";
 
 type Search = { redirect?: string; mode?: "signin" | "signup" };
 
@@ -204,13 +205,13 @@ function EmailForm({
             data: { full_name: fullName },
           },
         });
-        if (error) return toast.error(error.message);
+        if (error) return toast.error(friendlyError(error));
         toast.success("Account created — welcome to SPACES.");
         const to = await resolveRedirect(data.user?.id, redirect);
         navigate({ to, replace: true });
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) return toast.error(error.message);
+        if (error) return toast.error(friendlyError(error));
         toast.success("Welcome back to SPACES.");
         const to = await resolveRedirect(data.user?.id, redirect);
         navigate({ to, replace: true });
@@ -297,7 +298,7 @@ function PhoneForm({
     const p = normalize(phone);
     const { error } = await supabase.auth.signInWithOtp({ phone: p });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error));
     toast.success(`Verification code sent to ${p}`);
     setStep("otp");
   }
@@ -308,7 +309,7 @@ function PhoneForm({
     const p = normalize(phone);
     const { data, error } = await supabase.auth.verifyOtp({ phone: p, token: otp, type: "sms" });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error));
     toast.success("Signed in.");
     const to = await resolveRedirect(data.user?.id, redirect);
     navigate({ to, replace: true });

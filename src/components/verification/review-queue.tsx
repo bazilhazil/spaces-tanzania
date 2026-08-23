@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 import {
+import { friendlyError } from "@/lib/errors";
   fetchAllVerifications, fetchVerificationEvents, decideVerification,
   addInternalNote, verificationDocUrl,
   type VerificationRequest, type VerificationEvent, type VerificationStatus,
@@ -35,7 +36,7 @@ export function VerificationReviewQueue() {
     try {
       setRows(await fetchAllVerifications("all"));
     } catch (error) {
-      toast.error((error as Error).message);
+      toast.error(friendlyError(error));
     } finally {
       setLoading(false);
     }
@@ -73,7 +74,7 @@ export function VerificationReviewQueue() {
       toast.success(t("verify.admin.decisionSaved"));
       await load();
     } catch (error) {
-      toast.error((error as Error).message);
+      toast.error(friendlyError(error));
     }
   }
 
@@ -176,7 +177,7 @@ function ReviewDialog({
       toast.success(t("verify.admin.decisionSaved"));
       onDone();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(friendlyError(e));
     } finally {
       setBusy(false);
     }

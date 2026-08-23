@@ -20,6 +20,7 @@ import {
 } from "@/lib/property-actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { friendlyError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/property/$id")({
   component: PropertyDetail,
@@ -157,7 +158,7 @@ function PropertyDetail() {
 
   async function updateStatus(next: "live" | "paused" | "draft" | "sold" | "rented" | "archived") {
     const { error } = await supabase.from("properties").update({ status: next as never }).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error));
     setRow({ ...row, status: next });
     toast.success("Status updated");
   }
