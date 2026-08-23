@@ -14,6 +14,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { StatCard } from "@/components/ds";
+import { supabase } from "@/integrations/supabase/client";
+
 import {
   evidenceUrl, listAllReports, listReportActions, logModerationAction, REPORT_STATUSES,
   setAccountStatus, setPropertyUnderReview, updateReport,
