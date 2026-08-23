@@ -339,23 +339,24 @@ export function PropertyMiniCard({ p }: { p: RecentProperty }) {
 
 
 function NonOwnerHome({ role }: { role: SpacesMode }) {
-  const items = role === "agent"
+  const { stats, loading } = useDashboardStats();
+  const items: StatItem[] = role === "agent"
     ? [
-        { label: "Active Inquiries", value: 0, icon: Users, delta: "+0", tone: "primary" },
-        { label: "Listings", value: 0, icon: Home, delta: "+0", tone: "emerald" },
-        { label: "Deals", value: 0, icon: DollarSign, delta: "+0", tone: "amber" },
-        { label: "Rating", value: "—", icon: BarChart3, delta: "—", tone: "violet" },
+        { label: "Active Inquiries", value: stats.activeInquiries, icon: Users, delta: `${stats.completedInquiries} completed`, tone: "primary", to: "/leads" },
+        { label: "Listings", value: stats.listings, icon: Home, delta: `${stats.totalListings} total`, tone: "emerald", to: "/dashboard/properties" },
+        { label: "Deals", value: stats.activeDeals, icon: DollarSign, delta: `${stats.completedDeals} completed`, tone: "amber", to: "/deals" },
+        { label: "Rating", value: stats.rating ?? "—", icon: BarChart3, delta: stats.rating ? "Verified rating" : "No rating yet", tone: "violet" },
       ]
     : [
-
-        { label: "Favorites", value: 0, icon: Heart, delta: "+0", tone: "primary" },
-        { label: "Saved Searches", value: 0, icon: BarChart3, delta: "+0", tone: "emerald" },
-        { label: "Viewings", value: 0, icon: Calendar, delta: "0 upcoming", tone: "amber" },
-        { label: "Messages", value: 0, icon: MessageSquare, delta: "0 unread", tone: "violet" },
+        { label: "Favorites", value: stats.favorites, icon: Heart, delta: "Saved spaces", tone: "primary", to: "/dashboard/favorites" },
+        { label: "Inquiries", value: stats.activeInquiries, icon: BarChart3, delta: "Active", tone: "emerald", to: "/leads" },
+        { label: "Viewings", value: stats.viewings, icon: Calendar, delta: "Upcoming", tone: "amber", to: "/viewings" },
+        { label: "Messages", value: stats.unreadMessages, icon: MessageSquare, delta: "Unread", tone: "violet", to: "/messages" },
       ];
   return (
     <>
-      <StatsGrid items={items} />
+      <StatsGrid items={items} loading={loading} />
+
       <div className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary to-primary/85 p-6 text-primary-foreground shadow-[var(--shadow-elevated)]">
         <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
           <div>
