@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
 import {
   Search, Phone, MessageCircle, Mail, Calendar as CalendarIcon, Clock, MapPin,
   Home, User, Loader2, ArrowUpRight, Handshake, StickyNote, Activity as ActivityIcon,
-  CheckCircle2, ChevronRight, Users, TrendingUp, Sparkles,
+  CheckCircle2, ChevronRight, Users, TrendingUp, Sparkles, MessagesSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +47,12 @@ export function LeadsCenter() {
   }, [isAdmin]);
 
   useEffect(() => { void load(); }, [load]);
+
+  // Deep link from Messages: /leads?lead=<id> opens that inquiry.
+  const search = useSearch({ strict: false }) as { lead?: string };
+  useEffect(() => {
+    if (search.lead) setSelectedId(search.lead);
+  }, [search.lead]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -302,6 +308,13 @@ function LeadDrawer({
         </div>
 
         <div className="mt-2 grid gap-2 sm:grid-cols-3">
+          {lead.conversationId && (
+            <Button asChild variant="outline" className="h-11 rounded-xl">
+              <Link to="/messages" search={{ c: lead.conversationId }}>
+                <MessagesSquare className="mr-2 h-4 w-4" />{t("crm.viewConversation")}
+              </Link>
+            </Button>
+          )}
           {lead.phone && (
             <Button asChild variant="outline" className="h-11 rounded-xl">
               <a href={`tel:${lead.phone}`}><Phone className="mr-2 h-4 w-4" />{t("crm.call")}</a>
