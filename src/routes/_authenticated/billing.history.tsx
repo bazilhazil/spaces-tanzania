@@ -65,7 +65,7 @@ function HistoryPage() {
             {/* Desktop table */}
             <div className="hidden md:block">
               <div className="grid grid-cols-[1.4fr_1fr_1fr_0.8fr_0.6fr] gap-3 border-b border-border/60 bg-secondary/40 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                <div>Invoice</div><div>Method</div><div>Date</div><div>Amount</div><div>Status</div><div />
+                <div>Invoice</div><div>Method</div><div>Date</div><div>Amount</div><div>Status</div>
               </div>
               <div className="divide-y divide-border/60">
                 {filtered.map((inv: InvoiceLike) => (
