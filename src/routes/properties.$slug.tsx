@@ -34,14 +34,89 @@ import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/properties/$slug")({
+  loader: async ({ params }) => {
+    const listing = await getListingSeo({ data: { id: idFromSlug(params.slug) } });
+    return { listing };
+  },
   component: PropertyDetailPage,
-  head: () => ({
-    meta: [
-      { title: "Property details · SPACES" },
-      { name: "description", content: "View verified property listings across Tanzania on SPACES." },
-    ],
-  }),
+  head: ({ params, loaderData }) => {
+    const listing = loaderData?.listing;
+    if (!listing) {
+      return {
+        meta: [
+          { title: "Space unavailable · SPACES" },
+          { name: "description", content: "This space is no longer available on SPACES." },
+          { name: "robots", content: "noindex" },
+        ],
+      };
+    }
+    const place = [listing.ward, listing.district, listing.city].filter(Boolean).join(", ");
+    const action = listing.listingType === "sale" ? "for Sale" : listing.listingType === "lease" ? "for Lease" : "for Rent";
+    const bed = listing.bedrooms ? `${listing.bedrooms} Bedroom ` : "";
+    const title = `${bed}${listing.category} ${action} in ${place || "Tanzania"} | SPACES`;
+    const priceText = `${listing.currency} ${listing.price.toLocaleString()}`;
+    const description =
+      (listing.description || "").replace(/\s+/g, " ").trim().slice(0, 150) ||
+      `${bed}${listing.category} ${action.toLowerCase()} in ${place || "Tanzania"} at ${priceText}. Verified listings on SPACES.`;
+    const canonical = canonicalPropertyUrl(propertySlug({ ...listing, id: listing.id }));
+    const image = `${SITE_URL}/api/public/og/property/${listing.id}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { name: "keywords", content: [listing.category, action, place, "Tanzania property", "SPACES"].filter(Boolean).join(", ") },
+        { property: "og:title", content: `${title.replace(" | SPACES", "")} — ${priceText}` },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: canonical },
+        { property: "og:image", content: image },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: image },
+      ],
+      links: [{ rel: "canonical", href: canonical }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "RealEstateListing",
+            name: listing.title,
+            description,
+            url: canonical,
+            image,
+            datePosted: listing.createdAt ?? undefined,
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: listing.district || listing.city || undefined,
+              addressRegion: listing.city || undefined,
+              addressCountry: "TZ",
+            },
+            offers: {
+              "@type": "Offer",
+              price: listing.price,
+              priceCurrency: listing.currency,
+              availability: "https://schema.org/InStock",
+              url: canonical,
+            },
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+              { "@type": "ListItem", position: 2, name: "Spaces", item: `${SITE_URL}/properties` },
+              { "@type": "ListItem", position: 3, name: listing.title, item: canonical },
+            ],
+          }),
+        },
+      ],
+    };
+  },
 });
+
 
 function PropertyDetailPage() {
   const { slug } = Route.useParams();
