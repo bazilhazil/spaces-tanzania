@@ -84,6 +84,27 @@ function PropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [queryText, setQueryText] = useState(search.q ?? "");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const { user } = useAuth();
+  const [saveSearchOpen, setSaveSearchOpen] = useState(false);
+  const [authGate, setAuthGate] = useState(false);
+
+  // Filters currently applied on screen — reused when saving the search.
+  const currentFilters: SavedSearchFilters = useMemo(() => ({
+    q: search.q,
+    type: search.type,
+    category: search.category,
+    city: search.city,
+    district: search.district,
+    area: search.area,
+    minPrice: search.minPrice,
+    maxPrice: search.maxPrice,
+    beds: search.beds,
+    baths: search.baths,
+    furnished: search.furnished,
+    verified: search.verified,
+    amenities: search.amenities,
+  }), [search]);
+
 
   useEffect(() => setQueryText(search.q ?? ""), [search.q]);
 
