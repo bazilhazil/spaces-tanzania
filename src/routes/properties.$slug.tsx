@@ -17,6 +17,8 @@ import { PropertyCard } from "@/components/property-card";
 import { AuthGateDialog } from "@/components/auth-gate-dialog";
 import { PropertyShareDialog } from "@/components/property-share-dialog";
 import { createLead, type LeadContactMethod } from "@/lib/leads-db";
+import { sendPropertyMessage } from "@/lib/inquiry";
+
 import { createViewingRequest } from "@/lib/viewings-db";
 import { VerifiedBadge } from "@/components/trust/verified-badge";
 import { ReportDialog } from "@/components/trust/report-dialog";
