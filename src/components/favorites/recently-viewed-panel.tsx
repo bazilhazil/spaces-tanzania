@@ -3,19 +3,21 @@ import { Link } from "@tanstack/react-router";
 import { Clock, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { properties } from "@/lib/mock-data";
+import { usePropertiesByIds } from "@/hooks/use-properties-by-ids";
+import type { Property } from "@/lib/mock-data";
 import { PropertyCard } from "@/components/property-card";
 import { useFavorites } from "@/hooks/use-favorites";
 
 export function RecentlyViewedPanel() {
   const { recentlyViewed, clearRecent } = useFavorites();
 
+  const { map: propertyMap } = usePropertiesByIds(recentlyViewed.map((r) => r.propertyId));
+
   const items = useMemo(() => {
-    const map = new Map(properties.map((p) => [p.id, p]));
     return recentlyViewed
-      .map((r) => ({ r, property: map.get(r.propertyId) }))
-      .filter((x): x is { r: typeof recentlyViewed[number]; property: typeof properties[number] } => Boolean(x.property));
-  }, [recentlyViewed]);
+      .map((r) => ({ r, property: propertyMap.get(r.propertyId) }))
+      .filter((x): x is { r: typeof recentlyViewed[number]; property: Property } => Boolean(x.property));
+  }, [recentlyViewed, propertyMap]);
 
   return (
     <div className="space-y-5">

@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Home, Users, ShieldCheck, Flag, Calendar, CreditCard, Receipt, Megaphone,
-  Bell, BarChart3, FileClock, Settings, ShieldAlert, LifeBuoy, MessageSquare,
-  UserCheck, TrendingUp, TrendingDown, Sparkles, CheckCircle2, XCircle,
-  AlertTriangle, Search, Filter, MoreHorizontal, Star, Eye, Crown,
-  RefreshCw, Download, Plus, Zap, Database, KeyRound, Power, Flame,
-  Activity, DollarSign, Building2, MapPin, Clock,
+  Home, Users, ShieldCheck, Flag, Calendar, CreditCard, Megaphone,
+  Bell, Settings, ShieldAlert, LifeBuoy, MessageSquare,
+  TrendingUp, Sparkles, CheckCircle2, XCircle,
+  AlertTriangle, Search, MoreHorizontal, Crown,
+  RefreshCw, Plus, Zap, Database, KeyRound, Power, FileClock,
+  Activity, DollarSign, MapPin, Clock, BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,12 +17,16 @@ import { StatusBadge } from "@/components/ds/status-badge";
 import { EmptyState } from "@/components/ds/empty-state";
 import { VerificationReviewQueue } from "@/components/verification/review-queue";
 import { cn } from "@/lib/utils";
+import { ROLE_LABELS, ROLE_MATRIX, type AdminRole } from "@/lib/admin-roles";
 import {
-  KPI, HIGHLIGHTS, ACTIVITY, MODERATION, USERS, REPORTS,
-  CHART_MONTHS, CHART_REVENUE, CHART_TRAFFIC, CHART_LISTINGS, TOP_KEYWORDS,
-  BOOKINGS, PAYMENTS, AUDIT_LOGS, SUPPORT_TICKETS, NOTIFICATIONS, CAMPAIGNS,
-  ROLE_LABELS, ROLE_MATRIX, type AdminRole,
-} from "@/lib/admin-mock";
+  fetchAdminOverview, fetchAdminActivity, fetchAdminSeries, fetchModerationQueue,
+  fetchAdminUsers, fetchAdminReports, fetchAdminBookings, fetchAdminPayments,
+  fetchAdminSubscriptions, fetchPropertyTypeMix, fetchRegionMix, moderateProperty,
+  type AdminOverview, type AdminActivityItem, type AdminSeries, type AdminQueueItem,
+  type AdminUser, type AdminReport, type AdminBooking, type AdminPayment,
+  type AdminSubscription, type MonthPoint, type QueueFilter,
+} from "@/lib/admin-db";
+import { friendlyError } from "@/lib/errors";
 import { toast } from "sonner";
 
 // ---------- Shared ----------
@@ -56,26 +60,65 @@ function Panel({ title, right, children, className }: { title?: string; right?: 
   );
 }
 
+/** Tiny data hook so every panel reads live database records. */
+function useLive<T>(loader: () => Promise<T>, initial: T, deps: unknown[] = []) {
+  const [data, setData] = useState<T>(initial);
+  const [loading, setLoading] = useState(true);
+  const [nonce, setNonce] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    loader()
+      .then((d) => { if (alive) setData(d); })
+      .catch(() => { /* handled by empty states */ })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce, ...deps]);
+  const reload = useCallback(() => setNonce((n) => n + 1), []);
+  return { data, loading, reload };
+}
+
+const nf = new Intl.NumberFormat("en-US");
+function money(amount: number, currency = "TZS") {
+  return `${currency} ${nf.format(Math.round(amount))}`;
+}
+function relative(iso: string) {
+  if (!iso) return "—";
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.round(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.round(h / 24);
+  if (d < 31) return `${d}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+function titleCase(v: string) {
+  return (v ?? "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 // ---------- Dashboard ----------
 
 const ACTIVITY_ICON = {
-  property_new: Home, property_approved: CheckCircle2, viewing_booked: Calendar,
-  user_new: Users, subscription_paid: CreditCard, verification_approved: ShieldCheck, report_filed: Flag,
+  property_new: Home, viewing_booked: Calendar, user_new: Users,
+  report_filed: Flag, verification_pending: ShieldCheck, deal_completed: CheckCircle2,
 } as const;
 const ACTIVITY_TONE = {
   property_new: "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]",
-  property_approved: "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)]",
   viewing_booked: "bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]",
   user_new: "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]",
-  subscription_paid: "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)]",
-  verification_approved: "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]",
   report_filed: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]",
+  verification_pending: "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)]",
+  deal_completed: "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)]",
 } as const;
 
 function Sparkline({ data, color = "var(--color-brand-500)" }: { data: number[]; color?: string }) {
+  if (!data.length) return null;
   const max = Math.max(...data), min = Math.min(...data);
   const pts = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * 100;
+    const x = (i / Math.max(1, data.length - 1)) * 100;
     const y = 100 - ((v - min) / Math.max(1, max - min)) * 100;
     return `${x},${y}`;
   }).join(" ");
@@ -86,212 +129,280 @@ function Sparkline({ data, color = "var(--color-brand-500)" }: { data: number[];
   );
 }
 
-function BarChart({ data, labels, color = "var(--color-brand-500)" }: { data: number[]; labels: string[]; color?: string }) {
-  const max = Math.max(...data);
+function BarChart({ points, color = "var(--color-brand-500)" }: { points: MonthPoint[]; color?: string }) {
+  const max = Math.max(1, ...points.map((p) => p.value));
   return (
     <div className="flex h-56 items-end gap-2">
-      {data.map((v, i) => (
+      {points.map((p, i) => (
         <div key={i} className="flex flex-1 flex-col items-center gap-1">
           <div className="flex w-full flex-1 items-end">
             <div className="w-full rounded-t-lg transition-all hover:opacity-80"
-              style={{ height: `${(v / max) * 100}%`, background: `linear-gradient(180deg, ${color}, color-mix(in oklab, ${color} 50%, transparent))` }} />
+              style={{ height: `${(p.value / max) * 100}%`, minHeight: p.value > 0 ? 4 : 0, background: `linear-gradient(180deg, ${color}, color-mix(in oklab, ${color} 50%, transparent))` }} />
           </div>
-          <span className="text-[10px] font-medium text-muted-foreground">{labels[i]}</span>
+          <span className="text-[10px] font-medium text-muted-foreground">{p.label}</span>
         </div>
       ))}
     </div>
   );
 }
 
+const EMPTY_SERIES: AdminSeries = { listings: [], users: [], views: [], hasData: false };
+
 export function DashboardPanel() {
+  const { data: overview, loading, reload } = useLive<AdminOverview | null>(fetchAdminOverview, null);
+  const { data: activity } = useLive<AdminActivityItem[]>(() => fetchAdminActivity(10), []);
+  const { data: series } = useLive<AdminSeries>(fetchAdminSeries, EMPTY_SERIES);
+
+  const kpis = overview
+    ? [
+        { label: "Total listings", value: nf.format(overview.properties.total), icon: Home, tone: "brand" as const },
+        { label: "Live listings", value: nf.format(overview.properties.live), icon: Home, tone: "success" as const },
+        { label: "Awaiting review", value: nf.format(overview.properties.pending + overview.properties.draft), icon: Clock, tone: "gold" as const },
+        { label: "Registered users", value: nf.format(overview.users.total), icon: Users, tone: "brand" as const },
+        { label: "Inquiries", value: nf.format(overview.activity.leads), icon: MessageSquare, tone: "brand" as const },
+        { label: "Viewings", value: nf.format(overview.activity.bookings), icon: Calendar, tone: "gold" as const },
+        { label: "Open reports", value: nf.format(overview.activity.reportsOpen), icon: Flag, tone: "danger" as const },
+        { label: "Confirmed revenue", value: money(overview.revenue.paidTotal, overview.revenue.currency), icon: DollarSign, tone: "success" as const },
+      ]
+    : [];
+
   return (
     <>
       <PageHeader
         kicker="Control Center"
-        title="Good morning, Administrator"
-        subtitle="Here's what's happening across SPACES right now."
-        actions={
-          <>
-            <Button variant="outline" size="sm" className="gap-2"><Download className="h-4 w-4" /> Export</Button>
-            <Button size="sm" className="gap-2"><RefreshCw className="h-4 w-4" /> Refresh</Button>
-          </>
-        }
+        title="Administrator overview"
+        subtitle="Every figure below is calculated live from the SPACES database."
+        actions={<Button size="sm" className="gap-2" onClick={reload}><RefreshCw className="h-4 w-4" /> Refresh</Button>}
       />
 
-      {/* KPI grid */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {KPI.map((k) => (
-          <StatCard key={k.label} label={k.label} value={k.value} delta={k.delta} tone={k.tone}
-            icon={k.label.includes("Revenue") ? DollarSign : k.label.includes("Listing") ? Home : k.label.includes("Booking") ? Calendar : Activity} />
-        ))}
-      </div>
-
-      {/* Highlights row */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {HIGHLIGHTS.map((h) => (
-          <div key={h.label} className="ds-card p-4">
-            <div className="ds-caption">{h.label}</div>
-            <div className="mt-1 flex items-center gap-2">
-              <div className="font-display text-lg font-semibold">{h.value}</div>
-              {h.label === "Platform Health" && <span className="h-2 w-2 animate-pulse rounded-full bg-[color:var(--color-success-500)]" />}
-            </div>
+      {loading && !overview ? (
+        <p className="text-sm text-muted-foreground">Loading live data…</p>
+      ) : !overview ? (
+        <EmptyState icon={Database} title="No data available" description="Platform metrics will appear once records exist." />
+      ) : (
+        <>
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            {kpis.map((k) => (
+              <StatCard key={k.label} label={k.label} value={k.value} tone={k.tone} icon={k.icon} />
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Revenue chart */}
-        <Panel title="Revenue" className="lg:col-span-2"
-          right={<div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="h-2 w-2 rounded-full bg-[color:var(--color-brand-500)]" /> TZS millions</div>}>
-          <BarChart data={CHART_REVENUE} labels={CHART_MONTHS} />
-        </Panel>
-
-        {/* Live activity */}
-        <Panel title="Live Activity"
-          right={<span className="inline-flex items-center gap-1.5 text-xs font-medium text-[color:var(--color-success-700)]"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[color:var(--color-success-500)]" /> Live</span>}>
-          <ul className="space-y-3">
-            {ACTIVITY.map((a) => {
-              const Icon = ACTIVITY_ICON[a.kind];
-              return (
-                <li key={a.id} className="flex items-start gap-3">
-                  <div className={cn("grid h-9 w-9 place-items-center rounded-xl shrink-0", ACTIVITY_TONE[a.kind])}>
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium leading-tight">{a.text}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{a.time}</p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </Panel>
-
-        <Panel title="Traffic" right={<span className="text-xs text-muted-foreground">visits (k)</span>}>
-          <Sparkline data={CHART_TRAFFIC} color="var(--color-brand-500)" />
-          <div className="mt-2 flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Last 12 months</span>
-            <span className="inline-flex items-center gap-1 font-semibold text-[color:var(--color-success-700)]"><TrendingUp className="h-3 w-3" /> +18.4%</span>
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {[
+              { label: "Verified listings", value: nf.format(overview.properties.verified) },
+              { label: "Owners", value: nf.format(overview.users.owners) },
+              { label: "Agents", value: nf.format(overview.users.agents) },
+              { label: "Deals completed", value: nf.format(overview.activity.dealsCompleted) },
+              { label: "Verifications pending", value: nf.format(overview.activity.verificationsPending) },
+            ].map((h) => (
+              <div key={h.label} className="ds-card p-4">
+                <div className="ds-caption">{h.label}</div>
+                <div className="mt-1 font-display text-lg font-semibold">{h.value}</div>
+              </div>
+            ))}
           </div>
-        </Panel>
 
-        <Panel title="New Listings" right={<span className="text-xs text-muted-foreground">per month</span>}>
-          <Sparkline data={CHART_LISTINGS} color="var(--color-gold-600)" />
-          <div className="mt-2 flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Last 12 months</span>
-            <span className="inline-flex items-center gap-1 font-semibold text-[color:var(--color-success-700)]"><TrendingUp className="h-3 w-3" /> +12.1%</span>
-          </div>
-        </Panel>
+          <div className="grid gap-6 lg:grid-cols-3">
+            <Panel title="New listings" className="lg:col-span-2"
+              right={<span className="text-xs text-muted-foreground">last 12 months</span>}>
+              {series.hasData ? <BarChart points={series.listings} /> : <EmptyState icon={BarChart3} title="Not enough history yet" description="Charts fill in as listings are published." />}
+            </Panel>
 
-        <Panel title="Conversion" right={<span className="text-xs text-muted-foreground">visits → bookings</span>}>
-          <div className="flex items-baseline gap-2">
-            <div className="font-display text-4xl font-semibold">4.7%</div>
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--color-danger-700)]"><TrendingDown className="h-3 w-3" /> -0.3%</span>
+            <Panel title="Recent activity"
+              right={<span className="inline-flex items-center gap-1.5 text-xs font-medium text-[color:var(--color-success-700)]"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[color:var(--color-success-500)]" /> Live</span>}>
+              {activity.length === 0 ? (
+                <EmptyState icon={Activity} title="No activity yet" description="New listings, sign-ups and viewings will show here." />
+              ) : (
+                <ul className="space-y-3">
+                  {activity.map((a) => {
+                    const Icon = ACTIVITY_ICON[a.kind];
+                    return (
+                      <li key={a.id} className="flex items-start gap-3">
+                        <div className={cn("grid h-9 w-9 place-items-center rounded-xl shrink-0", ACTIVITY_TONE[a.kind])}>
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium leading-tight">{a.text}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">{relative(a.at)}</p>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </Panel>
+
+            <Panel title="Property views" right={<span className="text-xs text-muted-foreground">per month</span>}>
+              {series.hasData
+                ? <Sparkline data={series.views.map((p) => p.value)} />
+                : <p className="text-sm text-muted-foreground">No view history recorded yet.</p>}
+            </Panel>
+
+            <Panel title="New members" right={<span className="text-xs text-muted-foreground">per month</span>}>
+              {series.hasData
+                ? <Sparkline data={series.users.map((p) => p.value)} color="var(--color-gold-600)" />
+                : <p className="text-sm text-muted-foreground">No sign-up history recorded yet.</p>}
+            </Panel>
+
+            <Panel title="Inquiry conversion" right={<span className="text-xs text-muted-foreground">inquiries → completed deals</span>}>
+              <div className="flex items-baseline gap-2">
+                <div className="font-display text-4xl font-semibold">
+                  {overview.activity.leads > 0
+                    ? `${Math.round((overview.activity.dealsCompleted / overview.activity.leads) * 100)}%`
+                    : "—"}
+                </div>
+              </div>
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-secondary">
+                <div className="h-full rounded-full bg-linear-to-r from-[color:var(--color-brand-500)] to-[color:var(--color-gold-500)]"
+                  style={{ width: `${overview.activity.leads > 0 ? Math.min(100, (overview.activity.dealsCompleted / overview.activity.leads) * 100) : 0}%` }} />
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {nf.format(overview.activity.dealsCompleted)} completed of {nf.format(overview.activity.leads)} inquiries
+              </p>
+            </Panel>
           </div>
-          <div className="mt-4 h-2 overflow-hidden rounded-full bg-secondary">
-            <div className="h-full rounded-full bg-linear-to-r from-[color:var(--color-brand-500)] to-[color:var(--color-gold-500)]" style={{ width: "47%" }} />
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">Target 10% by Q4 2026</p>
-        </Panel>
-      </div>
+        </>
+      )}
     </>
   );
 }
 
 // ---------- Property Moderation ----------
 
+const QUEUE_FILTERS: { id: QueueFilter; label: string }[] = [
+  { id: "review", label: "Awaiting review" },
+  { id: "live", label: "Live" },
+  { id: "rejected", label: "Rejected" },
+  { id: "all", label: "All" },
+];
+
 export function PropertiesPanel() {
-  const [selected, setSelected] = useState<string | null>(MODERATION[0]?.id ?? null);
-  const item = MODERATION.find((m) => m.id === selected);
+  const [filter, setFilter] = useState<QueueFilter>("review");
+  const { data: items, loading, reload } = useLive<AdminQueueItem[]>(
+    () => fetchModerationQueue(filter),
+    [],
+    [filter],
+  );
+  const [selected, setSelected] = useState<string | null>(null);
+  const item = items.find((m) => m.id === selected) ?? items[0] ?? null;
+
+  const act = async (id: string, action: Parameters<typeof moderateProperty>[1], label: string) => {
+    try {
+      await moderateProperty(id, action);
+      toast.success(label);
+      reload();
+    } catch (e) {
+      toast.error(friendlyError(e));
+    }
+  };
 
   return (
     <>
-      <PageHeader kicker="Moderation" title="Property Queue" subtitle="Review, approve, or escalate new listings."
-        actions={<><Button variant="outline" size="sm" className="gap-2"><Filter className="h-4 w-4" /> Filters</Button><Button size="sm" className="gap-2"><Sparkles className="h-4 w-4" /> Auto-triage</Button></>} />
+      <PageHeader kicker="Moderation" title="Property Queue" subtitle="Review, approve, or escalate real listings submitted by owners and agents."
+        actions={<Button size="sm" variant="outline" className="gap-2" onClick={reload}><RefreshCw className="h-4 w-4" /> Refresh</Button>} />
 
-      <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
-        <div className="space-y-3">
-          {MODERATION.map((p) => (
-            <button key={p.id} onClick={() => setSelected(p.id)}
-              className={cn("ds-card w-full overflow-hidden text-left transition-all ds-press",
-                selected === p.id ? "ring-2 ring-[color:var(--color-brand-500)]" : "hover:shadow-[var(--shadow-md)]")}>
-              <div className="relative aspect-[16/10] w-full bg-secondary">
-                <img src={p.cover} alt={p.title} className="h-full w-full object-cover" loading="lazy" />
-                <div className="absolute right-2 top-2 flex gap-1.5">
-                  {p.verified && <StatusBadge kind="verified" />}
-                  <StatusBadge kind="pending" />
-                </div>
-              </div>
-              <div className="p-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="truncate text-sm font-semibold">{p.title}</h3>
-                    <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" /> {p.location}</p>
-                  </div>
-                  <span className="text-sm font-semibold text-primary">{p.price}</span>
-                </div>
-                <div className="mt-3 flex items-center gap-3 text-[11px]">
-                  <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold",
-                    p.quality >= 80 ? "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)]"
-                    : p.quality >= 60 ? "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)]"
-                    : "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]")}>
-                    <Zap className="h-3 w-3" /> Quality {p.quality}
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-muted-foreground"><Star className="h-3 w-3" /> Owner {p.ownerScore}</span>
-                  <span className="ml-auto text-muted-foreground">{p.submitted}</span>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {item ? (
-          <div className="ds-card overflow-hidden">
-            <div className="relative aspect-[21/9] w-full bg-secondary">
-              <img src={item.cover} alt={item.title} className="h-full w-full object-cover" />
-              <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 to-transparent p-6 text-white">
-                <div className="flex items-center gap-2">
-                  {item.verified && <StatusBadge kind="verified" />}
-                  <StatusBadge kind="pending" />
-                </div>
-                <h2 className="mt-2 font-display text-2xl font-semibold">{item.title}</h2>
-                <p className="mt-1 flex items-center gap-1 text-sm opacity-90"><MapPin className="h-3.5 w-3.5" /> {item.location} • {item.price}</p>
-              </div>
-            </div>
-
-            <div className="grid gap-4 p-6 sm:grid-cols-3">
-              <div className="ds-card p-4">
-                <div className="ds-caption">Listing Quality</div>
-                <div className="mt-1 font-display text-2xl font-semibold text-[color:var(--color-success-700)]">{item.quality}/100</div>
-                <div className="mt-2 h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-[color:var(--color-success-500)]" style={{ width: `${item.quality}%` }} /></div>
-              </div>
-              <div className="ds-card p-4">
-                <div className="ds-caption">Owner Trust Score</div>
-                <div className="mt-1 font-display text-2xl font-semibold">{item.ownerScore}/100</div>
-                <div className="mt-2 h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-[color:var(--color-brand-500)]" style={{ width: `${item.ownerScore}%` }} /></div>
-              </div>
-              <div className="ds-card p-4">
-                <div className="ds-caption">Verification</div>
-                <div className="mt-1 flex items-center gap-2 font-display text-lg font-semibold">
-                  {item.verified ? <><CheckCircle2 className="h-5 w-5 text-[color:var(--color-success-600)]" /> Verified</> : <><AlertTriangle className="h-5 w-5 text-[color:var(--color-warning-600)]" /> Unverified</>}
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground">Submitted {item.submitted}</p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2 border-t border-border/60 bg-secondary/30 p-4">
-              <Button variant="success" size="sm" className="gap-2" onClick={() => toast.success("Listing approved")}><CheckCircle2 className="h-4 w-4" /> Approve</Button>
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info("Changes requested")}><RefreshCw className="h-4 w-4" /> Request Changes</Button>
-              <Button variant="destructive" size="sm" className="gap-2" onClick={() => toast.error("Listing rejected")}><XCircle className="h-4 w-4" /> Reject</Button>
-              <div className="mx-2 h-6 w-px bg-border" />
-              <Button variant="gold" size="sm" className="gap-2" onClick={() => toast.success("Featured")}><Sparkles className="h-4 w-4" /> Feature</Button>
-              <Button variant="premium" size="sm" className="gap-2" onClick={() => toast.success("Promoted to Premium")}><Crown className="h-4 w-4" /> Premium</Button>
-              <Button variant="ghost" size="sm" className="gap-2 ml-auto" onClick={() => toast.warning("Suspended")}><Power className="h-4 w-4" /> Suspend</Button>
-              <Button variant="ghost" size="sm" className="gap-2" onClick={() => toast("Archived")}><Database className="h-4 w-4" /> Archive</Button>
-            </div>
-          </div>
-        ) : <EmptyState icon={Home} title="Nothing selected" description="Pick a listing from the queue to review." />}
+      <div className="mb-5 flex flex-wrap gap-2">
+        {QUEUE_FILTERS.map((f) => (
+          <Button key={f.id} size="sm" variant={filter === f.id ? "default" : "outline"} onClick={() => { setFilter(f.id); setSelected(null); }}>
+            {f.label}
+          </Button>
+        ))}
       </div>
+
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Loading listings…</p>
+      ) : items.length === 0 ? (
+        <EmptyState icon={Home} title="Queue is clear" description="There are no listings matching this filter right now." />
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
+          <div className="space-y-3">
+            {items.map((p) => (
+              <button key={p.id} onClick={() => setSelected(p.id)}
+                className={cn("ds-card w-full overflow-hidden text-left transition-all ds-press",
+                  item?.id === p.id ? "ring-2 ring-[color:var(--color-brand-500)]" : "hover:shadow-[var(--shadow-md)]")}>
+                <div className="relative aspect-[16/10] w-full bg-secondary">
+                  {p.cover
+                    ? <img src={p.cover} alt={p.title} className="h-full w-full object-cover" loading="lazy" />
+                    : <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">No photo uploaded</div>}
+                  <div className="absolute right-2 top-2 flex gap-1.5">
+                    {p.verified && <StatusBadge kind="verified" />}
+                    <Badge variant="muted" className="capitalize">{titleCase(p.status)}</Badge>
+                  </div>
+                </div>
+                <div className="p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-semibold">{p.title}</h3>
+                      <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" /> {p.location}</p>
+                    </div>
+                    <span className="shrink-0 text-sm font-semibold text-primary">{money(p.price, p.currency)}</span>
+                  </div>
+                  <div className="mt-3 flex items-center gap-3 text-[11px]">
+                    <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold",
+                      p.quality >= 80 ? "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)]"
+                      : p.quality >= 60 ? "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)]"
+                      : "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]")}>
+                      <Zap className="h-3 w-3" /> Complete {p.quality}%
+                    </span>
+                    <span className="ml-auto text-muted-foreground">{relative(p.createdAt)}</span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {item ? (
+            <div className="ds-card overflow-hidden">
+              <div className="relative aspect-[21/9] w-full bg-secondary">
+                {item.cover
+                  ? <img src={item.cover} alt={item.title} className="h-full w-full object-cover" />
+                  : <div className="grid h-full w-full place-items-center text-sm text-muted-foreground">No photo uploaded</div>}
+                <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 to-transparent p-6 text-white">
+                  <div className="flex items-center gap-2">
+                    {item.verified && <StatusBadge kind="verified" />}
+                    <Badge variant="muted" className="capitalize">{titleCase(item.status)}</Badge>
+                  </div>
+                  <h2 className="mt-2 font-display text-2xl font-semibold">{item.title}</h2>
+                  <p className="mt-1 flex items-center gap-1 text-sm opacity-90">
+                    <MapPin className="h-3.5 w-3.5" /> {item.location} • {money(item.price, item.currency)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 p-6 sm:grid-cols-3">
+                <div className="ds-card p-4">
+                  <div className="ds-caption">Listing completeness</div>
+                  <div className="mt-1 font-display text-2xl font-semibold">{item.quality}%</div>
+                  <div className="mt-2 h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-[color:var(--color-success-500)]" style={{ width: `${item.quality}%` }} /></div>
+                </div>
+                <div className="ds-card p-4">
+                  <div className="ds-caption">Submitted by</div>
+                  <div className="mt-1 font-display text-lg font-semibold">{item.ownerName}</div>
+                  <p className="mt-2 text-xs text-muted-foreground">{relative(item.createdAt)}</p>
+                </div>
+                <div className="ds-card p-4">
+                  <div className="ds-caption">Verification</div>
+                  <div className="mt-1 flex items-center gap-2 font-display text-lg font-semibold">
+                    {item.verified ? <><CheckCircle2 className="h-5 w-5 text-[color:var(--color-success-600)]" /> Verified</> : <><AlertTriangle className="h-5 w-5 text-[color:var(--color-warning-600)]" /> Unverified</>}
+                  </div>
+                  {item.underReview && <p className="mt-2 text-xs text-muted-foreground">Changes requested: {item.underReviewReason}</p>}
+                  {item.rejectionReason && <p className="mt-2 text-xs text-muted-foreground">Rejected: {item.rejectionReason}</p>}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 border-t border-border/60 bg-secondary/30 p-4">
+                <Button variant="success" size="sm" className="gap-2" onClick={() => act(item.id, "approve", "Listing approved and published")}><CheckCircle2 className="h-4 w-4" /> Approve</Button>
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => act(item.id, "request_changes", "Changes requested from the owner")}><RefreshCw className="h-4 w-4" /> Request Changes</Button>
+                <Button variant="destructive" size="sm" className="gap-2" onClick={() => act(item.id, "reject", "Listing rejected")}><XCircle className="h-4 w-4" /> Reject</Button>
+                <div className="mx-2 h-6 w-px bg-border" />
+                <Button variant="gold" size="sm" className="gap-2" onClick={() => act(item.id, "feature", "Listing featured")}><Sparkles className="h-4 w-4" /> Feature</Button>
+                <Button variant="ghost" size="sm" className="gap-2 ml-auto" onClick={() => act(item.id, "suspend", "Listing paused")}><Power className="h-4 w-4" /> Pause</Button>
+                <Button variant="ghost" size="sm" className="gap-2" onClick={() => act(item.id, "archive", "Listing archived")}><Database className="h-4 w-4" /> Archive</Button>
+              </div>
+            </div>
+          ) : <EmptyState icon={Home} title="Nothing selected" description="Pick a listing from the queue to review." />}
+        </div>
+      )}
     </>
   );
 }
@@ -299,60 +410,74 @@ export function PropertiesPanel() {
 // ---------- Users ----------
 
 export function UsersPanel() {
+  const { data: users, loading } = useLive<AdminUser[]>(fetchAdminUsers, []);
   const [q, setQ] = useState("");
-  const rows = useMemo(() => USERS.filter((u) => (u.name + u.email).toLowerCase().includes(q.toLowerCase())), [q]);
+  const rows = useMemo(
+    () => users.filter((u) => (u.name + (u.email ?? "")).toLowerCase().includes(q.toLowerCase())),
+    [users, q],
+  );
   return (
     <>
-      <PageHeader kicker="Community" title="User Management" subtitle="Search, filter, and act on any account across SPACES."
-        actions={<Button size="sm" className="gap-2"><Plus className="h-4 w-4" /> Invite Admin</Button>} />
+      <PageHeader kicker="Community" title="User Management" subtitle="Every registered SPACES account, straight from the database." />
       <Panel>
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <div className="relative w-full sm:flex-1 sm:min-w-[240px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input placeholder="Search users by name or email…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
           </div>
-          <Button variant="outline" size="sm" className="gap-2"><Filter className="h-4 w-4" /> Role</Button>
-          <Button variant="outline" size="sm" className="gap-2"><Filter className="h-4 w-4" /> Status</Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.warning("Bulk suspend applied")}>Bulk Suspend</Button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
-              <tr className="border-b border-border/60">
-                <th className="py-3 pr-4 font-medium">User</th>
-                <th className="py-3 pr-4 font-medium">Role</th>
-                <th className="py-3 pr-4 font-medium">Status</th>
-                <th className="py-3 pr-4 font-medium">Joined</th>
-                <th className="py-3 pr-4 font-medium">Listings</th>
-                <th className="py-3 pr-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((u) => (
-                <tr key={u.id} className="border-b border-border/40 last:border-0 hover:bg-secondary/40">
-                  <td className="py-3 pr-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9"><AvatarFallback className="bg-primary/10 text-primary font-semibold">{u.name.split(" ").map(s=>s[0]).join("")}</AvatarFallback></Avatar>
-                      <div><div className="font-semibold">{u.name}</div><div className="text-xs text-muted-foreground">{u.email}</div></div>
-                    </div>
-                  </td>
-                  <td className="py-3 pr-4"><Badge variant="muted" className="capitalize">{u.role}</Badge></td>
-                  <td className="py-3 pr-4">
-                    {u.status === "active" ? <Badge variant="success">Active</Badge>
-                     : u.status === "pending" ? <Badge variant="warning">Pending</Badge>
-                     : <Badge variant="destructive">Suspended</Badge>}
-                  </td>
-                  <td className="py-3 pr-4 text-muted-foreground">{u.joined}</td>
-                  <td className="py-3 pr-4 font-medium">{u.listings}</td>
-                  <td className="py-3 pr-4 text-right">
-                    <Button variant="ghost" size="icon" onClick={() => toast("Opened user details")}><MoreHorizontal className="h-4 w-4" /></Button>
-                  </td>
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading users…</p>
+        ) : rows.length === 0 ? (
+          <EmptyState icon={Users} title="No users found" description="No accounts match this search." />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <tr className="border-b border-border/60">
+                  <th className="py-3 pr-4 font-medium">User</th>
+                  <th className="py-3 pr-4 font-medium">Roles</th>
+                  <th className="py-3 pr-4 font-medium">Status</th>
+                  <th className="py-3 pr-4 font-medium">Joined</th>
+                  <th className="py-3 pr-4 font-medium">Listings</th>
+                  <th className="py-3 pr-4 font-medium text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rows.map((u) => (
+                  <tr key={u.id} className="border-b border-border/40 last:border-0 hover:bg-secondary/40">
+                    <td className="py-3 pr-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9"><AvatarFallback className="bg-primary/10 text-primary font-semibold">{u.name.split(" ").map((s) => s[0]).join("").slice(0, 2)}</AvatarFallback></Avatar>
+                        <div><div className="font-semibold">{u.name}</div><div className="text-xs text-muted-foreground">{u.email ?? u.phone ?? "—"}</div></div>
+                      </div>
+                    </td>
+                    <td className="py-3 pr-4">
+                      <div className="flex flex-wrap gap-1">
+                        {u.roles.length === 0
+                          ? <Badge variant="muted">buyer</Badge>
+                          : u.roles.map((r) => <Badge key={r} variant="muted" className="capitalize">{titleCase(r)}</Badge>)}
+                      </div>
+                    </td>
+                    <td className="py-3 pr-4">
+                      {u.status === "active" ? <Badge variant="success">Active</Badge>
+                        : u.status === "suspended" ? <Badge variant="warning">Suspended</Badge>
+                        : <Badge variant="destructive">Banned</Badge>}
+                    </td>
+                    <td className="py-3 pr-4 text-muted-foreground">{new Date(u.joined).toLocaleDateString()}</td>
+                    <td className="py-3 pr-4 font-medium">{u.listings}</td>
+                    <td className="py-3 pr-4 text-right">
+                      <Button variant="ghost" size="icon" asChild>
+                        <a href={`/profile/${u.id}`} aria-label={`Open profile for ${u.name}`}><MoreHorizontal className="h-4 w-4" /></a>
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Panel>
     </>
   );
@@ -361,31 +486,34 @@ export function UsersPanel() {
 // ---------- Agents ----------
 
 export function AgentsPanel() {
-  const agents = USERS.filter((u) => u.role === "agent").concat(
-    [{ id: "u10", name: "Habari Homes", email: "hello@habari.co.tz", role: "agent", status: "active", joined: "Aug 2024", listings: 41 }],
-  );
+  const { data: users, loading } = useLive<AdminUser[]>(fetchAdminUsers, []);
+  const agents = users.filter((u) => u.roles.includes("agent"));
   return (
     <>
-      <PageHeader kicker="Community" title="Agents" subtitle="Certified agents and agencies operating on SPACES." />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {agents.map((a) => (
-          <div key={a.id} className="ds-card ds-card-hover p-5">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12"><AvatarFallback className="bg-[color:var(--color-brand-600)] text-white font-semibold">{a.name.split(" ").map(s=>s[0]).join("")}</AvatarFallback></Avatar>
-                <div><div className="font-semibold">{a.name}</div><div className="text-xs text-muted-foreground">{a.email}</div></div>
+      <PageHeader kicker="Community" title="Agents" subtitle="Accounts holding the agent role on SPACES." />
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Loading agents…</p>
+      ) : agents.length === 0 ? (
+        <EmptyState icon={Users} title="No agents yet" description="Accounts granted the agent role will appear here." />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {agents.map((a) => (
+            <div key={a.id} className="ds-card ds-card-hover p-5">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-12 w-12"><AvatarFallback className="bg-[color:var(--color-brand-600)] text-white font-semibold">{a.name.split(" ").map((s) => s[0]).join("").slice(0, 2)}</AvatarFallback></Avatar>
+                  <div><div className="font-semibold">{a.name}</div><div className="text-xs text-muted-foreground">{a.email ?? a.phone ?? "—"}</div></div>
+                </div>
+                {a.status === "active" ? <Badge variant="success">Active</Badge> : <Badge variant="warning" className="capitalize">{a.status}</Badge>}
               </div>
-              <StatusBadge kind="verified" />
+              <div className="mt-4 grid grid-cols-2 gap-3 text-center">
+                <div><div className="font-display text-lg font-semibold">{a.listings}</div><div className="ds-caption">Listings</div></div>
+                <div><div className="font-display text-lg font-semibold">{new Date(a.joined).getFullYear()}</div><div className="ds-caption">Member since</div></div>
+              </div>
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-              <div><div className="font-display text-lg font-semibold">{a.listings}</div><div className="ds-caption">Listings</div></div>
-              <div><div className="font-display text-lg font-semibold">4.9</div><div className="ds-caption">Rating</div></div>
-              <div><div className="font-display text-lg font-semibold">12m</div><div className="ds-caption">Avg reply</div></div>
-            </div>
-            <div className="mt-4 flex gap-2"><Button size="sm" variant="outline" className="flex-1">View</Button><Button size="sm" className="flex-1">Message</Button></div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </>
   );
 }
@@ -404,42 +532,52 @@ export function VerificationPanel() {
 // ---------- Reports ----------
 
 export function ReportsPanel() {
+  const { data: reports, loading } = useLive<AdminReport[]>(fetchAdminReports, []);
+  const open = reports.filter((r) => r.status === "new" || r.status === "under_review" || r.status === "more_info");
+  const resolved = reports.filter((r) => r.status === "resolved");
+  const urgent = reports.filter((r) => r.priority === "urgent" || r.priority === "high");
   return (
     <>
       <PageHeader kicker="Trust & Safety" title="Reports" subtitle="User-submitted reports across listings, users, and messages." />
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Pending" value="14" tone="danger" icon={Flag} />
-        <StatCard label="Resolved (7d)" value="42" tone="success" icon={CheckCircle2} />
-        <StatCard label="High severity" value="3" tone="danger" icon={AlertTriangle} />
-        <StatCard label="Avg resolution" value="4h 12m" tone="brand" icon={Clock} />
+        <StatCard label="Open" value={nf.format(open.length)} tone="danger" icon={Flag} />
+        <StatCard label="Resolved" value={nf.format(resolved.length)} tone="success" icon={CheckCircle2} />
+        <StatCard label="High priority" value={nf.format(urgent.length)} tone="danger" icon={AlertTriangle} />
+        <StatCard label="Total" value={nf.format(reports.length)} tone="brand" icon={Clock} />
       </div>
       <Panel>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
-              <tr className="border-b border-border/60">
-                <th className="py-3 pr-4 font-medium">Target</th>
-                <th className="py-3 pr-4 font-medium">Reason</th>
-                <th className="py-3 pr-4 font-medium">Reporter</th>
-                <th className="py-3 pr-4 font-medium">Severity</th>
-                <th className="py-3 pr-4 font-medium">Status</th>
-                <th className="py-3 pr-4 font-medium text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {REPORTS.map((r) => (
-                <tr key={r.id} className="border-b border-border/40 last:border-0 hover:bg-secondary/40">
-                  <td className="py-3 pr-4 font-medium">{r.target}</td>
-                  <td className="py-3 pr-4">{r.reason}</td>
-                  <td className="py-3 pr-4 text-muted-foreground">{r.reporter}</td>
-                  <td className="py-3 pr-4"><Badge variant={r.severity === "high" ? "destructive" : r.severity === "medium" ? "warning" : "muted"} className="capitalize">{r.severity}</Badge></td>
-                  <td className="py-3 pr-4">{r.status === "resolved" ? <Badge variant="success">Resolved</Badge> : <Badge variant="warning">Pending</Badge>}</td>
-                  <td className="py-3 pr-4 text-right"><Button size="sm" variant="outline">Review</Button></td>
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading reports…</p>
+        ) : reports.length === 0 ? (
+          <EmptyState icon={Flag} title="No reports" description="Nothing has been reported on SPACES yet." />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <tr className="border-b border-border/60">
+                  <th className="py-3 pr-4 font-medium">Reference</th>
+                  <th className="py-3 pr-4 font-medium">Target</th>
+                  <th className="py-3 pr-4 font-medium">Reason</th>
+                  <th className="py-3 pr-4 font-medium">Priority</th>
+                  <th className="py-3 pr-4 font-medium">Status</th>
+                  <th className="py-3 pr-4 font-medium">Filed</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {reports.map((r) => (
+                  <tr key={r.id} className="border-b border-border/40 last:border-0 hover:bg-secondary/40">
+                    <td className="py-3 pr-4 font-mono text-xs">{r.reference}</td>
+                    <td className="py-3 pr-4 capitalize">{titleCase(r.target)}</td>
+                    <td className="py-3 pr-4">{titleCase(r.reason)}</td>
+                    <td className="py-3 pr-4"><Badge variant={r.priority === "urgent" ? "destructive" : r.priority === "high" ? "warning" : "muted"} className="capitalize">{r.priority}</Badge></td>
+                    <td className="py-3 pr-4">{r.status === "resolved" ? <Badge variant="success">Resolved</Badge> : r.status === "dismissed" ? <Badge variant="muted">Dismissed</Badge> : <Badge variant="warning" className="capitalize">{titleCase(r.status)}</Badge>}</td>
+                    <td className="py-3 pr-4 text-muted-foreground">{relative(r.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Panel>
     </>
   );
@@ -448,23 +586,32 @@ export function ReportsPanel() {
 // ---------- Bookings / Messages / Support ----------
 
 export function BookingsPanel() {
+  const { data: bookings, loading } = useLive<AdminBooking[]>(fetchAdminBookings, []);
   return (
     <>
-      <PageHeader kicker="Operations" title="Bookings" subtitle="All scheduled viewings across SPACES." />
+      <PageHeader kicker="Operations" title="Viewings" subtitle="All scheduled viewings across SPACES." />
       <Panel>
-        <div className="space-y-3">
-          {BOOKINGS.map((b) => (
-            <div key={b.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-border/60 p-4">
-              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]"><Calendar className="h-5 w-5" /></div>
-              <div className="min-w-0 flex-1">
-                <div className="font-semibold">{b.property}</div>
-                <div className="text-xs text-muted-foreground">{b.user} • Agent: {b.agent}</div>
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading viewings…</p>
+        ) : bookings.length === 0 ? (
+          <EmptyState icon={Calendar} title="No viewings booked" description="Viewing requests will appear here as buyers schedule them." />
+        ) : (
+          <div className="space-y-3">
+            {bookings.map((b) => (
+              <div key={b.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-border/60 p-4">
+                <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]"><Calendar className="h-5 w-5" /></div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold">{b.propertyTitle}</div>
+                  <div className="text-xs text-muted-foreground">{b.buyerName}</div>
+                </div>
+                <div className="text-sm font-medium">{new Date(b.scheduledAt).toLocaleString()}</div>
+                {b.status === "confirmed" ? <Badge variant="success">Confirmed</Badge>
+                  : b.status === "cancelled" ? <Badge variant="destructive">Cancelled</Badge>
+                  : <Badge variant="warning" className="capitalize">{titleCase(b.status)}</Badge>}
               </div>
-              <div className="text-sm font-medium">{b.when}</div>
-              {b.status === "confirmed" ? <Badge variant="success">Confirmed</Badge> : <Badge variant="warning">Pending</Badge>}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </Panel>
     </>
   );
@@ -474,7 +621,7 @@ export function MessagesPanel() {
   return (
     <>
       <PageHeader kicker="Operations" title="Messages" subtitle="Moderate flagged conversations and support threads." />
-      <EmptyState icon={MessageSquare} title="Nothing flagged" description="All conversations are within community guidelines. Nice work." />
+      <EmptyState icon={MessageSquare} title="Nothing flagged" description="Flagged conversations appear here from the Safety queue." />
     </>
   );
 }
@@ -482,25 +629,8 @@ export function MessagesPanel() {
 export function SupportPanel() {
   return (
     <>
-      <PageHeader kicker="Operations" title="Support" subtitle="Active user tickets." />
-      <Panel>
-        <div className="space-y-3">
-          {SUPPORT_TICKETS.map((t) => (
-            <div key={t.id} className="flex flex-wrap items-center gap-4 rounded-2xl border border-border/60 p-4">
-              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]"><LifeBuoy className="h-5 w-5" /></div>
-              <div className="min-w-0 flex-1">
-                <div className="font-semibold">{t.subject}</div>
-                <div className="text-xs text-muted-foreground">{t.user} • {t.when}</div>
-              </div>
-              <Badge variant={t.priority === "high" ? "destructive" : t.priority === "medium" ? "warning" : "muted"} className="capitalize">{t.priority}</Badge>
-              {t.status === "resolved" ? <Badge variant="success">Resolved</Badge>
-                : t.status === "pending" ? <Badge variant="warning">Pending</Badge>
-                : <Badge variant="destructive">Open</Badge>}
-              <Button size="sm" variant="outline">Open</Button>
-            </div>
-          ))}
-        </div>
-      </Panel>
+      <PageHeader kicker="Operations" title="Support" subtitle="User support tickets." />
+      <EmptyState icon={LifeBuoy} title="Support inbox not connected" description="No ticketing system is connected to SPACES yet, so there are no tickets to show." />
     </>
   );
 }
@@ -508,70 +638,78 @@ export function SupportPanel() {
 // ---------- Payments & Subscriptions ----------
 
 export function PaymentsPanel() {
+  const { data: payments, loading } = useLive<AdminPayment[]>(fetchAdminPayments, []);
+  const paid = payments.filter((p) => p.status === "paid" || p.status === "succeeded");
+  const refunded = payments.filter((p) => p.status === "refunded");
+  const total = paid.reduce((s, p) => s + p.amount, 0);
+  const currency = payments[0]?.currency ?? "TZS";
   return (
     <>
-      <PageHeader kicker="Revenue" title="Payments" subtitle="All transactions across SPACES." />
+      <PageHeader kicker="Revenue" title="Payments" subtitle="All transactions recorded on SPACES." />
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Today" value="TZS 8.4M" delta={6.2} tone="success" icon={DollarSign} />
-        <StatCard label="This week" value="TZS 42.1M" delta={11.0} tone="brand" icon={DollarSign} />
-        <StatCard label="Refunds (30d)" value="TZS 620K" delta={-2.0} tone="danger" icon={RefreshCw} />
-        <StatCard label="Success rate" value="98.6%" tone="success" icon={CheckCircle2} />
+        <StatCard label="Confirmed revenue" value={money(total, currency)} tone="success" icon={DollarSign} />
+        <StatCard label="Payments" value={nf.format(payments.length)} tone="brand" icon={CreditCard} />
+        <StatCard label="Refunded" value={nf.format(refunded.length)} tone="danger" icon={RefreshCw} />
+        <StatCard label="Success rate" value={payments.length ? `${Math.round((paid.length / payments.length) * 100)}%` : "—"} tone="success" icon={CheckCircle2} />
       </div>
       <Panel>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
-              <tr className="border-b border-border/60">
-                <th className="py-3 pr-4 font-medium">User</th>
-                <th className="py-3 pr-4 font-medium">Product</th>
-                <th className="py-3 pr-4 font-medium">Amount</th>
-                <th className="py-3 pr-4 font-medium">When</th>
-                <th className="py-3 pr-4 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {PAYMENTS.map((p) => (
-                <tr key={p.id} className="border-b border-border/40 last:border-0 hover:bg-secondary/40">
-                  <td className="py-3 pr-4 font-medium">{p.user}</td>
-                  <td className="py-3 pr-4">{p.plan}</td>
-                  <td className="py-3 pr-4 font-semibold">{p.amount}</td>
-                  <td className="py-3 pr-4 text-muted-foreground">{p.when}</td>
-                  <td className="py-3 pr-4">{p.status === "paid" ? <Badge variant="success">Paid</Badge> : <Badge variant="warning">Refunded</Badge>}</td>
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading payments…</p>
+        ) : payments.length === 0 ? (
+          <EmptyState icon={CreditCard} title="No payments yet" description="A payment gateway is not connected, so no transactions exist." />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <tr className="border-b border-border/60">
+                  <th className="py-3 pr-4 font-medium">Reference</th>
+                  <th className="py-3 pr-4 font-medium">Provider</th>
+                  <th className="py-3 pr-4 font-medium">Amount</th>
+                  <th className="py-3 pr-4 font-medium">When</th>
+                  <th className="py-3 pr-4 font-medium">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {payments.map((p) => (
+                  <tr key={p.id} className="border-b border-border/40 last:border-0 hover:bg-secondary/40">
+                    <td className="py-3 pr-4 font-mono text-xs">{p.reference ?? p.id.slice(0, 8)}</td>
+                    <td className="py-3 pr-4 capitalize">{titleCase(p.provider)}</td>
+                    <td className="py-3 pr-4 font-semibold">{money(p.amount, p.currency)}</td>
+                    <td className="py-3 pr-4 text-muted-foreground">{relative(p.createdAt)}</td>
+                    <td className="py-3 pr-4">{p.status === "paid" || p.status === "succeeded" ? <Badge variant="success">Paid</Badge> : <Badge variant="warning" className="capitalize">{titleCase(p.status)}</Badge>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Panel>
     </>
   );
 }
 
 export function SubscriptionsPanel() {
-  const plans = [
-    { name: "Buyer Plus", price: "TZS 25,000 / mo", subs: 1240, tone: "brand" },
-    { name: "Owner Pro", price: "TZS 60,000 / mo", subs: 348, tone: "gold" },
-    { name: "Agent Premium", price: "TZS 120,000 / mo", subs: 92, tone: "success" },
-  ];
+  const { data: plans, loading } = useLive<AdminSubscription[]>(fetchAdminSubscriptions, []);
   return (
     <>
-      <PageHeader kicker="Revenue" title="Subscriptions" subtitle="Manage recurring revenue tiers." actions={<Button size="sm" className="gap-2"><Plus className="h-4 w-4" /> New Plan</Button>} />
-      <div className="grid gap-4 md:grid-cols-3">
-        {plans.map((p) => (
-          <div key={p.name} className="ds-card ds-card-hover p-6">
-            <div className="ds-caption">{p.name}</div>
-            <div className="mt-2 font-display text-2xl font-semibold">{p.price}</div>
-            <div className="mt-4 flex items-baseline gap-2">
-              <div className="font-display text-4xl font-semibold text-primary">{p.subs}</div>
-              <div className="ds-caption">active subs</div>
+      <PageHeader kicker="Revenue" title="Subscriptions" subtitle="Recurring plans currently held by SPACES accounts." />
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Loading subscriptions…</p>
+      ) : plans.length === 0 ? (
+        <EmptyState icon={CreditCard} title="No subscriptions yet" description="Plans will appear here once accounts subscribe." />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-3">
+          {plans.map((p) => (
+            <div key={p.plan} className="ds-card ds-card-hover p-6">
+              <div className="ds-caption capitalize">{titleCase(p.plan)}</div>
+              <div className="mt-4 flex items-baseline gap-2">
+                <div className="font-display text-4xl font-semibold text-primary">{p.active}</div>
+                <div className="ds-caption">active of {p.total}</div>
+              </div>
             </div>
-            <div className="mt-4 flex gap-2">
-              <Button size="sm" variant="outline" className="flex-1">Edit</Button>
-              <Button size="sm" className="flex-1">View</Button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </>
   );
 }
@@ -579,44 +717,45 @@ export function SubscriptionsPanel() {
 // ---------- Analytics ----------
 
 export function AnalyticsPanel() {
+  const { data: series } = useLive<AdminSeries>(fetchAdminSeries, EMPTY_SERIES);
+  const { data: regions } = useLive<{ name: string; count: number; pct: number }[]>(fetchRegionMix, []);
+  const { data: types } = useLive<{ name: string; count: number; pct: number }[]>(fetchPropertyTypeMix, []);
+
   return (
     <>
-      <PageHeader kicker="Insights" title="Analytics" subtitle="Growth, traffic, and revenue across the platform." />
+      <PageHeader kicker="Insights" title="Analytics" subtitle="Growth and distribution calculated from real SPACES records." />
       <div className="mb-6 grid gap-4 md:grid-cols-2">
-        <Panel title="Revenue growth"><BarChart data={CHART_REVENUE} labels={CHART_MONTHS} color="var(--color-brand-500)" /></Panel>
-        <Panel title="Traffic growth"><BarChart data={CHART_TRAFFIC} labels={CHART_MONTHS} color="var(--color-gold-500)" /></Panel>
+        <Panel title="New listings per month">
+          {series.hasData ? <BarChart points={series.listings} /> : <EmptyState icon={BarChart3} title="Not enough data" description="This chart fills in as listings are published." />}
+        </Panel>
+        <Panel title="Property views per month">
+          {series.hasData ? <BarChart points={series.views} color="var(--color-gold-500)" /> : <EmptyState icon={TrendingUp} title="Not enough data" description="This chart fills in as buyers browse listings." />}
+        </Panel>
       </div>
-      <div className="grid gap-6 md:grid-cols-3">
-        <Panel title="Top regions">
-          <ul className="space-y-3">
-            {[["Dar es Salaam", 46],["Arusha", 18],["Mwanza", 12],["Zanzibar", 11],["Dodoma", 8]].map(([name, pct]) => (
-              <li key={name as string}>
-                <div className="mb-1 flex items-center justify-between text-sm"><span className="font-medium">{name}</span><span className="text-muted-foreground">{pct}%</span></div>
-                <div className="h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-[color:var(--color-brand-500)]" style={{ width: `${pct}%` }} /></div>
-              </li>
-            ))}
-          </ul>
+      <div className="grid gap-6 md:grid-cols-2">
+        <Panel title="Listings by region">
+          {regions.length === 0 ? <p className="text-sm text-muted-foreground">No regional data yet.</p> : (
+            <ul className="space-y-3">
+              {regions.map((r) => (
+                <li key={r.name}>
+                  <div className="mb-1 flex items-center justify-between text-sm"><span className="font-medium">{r.name}</span><span className="text-muted-foreground">{r.count} · {r.pct}%</span></div>
+                  <div className="h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-[color:var(--color-brand-500)]" style={{ width: `${r.pct}%` }} /></div>
+                </li>
+              ))}
+            </ul>
+          )}
         </Panel>
-        <Panel title="Property types">
-          <ul className="space-y-3">
-            {[["Apartments", 38],["Villas", 24],["Land", 16],["Commercial", 12],["Rooms", 10]].map(([name, pct]) => (
-              <li key={name as string}>
-                <div className="mb-1 flex items-center justify-between text-sm"><span className="font-medium">{name}</span><span className="text-muted-foreground">{pct}%</span></div>
-                <div className="h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-[color:var(--color-gold-500)]" style={{ width: `${pct}%` }} /></div>
-              </li>
-            ))}
-          </ul>
-        </Panel>
-        <Panel title="Top search keywords">
-          <ul className="space-y-2">
-            {TOP_KEYWORDS.map((k, i) => (
-              <li key={k} className="flex items-center gap-3 rounded-xl border border-border/60 p-2.5 text-sm">
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-secondary text-xs font-semibold">{i+1}</span>
-                <span className="flex-1 font-medium">{k}</span>
-                <Flame className="h-3.5 w-3.5 text-[color:var(--color-gold-600)]" />
-              </li>
-            ))}
-          </ul>
+        <Panel title="Listings by property type">
+          {types.length === 0 ? <p className="text-sm text-muted-foreground">No property data yet.</p> : (
+            <ul className="space-y-3">
+              {types.map((t) => (
+                <li key={t.name}>
+                  <div className="mb-1 flex items-center justify-between text-sm"><span className="font-medium capitalize">{titleCase(t.name)}</span><span className="text-muted-foreground">{t.count} · {t.pct}%</span></div>
+                  <div className="h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-[color:var(--color-gold-500)]" style={{ width: `${t.pct}%` }} /></div>
+                </li>
+              ))}
+            </ul>
+          )}
         </Panel>
       </div>
     </>
@@ -628,31 +767,12 @@ export function AnalyticsPanel() {
 export function AuditPanel() {
   return (
     <>
-      <PageHeader kicker="System" title="Audit Logs" subtitle="Every administrative action, timestamped and immutable." />
-      <Panel>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
-              <tr className="border-b border-border/60">
-                <th className="py-3 pr-4 font-medium">Actor</th>
-                <th className="py-3 pr-4 font-medium">Action</th>
-                <th className="py-3 pr-4 font-medium">IP</th>
-                <th className="py-3 pr-4 font-medium">When</th>
-              </tr>
-            </thead>
-            <tbody>
-              {AUDIT_LOGS.map((l) => (
-                <tr key={l.id} className="border-b border-border/40 last:border-0 hover:bg-secondary/40">
-                  <td className="py-3 pr-4 font-mono text-xs">{l.actor}</td>
-                  <td className="py-3 pr-4">{l.action}</td>
-                  <td className="py-3 pr-4 font-mono text-xs text-muted-foreground">{l.ip}</td>
-                  <td className="py-3 pr-4 text-muted-foreground">{l.when}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Panel>
+      <PageHeader kicker="System" title="Audit Logs" subtitle="Administrative actions recorded on SPACES." />
+      <EmptyState
+        icon={FileClock}
+        title="No audit trail recorded"
+        description="Moderation decisions are written directly to each record. A dedicated audit log is not enabled on this platform yet."
+      />
     </>
   );
 }
@@ -662,22 +782,8 @@ export function AuditPanel() {
 export function MarketingPanel() {
   return (
     <>
-      <PageHeader kicker="Growth" title="Marketing" subtitle="Campaigns and lifecycle broadcasts."
-        actions={<Button size="sm" className="gap-2"><Plus className="h-4 w-4" /> New Campaign</Button>} />
-      <div className="grid gap-4 md:grid-cols-3">
-        {CAMPAIGNS.map((c) => (
-          <div key={c.id} className="ds-card ds-card-hover p-5">
-            <div className="flex items-center justify-between">
-              <div className="font-semibold">{c.name}</div>
-              {c.status === "live" ? <Badge variant="success">Live</Badge> : c.status === "scheduled" ? <Badge variant="warning">Scheduled</Badge> : <Badge variant="muted">Draft</Badge>}
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div><div className="ds-caption">Reach</div><div className="font-display text-lg font-semibold">{c.reach}</div></div>
-              <div><div className="ds-caption">CTR</div><div className="font-display text-lg font-semibold">{c.ctr}</div></div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <PageHeader kicker="Growth" title="Marketing" subtitle="Campaigns and lifecycle broadcasts." />
+      <EmptyState icon={Megaphone} title="No campaigns" description="Campaign management is not connected yet, so there are no campaigns to display." />
     </>
   );
 }
@@ -685,19 +791,8 @@ export function MarketingPanel() {
 export function NotificationsPanel() {
   return (
     <>
-      <PageHeader kicker="Growth" title="Notifications" subtitle="Channels, quotas, and scheduled broadcasts." />
-      <div className="grid gap-4 md:grid-cols-3">
-        {NOTIFICATIONS.map((n) => (
-          <div key={n.id} className="ds-card p-5">
-            <div className="flex items-center justify-between">
-              <Badge variant="muted" className="capitalize">{n.channel}</Badge>
-              <Bell className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div className="mt-3 font-semibold">{n.title}</div>
-            <p className="mt-1 text-sm text-muted-foreground">{n.body}</p>
-          </div>
-        ))}
-      </div>
+      <PageHeader kicker="Growth" title="Notifications" subtitle="In-app notifications are delivered automatically by the platform." />
+      <EmptyState icon={Bell} title="No broadcast tools connected" description="SPACES currently sends transactional in-app notifications only; broadcast channels are not configured." />
     </>
   );
 }
@@ -741,9 +836,9 @@ export function SettingsPanel() {
 
         <Panel title="Integrations">
           <SettingRow label="Google Maps" description="Search, geocoding, static maps"><Badge variant="success">Connected</Badge></SettingRow>
-          <SettingRow label="Lovable AI Gateway" description="AI moderation & suggestions"><Badge variant="success">Connected</Badge></SettingRow>
-          <SettingRow label="SMS Provider" description="Africa's Talking"><Badge variant="warning">Configure</Badge></SettingRow>
-          <SettingRow label="Email Provider" description="Postmark"><Badge variant="warning">Configure</Badge></SettingRow>
+          <SettingRow label="Payment gateway" description="Mobile money & cards"><Badge variant="warning">Not connected</Badge></SettingRow>
+          <SettingRow label="SMS Provider" description="Bulk SMS delivery"><Badge variant="warning">Not connected</Badge></SettingRow>
+          <SettingRow label="Email Provider" description="Transactional email"><Badge variant="warning">Not connected</Badge></SettingRow>
         </Panel>
       </div>
     </>
@@ -753,6 +848,7 @@ export function SettingsPanel() {
 // ---------- Super Admin ----------
 
 export function SuperAdminPanel() {
+  const { data: overview } = useLive<AdminOverview | null>(fetchAdminOverview, null);
   const [maintenance, setMaintenance] = useState(false);
   const [emergency, setEmergency] = useState(false);
   return (
@@ -784,8 +880,17 @@ export function SuperAdminPanel() {
         </div>
       </div>
 
-      {/* Role matrix */}
-      <Panel title="Role & Permissions Matrix" right={<Button size="sm" variant="outline" className="gap-2"><Plus className="h-4 w-4" /> New role</Button>}>
+      {overview && (
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard label="Accounts" value={nf.format(overview.users.total)} tone="brand" icon={Users} />
+          <StatCard label="Admin roles" value={nf.format(overview.users.admins)} tone="danger" icon={ShieldAlert} />
+          <StatCard label="Listings" value={nf.format(overview.properties.total)} tone="brand" icon={Home} />
+          <StatCard label="Open reports" value={nf.format(overview.activity.reportsOpen)} tone="danger" icon={Flag} />
+        </div>
+      )}
+
+      {/* Role matrix (product documentation) */}
+      <Panel title="Role & Permissions Matrix">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -814,21 +919,14 @@ export function SuperAdminPanel() {
         </div>
       </Panel>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
         <div className="ds-card p-5">
           <div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-2xl bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]"><Database className="h-4 w-4" /></div><div className="font-semibold">Backups</div></div>
-          <p className="mt-2 text-xs text-muted-foreground">Last backup 12 min ago. Retention 30 days.</p>
-          <div className="mt-3 flex gap-2"><Button size="sm" variant="outline" className="flex-1">Backup now</Button><Button size="sm" className="flex-1">Restore</Button></div>
+          <p className="mt-2 text-xs text-muted-foreground">Database backups are managed by the hosting platform.</p>
         </div>
         <div className="ds-card p-5">
-          <div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-2xl bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]"><KeyRound className="h-4 w-4" /></div><div className="font-semibold">API Keys & Secrets</div></div>
-          <p className="mt-2 text-xs text-muted-foreground">12 secrets configured across environments.</p>
-          <div className="mt-3 flex gap-2"><Button size="sm" variant="outline" className="flex-1">Manage</Button><Button size="sm" className="flex-1">Rotate</Button></div>
-        </div>
-        <div className="ds-card p-5">
-          <div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-2xl bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)]"><Zap className="h-4 w-4" /></div><div className="font-semibold">Feature Flags</div></div>
-          <p className="mt-2 text-xs text-muted-foreground">7 flags live. 3 in staged rollout.</p>
-          <div className="mt-3 flex gap-2"><Button size="sm" variant="outline" className="flex-1">Manage flags</Button></div>
+          <div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-2xl bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]"><KeyRound className="h-4 w-4" /></div><div className="font-semibold">API keys & secrets</div></div>
+          <p className="mt-2 text-xs text-muted-foreground">Secrets are stored securely outside the application and are never displayed here.</p>
         </div>
       </div>
     </>
