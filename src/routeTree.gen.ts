@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrustSystemRouteImport } from './routes/trust-system'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
@@ -58,6 +59,11 @@ import { Route as AuthenticatedDashboardPropertiesIdManageRouteImport } from './
 const TrustSystemRoute = TrustSystemRouteImport.update({
   id: '/trust-system',
   path: '/trust-system',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -304,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/trust-system': typeof TrustSystemRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/billing': typeof AuthenticatedBillingRouteWithChildren
@@ -350,6 +357,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/trust-system': typeof TrustSystemRoute
   '/billing': typeof AuthenticatedBillingRouteWithChildren
   '/business-intelligence': typeof AuthenticatedBusinessIntelligenceRoute
@@ -397,6 +405,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/trust-system': typeof TrustSystemRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/billing': typeof AuthenticatedBillingRouteWithChildren
@@ -445,6 +454,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/sitemap.xml'
+    | '/terms'
     | '/trust-system'
     | '/admin'
     | '/billing'
@@ -491,6 +501,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/sitemap.xml'
+    | '/terms'
     | '/trust-system'
     | '/billing'
     | '/business-intelligence'
@@ -537,6 +548,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/sitemap.xml'
+    | '/terms'
     | '/trust-system'
     | '/_authenticated/admin'
     | '/_authenticated/billing'
@@ -585,6 +597,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TermsRoute: typeof TermsRoute
   TrustSystemRoute: typeof TrustSystemRoute
   ProfileHandleRoute: typeof ProfileHandleRoute
   PropertiesSlugRoute: typeof PropertiesSlugRoute
@@ -600,6 +613,13 @@ declare module '@tanstack/react-router' {
       path: '/trust-system'
       fullPath: '/trust-system'
       preLoaderRoute: typeof TrustSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -1037,6 +1057,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermsRoute: TermsRoute,
   TrustSystemRoute: TrustSystemRoute,
   ProfileHandleRoute: ProfileHandleRoute,
   PropertiesSlugRoute: PropertiesSlugRoute,
