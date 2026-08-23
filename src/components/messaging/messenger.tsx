@@ -171,13 +171,14 @@ export function Messenger() {
 
   const visible = useMemo(() => {
     const f = (id: string) => flags[id] ?? {};
-    const base = conversations.filter((c) => !f(c.id).deleted);
+    let base = conversations.filter((c) => !f(c.id).deleted);
+    if (propertyFilter) base = base.filter((c) => c.propertyId === propertyFilter);
     let list: DbConversation[];
     switch (folder) {
       case "unread":   list = base.filter((c) => c.unread > 0 && !f(c.id).archived); break;
       case "starred":  list = base.filter((c) => f(c.id).starred); break;
       case "archived": list = base.filter((c) => f(c.id).archived); break;
-      case "deleted":  list = conversations.filter((c) => f(c.id).deleted); break;
+      case "deleted":  list = base.filter((c) => f(c.id).deleted); break;
       case "sent":     list = base; break;
       default:         list = base.filter((c) => !f(c.id).archived);
     }
@@ -187,7 +188,15 @@ export function Messenger() {
       c.peer.name.toLowerCase().includes(q) ||
       c.lastMessage.toLowerCase().includes(q) ||
       (c.propertyTitle?.toLowerCase().includes(q) ?? false));
-  }, [conversations, flags, folder, query]);
+  }, [conversations, flags, folder, query, propertyFilter]);
+
+  // When arriving from a property page, open that property's first conversation.
+  useEffect(() => {
+    if (!propertyFilter || search.c) return;
+    const first = conversations.find((c) => c.propertyId === propertyFilter);
+    if (first) setActiveId(first.id);
+  }, [propertyFilter, conversations, search.c]);
+
 
   const counts = useMemo(() => {
     const f = (id: string) => flags[id] ?? {};
