@@ -1,18 +1,23 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  ArrowLeft, Eye, Heart, MessageSquare, Calendar, Star, ShieldCheck, Sparkles, Crown,
+  ArrowLeft, Eye, Heart, MessageSquare, Calendar, Star, ShieldCheck, Crown,
   Edit3, Share2, Link2, Play, Pause, Trash2, Copy, Clock, TrendingUp, MapPin, BarChart3,
-  CheckCircle2, AlertCircle, History,
+  CheckCircle2, AlertCircle, History, MoreHorizontal, ChevronRight,
 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { StatusBadge, StatCard } from "@/components/ds";
+import { StatusBadge } from "@/components/ds";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
 import { useAuth } from "@/hooks/use-auth";
 import { publicIdFrom } from "@/components/property-management/manager";
-import { deletePropertyWithStorage, fetchPropertyMetrics, type PropertyMetrics } from "@/lib/property-actions";
+import {
+  deletePropertyWithStorage, duplicateProperty, fetchPropertyMetrics, type PropertyMetrics,
+} from "@/lib/property-actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +25,20 @@ export const Route = createFileRoute("/_authenticated/property/$id")({
   component: PropertyDetail,
 });
 
-type Tab = "overview" | "views" | "messages" | "bookings" | "performance" | "quality" | "verification" | "history";
+type Tab = "overview" | "messages" | "viewings" | "views" | "performance" | "quality" | "verification" | "history";
+
+const MORE_TABS: { key: Tab; label: string; icon: any }[] = [
+  { key: "views", label: "Views", icon: Eye },
+  { key: "performance", label: "Performance", icon: BarChart3 },
+  { key: "quality", label: "Listing quality", icon: Star },
+  { key: "verification", label: "Verification", icon: ShieldCheck },
+  { key: "history", label: "Edit history", icon: History },
+];
+
+type ConvoRow = { id: string; last_message_at: string; last?: string };
+type BookingRow = {
+  id: string; scheduled_at: string; status: string; buyer_name: string | null; message: string | null;
+};
 
 function PropertyDetail() {
   const { id } = Route.useParams();
@@ -31,6 +49,8 @@ function PropertyDetail() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("overview");
   const [metrics, setMetrics] = useState<PropertyMetrics>({ views: 0, favorites: 0, messages: 0, bookings: 0, leads: 0, deals: 0, activeDeal: false });
+  const [convos, setConvos] = useState<ConvoRow[]>([]);
+  const [bookings, setBookings] = useState<BookingRow[]>([]);
 
   useEffect(() => {
     let alive = true;
@@ -62,13 +82,52 @@ function PropertyDetail() {
     return () => { alive = false; };
   }, [id]);
 
+  // Real conversations + viewing requests for THIS property (same records the
+  // Messages and Viewings pages use).
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const [{ data: cs }, { data: bs }] = await Promise.all([
+        supabase
+          .from("conversations")
+          .select("id,last_message_at")
+          .eq("property_id", id)
+          .order("last_message_at", { ascending: false }),
+        supabase
+          .from("bookings")
+          .select("id,scheduled_at,status,buyer_name,message")
+          .eq("property_id", id)
+          .order("scheduled_at", { ascending: false }),
+      ]);
+      if (!alive) return;
+      setBookings((bs ?? []) as BookingRow[]);
+      const list = (cs ?? []) as ConvoRow[];
+      if (list.length) {
+        const { data: msgs } = await supabase
+          .from("messages")
+          .select("conversation_id,body,created_at")
+          .in("conversation_id", list.map((c) => c.id))
+          .order("created_at", { ascending: false });
+        const lastByConv: Record<string, string> = {};
+        for (const msg of (msgs ?? []) as any[]) {
+          if (!lastByConv[msg.conversation_id]) lastByConv[msg.conversation_id] = msg.body;
+        }
+        if (!alive) return;
+        setConvos(list.map((c) => ({ ...c, last: lastByConv[c.id] })));
+      } else {
+        setConvos([]);
+      }
+    })();
+    return () => { alive = false; };
+  }, [id]);
+
   if (loading) {
     return (
       <DashboardShell>
-        <div className="mx-auto max-w-6xl space-y-6">
+        <div className="mx-auto w-full min-w-0 max-w-6xl space-y-6">
           <div className="h-8 w-40 animate-pulse rounded-lg bg-muted/50" />
           <div className="h-64 animate-pulse rounded-2xl bg-muted/50" />
-          <div className="grid gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {[0,1,2,3].map((i) => <div key={i} className="h-24 animate-pulse rounded-2xl bg-muted/50" />)}
           </div>
         </div>
@@ -114,20 +173,25 @@ function PropertyDetail() {
   }
 
   const url = typeof window !== "undefined" ? `${window.location.origin}/properties/${row.id}` : "";
-  const tabs: { key: Tab; label: string; icon: any }[] = [
-    { key: "overview", label: "Overview", icon: TrendingUp },
-    { key: "views", label: "Views", icon: Eye },
-    { key: "messages", label: "Messages", icon: MessageSquare },
-    { key: "bookings", label: "Bookings", icon: Calendar },
-    { key: "performance", label: "Performance", icon: BarChart3 },
-    { key: "quality", label: "Listing Quality", icon: Star },
-    { key: "verification", label: "Verification", icon: ShieldCheck },
-    { key: "history", label: "Edit History", icon: History },
+  async function share() {
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      try { await (navigator as any).share({ title: row.title, url }); return; } catch { /* cancelled */ }
+    }
+    navigator.clipboard.writeText(url);
+    toast.success("Link copied");
+  }
+
+  const isLive = row.status === "live";
+  const primaryTabs: { key: Tab; label: string }[] = [
+    { key: "overview", label: "Overview" },
+    { key: "messages", label: "Messages" },
+    { key: "viewings", label: "Viewings" },
   ];
+  const activeMore = MORE_TABS.find((m) => m.key === tab);
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
+      <div className="mx-auto w-full min-w-0 max-w-6xl space-y-6 overflow-x-hidden animate-fade-in">
         <div>
           <Link to="/dashboard/properties" className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary">
             <ArrowLeft className="h-3.5 w-3.5" /> My Properties
@@ -137,7 +201,7 @@ function PropertyDetail() {
         {/* Hero card */}
         <div className="overflow-hidden rounded-3xl border border-border/60 bg-background shadow-[var(--shadow-soft)]">
           <div className="grid gap-0 md:grid-cols-[380px_1fr]">
-            <div className="relative aspect-[16/10] md:aspect-auto md:h-full bg-muted">
+            <div className="relative aspect-[16/10] w-full bg-muted md:aspect-auto md:h-full">
               {cover ? (
                 <img src={cover} alt={row.title} className="h-full w-full object-cover" />
               ) : (
@@ -147,107 +211,173 @@ function PropertyDetail() {
                 <StatusBadge kind={statusKind(row.status)} label={statusLabel(row.status)} />
               </div>
             </div>
-            <div className="flex flex-col gap-4 p-6">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{publicId}</p>
-                  <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-foreground md:text-3xl">{row.title}</h1>
-                  <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-3.5 w-3.5" /> {location}</p>
-                </div>
-                <p className="font-display text-2xl font-semibold text-primary">
+            <div className="flex min-w-0 flex-col gap-4 p-4 sm:p-6">
+              <div className="min-w-0">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{publicId}</p>
+                <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-foreground md:text-3xl">{row.title}</h1>
+                <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{location}</span></p>
+                <p className="mt-2 font-display text-xl font-semibold text-primary sm:text-2xl">
                   {row.currency} {row.price.toLocaleString()}
                   {row.listing_type === "rent" && <span className="ml-1 text-sm font-normal text-muted-foreground">/mo</span>}
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-1.5">
-                <StatusBadge kind="verified" label="Verified" />
-                <StatusBadge kind="premium" label="Premium" />
-                <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ring-1",
-                  quality.score >= 80 ? "bg-emerald-50 text-emerald-700 ring-emerald-200" :
-                  quality.score >= 60 ? "bg-amber-50 text-amber-700 ring-amber-200" :
-                  "bg-rose-50 text-rose-700 ring-rose-200"
-                )}><Star className="h-3 w-3" /> Quality {quality.score}</span>
-              </div>
-
               {isOwner && (
                 <div className="mt-auto flex flex-wrap gap-2 pt-2">
-                  <Button asChild variant="outline" size="sm" className="rounded-lg"><a href={url} target="_blank" rel="noreferrer"><Eye className="mr-1 h-3.5 w-3.5" /> View public</a></Button>
+                  <Button asChild variant="outline" size="sm" className="rounded-lg">
+                    <a href={url} target="_blank" rel="noreferrer"><Eye className="mr-1 h-3.5 w-3.5" /> View public</a>
+                  </Button>
                   <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-lg"
-                    onClick={() => {
-                      console.log("Edit source:", "property.$id details");
-                      const destination = `/dashboard/properties/${row.id}/manage`;
-                      console.log("Navigating to:", destination);
-                      navigate({ to: "/dashboard/properties/$id/manage", params: { id: row.id } });
-                    }}
+                    variant="outline" size="sm" className="rounded-lg"
+                    onClick={() => navigate({ to: "/dashboard/properties/$id/manage", params: { id: row.id } })}
                   >
                     <Edit3 className="mr-1 h-3.5 w-3.5" /> Edit
                   </Button>
-                  {row.status === "live" ? (
-                    <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("paused")}><Pause className="mr-1 h-3.5 w-3.5" /> Pause</Button>
+                  {isLive ? (
+                    <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("paused")}>
+                      <Pause className="mr-1 h-3.5 w-3.5" /> Pause listing
+                    </Button>
                   ) : (
-                    <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("live")}><Play className="mr-1 h-3.5 w-3.5" /> {row.status === "draft" ? "Publish" : "Resume"}</Button>
+                    <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("live")}>
+                      <Play className="mr-1 h-3.5 w-3.5" /> {row.status === "draft" ? "Publish" : "Resume listing"}
+                    </Button>
                   )}
-                  {row.listing_type === "sale" && row.status !== "sold" && (
-                    <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("sold")}><CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Mark sold</Button>
-                  )}
-                  {row.listing_type === "rent" && row.status !== "rented" && (
-                    <Button variant="outline" size="sm" className="rounded-lg" onClick={() => updateStatus("rented")}><CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Mark rented</Button>
-                  )}
-                  <Button variant="outline" size="sm" className="rounded-lg" onClick={() => { navigator.clipboard.writeText(url); toast.success("Link copied"); }}><Link2 className="mr-1 h-3.5 w-3.5" /> Copy link</Button>
-                  <Button variant="outline" size="sm" className="rounded-lg" onClick={async () => { if ((navigator as any).share) try { await (navigator as any).share({ title: row.title, url }); } catch {} else { navigator.clipboard.writeText(url); toast.success("Link copied"); } }}><Share2 className="mr-1 h-3.5 w-3.5" /> Share</Button>
-                  <Button variant="outline" size="sm" className="rounded-lg" onClick={() => toast.info("Duplicating…")}><Copy className="mr-1 h-3.5 w-3.5" /> Duplicate</Button>
-                  <Button size="sm" className="rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700" onClick={() => toast.info("Promotion coming soon")}><Crown className="mr-1 h-3.5 w-3.5" /> Promote</Button>
-                  <Button variant="ghost" size="sm" className="rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={del}><Trash2 className="mr-1 h-3.5 w-3.5" /> Delete</Button>
+                  <Button variant="outline" size="sm" className="rounded-lg" onClick={share}>
+                    <Share2 className="mr-1 h-3.5 w-3.5" /> Share
+                  </Button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="rounded-lg">
+                        <MoreHorizontal className="mr-1 h-4 w-4" /> More
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(url); toast.success("Link copied"); }}>
+                        <Link2 className="mr-2 h-3.5 w-3.5" /> Copy link
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={async () => {
+                          try {
+                            const newId = await duplicateProperty(row.id);
+                            toast.success("Copy created as a draft");
+                            navigate({ to: "/dashboard/properties/$id/manage", params: { id: newId } });
+                          } catch (e: any) { toast.error(e?.message ?? "Could not duplicate"); }
+                        }}
+                      >
+                        <Copy className="mr-2 h-3.5 w-3.5" /> Duplicate
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => toast.info("Promotion coming soon")}>
+                        <Crown className="mr-2 h-3.5 w-3.5" /> Promote
+                      </DropdownMenuItem>
+                      {row.listing_type === "sale" && row.status !== "sold" && (
+                        <DropdownMenuItem onClick={() => updateStatus("sold")}>
+                          <CheckCircle2 className="mr-2 h-3.5 w-3.5" /> Mark sold
+                        </DropdownMenuItem>
+                      )}
+                      {row.listing_type === "rent" && row.status !== "rented" && (
+                        <DropdownMenuItem onClick={() => updateStatus("rented")}>
+                          <CheckCircle2 className="mr-2 h-3.5 w-3.5" /> Mark rented
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem onClick={del} className="text-destructive focus:text-destructive">
+                        <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Metrics */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard icon={Eye} label="Total views" value={metrics.views.toLocaleString()} />
-          <StatCard icon={Heart} label="Saves" value={metrics.favorites.toLocaleString()} />
-          <StatCard icon={MessageSquare} label="Messages" value={metrics.messages.toLocaleString()} />
-          <StatCard icon={Calendar} label="Viewings" value={metrics.bookings.toLocaleString()} />
+        {/* Simple statistics — real records only */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <StatTile icon={Eye} label="Views" value={metrics.views} />
+          <StatTile icon={Heart} label="Saves" value={metrics.favorites} />
+          <StatTile
+            icon={MessageSquare} label="Messages" value={metrics.messages}
+            to="/messages" search={{ property: row.id }}
+          />
+          <StatTile
+            icon={Calendar} label="Viewings" value={metrics.bookings}
+            to="/viewings" search={{ property: row.id }}
+          />
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1.5 overflow-x-auto border-b border-border/60 pb-px">
-          {tabs.map((t) => {
+        {/* Tabs: three simple ones + More */}
+        <div className="flex items-center gap-1.5 border-b border-border/60 pb-px">
+          {primaryTabs.map((t) => {
             const active = tab === t.key;
-            const Icon = t.icon;
             return (
               <button
                 key={t.key}
                 onClick={() => setTab(t.key)}
                 className={cn(
-                  "inline-flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
+                  "shrink-0 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
                   active ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Icon className="h-3.5 w-3.5" /> {t.label}
+                {t.label}
               </button>
             );
           })}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={cn(
+                  "ml-auto inline-flex shrink-0 items-center gap-1 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
+                  activeMore ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {activeMore ? activeMore.label : "More"} <MoreHorizontal className="h-3.5 w-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              {MORE_TABS.map((m) => {
+                const Icon = m.icon;
+                return (
+                  <DropdownMenuItem key={m.key} onClick={() => setTab(m.key)}>
+                    <Icon className="mr-2 h-3.5 w-3.5" /> {m.label}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Tab bodies */}
         <div className="animate-fade-in">
           {tab === "overview" && <TimelineTab row={row} />}
+          {tab === "messages" && (
+            <RealListCard
+              title="Conversations about this property"
+              empty="No messages about this property yet."
+              footer={{ label: "Open in Messages", to: "/messages", search: { property: row.id } }}
+              items={convos.map((c) => ({
+                key: c.id,
+                title: c.last ? c.last.slice(0, 80) : "Conversation",
+                body: "Tap to open this conversation",
+                meta: new Date(c.last_message_at).toLocaleString(),
+                to: "/messages" as const,
+                search: { c: c.id },
+              }))}
+            />
+          )}
+          {tab === "viewings" && (
+            <RealListCard
+              title="Viewing requests for this property"
+              empty="No viewing requests for this property yet."
+              footer={{ label: "Open in Viewings", to: "/viewings", search: { property: row.id } }}
+              items={bookings.map((b) => ({
+                key: b.id,
+                title: new Date(b.scheduled_at).toLocaleString(),
+                body: b.buyer_name || b.message || "Viewing request",
+                meta: b.status,
+              }))}
+            />
+          )}
           {tab === "views" && <ChartCard title="Views (last 30 days)" series={fakeSeries(row.id, 30, 5, 60)} unit=" views" />}
-          {tab === "messages" && <ListCard title="Recent messages" items={[
-            { title: "Amina Hassan", body: "Is the price negotiable?", meta: "2h ago" },
-            { title: "James M.", body: "Can I schedule a viewing this weekend?", meta: "Yesterday" },
-          ]} />}
-          {tab === "bookings" && <ListCard title="Scheduled viewings" items={[
-            { title: "Sat, 12 Jul • 10:00", body: "Grace Kimario", meta: "Confirmed" },
-            { title: "Sun, 13 Jul • 15:30", body: "David L.", meta: "Pending" },
-          ]} />}
           {tab === "performance" && (
             <div className="grid gap-4 md:grid-cols-2">
               <ChartCard title="Traffic sources" series={[{ label: "Search", value: 62 }, { label: "Direct", value: 24 }, { label: "Social", value: 14 }]} unit="%" bar />
@@ -265,6 +395,83 @@ function PropertyDetail() {
     </DashboardShell>
   );
 }
+
+/** Simple statistic. Clickable only when there is a useful destination. */
+function StatTile({
+  icon: Icon, label, value, to, search,
+}: {
+  icon: any; label: string; value: number;
+  to?: string; search?: Record<string, string>;
+}) {
+  const inner = (
+    <div
+      className={cn(
+        "flex h-full min-w-0 flex-col gap-2 rounded-2xl border border-border/60 bg-background p-4 shadow-[var(--shadow-soft)]",
+        to && "cursor-pointer hover:border-primary/40",
+      )}
+    >
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Icon className="h-4 w-4 shrink-0" />
+        <span className="truncate text-sm font-medium">{label}</span>
+        {to && <ChevronRight className="ml-auto h-3.5 w-3.5" />}
+      </div>
+      <p className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+        {value.toLocaleString()}
+      </p>
+    </div>
+  );
+  if (!to) return inner;
+  return <Link to={to} search={search as never} className="block h-full">{inner}</Link>;
+}
+
+function RealListCard({
+  title, items, empty, footer,
+}: {
+  title: string;
+  empty: string;
+  items: { key: string; title: string; body: string; meta: string; to?: string; search?: Record<string, string> }[];
+  footer?: { label: string; to: string; search?: Record<string, string> };
+}) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-background p-4 shadow-[var(--shadow-soft)] sm:p-6">
+      <h3 className="mb-4 font-display text-base font-semibold">{title}</h3>
+      {items.length === 0 ? (
+        <p className="py-6 text-center text-sm text-muted-foreground">{empty}</p>
+      ) : (
+        <ul className="divide-y divide-border/50">
+          {items.map((it) => {
+            const body = (
+              <div className="flex items-start justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{it.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">{it.body}</p>
+                </div>
+                <span className="shrink-0 text-xs capitalize text-muted-foreground">{it.meta}</span>
+              </div>
+            );
+            return (
+              <li key={it.key}>
+                {it.to
+                  ? <Link to={it.to} search={it.search as never} className="block hover:opacity-80">{body}</Link>
+                  : body}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {footer && (
+        <Link
+          to={footer.to}
+          search={footer.search as never}
+          className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+        >
+          {footer.label} <ChevronRight className="h-3.5 w-3.5" />
+        </Link>
+      )}
+    </div>
+  );
+}
+
 
 function TimelineTab({ row }: { row: any }) {
   const events = [

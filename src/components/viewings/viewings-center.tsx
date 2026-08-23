@@ -31,7 +31,7 @@ const STATUS_TINT: Record<ViewingStatusDb, string> = {
   completed: "border-primary/30 bg-primary/10 text-primary",
 };
 
-export function ViewingsCenter({ role = "buyer" }: { role?: Role }) {
+export function ViewingsCenter({ role = "buyer", propertyId = null }: { role?: Role; propertyId?: string | null }) {
   const { t } = useI18n();
   const [incoming, setIncoming] = useState<ViewingRequest[]>([]);
   const [mine, setMine] = useState<ViewingRequest[]>([]);
@@ -49,11 +49,15 @@ export function ViewingsCenter({ role = "buyer" }: { role?: Role }) {
       fetchMyViewings(),
       role === "admin" ? fetchAllViewings() : Promise.resolve([]),
     ]);
-    setIncoming(inc);
-    setMine(own);
-    setAll(everything);
+    // When opened from a property page, show only that listing's requests.
+    const only = (list: ViewingRequest[]) =>
+      propertyId ? list.filter((v) => v.propertyId === propertyId) : list;
+    setIncoming(only(inc));
+    setMine(only(own));
+    setAll(only(everything));
     setLoading(false);
-  }, [isRecipientView, role]);
+  }, [isRecipientView, role, propertyId]);
+
 
   useEffect(() => { void load(); }, [load]);
 
@@ -83,7 +87,10 @@ export function ViewingsCenter({ role = "buyer" }: { role?: Role }) {
         <h1 className="font-display text-2xl font-semibold tracking-tight md:text-3xl">
           {t("viewings.title")}
         </h1>
-        <p className="text-sm text-muted-foreground">{t("viewings.subtitle")}</p>
+        <p className="text-sm text-muted-foreground">
+          {propertyId ? "Showing viewing requests for this property only." : t("viewings.subtitle")}
+        </p>
+
       </header>
 
       <KpiRow items={kpiSource} />

@@ -126,12 +126,13 @@ function OwnerHome() {
       <StatsGrid
         loading={statsLoading}
         items={[
-          { label: "Active Listings", value: stats.listings, icon: Home, delta: `${stats.totalListings} total`, tone: "primary", to: "/dashboard/properties" },
-          { label: "Total Property Views", value: stats.propertyViews, icon: Eye, delta: "All listings", tone: "emerald", to: "/dashboard/properties" },
+          { label: "My Properties", value: stats.listings, icon: Home, delta: `${stats.totalListings} total`, tone: "primary", to: "/dashboard/properties" },
           { label: "New Inquiries", value: stats.activeInquiries, icon: MessageSquare, delta: `${stats.completedInquiries} completed`, tone: "amber", to: "/leads" },
-          { label: "Scheduled Viewings", value: stats.viewings, icon: Calendar, delta: "Upcoming", tone: "violet", to: "/viewings" },
+          { label: "Viewing Requests", value: stats.viewings, icon: Calendar, delta: "Upcoming", tone: "violet", to: "/viewings" },
+          { label: "Messages", value: stats.unreadMessages, icon: MessageSquare, delta: "Unread", tone: "emerald", to: "/messages" },
         ]}
       />
+
 
 
       <QuickActions />
