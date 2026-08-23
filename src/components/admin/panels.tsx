@@ -307,7 +307,7 @@ export function PropertiesPanel() {
       <div className="mb-5 flex flex-wrap gap-2">
         {QUEUE_FILTERS.map((f) => (
           <Button key={f.id} size="sm" variant={filter === f.id ? "default" : "outline"} onClick={() => { setFilter(f.id); setSelected(null); }}>
-            {f.label}
+            {t(f.labelKey)}
           </Button>
         ))}
       </div>
