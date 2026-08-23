@@ -1537,17 +1537,6 @@ export type Database = {
         Args: { _agent_id: string; _property_id: string }
         Returns: Database["public"]["Enums"]["agent_permission"]
       }
-      can_review: {
-        Args: {
-          _booking_id: string
-          _deal_id: string
-          _property_id: string
-          _reviewer: string
-          _subject_type: string
-          _subject_user_id: string
-        }
-        Returns: boolean
-      }
       crm_lead_status_for_stage: {
         Args: { _stage: Database["public"]["Enums"]["deal_stage"] }
         Returns: string
