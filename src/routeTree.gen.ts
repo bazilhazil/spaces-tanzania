@@ -48,6 +48,7 @@ import { Route as AuthenticatedDashboardAgentPerformanceRouteImport } from './ro
 import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_authenticated/dashboard.$section'
 import { Route as AuthenticatedBillingHistoryRouteImport } from './routes/_authenticated/billing.history'
 import { Route as AuthenticatedAdminSectionRouteImport } from './routes/_authenticated/admin.$section'
+import { Route as ApiPublicOgPropertyIdRouteImport } from './routes/api/public/og.property.$id'
 import { Route as AuthenticatedDashboardPropertiesIdManageRouteImport } from './routes/_authenticated/dashboard.properties.$id.manage'
 
 const TrustSystemRoute = TrustSystemRouteImport.update({
@@ -256,6 +257,11 @@ const AuthenticatedAdminSectionRoute =
     path: '/$section',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const ApiPublicOgPropertyIdRoute = ApiPublicOgPropertyIdRouteImport.update({
+  id: '/api/public/og/property/$id',
+  path: '/api/public/og/property/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardPropertiesIdManageRoute =
   AuthenticatedDashboardPropertiesIdManageRouteImport.update({
     id: '/$id/manage',
@@ -303,6 +309,7 @@ export interface FileRoutesByFullPath {
   '/property/$id': typeof AuthenticatedPropertyIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
+  '/api/public/og/property/$id': typeof ApiPublicOgPropertyIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -343,6 +350,7 @@ export interface FileRoutesByTo {
   '/property/$id': typeof AuthenticatedPropertyIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
+  '/api/public/og/property/$id': typeof ApiPublicOgPropertyIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -386,6 +394,7 @@ export interface FileRoutesById {
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
+  '/api/public/og/property/$id': typeof ApiPublicOgPropertyIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -429,6 +438,7 @@ export interface FileRouteTypes {
     | '/property/$id'
     | '/admin/'
     | '/dashboard/properties/$id/manage'
+    | '/api/public/og/property/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -469,6 +479,7 @@ export interface FileRouteTypes {
     | '/property/$id'
     | '/admin'
     | '/dashboard/properties/$id/manage'
+    | '/api/public/og/property/$id'
   id:
     | '__root__'
     | '/'
@@ -511,6 +522,7 @@ export interface FileRouteTypes {
     | '/_authenticated/property/$id'
     | '/_authenticated/admin/'
     | '/_authenticated/dashboard/properties/$id/manage'
+    | '/api/public/og/property/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -526,6 +538,7 @@ export interface RootRouteChildren {
   ProfileHandleRoute: typeof ProfileHandleRoute
   PropertiesSlugRoute: typeof PropertiesSlugRoute
   PropertiesIndexRoute: typeof PropertiesIndexRoute
+  ApiPublicOgPropertyIdRoute: typeof ApiPublicOgPropertyIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -803,6 +816,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSectionRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/api/public/og/property/$id': {
+      id: '/api/public/og/property/$id'
+      path: '/api/public/og/property/$id'
+      fullPath: '/api/public/og/property/$id'
+      preLoaderRoute: typeof ApiPublicOgPropertyIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard/properties/$id/manage': {
       id: '/_authenticated/dashboard/properties/$id/manage'
       path: '/$id/manage'
@@ -938,6 +958,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileHandleRoute: ProfileHandleRoute,
   PropertiesSlugRoute: PropertiesSlugRoute,
   PropertiesIndexRoute: PropertiesIndexRoute,
+  ApiPublicOgPropertyIdRoute: ApiPublicOgPropertyIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
