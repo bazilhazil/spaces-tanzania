@@ -24,8 +24,8 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
       { label: "My Properties", to: "/dashboard/properties", icon: Home },
       { label: "Upload Property", to: "/upload", icon: Upload },
-      { label: "Leads", to: "/leads", icon: Contact },
-      { label: "Deals", to: "/deals", icon: Handshake },
+      { label: "Inquiries", to: "/leads", icon: Contact },
+      { label: "My Deals", to: "/deals", icon: Handshake },
       { label: "Viewings", to: "/viewings", icon: Calendar },
       { label: "Messages", to: "/messages", icon: MessageSquare },
       { label: "Notifications", to: "/notifications", icon: Bell },
@@ -55,8 +55,8 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
     agent: [
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
       
-      { label: "Leads", to: "/leads", icon: Contact },
-      { label: "Deals", to: "/deals", icon: Handshake },
+      { label: "Inquiries", to: "/leads", icon: Contact },
+      { label: "My Deals", to: "/deals", icon: Handshake },
       { label: t("dashboard.side.properties"), to: "/dashboard/properties", icon: Briefcase },
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
