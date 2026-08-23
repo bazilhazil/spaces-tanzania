@@ -160,7 +160,15 @@ function RootComponent() {
               <Outlet />
               <LanguageWelcome />
               <CompareTray />
-              <Toaster richColors position="top-right" />
+              {/* Bottom placement keeps confirmations clear of the public navigation. */}
+              <Toaster
+                richColors
+                position="bottom-right"
+                duration={2000}
+                visibleToasts={3}
+                toastOptions={{ className: "pointer-events-auto" }}
+              />
+
             </FavoritesProvider>
           </ModeProvider>
         </AuthProvider>
