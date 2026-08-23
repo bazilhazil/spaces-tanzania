@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
 import {
   Search, Star, Archive, Trash2, Send, Home, MoreVertical, Check, CheckCheck,
   Shield, Ban, Flag, Plus, ArrowLeft, Sparkles, Inbox as InboxIcon,
   MailOpen, Star as StarIcon, Archive as ArchiveIcon, SendHorizontal, Trash,
-  ExternalLink, Loader2, Calendar,
+  ExternalLink, Loader2, Calendar, ClipboardList,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -92,6 +92,12 @@ export function Messenger() {
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
   const [loading, setLoading] = useState(true);
   const activeIdRef = useRef<string | null>(null);
+
+  // Deep link from an inquiry: /messages?c=<conversationId> opens that exact chat.
+  const search = useSearch({ strict: false }) as { c?: string };
+  useEffect(() => {
+    if (search.c) { setActiveId(search.c); setMobileView("chat"); }
+  }, [search.c]);
 
   useEffect(() => { setFlags(readFlags()); }, []);
   useEffect(() => { activeIdRef.current = activeId; }, [activeId]);
@@ -476,6 +482,13 @@ function ChatPane({
           </div>
         </div>
         <div className="flex items-center gap-1">
+          {conv.inquiryId && (
+            <Button asChild variant="outline" size="sm" className="hidden rounded-full sm:inline-flex">
+              <Link to="/leads" search={{ lead: conv.inquiryId }}>
+                <ClipboardList className="mr-1.5 h-4 w-4" /> View inquiry
+              </Link>
+            </Button>
+          )}
           <Button variant="ghost" size="icon" className="rounded-full" onClick={onToggleStar} aria-label="Star">
             <Star className={cn("h-4 w-4", starred && "fill-amber-400 text-amber-400")} />
           </Button>
