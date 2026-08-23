@@ -832,6 +832,8 @@
       "reason": "Reason shared with the applicant",
       "internalNote": "Internal note (admins only)",
       "reasonRequired": "Please add a reason",
+      "open": "Open",
+      "riskNotCalculated": "Risk not calculated",
       "approve": "Approve",
       "reject": "Reject",
       "requestInfo": "Request info",
