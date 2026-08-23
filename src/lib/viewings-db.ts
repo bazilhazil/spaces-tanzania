@@ -48,6 +48,7 @@ export type ViewingErrorCode =
   | "property_missing"
   | "invalid_date"
   | "permission"
+  | "duplicate"
   | "failed";
 
 /**
@@ -57,7 +58,7 @@ export type ViewingErrorCode =
  */
 export async function createViewingRequest(
   input: CreateViewingInput,
-): Promise<{ ok: boolean; error?: ViewingErrorCode; detail?: string }> {
+): Promise<{ ok: boolean; error?: ViewingErrorCode; detail?: string; updated?: boolean }> {
   const { data: session } = await supabase.auth.getSession();
   const user = session.session?.user;
   if (!user) return { ok: false, error: "auth" };
