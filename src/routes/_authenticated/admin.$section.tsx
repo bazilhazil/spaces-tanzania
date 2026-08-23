@@ -5,6 +5,7 @@ import {
   AnalyticsPanel, AuditPanel, MarketingPanel, NotificationsPanel, SettingsPanel,
   SuperAdminPanel,
 } from "@/components/admin/panels";
+import { ReviewsPanel } from "@/components/admin/reviews-panel";
 
 const PANELS: Record<string, React.ComponentType> = {
   properties: PropertiesPanel,
@@ -12,6 +13,7 @@ const PANELS: Record<string, React.ComponentType> = {
   agents: AgentsPanel,
   verification: VerificationPanel,
   reports: ReportsPanel,
+  reviews: ReviewsPanel,
   bookings: BookingsPanel,
   messages: MessagesPanel,
   support: SupportPanel,
