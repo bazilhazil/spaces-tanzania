@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.tg_user_roles_guard_escalation() FROM PUBLIC, anon, authenticated;
