@@ -53,6 +53,21 @@ export function SafetyPanel() {
 
   useEffect(() => { void load(); }, [load]);
 
+  // New reports must land here without a manual refresh.
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-safety-reports")
+      .on("postgres_changes", { event: "*", schema: "public", table: "safety_reports" }, () => void load())
+      .subscribe();
+    const onFocus = () => { if (document.visibilityState === "visible") void load(); };
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      document.removeEventListener("visibilitychange", onFocus);
+      void supabase.removeChannel(channel);
+    };
+  }, [load]);
+
+
   const filtered = useMemo(
     () => (tab === "all" ? reports : reports.filter((r) => r.status === tab)),
     [reports, tab],
