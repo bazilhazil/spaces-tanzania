@@ -1038,6 +1038,183 @@ export type Database = {
           },
         ]
       }
+      review_moderation_events: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          reason: string | null
+          review_id: string
+          to_status: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          reason?: string | null
+          review_id: string
+          to_status?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          reason?: string | null
+          review_id?: string
+          to_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_moderation_events_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          review_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          review_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          review_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_reports_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          booking_id: string | null
+          categories: Json
+          comment: string | null
+          created_at: string
+          deal_id: string | null
+          id: string
+          property_id: string | null
+          published_at: string | null
+          rating: number
+          response: string | null
+          response_at: string | null
+          response_by: string | null
+          reviewer_id: string
+          reviewer_role: string
+          status: Database["public"]["Enums"]["review_status"]
+          status_reason: string | null
+          subject_type: Database["public"]["Enums"]["review_subject_type"]
+          subject_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          booking_id?: string | null
+          categories?: Json
+          comment?: string | null
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          property_id?: string | null
+          published_at?: string | null
+          rating: number
+          response?: string | null
+          response_at?: string | null
+          response_by?: string | null
+          reviewer_id: string
+          reviewer_role?: string
+          status?: Database["public"]["Enums"]["review_status"]
+          status_reason?: string | null
+          subject_type: Database["public"]["Enums"]["review_subject_type"]
+          subject_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string | null
+          categories?: Json
+          comment?: string | null
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          property_id?: string | null
+          published_at?: string | null
+          rating?: number
+          response?: string | null
+          response_at?: string | null
+          response_by?: string | null
+          reviewer_id?: string
+          reviewer_role?: string
+          status?: Database["public"]["Enums"]["review_status"]
+          status_reason?: string | null
+          subject_type?: Database["public"]["Enums"]["review_subject_type"]
+          subject_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           billing_cycle: string
@@ -1360,6 +1537,17 @@ export type Database = {
         Args: { _agent_id: string; _property_id: string }
         Returns: Database["public"]["Enums"]["agent_permission"]
       }
+      can_review: {
+        Args: {
+          _booking_id: string
+          _deal_id: string
+          _property_id: string
+          _reviewer: string
+          _subject_type: string
+          _subject_user_id: string
+        }
+        Returns: boolean
+      }
       crm_lead_status_for_stage: {
         Args: { _stage: Database["public"]["Enums"]["deal_stage"] }
         Returns: string
@@ -1395,7 +1583,37 @@ export type Database = {
         }
         Returns: boolean
       }
+      moderate_review: {
+        Args: { _reason?: string; _review_id: string; _status: string }
+        Returns: undefined
+      }
+      my_review_opportunities: {
+        Args: never
+        Returns: {
+          can_review_property: boolean
+          counterpart_id: string
+          counterpart_name: string
+          counterpart_reviewed: boolean
+          occurred_at: string
+          property_id: string
+          property_reviewed: boolean
+          property_title: string
+          source: string
+          source_id: string
+        }[]
+      }
+      property_rating: {
+        Args: { _property_id: string }
+        Returns: {
+          average: number
+          total: number
+        }[]
+      }
       recompute_deal_health: { Args: { _deal_id: string }; Returns: undefined }
+      respond_to_review: {
+        Args: { _response: string; _review_id: string }
+        Returns: undefined
+      }
       search_agents: {
         Args: { _q: string }
         Returns: {
@@ -1419,6 +1637,13 @@ export type Database = {
       set_lead_status: {
         Args: { _force?: boolean; _lead_id: string; _status: string }
         Returns: undefined
+      }
+      user_rating: {
+        Args: { _user_id: string }
+        Returns: {
+          average: number
+          total: number
+        }[]
       }
     }
     Enums: {
@@ -1485,6 +1710,8 @@ export type Database = {
         | "warehouse"
         | "land"
         | "commercial"
+      review_status: "pending" | "published" | "flagged" | "removed"
+      review_subject_type: "property" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1681,6 +1908,8 @@ export const Constants = {
         "land",
         "commercial",
       ],
+      review_status: ["pending", "published", "flagged", "removed"],
+      review_subject_type: ["property", "user"],
     },
   },
 } as const
