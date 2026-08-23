@@ -455,8 +455,13 @@ function ChatPane({
             {p.verified && <Shield className="h-3.5 w-3.5 text-[color:var(--color-brand-600)]" />}
             <span className={cn("rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider", roleTint[p.role] ?? roleTint.buyer)}>{p.role}</span>
           </div>
-          <div className="truncate text-[11px] text-muted-foreground">
-            {conv.propertyTitle ? conv.propertyTitle : "Direct conversation"}
+          <div className="flex items-center gap-1.5 truncate text-[11px] text-muted-foreground">
+            <span className="truncate">{conv.propertyTitle ? conv.propertyTitle : "Direct conversation"}</span>
+            {conv.inquiryStatus && (
+              <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-foreground">
+                {t(`crm.status.${conv.inquiryStatus}`)}
+              </span>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-1">
