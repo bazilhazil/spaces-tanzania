@@ -187,13 +187,18 @@ function PropertyDetailPage() {
 
   if (!property) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-center">
-          <h1 className="font-display text-3xl">{t("properties.notFoundTitle")}</h1>
-          <Link to="/properties" className="mt-4 inline-block text-primary underline">
-            {t("properties.notFoundBack")}
+      <div className="flex min-h-screen flex-col bg-background">
+        <SiteHeader />
+        <main className="container-page flex-1 py-20 text-center">
+          <h1 className="font-display text-3xl font-semibold">{t("properties.notFoundTitle")}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            This space may have been rented, sold or removed.
+          </p>
+          <Link to="/properties" className="mt-6 inline-block">
+            <Button>View similar spaces</Button>
           </Link>
-        </div>
+        </main>
+        <SiteFooter />
       </div>
     );
   }
