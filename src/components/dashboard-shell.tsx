@@ -78,7 +78,15 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
   };
 }
 
-
+/**
+ * Everyday links stay visible; everything else collapses under "More" so the
+ * sidebar stays simple for ordinary owners.
+ */
+const PRIMARY_PATHS: Record<SpacesMode, string[]> = {
+  owner: ["/dashboard", "/dashboard/properties", "/upload", "/leads", "/viewings", "/messages", "/notifications"],
+  buyer: ["/dashboard", "/dashboard/favorites", "/dashboard/searches", "/viewings", "/messages", "/notifications"],
+  agent: ["/dashboard", "/leads", "/deals", "/dashboard/properties", "/viewings", "/messages", "/notifications"],
+};
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const { profile, user, signOut, roles } = useAuth();
@@ -88,11 +96,17 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const NAV = useRoleNav();
   const isAdmin = roles.includes("admin") || roles.includes("super_admin");
   const items: Item[] = isAdmin
     ? [...NAV[activeMode], { label: "Admin Control Center", to: "/admin", icon: ShieldAlert }]
     : NAV[activeMode];
+  const primaryPaths = PRIMARY_PATHS[activeMode];
+  const primaryItems = items.filter((i) => primaryPaths.includes(i.to));
+  const moreItems = items.filter((i) => !primaryPaths.includes(i.to));
+  const moreActive = moreItems.some((i) => i.to === pathname);
+
 
 
 
