@@ -12,7 +12,7 @@ import {
 } from "@/lib/safety-db";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/safety")({
+export const Route = createFileRoute("/_authenticated/dashboard/safety")({
   component: SafetyPage,
   head: () => ({
     meta: [

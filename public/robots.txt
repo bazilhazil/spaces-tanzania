@@ -8,7 +8,6 @@ Disallow: /notifications
 Disallow: /verification
 Disallow: /verification-hub
 Disallow: /trust
-Disallow: /safety
 Disallow: /deals
 Disallow: /leads
 Disallow: /viewings
