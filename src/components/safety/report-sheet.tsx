@@ -48,7 +48,9 @@ export function ReportSheet({ target, trigger, open, onOpenChange }: Props) {
 
   async function handleSubmit() {
     if (!reason) { toast.error(t("safety.report.chooseReason")); return; }
+    if (busy) return; // guard against double clicks / slow connections
     setBusy(true);
+
     const res = await submitReport({
       targetType: target.type,
       reason,
