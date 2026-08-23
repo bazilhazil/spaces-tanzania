@@ -201,7 +201,6 @@
       "trustLine": "Verified agent. Response within 24 hours.",
       "whatsappMessage": "Hello, I'm interested in {title} on SPACES.",
       "whatsappMessageFull": "Hi, I'm interested in {title} ({location}) on SPACES. Is it still available?",
-
       "contactUnavailable": "Contact details aren't available for this listing yet. Send an inquiry instead."
     }
   },
@@ -842,5 +841,21 @@
       "decisionSaved": "Decision recorded",
       "docFailed": "Could not open document"
     }
+  },
+  "inquiry": {
+    "message": "Message",
+    "whatsapp": "WhatsApp",
+    "call": "Call",
+    "viewing": "Viewing",
+    "requestViewing": "Request Viewing",
+    "sendMessage": "Send Message",
+    "suggested": "Hi, I'm interested in this space. Is it still available?",
+    "formHint": "Your message goes straight to the listing owner or agent.",
+    "tooShort": "Please write a longer message",
+    "sent": "Message sent — the owner will get back to you shortly",
+    "sendFailed": "Could not send your message. Please try again.",
+    "signInRequired": "Please sign in to send a message",
+    "unavailable": "This space is no longer available.",
+    "viewSimilar": "View Similar Spaces"
   }
 }
