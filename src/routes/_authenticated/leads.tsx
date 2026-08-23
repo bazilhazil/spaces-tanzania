@@ -5,8 +5,8 @@ import { LeadsCenter } from "@/components/crm/leads-center";
 export const Route = createFileRoute("/_authenticated/leads")({
   head: () => ({
     meta: [
-      { title: "Leads & CRM — SPACES" },
-      { name: "description", content: "Manage every inquiry professionally with the SPACES lead management system." },
+      { title: "Inquiries — SPACES" },
+      { name: "description", content: "See who is interested in your properties and what to do next — all in one simple list." },
     ],
   }),
   component: LeadsPage,
@@ -17,8 +17,8 @@ function LeadsPage() {
     <DashboardShell>
       <div className="mx-auto max-w-7xl space-y-6 animate-fade-in">
         <header>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">Leads</h1>
-          <p className="mt-1 text-muted-foreground">Every inquiry, from first message to closed deal — in one place.</p>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">Inquiries</h1>
+          <p className="mt-1 text-muted-foreground">Everyone who asked about your properties — messages, calls and viewings in one place.</p>
         </header>
         <LeadsCenter />
       </div>
