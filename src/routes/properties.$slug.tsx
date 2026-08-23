@@ -133,17 +133,20 @@ function PropertyDetailPage() {
   const [similar, setSimilar] = useState<Property[]>([]);
   const [ownerId, setOwnerId] = useState<string | null>(null);
 
+  const propertyId = idFromSlug(slug);
+
   useEffect(() => {
     let alive = true;
     setLoading(true);
     (async () => {
-      const res = await fetchPropertyById(slug);
+      const res = await fetchPropertyById(propertyId);
       if (!alive) return;
       if (res) {
         setProperty(res.property);
         setAgent(contactAgentFromRow(res.row));
         setStatus((res.row?.status as string) ?? "live");
         setOwnerId(((res.row as unknown as { owner_id?: string })?.owner_id) ?? null);
+        track("property_viewed", { property_id: res.property.id, category: res.property.category });
         const others = await fetchLiveProperties(12);
         if (!alive) return;
         setSimilar(others.filter((p) => p.id !== res.property.id).slice(0, 4));
@@ -151,7 +154,7 @@ function PropertyDetailPage() {
       setLoading(false);
     })();
     return () => { alive = false; };
-  }, [slug]);
+  }, [propertyId]);
 
 
   const [activeImage, setActiveImage] = useState(0);
