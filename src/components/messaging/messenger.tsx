@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
-  Search, Star, Archive, Trash2, Send, MapPin, Home, MoreVertical, Check, CheckCheck,
-  Circle, Shield, Ban, Flag, BellOff, Plus, ArrowLeft, Sparkles, Inbox as InboxIcon,
+  Search, Star, Archive, Trash2, Send, Home, MoreVertical, Check, CheckCheck,
+  Shield, Ban, Flag, Plus, ArrowLeft, Sparkles, Inbox as InboxIcon,
   MailOpen, Star as StarIcon, Archive as ArchiveIcon, SendHorizontal, Trash,
   ExternalLink, Loader2, Calendar,
 } from "lucide-react";
