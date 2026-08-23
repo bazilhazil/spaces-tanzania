@@ -15,10 +15,16 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import {
-  KIND_META, listNotifications, markAllRead, markRead, removeNotification,
+  KIND_META,
   getPrefs, setPrefs, getProviders, setProviders, anyProviderConfigured,
-  type SpacesNotification, type NotificationKind, type ChannelPrefs, type ProviderStatus,
+  type NotificationKind, type ChannelPrefs, type ProviderStatus,
 } from "@/lib/notifications-store";
+import {
+  listNotificationsDb, markNotificationRead, markAllNotificationsRead,
+  deleteNotification, subscribeNotifications, isPropertyAlert, type DbNotification,
+} from "@/lib/notifications-db";
+import { useAuth } from "@/hooks/use-auth";
+
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
