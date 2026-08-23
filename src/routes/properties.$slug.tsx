@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BadgeCheck, Bath, BedDouble, Building2, Calendar, Car, ChevronLeft, ChevronRight,
   Heart, Mail, MapPin, MessageCircle, Phone, Ruler, Share2, ShieldCheck, Sparkles,
-  Star, X, Play, Calculator, Send, Timer, CheckCircle2, Maximize2, FileText,
+  Star, X, Play, Calculator, Send, CheckCircle2, Maximize2, FileText,
   Flag, ZoomIn, ZoomOut, Eye,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -22,12 +22,9 @@ import { sendPropertyMessage } from "@/lib/inquiry";
 import { createViewingRequest } from "@/lib/viewings-db";
 import { VerifiedBadge } from "@/components/trust/verified-badge";
 import { ReportSheet } from "@/components/safety/report-sheet";
-import { TrustScoreRing } from "@/components/trust/trust-score-ring";
-import { QualityScorePill } from "@/components/trust/quality-score";
-import { computeTrustScore, MOCK_TRUST_SIGNALS } from "@/lib/trust-engine";
 import { PropertyReviews } from "@/components/reviews/property-reviews";
 import { formatPrice, type Property, type Agent } from "@/lib/mock-data";
-import { fetchLiveProperties, fetchPropertyById, fetchPropertyContact, contactAgentFromRow } from "@/lib/properties-db";
+import { fetchLiveProperties, fetchPropertyById, fetchPropertyContact, contactAgentFromRow, fetchOwnerPublicProfile, type OwnerPublicProfile } from "@/lib/properties-db";
 import { useAuth } from "@/hooks/use-auth";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useI18n } from "@/hooks/use-i18n";
@@ -132,12 +129,14 @@ function PropertyDetailPage() {
   const [loading, setLoading] = useState(true);
   const [similar, setSimilar] = useState<Property[]>([]);
   const [ownerId, setOwnerId] = useState<string | null>(null);
+  const [ownerProfile, setOwnerProfile] = useState<OwnerPublicProfile | null>(null);
 
   const propertyId = idFromSlug(slug);
 
   useEffect(() => {
     let alive = true;
     setLoading(true);
+    setOwnerProfile(null);
     (async () => {
       const res = await fetchPropertyById(propertyId);
       if (!alive) return;
@@ -145,11 +144,20 @@ function PropertyDetailPage() {
         setProperty(res.property);
         setAgent(contactAgentFromRow(res.row));
         setStatus((res.row?.status as string) ?? "live");
-        setOwnerId(((res.row as unknown as { owner_id?: string })?.owner_id) ?? null);
+        const oid = ((res.row as unknown as { owner_id?: string })?.owner_id) ?? null;
+        setOwnerId(oid);
         track("property_viewed", { property_id: res.property.id, category: res.property.category });
-        const others = await fetchLiveProperties(12);
+        if (oid) {
+          void fetchOwnerPublicProfile(oid).then((p) => { if (alive) setOwnerProfile(p); });
+        }
+        const others = await fetchLiveProperties(24);
         if (!alive) return;
-        setSimilar(others.filter((p) => p.id !== res.property.id).slice(0, 4));
+        const pool = others.filter((p) => p.id !== res.property.id);
+        // Prefer spaces in the same city with the same listing type.
+        const near = pool.filter(
+          (p) => p.city === res.property.city && p.listingType === res.property.listingType,
+        );
+        setSimilar([...near, ...pool.filter((p) => !near.includes(p))].slice(0, 4));
       }
       setLoading(false);
     })();
@@ -167,7 +175,6 @@ function PropertyDetailPage() {
   const [revealedPhone, setRevealedPhone] = useState<string | null>(null);
 
 
-  const trust = useMemo(() => computeTrustScore(MOCK_TRUST_SIGNALS), []);
 
   if (loading) {
     return (
@@ -389,8 +396,10 @@ function PropertyDetailPage() {
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {property.verified && <VerifiedBadge kind="space" label={t("verify.badge.space")} size="sm" />}
-                  {agent?.verified && <VerifiedBadge kind="agent" label={t("verify.badge.agent")} size="sm" />}
-                  <QualityScorePill score={78} />
+                  {ownerProfile?.verifiedAgent && <VerifiedBadge kind="agent" label={t("verify.badge.agent")} size="sm" />}
+                  {ownerProfile?.verifiedOwner && !ownerProfile?.verifiedAgent && (
+                    <VerifiedBadge kind="owner" label={t("verify.badge.owner")} size="sm" />
+                  )}
                 </div>
                 {property.verified && (
                   <p className="mt-2 text-xs text-muted-foreground">{t("verify.spaceExplainer")}</p>
@@ -545,38 +554,42 @@ function PropertyDetailPage() {
                 <div className="flex items-center gap-4">
                   <div className="relative">
                     <img
-                      src={agent.avatar}
-                      alt={agent.name}
+                      src={ownerProfile?.avatar || agent.avatar}
+                      alt={ownerProfile?.name || agent.name}
                       loading="lazy"
                       width={120}
                       height={120}
                       className="h-14 w-14 rounded-full object-cover"
                     />
-                    {agent.verified && (
+                    {(ownerProfile?.verifiedAgent || ownerProfile?.verifiedOwner) && (
                       <span className="absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full bg-primary text-primary-foreground ring-2 ring-card">
                         <BadgeCheck className="h-3 w-3" />
                       </span>
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate font-semibold text-foreground">{agent.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">{agent.agency}</p>
-                    <p className="mt-1 inline-flex items-center gap-1 text-xs text-gold">
-                      <Star className="h-3.5 w-3.5 fill-current" /> {agent.rating.toFixed(1)}
-                    </p>
+                    <p className="truncate font-semibold text-foreground">{ownerProfile?.name || agent.name}</p>
+                    {ownerProfile?.agency && (
+                      <p className="truncate text-xs text-muted-foreground">{ownerProfile.agency}</p>
+                    )}
+                    {ownerProfile?.rating != null && (
+                      <p className="mt-1 inline-flex items-center gap-1 text-xs text-gold">
+                        <Star className="h-3.5 w-3.5 fill-current" /> {ownerProfile.rating.toFixed(1)}
+                        <span className="text-muted-foreground">({ownerProfile.reviews})</span>
+                      </p>
+                    )}
                   </div>
                 </div>
+                {ownerId && (
+                  <Link
+                    to="/profile/$handle"
+                    params={{ handle: ownerId }}
+                    className="mt-3 inline-block text-xs font-medium text-primary hover:underline"
+                  >
+                    {t("properties.detail.viewProfile")}
+                  </Link>
+                )}
 
-                <div className="mt-4 grid grid-cols-2 gap-2 text-[11px]">
-                  <div className="rounded-lg bg-secondary/60 p-2">
-                    <div className="inline-flex items-center gap-1 text-muted-foreground"><MessageCircle className="h-3 w-3" /> Response</div>
-                    <div className="mt-0.5 font-display text-sm font-semibold">98%</div>
-                  </div>
-                  <div className="rounded-lg bg-secondary/60 p-2">
-                    <div className="inline-flex items-center gap-1 text-muted-foreground"><Timer className="h-3 w-3" /> Avg reply</div>
-                    <div className="mt-0.5 font-display text-sm font-semibold">~1h</div>
-                  </div>
-                </div>
 
                 <div className="mt-4 grid gap-2">
                   {unavailable ? (
@@ -633,18 +646,6 @@ function PropertyDetailPage() {
                 </div>
               </div>
             )}
-
-            {/* Trust score */}
-            <div className="mt-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
-              <div className="flex items-center gap-4">
-                <TrustScoreRing score={trust.score} tier={trust.tier} size={80} />
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground">Trust score</p>
-                  <p className="font-display text-lg font-semibold">{trust.tier}</p>
-                  <p className="text-xs text-muted-foreground">Verified profile, strong track record</p>
-                </div>
-              </div>
-            </div>
           </aside>
         </section>
 

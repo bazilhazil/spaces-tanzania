@@ -108,9 +108,11 @@ export async function fetchPropertyContact(propertyId: string): Promise<{
 
 export async function fetchPropertyById(id: string): Promise<{ property: Property; row: Row } | null> {
   const { data: session } = await supabase.auth.getSession();
+  // `public_listing_pages` also exposes sold/rented listings so shared links keep
+  // working; search surfaces still read the live-only `public_properties` view.
   const result = session.session
     ? await supabase.from("properties").select("*").eq("id", id).maybeSingle()
-    : await supabase.from("public_properties").select("*").eq("id", id).maybeSingle();
+    : await supabase.from("public_listing_pages" as never).select("*").eq("id", id).maybeSingle();
   if (!result.data) return null;
   const row = result.data as Row;
   if (session.session) {
@@ -135,7 +137,7 @@ export function contactAgentFromRow(row: Row): Agent {
     whatsapp,
     avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
     listings: 1,
-    rating: 4.8,
+    rating: 0,
     verified: false,
   };
 }
@@ -175,5 +177,51 @@ export async function fetchPlatformStats(): Promise<{
     verifiedListings: rows.filter((r) => r.verified === true).length,
     cities: new Set(rows.map((r) => r.region).filter(Boolean)).size,
     partners: new Set(rows.map((r) => r.owner_id).filter(Boolean)).size,
+  };
+}
+
+export interface OwnerPublicProfile {
+  id: string;
+  name: string | null;
+  agency: string | null;
+  avatar: string | null;
+  verifiedOwner: boolean;
+  verifiedAgent: boolean;
+  verifiedIdentity: boolean;
+  rating: number | null;
+  reviews: number;
+}
+
+/**
+ * Real, public owner/agent information for a listing. Verification badges are
+ * only ever driven by these database flags — never assumed.
+ */
+export async function fetchOwnerPublicProfile(ownerId: string): Promise<OwnerPublicProfile | null> {
+  if (!ownerId) return null;
+  const { data } = await supabase
+    .from("public_profiles")
+    .select("id,full_name,agency_name,avatar_url,verified_owner,verified_agent,verified_identity")
+    .eq("id", ownerId)
+    .maybeSingle();
+  if (!data) return null;
+  const p = data as any;
+  let rating: number | null = null;
+  let reviews = 0;
+  const { data: r } = await supabase.rpc("user_rating", { _user_id: ownerId } as never);
+  const row = Array.isArray(r) ? (r[0] as any) : (r as any);
+  if (row && Number(row.total ?? 0) > 0) {
+    rating = Number(row.average ?? 0);
+    reviews = Number(row.total ?? 0);
+  }
+  return {
+    id: p.id,
+    name: p.full_name,
+    agency: p.agency_name,
+    avatar: p.avatar_url,
+    verifiedOwner: p.verified_owner === true,
+    verifiedAgent: p.verified_agent === true,
+    verifiedIdentity: p.verified_identity === true,
+    rating,
+    reviews,
   };
 }
