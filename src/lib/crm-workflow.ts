@@ -117,7 +117,10 @@ export async function fetchCrmLeads(opts?: { all?: boolean }): Promise<CrmLead[]
     dealIds.length
       ? supabase.from("deals").select("id,reference,stage").in("id", dealIds)
       : Promise.resolve({ data: [] as Raw[] } as never),
-  ]);
+    propIds.length
+      ? supabase.from("conversations").select("id,property_id,buyer_id").in("property_id", propIds)
+      : Promise.resolve({ data: [] as Raw[] } as never),
+  ] as const);
 
   const props = new Map((((propsRes as Raw).data as Raw[]) ?? []).map((p) => [p.id, p]));
   const profs = new Map((((profRes as Raw).data as Raw[]) ?? []).map((p) => [p.id, p]));
