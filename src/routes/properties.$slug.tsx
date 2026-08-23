@@ -569,38 +569,37 @@ function PropertyDetailPage() {
       <SiteFooter />
 
       {/* Mobile sticky action bar */}
-      {agent && (
+      {agent && !unavailable && (
         <div className="sticky bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur lg:hidden">
-          <div className="grid grid-cols-3 gap-2 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-            <Button
-              variant="outline"
-              className="gap-1.5"
-              onClick={() => contactAndOpen("call", (a) => (a.phone ? `tel:${a.phone.replace(/\s/g, "")}` : null))}
-            >
-              <Phone className="h-4 w-4" /> Call
+          <div className="grid grid-cols-4 gap-1.5 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+            <Button size="sm" className="flex-col gap-0.5 py-2 text-[11px]" onClick={() => requireAuth(() => setInquiryOpen(true))}>
+              <Send className="h-4 w-4" /> {t("inquiry.message")}
             </Button>
             <Button
-              className="w-full gap-1.5 bg-success text-success-foreground hover:bg-success/90"
-              onClick={() =>
-                contactAndOpen("whatsapp", (a) =>
-                  a.whatsapp
-                    ? `https://wa.me/${a.whatsapp}?text=${encodeURIComponent(t("properties.detail.whatsappMessage", { title: property.title }))}`
-                    : null,
-                )
-              }
+              size="sm"
+              className="flex-col gap-0.5 bg-success py-2 text-[11px] text-success-foreground hover:bg-success/90"
+              onClick={openWhatsApp}
             >
-              <MessageCircle className="h-4 w-4" /> WhatsApp
+              <MessageCircle className="h-4 w-4" /> {t("inquiry.whatsapp")}
             </Button>
-
-            <Button
-              className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => requireAuth(() => setViewingOpen(true))}
-            >
-              <Calendar className="h-4 w-4" /> Viewing
+            <Button size="sm" variant="outline" className="flex-col gap-0.5 py-2 text-[11px]" onClick={callAction}>
+              <Phone className="h-4 w-4" /> {t("inquiry.call")}
+            </Button>
+            <Button size="sm" variant="outline" className="flex-col gap-0.5 py-2 text-[11px]" onClick={() => requireAuth(() => setViewingOpen(true))}>
+              <Calendar className="h-4 w-4" /> {t("inquiry.viewing")}
             </Button>
           </div>
         </div>
       )}
+      {agent && unavailable && (
+        <div className="sticky bottom-0 z-40 border-t border-border bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+          <p className="mb-2 text-center text-xs text-muted-foreground">{t("inquiry.unavailable")}</p>
+          <Button variant="outline" className="w-full" asChild>
+            <Link to="/properties">{t("inquiry.viewSimilar")}</Link>
+          </Button>
+        </div>
+      )}
+
 
 
       {/* Fullscreen lightbox */}
