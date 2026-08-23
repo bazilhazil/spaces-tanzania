@@ -1,22 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, Heart, MapPin, Phone, Trash2, Home as HomeIcon } from "lucide-react";
+import { CalendarPlus, ChevronLeft, Heart, MapPin, Share2, ShieldCheck, Trash2, Home as HomeIcon } from "lucide-react";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Button } from "@/components/ui/button";
+import { PropertyShareDialog } from "@/components/property-share-dialog";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useI18n } from "@/hooks/use-i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
-import { fetchPropertyContact } from "@/lib/properties-db";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard/favorites")({
   component: FavoritesPage,
   head: () => ({
     meta: [
-      { title: "Favorites — SPACES" },
-      { name: "description", content: "Properties you've saved on SPACES." },
+      { title: "My Saved Spaces — SPACES" },
+      { name: "description", content: "Spaces you've saved on SPACES." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -30,6 +30,8 @@ type FavRow = {
   region: string | null;
   district: string | null;
   property_type: string | null;
+  listing_type: string | null;
+  verified: boolean | null;
   image?: string | null;
 };
 
@@ -43,11 +45,13 @@ function formatPrice(price: number | null, currency: string | null) {
   }
 }
 
+
 function FavoritesPage() {
   const { t, lang } = useI18n();
   const { favorites, removeFavorite } = useFavorites();
   const [rows, setRows] = useState<Record<string, FavRow>>({});
   const [loading, setLoading] = useState(true);
+  const [share, setShare] = useState<FavRow | null>(null);
 
   const ids = useMemo(
     () => favorites.map((f) => f.propertyId).filter((id) => /^[0-9a-f-]{36}$/i.test(id)),
@@ -61,7 +65,7 @@ function FavoritesPage() {
       setLoading(true);
       const { data } = await supabase
         .from("properties")
-        .select("id,title,price,currency,region,district,property_type")
+        .select("id,title,price,currency,region,district,property_type,listing_type,verified")
         .in("id", ids);
       const { data: media } = await supabase
         .from("property_media")
@@ -95,15 +99,10 @@ function FavoritesPage() {
     day: "numeric", month: "short", year: "numeric",
   });
 
-  const handleContact = async (row: FavRow) => {
-    const contact = await fetchPropertyContact(row.id);
-    const phone = (contact?.contact_whatsapp || contact?.contact_phone || "").replace(/[^\d]/g, "");
-    if (phone) {
-      window.open(`https://wa.me/${phone}`, "_blank", "noopener");
-    } else {
-      toast.info("No contact info available");
-    }
-  };
+  const shareUrl = share
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/properties/${share.id}`
+    : "";
+
 
   return (
     <DashboardShell>
@@ -148,11 +147,23 @@ function FavoritesPage() {
                       <HomeIcon className="h-8 w-8" />
                     </div>
                   )}
-                  {row.property_type && (
-                    <span className="absolute left-3 top-3 rounded-full bg-background/90 px-2.5 py-1 text-[11px] font-medium capitalize text-foreground shadow-sm backdrop-blur">
-                      {row.property_type}
-                    </span>
-                  )}
+                  <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+                    {row.property_type && (
+                      <span className="rounded-full bg-background/90 px-2.5 py-1 text-[11px] font-medium capitalize text-foreground shadow-sm backdrop-blur">
+                        {row.property_type}
+                      </span>
+                    )}
+                    {row.listing_type && (
+                      <span className="rounded-full bg-primary/90 px-2.5 py-1 text-[11px] font-medium text-primary-foreground shadow-sm">
+                        {row.listing_type === "rent" ? t("card.forRent") : t("card.forSale")}
+                      </span>
+                    )}
+                    {row.verified && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600/90 px-2.5 py-1 text-[11px] font-medium text-white shadow-sm">
+                        <ShieldCheck className="h-3 w-3" /> {t("saved.verified")}
+                      </span>
+                    )}
+                  </div>
                 </Link>
                 <div className="flex flex-1 flex-col gap-3 p-4">
                   <div>
@@ -170,19 +181,25 @@ function FavoritesPage() {
                   <p className="text-[11px] text-muted-foreground">
                     {t("favoritesPage.savedOn", { date: dateFmt.format(new Date(fav.savedAt)) })}
                   </p>
-                  <div className="mt-auto flex items-center gap-2 pt-2">
-                    <Button size="sm" className="flex-1 gap-1.5 rounded-xl" onClick={() => void handleContact(row)}>
-                      <Phone className="h-3.5 w-3.5" />
-                      {t("favoritesPage.contact")}
+                  <div className="mt-auto grid grid-cols-2 gap-2 pt-2">
+                    <Button asChild size="sm" className="gap-1.5 rounded-xl">
+                      <Link to="/properties/$slug" params={{ slug: fav.propertyId }}>{t("saved.viewSpace")}</Link>
+                    </Button>
+                    <Button asChild size="sm" variant="outline" className="gap-1.5 rounded-xl">
+                      <Link to="/properties/$slug" params={{ slug: fav.propertyId }} hash="viewing">
+                        <CalendarPlus className="h-3.5 w-3.5" /> {t("saved.requestViewing")}
+                      </Link>
+                    </Button>
+                    <Button size="sm" variant="outline" className="gap-1.5 rounded-xl" onClick={() => setShare(row)}>
+                      <Share2 className="h-3.5 w-3.5" /> {t("saved.share")}
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       className="gap-1.5 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
                       onClick={() => { removeFavorite(fav.propertyId); toast.success(t("favoritesPage.removed")); }}
-                      aria-label={t("favoritesPage.remove")}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-3.5 w-3.5" /> {t("favoritesPage.remove")}
                     </Button>
                   </div>
                 </div>
@@ -191,9 +208,16 @@ function FavoritesPage() {
           </div>
         )}
       </div>
+      <PropertyShareDialog
+        open={!!share}
+        onOpenChange={(o) => !o && setShare(null)}
+        title={share?.title ?? "SPACES"}
+        url={shareUrl}
+      />
     </DashboardShell>
   );
 }
+
 
 function EmptyState() {
   const { t } = useI18n();

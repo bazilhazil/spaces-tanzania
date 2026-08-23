@@ -315,9 +315,11 @@ function PropertyDetailPage() {
                     size="sm"
                     className="gap-1.5"
                     onClick={() => {
+                      if (!user) { setAuthGate(true); return; }
                       const now = toggleFavorite(property.id);
                       toast.success(now ? "Saved to favorites" : "Removed from favorites");
                     }}
+
                   >
                     <Heart className={cn("h-4 w-4", favorited && "fill-current")} /> {t("common.save")}
                   </Button>

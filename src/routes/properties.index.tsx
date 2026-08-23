@@ -1,7 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { ChevronRight, Map as MapIcon, MapPin, Rows3, Search, SlidersHorizontal, X } from "lucide-react";
+import { BookmarkPlus, ChevronRight, Map as MapIcon, MapPin, Rows3, Search, SlidersHorizontal, X } from "lucide-react";
+import { AuthGateDialog } from "@/components/auth-gate-dialog";
+import { SaveSearchDialog } from "@/components/favorites/save-search-dialog";
+import { useAuth } from "@/hooks/use-auth";
+import type { SavedSearchFilters } from "@/lib/saved-searches-db";
+
 import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -79,6 +84,27 @@ function PropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [queryText, setQueryText] = useState(search.q ?? "");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const { user } = useAuth();
+  const [saveSearchOpen, setSaveSearchOpen] = useState(false);
+  const [authGate, setAuthGate] = useState(false);
+
+  // Filters currently applied on screen — reused when saving the search.
+  const currentFilters: SavedSearchFilters = useMemo(() => ({
+    q: search.q,
+    type: search.type,
+    category: search.category,
+    city: search.city,
+    district: search.district,
+    area: search.area,
+    minPrice: search.minPrice,
+    maxPrice: search.maxPrice,
+    beds: search.beds,
+    baths: search.baths,
+    furnished: search.furnished,
+    verified: search.verified,
+    amenities: search.amenities,
+  }), [search]);
+
 
   useEffect(() => setQueryText(search.q ?? ""), [search.q]);
 
@@ -290,6 +316,16 @@ function PropertiesPage() {
                   {t("discovery.results", { count: sorted.length })}
                 </p>
                 <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 rounded-xl"
+                    onClick={() => (user ? setSaveSearchOpen(true) : setAuthGate(true))}
+                  >
+                    <BookmarkPlus className="h-4 w-4" /> {t("saved.saveSearch")}
+                  </Button>
+
                   <div className="hidden rounded-xl border border-border p-0.5 sm:flex">
                     <button
                       onClick={() => patch({ view: undefined })}
@@ -372,6 +408,13 @@ function PropertiesPage() {
         </section>
       </main>
       <SiteFooter />
+      <SaveSearchDialog
+        open={saveSearchOpen}
+        onOpenChange={setSaveSearchOpen}
+        filters={currentFilters}
+      />
+      <AuthGateDialog open={authGate} onOpenChange={setAuthGate} />
+
     </div>
   );
 }

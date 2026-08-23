@@ -15,10 +15,16 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import {
-  KIND_META, listNotifications, markAllRead, markRead, removeNotification,
+  KIND_META,
   getPrefs, setPrefs, getProviders, setProviders, anyProviderConfigured,
-  type SpacesNotification, type NotificationKind, type ChannelPrefs, type ProviderStatus,
+  type NotificationKind, type ChannelPrefs, type ProviderStatus,
 } from "@/lib/notifications-store";
+import {
+  listNotificationsDb, markNotificationRead, markAllNotificationsRead,
+  deleteNotification, subscribeNotifications, isPropertyAlert, type DbNotification,
+} from "@/lib/notifications-db";
+import { useAuth } from "@/hooks/use-auth";
+
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +48,28 @@ const KIND_ICON: Record<NotificationKind, React.ComponentType<{ className?: stri
   property_approved: Home, property_rejected: Home,
   announcement: Megaphone,
 };
+
+/** Kinds emitted by database triggers that the legacy meta map doesn't cover. */
+const EXTRA_META: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+  price_change: { label: "Price Change", icon: Megaphone },
+  property_verified: { label: "Property Verified", icon: ShieldCheck },
+  property_available: { label: "Space Available", icon: Home },
+  saved_search_match: { label: "New Match", icon: Search },
+};
+
+function kindLabel(kind: string) {
+  return EXTRA_META[kind]?.label ?? KIND_META[kind as NotificationKind]?.label ?? "Update";
+}
+
+function kindIcon(kind: string) {
+  return EXTRA_META[kind]?.icon ?? KIND_ICON[kind as NotificationKind] ?? Bell;
+}
+
+function money(value: number | null | undefined, currency: string | null | undefined) {
+  if (!value) return "—";
+  return `${currency || "TZS"} ${Number(value).toLocaleString()}`;
+}
+
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -74,9 +102,18 @@ function useLive<T>(read: () => T, event: string): T {
 }
 
 function NotificationsPage() {
-  const notifs = useLive<SpacesNotification[]>(listNotifications, "spaces:notifications-changed");
+  const { user } = useAuth();
+  const [notifs, setNotifs] = useState<DbNotification[]>([]);
   const [q, setQ] = useState("");
   const [tab, setTab] = useState("all");
+
+  const reload = () => { void listNotificationsDb().then(setNotifs); };
+
+  useEffect(() => {
+    reload();
+    if (!user) return;
+    return subscribeNotifications(user.id, reload);
+  }, [user?.id]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -87,11 +124,21 @@ function NotificationsPage() {
       if (tab === "week" && bucket(n.createdAt) === "earlier") return false;
       if (tab === "earlier" && bucket(n.createdAt) !== "earlier") return false;
       if (!needle) return true;
-      return (n.title + " " + n.body + " " + KIND_META[n.kind].label).toLowerCase().includes(needle);
+      return (n.title + " " + n.body + " " + kindLabel(n.kind)).toLowerCase().includes(needle);
     });
   }, [notifs, q, tab]);
 
   const unread = notifs.filter((n) => !n.read).length;
+
+  const onRead = async (id: string) => {
+    setNotifs((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    await markNotificationRead(id);
+  };
+  const onDelete = async (id: string) => {
+    setNotifs((prev) => prev.filter((n) => n.id !== id));
+    await deleteNotification(id);
+    toast.success("Notification deleted");
+  };
 
   return (
     <DashboardShell>
@@ -107,11 +154,21 @@ function NotificationsPage() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="rounded-full">{unread} unread</Badge>
-            <Button variant="outline" size="sm" onClick={() => { markAllRead(); toast.success("All notifications marked as read"); }}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                setNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
+                await markAllNotificationsRead();
+                toast.success("All notifications marked as read");
+              }}
+            >
               <Check className="mr-1.5 h-4 w-4" /> Mark all as read
             </Button>
           </div>
         </header>
+
+
 
         <Tabs value={tab} onValueChange={setTab} className="space-y-4">
           <div className="flex items-center gap-2">
@@ -149,7 +206,7 @@ function NotificationsPage() {
 
           {(["all", "unread", "read", "today", "week", "earlier"] as const).map((t) => (
             <TabsContent key={t} value={t} className="mt-0">
-              <NotifList items={filtered} />
+              <NotifList items={filtered} onRead={onRead} onDelete={onDelete} />
             </TabsContent>
           ))}
 
@@ -162,7 +219,11 @@ function NotificationsPage() {
   );
 }
 
-function NotifList({ items }: { items: SpacesNotification[] }) {
+function NotifList({ items, onRead, onDelete }: {
+  items: DbNotification[];
+  onRead: (id: string) => void | Promise<void>;
+  onDelete: (id: string) => void | Promise<void>;
+}) {
   if (items.length === 0) {
     return (
       <EmptyState
@@ -175,7 +236,8 @@ function NotifList({ items }: { items: SpacesNotification[] }) {
   return (
     <ul className="space-y-2">
       {items.map((n) => {
-        const Icon = KIND_ICON[n.kind];
+        const Icon = kindIcon(n.kind);
+        const alert = isPropertyAlert(n.kind) ? n.property : null;
         return (
           <li
             key={n.id}
@@ -199,23 +261,51 @@ function NotifList({ items }: { items: SpacesNotification[] }) {
                 </div>
                 <span className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground">{timeAgo(n.createdAt)}</span>
               </div>
+
+              {alert && (
+                <div className="mt-2 flex gap-3 rounded-xl border border-border/60 bg-secondary/30 p-2">
+                  <div className="h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
+                    {alert.image ? (
+                      <img src={alert.image} alt={alert.title} loading="lazy" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center text-muted-foreground"><Home className="h-4 w-4" /></div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{alert.title}</p>
+                    <p className="truncate text-xs text-muted-foreground">{alert.location || "—"}</p>
+                    {n.kind === "price_change" && n.data.previous_price ? (
+                      <p className="mt-0.5 text-xs">
+                        <span className="text-muted-foreground line-through">{money(n.data.previous_price, alert.currency)}</span>{" "}
+                        <span className="font-semibold text-primary">{money(n.data.new_price ?? alert.price, alert.currency)}</span>
+                      </p>
+                    ) : (
+                      <p className="mt-0.5 text-xs font-semibold text-primary">{money(alert.price, alert.currency)}</p>
+                    )}
+                  </div>
+                  <Button asChild size="sm" className="h-8 shrink-0 self-center rounded-xl text-xs">
+                    <Link to="/properties/$slug" params={{ slug: alert.id }}>View Space</Link>
+                  </Button>
+                </div>
+              )}
+
               <div className="mt-2 flex items-center justify-between gap-2">
-                <Badge variant="outline" className="rounded-full text-[10px]">{KIND_META[n.kind].label}</Badge>
+                <Badge variant="outline" className="rounded-full text-[10px]">{kindLabel(n.kind)}</Badge>
 
                 {/* Desktop: inline action buttons */}
                 <div className="hidden flex-wrap items-center gap-1 md:flex">
-                  {n.href && (
+                  {n.link && !alert && (
                     <Button asChild size="sm" variant="ghost" className="h-7 px-2 text-xs">
-                      <Link to={n.href}>Open</Link>
+                      <a href={n.link}>Open</a>
                     </Button>
                   )}
                   {!n.read && (
-                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => markRead(n.id)}>
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => void onRead(n.id)}>
                       <Check className="mr-1 h-3.5 w-3.5" />Mark read
                     </Button>
                   )}
                   <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
-                    onClick={() => { removeNotification(n.id); toast.success("Notification deleted"); }}>
+                    onClick={() => void onDelete(n.id)}>
                     <Trash2 className="mr-1 h-3.5 w-3.5" />Delete
                   </Button>
                 </div>
@@ -228,19 +318,19 @@ function NotifList({ items }: { items: SpacesNotification[] }) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-44">
-                    {n.href && (
+                    {n.link && (
                       <DropdownMenuItem asChild>
-                        <Link to={n.href}>Open</Link>
+                        <a href={n.link}>Open</a>
                       </DropdownMenuItem>
                     )}
                     {!n.read && (
-                      <DropdownMenuItem onClick={() => markRead(n.id)}>
+                      <DropdownMenuItem onClick={() => void onRead(n.id)}>
                         <Check className="mr-2 h-4 w-4" />Mark as read
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem
                       className="text-destructive focus:text-destructive"
-                      onClick={() => { removeNotification(n.id); toast.success("Notification deleted"); }}
+                      onClick={() => void onDelete(n.id)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />Delete
                     </DropdownMenuItem>
@@ -253,6 +343,7 @@ function NotifList({ items }: { items: SpacesNotification[] }) {
       })}
     </ul>
   );
+
 }
 
 const PROVIDER_META: { id: keyof ProviderStatus; name: string; icon: React.ComponentType<{ className?: string }>; description: string }[] = [
