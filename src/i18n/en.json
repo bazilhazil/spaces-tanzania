@@ -39,7 +39,9 @@
     "listings": "listings",
     "listing": "listing",
     "all": "All",
-    "remove": "Remove"
+    "remove": "Remove",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "home": {
     "hero": {
@@ -438,16 +440,16 @@
     "home": "Go home"
   },
   "favoritesPage": {
-    "title": "Favorites",
-    "subtitle": "Properties you've saved across your devices.",
+    "title": "My Saved Spaces",
+    "subtitle": "Spaces you've saved across your devices.",
     "back": "Dashboard",
     "savedOn": "Saved {date}",
     "contact": "Contact owner",
     "remove": "Remove",
     "removed": "Removed from favorites",
-    "emptyTitle": "No saved properties yet.",
+    "emptyTitle": "You haven't saved any spaces yet.",
     "emptyBody": "Tap the heart on any listing to save it here.",
-    "browse": "Browse Properties",
+    "browse": "Find a Space",
     "loading": "Loading your favorites…"
   },
   "share": {
@@ -1046,5 +1048,48 @@
     "reportUser": "Report user",
     "reportMessage": "Report message",
     "underReview": "Under review"
+  },
+  "saved": {
+    "searchesTitle": "Saved Searches",
+    "searchesSubtitle": "Save a search and get alerted when new matching spaces are listed.",
+    "saveSearch": "Save search",
+    "editSearch": "Edit saved search",
+    "searchName": "Search name",
+    "namePlaceholder": "e.g. Mbezi 2 Bedroom",
+    "nameRequired": "Give your search a name.",
+    "alerts": "Property alerts",
+    "alertsHint": "Get notified when new spaces match this search.",
+    "frequency": "Alert frequency",
+    "freq": {
+      "instant": "Instant",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "off": "Alerts off"
+    },
+    "created": "Created {date}",
+    "lastAlert": "Last alert {date}",
+    "noAlertYet": "No alerts yet",
+    "matches": "{count} matching spaces",
+    "searchNow": "Search now",
+    "newSearch": "New search",
+    "alertsOn": "Alerts turned on",
+    "alertsOff": "Alerts turned off",
+    "deleted": "Saved search deleted",
+    "updated": "Saved search updated",
+    "saving": "Saving…",
+    "saveFailed": "Could not save. Please try again.",
+    "deleteTitle": "Delete saved search?",
+    "deleteBody": "\"{name}\" and its alerts will be removed.",
+    "noSearchesTitle": "You haven't saved any searches yet.",
+    "noSearchesBody": "Run a search, then tap Save search to get alerts.",
+    "findSpace": "Find a Space",
+    "viewSpace": "View Space",
+    "requestViewing": "Request Viewing",
+    "share": "Share",
+    "verified": "Verified",
+    "signInTitle": "Sign in to save this space.",
+    "previousPrice": "Previous price",
+    "newPrice": "New price",
+    "createdToast": "Saved search created"
   }
 }

@@ -39,7 +39,9 @@
     "listings": "matangazo",
     "listing": "tangazo",
     "all": "Zote",
-    "remove": "Ondoa"
+    "remove": "Ondoa",
+    "edit": "Hariri",
+    "delete": "Futa"
   },
   "home": {
     "hero": {
@@ -438,16 +440,16 @@
     "home": "Rudi mwanzo"
   },
   "favoritesPage": {
-    "title": "Vipendwa",
-    "subtitle": "Mali ulizohifadhi kwenye vifaa vyako vyote.",
+    "title": "Nafasi Nilizohifadhi",
+    "subtitle": "Nafasi ulizohifadhi kwenye vifaa vyako.",
     "back": "Dashibodi",
     "savedOn": "Ilihifadhiwa {date}",
     "contact": "Wasiliana na mmiliki",
     "remove": "Ondoa",
     "removed": "Imeondolewa kwenye vipendwa",
-    "emptyTitle": "Hujahifadhi mali yoyote bado.",
-    "emptyBody": "Bonyeza moyo kwenye tangazo lolote ili kuhifadhi hapa.",
-    "browse": "Vinjari Mali",
+    "emptyTitle": "Bado hujahifadhi nafasi yoyote.",
+    "emptyBody": "Bofya moyo kwenye tangazo lolote kuihifadhi hapa.",
+    "browse": "Tafuta Nafasi",
     "loading": "Inapakia vipendwa vyako…"
   },
   "share": {
@@ -1046,5 +1048,48 @@
     "reportUser": "Ripoti mtumiaji",
     "reportMessage": "Ripoti ujumbe",
     "underReview": "Inakaguliwa"
+  },
+  "saved": {
+    "searchesTitle": "Utafutaji Uliohifadhiwa",
+    "searchesSubtitle": "Hifadhi utafutaji wako upate taarifa nafasi mpya zinapowekwa.",
+    "saveSearch": "Hifadhi utafutaji",
+    "editSearch": "Hariri utafutaji",
+    "searchName": "Jina la utafutaji",
+    "namePlaceholder": "mf. Mbezi Vyumba 2",
+    "nameRequired": "Weka jina la utafutaji.",
+    "alerts": "Taarifa za nafasi",
+    "alertsHint": "Pata taarifa nafasi mpya zinapolingana na utafutaji huu.",
+    "frequency": "Mara ngapi",
+    "freq": {
+      "instant": "Papo hapo",
+      "daily": "Kila siku",
+      "weekly": "Kila wiki",
+      "off": "Zimezimwa"
+    },
+    "created": "Imeundwa {date}",
+    "lastAlert": "Taarifa ya mwisho {date}",
+    "noAlertYet": "Hakuna taarifa bado",
+    "matches": "Nafasi {count} zinazolingana",
+    "searchNow": "Tafuta sasa",
+    "newSearch": "Utafutaji mpya",
+    "alertsOn": "Taarifa zimewashwa",
+    "alertsOff": "Taarifa zimezimwa",
+    "deleted": "Utafutaji umefutwa",
+    "updated": "Utafutaji umesasishwa",
+    "createdToast": "Utafutaji umehifadhiwa",
+    "saving": "Inahifadhi…",
+    "saveFailed": "Imeshindikana kuhifadhi. Jaribu tena.",
+    "deleteTitle": "Futa utafutaji?",
+    "deleteBody": "\"{name}\" na taarifa zake vitaondolewa.",
+    "noSearchesTitle": "Bado hujahifadhi utafutaji wowote.",
+    "noSearchesBody": "Fanya utafutaji kisha bofya Hifadhi utafutaji.",
+    "findSpace": "Tafuta Nafasi",
+    "viewSpace": "Angalia Nafasi",
+    "requestViewing": "Omba Kutembelea",
+    "share": "Sambaza",
+    "verified": "Imethibitishwa",
+    "signInTitle": "Ingia ili kuhifadhi nafasi hii.",
+    "previousPrice": "Bei ya awali",
+    "newPrice": "Bei mpya"
   }
 }
