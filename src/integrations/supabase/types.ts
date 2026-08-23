@@ -669,6 +669,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: Database["public"]["Enums"]["account_status"]
           agency_name: string | null
           avatar_url: string | null
           bio: string | null
@@ -680,6 +681,8 @@ export type Database = {
           location: string | null
           national_id: string | null
           phone: string | null
+          suspended_until: string | null
+          suspension_reason: string | null
           updated_at: string
           verified_agent: boolean
           verified_business: boolean
@@ -687,6 +690,7 @@ export type Database = {
           verified_owner: boolean
         }
         Insert: {
+          account_status?: Database["public"]["Enums"]["account_status"]
           agency_name?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -698,6 +702,8 @@ export type Database = {
           location?: string | null
           national_id?: string | null
           phone?: string | null
+          suspended_until?: string | null
+          suspension_reason?: string | null
           updated_at?: string
           verified_agent?: boolean
           verified_business?: boolean
@@ -705,6 +711,7 @@ export type Database = {
           verified_owner?: boolean
         }
         Update: {
+          account_status?: Database["public"]["Enums"]["account_status"]
           agency_name?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -716,6 +723,8 @@ export type Database = {
           location?: string | null
           national_id?: string | null
           phone?: string | null
+          suspended_until?: string | null
+          suspension_reason?: string | null
           updated_at?: string
           verified_agent?: boolean
           verified_business?: boolean
@@ -753,6 +762,8 @@ export type Database = {
           status: Database["public"]["Enums"]["property_status"]
           street: string | null
           title: string
+          under_review: boolean
+          under_review_reason: string | null
           updated_at: string
           verified: boolean
           view_count: number
@@ -787,6 +798,8 @@ export type Database = {
           status?: Database["public"]["Enums"]["property_status"]
           street?: string | null
           title: string
+          under_review?: boolean
+          under_review_reason?: string | null
           updated_at?: string
           verified?: boolean
           view_count?: number
@@ -821,6 +834,8 @@ export type Database = {
           status?: Database["public"]["Enums"]["property_status"]
           street?: string | null
           title?: string
+          under_review?: boolean
+          under_review_reason?: string | null
           updated_at?: string
           verified?: boolean
           view_count?: number
@@ -1048,6 +1063,47 @@ export type Database = {
           },
         ]
       }
+      report_actions: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          from_status: Database["public"]["Enums"]["report_status"] | null
+          id: string
+          note: string | null
+          report_id: string
+          to_status: Database["public"]["Enums"]["report_status"] | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["report_status"] | null
+          id?: string
+          note?: string | null
+          report_id: string
+          to_status?: Database["public"]["Enums"]["report_status"] | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["report_status"] | null
+          id?: string
+          note?: string | null
+          report_id?: string
+          to_status?: Database["public"]["Enums"]["report_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_actions_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "safety_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_moderation_events: {
         Row: {
           action: string
@@ -1225,6 +1281,98 @@ export type Database = {
           },
         ]
       }
+      safety_reports: {
+        Row: {
+          assigned_admin_id: string | null
+          conversation_id: string | null
+          created_at: string
+          description: string | null
+          evidence_path: string | null
+          id: string
+          message_id: string | null
+          priority: Database["public"]["Enums"]["report_priority"]
+          property_id: string | null
+          reason: string
+          reference: string
+          reported_user_id: string | null
+          reporter_id: string
+          resolution: string | null
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_type: Database["public"]["Enums"]["report_target_type"]
+          updated_at: string
+        }
+        Insert: {
+          assigned_admin_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          description?: string | null
+          evidence_path?: string | null
+          id?: string
+          message_id?: string | null
+          priority?: Database["public"]["Enums"]["report_priority"]
+          property_id?: string | null
+          reason: string
+          reference?: string
+          reported_user_id?: string | null
+          reporter_id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_type: Database["public"]["Enums"]["report_target_type"]
+          updated_at?: string
+        }
+        Update: {
+          assigned_admin_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          description?: string | null
+          evidence_path?: string | null
+          id?: string
+          message_id?: string | null
+          priority?: Database["public"]["Enums"]["report_priority"]
+          property_id?: string | null
+          reason?: string
+          reference?: string
+          reported_user_id?: string | null
+          reporter_id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_type?: Database["public"]["Enums"]["report_target_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_reports_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_reports_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           billing_cycle: string
@@ -1261,6 +1409,30 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
         }
         Relationships: []
       }
@@ -1582,9 +1754,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_blocked_with: { Args: { _other: string }; Returns: boolean }
       moderate_review: {
         Args: { _reason?: string; _review_id: string; _status: string }
         Returns: undefined
+      }
+      my_account_status: {
+        Args: never
+        Returns: {
+          reason: string
+          status: Database["public"]["Enums"]["account_status"]
+          until: string
+        }[]
       }
       my_review_opportunities: {
         Args: never
@@ -1646,6 +1827,7 @@ export type Database = {
       }
     }
     Enums: {
+      account_status: "active" | "suspended" | "banned"
       agent_permission:
         | "view_only"
         | "manage_leads"
@@ -1709,6 +1891,14 @@ export type Database = {
         | "warehouse"
         | "land"
         | "commercial"
+      report_priority: "normal" | "high" | "urgent"
+      report_status:
+        | "new"
+        | "under_review"
+        | "more_info"
+        | "resolved"
+        | "dismissed"
+      report_target_type: "property" | "user" | "message"
       review_status: "pending" | "published" | "flagged" | "removed"
       review_subject_type: "property" | "user"
     }
@@ -1838,6 +2028,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_status: ["active", "suspended", "banned"],
       agent_permission: [
         "view_only",
         "manage_leads",
@@ -1907,6 +2098,15 @@ export const Constants = {
         "land",
         "commercial",
       ],
+      report_priority: ["normal", "high", "urgent"],
+      report_status: [
+        "new",
+        "under_review",
+        "more_info",
+        "resolved",
+        "dismissed",
+      ],
+      report_target_type: ["property", "user", "message"],
       review_status: ["pending", "published", "flagged", "removed"],
       review_subject_type: ["property", "user"],
     },
