@@ -102,9 +102,18 @@ function useLive<T>(read: () => T, event: string): T {
 }
 
 function NotificationsPage() {
-  const notifs = useLive<SpacesNotification[]>(listNotifications, "spaces:notifications-changed");
+  const { user } = useAuth();
+  const [notifs, setNotifs] = useState<DbNotification[]>([]);
   const [q, setQ] = useState("");
   const [tab, setTab] = useState("all");
+
+  const reload = () => { void listNotificationsDb().then(setNotifs); };
+
+  useEffect(() => {
+    reload();
+    if (!user) return;
+    return subscribeNotifications(user.id, reload);
+  }, [user?.id]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -115,11 +124,21 @@ function NotificationsPage() {
       if (tab === "week" && bucket(n.createdAt) === "earlier") return false;
       if (tab === "earlier" && bucket(n.createdAt) !== "earlier") return false;
       if (!needle) return true;
-      return (n.title + " " + n.body + " " + KIND_META[n.kind].label).toLowerCase().includes(needle);
+      return (n.title + " " + n.body + " " + kindLabel(n.kind)).toLowerCase().includes(needle);
     });
   }, [notifs, q, tab]);
 
   const unread = notifs.filter((n) => !n.read).length;
+
+  const onRead = async (id: string) => {
+    setNotifs((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    await markNotificationRead(id);
+  };
+  const onDelete = async (id: string) => {
+    setNotifs((prev) => prev.filter((n) => n.id !== id));
+    await deleteNotification(id);
+    toast.success("Notification deleted");
+  };
 
   return (
     <DashboardShell>
@@ -135,9 +154,20 @@ function NotificationsPage() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="rounded-full">{unread} unread</Badge>
-            <Button variant="outline" size="sm" onClick={() => { markAllRead(); toast.success("All notifications marked as read"); }}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                setNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
+                await markAllNotificationsRead();
+                toast.success("All notifications marked as read");
+              }}
+            >
               <Check className="mr-1.5 h-4 w-4" /> Mark all as read
             </Button>
+          </div>
+        </header>
+
           </div>
         </header>
 
