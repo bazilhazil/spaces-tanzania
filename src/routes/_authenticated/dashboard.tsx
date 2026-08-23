@@ -76,7 +76,7 @@ function greeting() {
 
 function OwnerHome() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<OwnerStats>({ active: 0, views: 0, inquiries: 0, viewings: 0 });
+  const { stats, loading: statsLoading } = useDashboardStats();
   const [recent, setRecent] = useState<RecentProperty[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -91,8 +91,6 @@ function OwnerHome() {
         .order("created_at", { ascending: false })
         .limit(6);
       const list = props ?? [];
-      const active = list.filter((p) => p.status === "live").length;
-      const views = list.reduce((sum, p) => sum + (p.view_count ?? 0), 0);
 
       // Fetch cover for each
       const ids = list.map((p) => p.id);
@@ -115,7 +113,6 @@ function OwnerHome() {
       }
 
       if (!alive) return;
-      setStats({ active, views, inquiries: 0, viewings: 0 });
       setRecent(list.map((p) => ({ ...p, cover: coverByProp[p.id] })));
       setLoading(false);
     })();
@@ -125,13 +122,15 @@ function OwnerHome() {
   return (
     <>
       <StatsGrid
+        loading={statsLoading}
         items={[
-          { label: "Active Listings", value: stats.active, icon: Home, delta: "+0", tone: "primary" },
-          { label: "Total Property Views", value: stats.views, icon: Eye, delta: "+0%", tone: "emerald" },
-          { label: "New Inquiries", value: stats.inquiries, icon: MessageSquare, delta: "0 today", tone: "amber" },
-          { label: "Scheduled Viewings", value: stats.viewings, icon: Calendar, delta: "This week", tone: "violet" },
+          { label: "Active Listings", value: stats.listings, icon: Home, delta: `${stats.totalListings} total`, tone: "primary", to: "/dashboard/properties" },
+          { label: "Total Property Views", value: stats.propertyViews, icon: Eye, delta: "All listings", tone: "emerald", to: "/dashboard/properties" },
+          { label: "New Inquiries", value: stats.activeInquiries, icon: MessageSquare, delta: `${stats.completedInquiries} completed`, tone: "amber", to: "/leads" },
+          { label: "Scheduled Viewings", value: stats.viewings, icon: Calendar, delta: "Upcoming", tone: "violet", to: "/viewings" },
         ]}
       />
+
 
       <QuickActions />
 
