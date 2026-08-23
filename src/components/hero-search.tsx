@@ -75,20 +75,21 @@ export function HeroSearch() {
             },
           });
         }}
-        className="grid gap-3 rounded-r-2xl rounded-bl-2xl bg-background/95 p-4 shadow-[var(--shadow-elevated)] backdrop-blur md:grid-cols-12 md:items-center md:p-3"
+        className="relative z-30 grid gap-3 rounded-r-2xl rounded-bl-2xl bg-background/95 p-4 shadow-[var(--shadow-elevated)] backdrop-blur md:grid-cols-12 md:items-center md:p-3"
       >
-        <div className="relative md:col-span-4">
+        <div className="relative z-50 md:col-span-4">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={q}
             onChange={(e) => { setQ(e.target.value); setShowHits(true); }}
             onFocus={() => setShowHits(true)}
             onBlur={() => setTimeout(() => setShowHits(false), 150)}
+            onKeyDown={(e) => { if (e.key === "Escape") { setShowHits(false); e.currentTarget.blur(); } }}
             placeholder={t("search.placeholder")}
             className="h-12 border-transparent bg-secondary/60 pl-10 text-sm focus-visible:border-ring"
           />
           {showHits && q && hits.length > 0 && (
-            <div className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-border bg-popover shadow-[var(--shadow-lg)]">
+            <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-72 w-full overflow-y-auto overscroll-contain rounded-2xl border border-border bg-popover p-1 text-popover-foreground shadow-[var(--shadow-elevated)]">
               {hits.map((h, i) => (
                 <button
                   key={`${h.label}-${i}`}
@@ -99,7 +100,7 @@ export function HeroSearch() {
                     setQ(h.ward ?? h.district ?? h.region);
                     setShowHits(false);
                   }}
-                  className="flex w-full items-start gap-3 border-b border-border/50 px-4 py-2.5 text-left last:border-0 hover:bg-muted"
+                  className="flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-muted focus:bg-muted focus:outline-none"
                 >
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   <div className="min-w-0">
@@ -111,6 +112,7 @@ export function HeroSearch() {
             </div>
           )}
         </div>
+
         <Select value={city} onValueChange={setCity}>
           <SelectTrigger className="h-12 border-transparent bg-secondary/60 md:col-span-2">
             <SelectValue placeholder={t("search.city")} />
