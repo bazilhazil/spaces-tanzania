@@ -22,8 +22,6 @@ import { sendPropertyMessage } from "@/lib/inquiry";
 import { createViewingRequest } from "@/lib/viewings-db";
 import { VerifiedBadge } from "@/components/trust/verified-badge";
 import { ReportSheet } from "@/components/safety/report-sheet";
-import { TrustScoreRing } from "@/components/trust/trust-score-ring";
-import { QualityScorePill } from "@/components/trust/quality-score";
 import { PropertyReviews } from "@/components/reviews/property-reviews";
 import { formatPrice, type Property, type Agent } from "@/lib/mock-data";
 import { fetchLiveProperties, fetchPropertyById, fetchPropertyContact, contactAgentFromRow, fetchOwnerPublicProfile, type OwnerPublicProfile } from "@/lib/properties-db";
@@ -398,8 +396,10 @@ function PropertyDetailPage() {
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {property.verified && <VerifiedBadge kind="space" label={t("verify.badge.space")} size="sm" />}
-                  {agent?.verified && <VerifiedBadge kind="agent" label={t("verify.badge.agent")} size="sm" />}
-                  <QualityScorePill score={78} />
+                  {ownerProfile?.verifiedAgent && <VerifiedBadge kind="agent" label={t("verify.badge.agent")} size="sm" />}
+                  {ownerProfile?.verifiedOwner && !ownerProfile?.verifiedAgent && (
+                    <VerifiedBadge kind="owner" label={t("verify.badge.owner")} size="sm" />
+                  )}
                 </div>
                 {property.verified && (
                   <p className="mt-2 text-xs text-muted-foreground">{t("verify.spaceExplainer")}</p>
@@ -642,18 +642,6 @@ function PropertyDetailPage() {
                 </div>
               </div>
             )}
-
-            {/* Trust score */}
-            <div className="mt-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
-              <div className="flex items-center gap-4">
-                <TrustScoreRing score={trust.score} tier={trust.tier} size={80} />
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground">Trust score</p>
-                  <p className="font-display text-lg font-semibold">{trust.tier}</p>
-                  <p className="text-xs text-muted-foreground">Verified profile, strong track record</p>
-                </div>
-              </div>
-            </div>
           </aside>
         </section>
 
