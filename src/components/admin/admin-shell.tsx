@@ -34,7 +34,7 @@ const NAV: { group: string; items: Item[] }[] = [
     items: [
       { label: "Properties", section: "properties", icon: Home, badge: "27" },
       { label: "Verification", section: "verification", icon: ShieldCheck },
-      { label: "Reports", section: "reports", icon: Flag, badge: "14" },
+      { label: "Safety & Reports", section: "reports", icon: Flag },
       { label: "Reviews", section: "reviews", icon: Star },
       { label: "Bookings", section: "bookings", icon: Calendar },
       { label: "Messages", section: "messages", icon: MessageSquare },
