@@ -30,6 +30,52 @@ import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
+  head: () => ({
+    meta: [
+      { title: "SPACES — Verified Property for Rent & Sale in Tanzania" },
+      {
+        name: "description",
+        content:
+          "Find verified houses, apartments, offices, shops, warehouses and land for rent or sale across Dar es Salaam, Zanzibar, Arusha and all of Tanzania.",
+      },
+      { property: "og:title", content: "SPACES — Verified Property for Rent & Sale in Tanzania" },
+      {
+        property: "og:description",
+        content:
+          "Browse verified listings, connect directly with owners and agents, and book viewings across Tanzania.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://spacestz.com/" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "https://spacestz.com/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "SPACES",
+          url: "https://spacestz.com/",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://spacestz.com/properties?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "SPACES",
+          url: "https://spacestz.com/",
+          areaServed: "TZ",
+        }),
+      },
+    ],
+  }),
 });
 
 
