@@ -1373,6 +1373,42 @@ export type Database = {
           },
         ]
       }
+      saved_searches: {
+        Row: {
+          alerts_enabled: boolean
+          created_at: string
+          filters: Json
+          frequency: string
+          id: string
+          last_alert_at: string | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alerts_enabled?: boolean
+          created_at?: string
+          filters?: Json
+          frequency?: string
+          id?: string
+          last_alert_at?: string | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alerts_enabled?: boolean
+          created_at?: string
+          filters?: Json
+          frequency?: string
+          id?: string
+          last_alert_at?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           billing_cycle: string
@@ -1793,6 +1829,13 @@ export type Database = {
       respond_to_review: {
         Args: { _response: string; _review_id: string }
         Returns: undefined
+      }
+      saved_search_matches: {
+        Args: {
+          _filters: Json
+          _p: Database["public"]["Tables"]["properties"]["Row"]
+        }
+        Returns: boolean
       }
       search_agents: {
         Args: { _q: string }

@@ -290,6 +290,16 @@ function PropertiesPage() {
                   {t("discovery.results", { count: sorted.length })}
                 </p>
                 <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 rounded-xl"
+                    onClick={() => (user ? setSaveSearchOpen(true) : setAuthGate(true))}
+                  >
+                    <BookmarkPlus className="h-4 w-4" /> {t("saved.saveSearch")}
+                  </Button>
+
                   <div className="hidden rounded-xl border border-border p-0.5 sm:flex">
                     <button
                       onClick={() => patch({ view: undefined })}
