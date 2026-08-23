@@ -70,6 +70,8 @@ export interface CrmLead {
   viewingId: string | null;
   viewingStatus: string | null;
   viewingAt: string | null;
+  /** The message conversation this inquiry came from (when there is one). */
+  conversationId: string | null;
 }
 
 export interface TimelineEntry {
@@ -101,7 +103,7 @@ export async function fetchCrmLeads(opts?: { all?: boolean }): Promise<CrmLead[]
   const leadIds = rows.map((r) => r.id);
   const dealIds = [...new Set(rows.map((r) => r.deal_id).filter(Boolean))];
 
-  const [propsRes, profRes, bookRes, dealRes] = await Promise.all([
+  const [propsRes, profRes, bookRes, dealRes, convRes] = await Promise.all([
     propIds.length
       ? supabase.from("properties").select("id,title,region,district,ward").in("id", propIds)
       : Promise.resolve({ data: [] as Raw[] } as never),
