@@ -1,18 +1,16 @@
-import { Star, MessageCircle, Timer, Building2, Award, Calendar, MapPin, Flag } from "lucide-react";
+import { Star, Building2, Award, Calendar, MapPin, Flag } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { VerificationBadge } from "./verification-badge";
-import { TrustScoreRing } from "./trust-score-ring";
 import { ReportSheet } from "@/components/safety/report-sheet";
 import { BlockUserDialog, useBlockState } from "@/components/safety/block-user-dialog";
 import { Ban } from "lucide-react";
 import { useState } from "react";
-import { computeTrustScore, MOCK_TRUST_SIGNALS, type PublicProfileData } from "@/lib/trust-engine";
+import { type PublicProfileData } from "@/lib/trust-engine";
 import { PersonReviews } from "@/components/reviews/person-reviews";
 import { cn } from "@/lib/utils";
 
 export function PublicProfile({ profile, userId, className }: { profile: PublicProfileData; userId?: string; className?: string }) {
-  const trust = computeTrustScore(MOCK_TRUST_SIGNALS);
   const [blockOpen, setBlockOpen] = useState(false);
   const { blocked, setBlocked } = useBlockState(userId ?? null);
 
@@ -66,19 +64,15 @@ export function PublicProfile({ profile, userId, className }: { profile: PublicP
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[auto_1fr]">
-        <div className="ds-card grid place-items-center p-6">
-          <TrustScoreRing score={trust.score} tier={trust.tier} size={148} />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-          <Stat icon={Star}         label="Rating"           value={`${profile.stats.rating.toFixed(1)} ★`} sub={`${profile.stats.reviewCount} reviews`} />
-          <Stat icon={MessageCircle} label="Response rate"    value={`${profile.stats.responseRate}%`} />
-          <Stat icon={Timer}         label="Avg response"     value={profile.stats.responseTime} />
-          <Stat icon={Building2}     label="Active listings"  value={profile.stats.listings.toString()} />
-          <Stat icon={Award}         label="Transactions"     value={profile.stats.transactions.toString()} />
-          <Stat icon={Calendar}      label="Member since"     value={profile.memberSince} />
-        </div>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        {profile.stats.reviewCount > 0 && (
+          <Stat icon={Star} label="Rating" value={`${profile.stats.rating.toFixed(1)} \u2605`} sub={`${profile.stats.reviewCount} reviews`} />
+        )}
+        <Stat icon={Building2} label="Active listings" value={profile.stats.listings.toString()} />
+        {profile.stats.transactions > 0 && (
+          <Stat icon={Award} label="Completed deals" value={profile.stats.transactions.toString()} />
+        )}
+        <Stat icon={Calendar} label="Member since" value={profile.memberSince} />
       </div>
 
       {userId && (
