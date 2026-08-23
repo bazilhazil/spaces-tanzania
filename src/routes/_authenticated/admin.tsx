@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
     const { data: authData, error: authError } = await supabase.auth.getUser();
-    if (authError || !authData.user) throw redirect({ to: "/auth" });
+    if (authError || !authData.user)
+      throw redirect({ to: "/auth", search: { redirect: location.href } });
+
     const { data: roleRows, error: roleError } = await supabase
       .from("user_roles")
       .select("role")
