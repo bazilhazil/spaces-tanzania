@@ -230,6 +230,10 @@ function PropertyDetailPage() {
    */
   async function contactVia(method: LeadContactMethod): Promise<Agent | null> {
     if (!property || !agent) return null;
+    track(method === "whatsapp" ? "whatsapp_clicked" : "contact_clicked", {
+      property_id: property.id,
+      method,
+    });
     await createLead({
       propertyId: property.id,
       ownerId: property.agentId,
