@@ -1395,14 +1395,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_property_agent: {
-        Args: { _property_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_property_owner: {
-        Args: { _property_id: string; _user_id: string }
-        Returns: boolean
-      }
       recompute_deal_health: { Args: { _deal_id: string }; Returns: undefined }
       search_agents: {
         Args: { _q: string }
