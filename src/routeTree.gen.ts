@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrustSystemRouteImport } from './routes/trust-system'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
@@ -33,7 +34,6 @@ import { Route as AuthenticatedVerificationHubRouteImport } from './routes/_auth
 import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
 import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
 import { Route as AuthenticatedTrustRouteImport } from './routes/_authenticated/trust'
-import { Route as AuthenticatedSafetyRouteImport } from './routes/_authenticated/safety'
 import { Route as AuthenticatedReviewsRouteImport } from './routes/_authenticated/reviews'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
@@ -47,6 +47,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedPropertyIdRouteImport } from './routes/_authenticated/property.$id'
 import { Route as AuthenticatedDashboardSearchesRouteImport } from './routes/_authenticated/dashboard.searches'
+import { Route as AuthenticatedDashboardSafetyRouteImport } from './routes/_authenticated/dashboard.safety'
 import { Route as AuthenticatedDashboardPropertiesRouteImport } from './routes/_authenticated/dashboard.properties'
 import { Route as AuthenticatedDashboardPerformanceRouteImport } from './routes/_authenticated/dashboard.performance'
 import { Route as AuthenticatedDashboardFavoritesRouteImport } from './routes/_authenticated/dashboard.favorites'
@@ -70,6 +71,11 @@ const TermsRoute = TermsRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SafetyRoute = SafetyRouteImport.update({
+  id: '/safety',
+  path: '/safety',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -178,11 +184,6 @@ const AuthenticatedTrustRoute = AuthenticatedTrustRouteImport.update({
   path: '/trust',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSafetyRoute = AuthenticatedSafetyRouteImport.update({
-  id: '/safety',
-  path: '/safety',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedReviewsRoute = AuthenticatedReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
@@ -251,6 +252,12 @@ const AuthenticatedDashboardSearchesRoute =
     path: '/searches',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardSafetyRoute =
+  AuthenticatedDashboardSafetyRouteImport.update({
+    id: '/safety',
+    path: '/safety',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardPropertiesRoute =
   AuthenticatedDashboardPropertiesRouteImport.update({
     id: '/properties',
@@ -316,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
+  '/safety': typeof SafetyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust-system': typeof TrustSystemRoute
@@ -329,7 +337,6 @@ export interface FileRoutesByFullPath {
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/reviews': typeof AuthenticatedReviewsRoute
-  '/safety': typeof AuthenticatedSafetyRoute
   '/trust': typeof AuthenticatedTrustRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/verification': typeof AuthenticatedVerificationRoute
@@ -347,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/dashboard/performance': typeof AuthenticatedDashboardPerformanceRoute
   '/dashboard/properties': typeof AuthenticatedDashboardPropertiesRouteWithChildren
+  '/dashboard/safety': typeof AuthenticatedDashboardSafetyRoute
   '/dashboard/searches': typeof AuthenticatedDashboardSearchesRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -364,6 +372,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
+  '/safety': typeof SafetyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust-system': typeof TrustSystemRoute
@@ -376,7 +385,6 @@ export interface FileRoutesByTo {
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/reviews': typeof AuthenticatedReviewsRoute
-  '/safety': typeof AuthenticatedSafetyRoute
   '/trust': typeof AuthenticatedTrustRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/verification': typeof AuthenticatedVerificationRoute
@@ -394,6 +402,7 @@ export interface FileRoutesByTo {
   '/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/dashboard/performance': typeof AuthenticatedDashboardPerformanceRoute
   '/dashboard/properties': typeof AuthenticatedDashboardPropertiesRouteWithChildren
+  '/dashboard/safety': typeof AuthenticatedDashboardSafetyRoute
   '/dashboard/searches': typeof AuthenticatedDashboardSearchesRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -413,6 +422,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
+  '/safety': typeof SafetyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust-system': typeof TrustSystemRoute
@@ -426,7 +436,6 @@ export interface FileRoutesById {
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/reviews': typeof AuthenticatedReviewsRoute
-  '/_authenticated/safety': typeof AuthenticatedSafetyRoute
   '/_authenticated/trust': typeof AuthenticatedTrustRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/_authenticated/verification': typeof AuthenticatedVerificationRoute
@@ -444,6 +453,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/favorites': typeof AuthenticatedDashboardFavoritesRoute
   '/_authenticated/dashboard/performance': typeof AuthenticatedDashboardPerformanceRoute
   '/_authenticated/dashboard/properties': typeof AuthenticatedDashboardPropertiesRouteWithChildren
+  '/_authenticated/dashboard/safety': typeof AuthenticatedDashboardSafetyRoute
   '/_authenticated/dashboard/searches': typeof AuthenticatedDashboardSearchesRoute
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -463,6 +473,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/privacy'
     | '/register'
+    | '/safety'
     | '/sitemap.xml'
     | '/terms'
     | '/trust-system'
@@ -476,7 +487,6 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/reviews'
-    | '/safety'
     | '/trust'
     | '/upload'
     | '/verification'
@@ -494,6 +504,7 @@ export interface FileRouteTypes {
     | '/dashboard/favorites'
     | '/dashboard/performance'
     | '/dashboard/properties'
+    | '/dashboard/safety'
     | '/dashboard/searches'
     | '/property/$id'
     | '/admin/'
@@ -511,6 +522,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/privacy'
     | '/register'
+    | '/safety'
     | '/sitemap.xml'
     | '/terms'
     | '/trust-system'
@@ -523,7 +535,6 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/reviews'
-    | '/safety'
     | '/trust'
     | '/upload'
     | '/verification'
@@ -541,6 +552,7 @@ export interface FileRouteTypes {
     | '/dashboard/favorites'
     | '/dashboard/performance'
     | '/dashboard/properties'
+    | '/dashboard/safety'
     | '/dashboard/searches'
     | '/property/$id'
     | '/admin'
@@ -559,6 +571,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/privacy'
     | '/register'
+    | '/safety'
     | '/sitemap.xml'
     | '/terms'
     | '/trust-system'
@@ -572,7 +585,6 @@ export interface FileRouteTypes {
     | '/_authenticated/messages'
     | '/_authenticated/notifications'
     | '/_authenticated/reviews'
-    | '/_authenticated/safety'
     | '/_authenticated/trust'
     | '/_authenticated/upload'
     | '/_authenticated/verification'
@@ -590,6 +602,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/favorites'
     | '/_authenticated/dashboard/performance'
     | '/_authenticated/dashboard/properties'
+    | '/_authenticated/dashboard/safety'
     | '/_authenticated/dashboard/searches'
     | '/_authenticated/property/$id'
     | '/_authenticated/admin/'
@@ -609,6 +622,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
   RegisterRoute: typeof RegisterRoute
+  SafetyRoute: typeof SafetyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   TrustSystemRoute: typeof TrustSystemRoute
@@ -640,6 +654,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/safety': {
+      id: '/safety'
+      path: '/safety'
+      fullPath: '/safety'
+      preLoaderRoute: typeof SafetyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -789,13 +810,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTrustRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/safety': {
-      id: '/_authenticated/safety'
-      path: '/safety'
-      fullPath: '/safety'
-      preLoaderRoute: typeof AuthenticatedSafetyRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/reviews': {
       id: '/_authenticated/reviews'
       path: '/reviews'
@@ -885,6 +899,13 @@ declare module '@tanstack/react-router' {
       path: '/searches'
       fullPath: '/dashboard/searches'
       preLoaderRoute: typeof AuthenticatedDashboardSearchesRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/safety': {
+      id: '/_authenticated/dashboard/safety'
+      path: '/safety'
+      fullPath: '/dashboard/safety'
+      preLoaderRoute: typeof AuthenticatedDashboardSafetyRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
     '/_authenticated/dashboard/properties': {
@@ -998,6 +1019,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardFavoritesRoute: typeof AuthenticatedDashboardFavoritesRoute
   AuthenticatedDashboardPerformanceRoute: typeof AuthenticatedDashboardPerformanceRoute
   AuthenticatedDashboardPropertiesRoute: typeof AuthenticatedDashboardPropertiesRouteWithChildren
+  AuthenticatedDashboardSafetyRoute: typeof AuthenticatedDashboardSafetyRoute
   AuthenticatedDashboardSearchesRoute: typeof AuthenticatedDashboardSearchesRoute
 }
 
@@ -1011,6 +1033,7 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
       AuthenticatedDashboardPerformanceRoute,
     AuthenticatedDashboardPropertiesRoute:
       AuthenticatedDashboardPropertiesRouteWithChildren,
+    AuthenticatedDashboardSafetyRoute: AuthenticatedDashboardSafetyRoute,
     AuthenticatedDashboardSearchesRoute: AuthenticatedDashboardSearchesRoute,
   }
 
@@ -1030,7 +1053,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedReviewsRoute: typeof AuthenticatedReviewsRoute
-  AuthenticatedSafetyRoute: typeof AuthenticatedSafetyRoute
   AuthenticatedTrustRoute: typeof AuthenticatedTrustRoute
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
   AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
@@ -1052,7 +1074,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedReviewsRoute: AuthenticatedReviewsRoute,
-  AuthenticatedSafetyRoute: AuthenticatedSafetyRoute,
   AuthenticatedTrustRoute: AuthenticatedTrustRoute,
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
   AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
@@ -1077,6 +1098,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,
+  SafetyRoute: SafetyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   TrustSystemRoute: TrustSystemRoute,
