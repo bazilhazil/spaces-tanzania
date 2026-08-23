@@ -76,7 +76,7 @@ export function SafetyPanel() {
   );
 
   const stats = useMemo(() => ({
-    open: reports.filter((r) => r.status === "new" || r.status === "under_review").length,
+    open: reports.filter((r) => r.status === "new" || r.status === "under_review" || r.status === "more_info").length,
     urgent: reports.filter((r) => r.priority === "urgent" && r.status !== "resolved" && r.status !== "dismissed").length,
     resolved: reports.filter((r) => r.status === "resolved").length,
     total: reports.length,
