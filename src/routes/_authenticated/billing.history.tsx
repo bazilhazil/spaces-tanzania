@@ -1,14 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Receipt, ArrowLeft, Search } from "lucide-react";
+import { Receipt, ArrowLeft, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { listInvoices, methodName } from "@/lib/payments-store";
-import { formatTZS, type Invoice } from "@/lib/billing-mock";
+import { methodName } from "@/lib/payments-store";
+import { useMyPayments, type InvoiceLike } from "@/lib/billing-db";
+import { formatTZS } from "@/lib/billing-mock";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 import { EmptyState } from "@/components/ds/empty-state";
 
 export const Route = createFileRoute("/_authenticated/billing/history")({
@@ -22,15 +21,8 @@ export const Route = createFileRoute("/_authenticated/billing/history")({
 });
 
 function HistoryPage() {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const { invoices, loading } = useMyPayments();
   const [q, setQ] = useState("");
-
-  useEffect(() => {
-    const load = () => setInvoices(listInvoices());
-    load();
-    window.addEventListener("spaces:invoices-changed", load);
-    return () => window.removeEventListener("spaces:invoices-changed", load);
-  }, []);
 
   const filtered = invoices.filter((i) => {
     if (!q) return true;
@@ -60,7 +52,9 @@ function HistoryPage() {
           </div>
         </div>
 
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="ds-card p-8 text-center text-sm text-muted-foreground">Loading…</div>
+        ) : filtered.length === 0 ? (
           <EmptyState
             icon={Receipt}
             title="No invoices yet"
@@ -70,12 +64,12 @@ function HistoryPage() {
           <div className="ds-card overflow-hidden">
             {/* Desktop table */}
             <div className="hidden md:block">
-              <div className="grid grid-cols-[1.4fr_1fr_1fr_0.8fr_0.6fr_auto] gap-3 border-b border-border/60 bg-secondary/40 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="grid grid-cols-[1.4fr_1fr_1fr_0.8fr_0.6fr] gap-3 border-b border-border/60 bg-secondary/40 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 <div>Invoice</div><div>Method</div><div>Date</div><div>Amount</div><div>Status</div><div />
               </div>
               <div className="divide-y divide-border/60">
-                {filtered.map((inv) => (
-                  <div key={inv.id} className="grid grid-cols-[1.4fr_1fr_1fr_0.8fr_0.6fr_auto] items-center gap-3 px-5 py-3.5">
+                {filtered.map((inv: InvoiceLike) => (
+                  <div key={inv.id} className="grid grid-cols-[1.4fr_1fr_1fr_0.8fr_0.6fr] items-center gap-3 px-5 py-3.5">
                     <div className="min-w-0">
                       <div className="truncate font-medium text-foreground">{inv.description}</div>
                       <div className="text-xs text-muted-foreground">{inv.id}</div>
@@ -86,16 +80,13 @@ function HistoryPage() {
                     <div>
                       <StatusBadge status={inv.status} />
                     </div>
-                    <Button variant="ghost" size="sm" onClick={() => toast.success(`Receipt ${inv.id} downloaded`)}>
-                      <Download className="h-4 w-4" />
-                    </Button>
                   </div>
                 ))}
               </div>
             </div>
             {/* Mobile stack */}
             <div className="divide-y divide-border/60 md:hidden">
-              {filtered.map((inv) => (
+              {filtered.map((inv: InvoiceLike) => (
                 <div key={inv.id} className="flex flex-col gap-2 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -108,9 +99,6 @@ function HistoryPage() {
                     <div className="text-sm text-muted-foreground">{methodName(inv.method)}</div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold">{formatTZS(inv.amountTZS)}</span>
-                      <Button variant="ghost" size="sm" onClick={() => toast.success(`Receipt ${inv.id} downloaded`)}>
-                        <Download className="h-4 w-4" />
-                      </Button>
                     </div>
                   </div>
                 </div>
@@ -123,7 +111,7 @@ function HistoryPage() {
   );
 }
 
-function StatusBadge({ status }: { status: Invoice["status"] }) {
+function StatusBadge({ status }: { status: string }) {
   return (
     <Badge variant="outline" className={cn(
       "capitalize",
