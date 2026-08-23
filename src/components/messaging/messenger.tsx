@@ -67,6 +67,17 @@ function readFlags(): LocalFlags {
   }
 }
 
+const INQUIRY_STATUS_LABEL: Record<string, string> = {
+  new: "New",
+  contacted: "Contacted",
+  viewing_scheduled: "Viewing",
+  viewing_completed: "Viewed",
+  negotiating: "Negotiating",
+  offer_made: "Offer made",
+  won: "Completed",
+  lost: "Closed",
+};
+
 export function Messenger() {
   const { user, initialized } = useAuth();
   const userId = user?.id ?? null;
@@ -455,8 +466,13 @@ function ChatPane({
             {p.verified && <Shield className="h-3.5 w-3.5 text-[color:var(--color-brand-600)]" />}
             <span className={cn("rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider", roleTint[p.role] ?? roleTint.buyer)}>{p.role}</span>
           </div>
-          <div className="truncate text-[11px] text-muted-foreground">
-            {conv.propertyTitle ? conv.propertyTitle : "Direct conversation"}
+          <div className="flex items-center gap-1.5 truncate text-[11px] text-muted-foreground">
+            <span className="truncate">{conv.propertyTitle ? conv.propertyTitle : "Direct conversation"}</span>
+            {conv.inquiryStatus && (
+              <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-foreground">
+                {INQUIRY_STATUS_LABEL[conv.inquiryStatus] ?? conv.inquiryStatus}
+              </span>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-1">

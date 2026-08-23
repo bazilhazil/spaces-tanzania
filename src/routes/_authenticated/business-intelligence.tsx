@@ -383,7 +383,7 @@ function BIPage() {
         <section className="grid gap-3 lg:grid-cols-2">
           <div className="ds-card p-4">
             <div className="mb-2 flex items-center justify-between">
-              <div className="ds-h-sm">Daily Leads & Viewings</div>
+              <div className="ds-h-sm">Daily Inquiries & Viewings</div>
               <div className="text-xs text-muted-foreground">{RANGE_LABEL[range]}</div>
             </div>
             <div className="h-64">

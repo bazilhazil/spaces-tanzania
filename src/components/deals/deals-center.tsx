@@ -41,7 +41,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  DEAL_STAGES, STAGE_LABEL, STAGE_TONE, HEALTH_DOT, HEALTH_LABEL, DOC_LABEL,
+  DEAL_STAGES, PIPELINE_STAGES, pipelineColumnFor, STAGE_LABEL, STAGE_TONE, HEALTH_DOT, HEALTH_LABEL, DOC_LABEL,
   fetchDeals, fetchActivities, fetchDocuments, moveDealStage, updateDeal,
   addNote, uploadDocument, documentSignedUrl, deleteDocument, cancelDeal,
   completeDeal, assignAgent, scheduleFollowUp, computeStats, computeHealth,
@@ -138,8 +138,8 @@ export function DealsCenter() {
   );
 
   const columns = useMemo(() => {
-    const map: Record<DealStage, Deal[]> = Object.fromEntries(DEAL_STAGES.map((s) => [s, []])) as any;
-    for (const d of filtered) map[d.stage].push(d);
+    const map: Record<DealStage, Deal[]> = Object.fromEntries(PIPELINE_STAGES.map((s) => [s, []])) as any;
+    for (const d of filtered) map[pipelineColumnFor(d.stage)].push(d);
     return map;
   }, [filtered]);
 
@@ -192,7 +192,7 @@ export function DealsCenter() {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search deal ID, buyer, property, agent…"
+            placeholder="Search buyer, property or reference…"
             className="h-11 rounded-xl pl-9"
           />
         </div>
@@ -237,7 +237,7 @@ export function DealsCenter() {
       <Tabs value={tab} onValueChange={(v) => setTab(v as "kanban" | "overview")}>
         <TabsList>
           <TabsTrigger value="kanban">Pipeline</TabsTrigger>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="overview">Summary</TabsTrigger>
         </TabsList>
 
         <TabsContent value="kanban" className="mt-4">
@@ -247,7 +247,7 @@ export function DealsCenter() {
             <DndContext sensors={sensors} collisionDetection={closestCenter}
                         onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
               <div className="flex flex-col gap-3 overflow-hidden pb-4 md:flex-row md:overflow-x-auto">
-                {DEAL_STAGES.map((s) => (
+                {PIPELINE_STAGES.map((s) => (
                   <StageColumn
                     key={s}
                     stage={s}

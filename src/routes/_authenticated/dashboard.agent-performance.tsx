@@ -33,13 +33,13 @@ type Stage =
   | "completed" | "cancelled";
 
 const PIPELINE: { key: Stage; label: string; tone: string }[] = [
-  { key: "new_inquiry",       label: "New Leads",         tone: "bg-blue-50 text-blue-700 border-blue-200" },
+  { key: "new_inquiry",       label: "New",         tone: "bg-blue-50 text-blue-700 border-blue-200" },
   { key: "contacted",         label: "Contacted",         tone: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  { key: "viewing_scheduled", label: "Viewing Scheduled", tone: "bg-violet-50 text-violet-700 border-violet-200" },
+  { key: "viewing_scheduled", label: "Viewing", tone: "bg-violet-50 text-violet-700 border-violet-200" },
   { key: "negotiation",       label: "Negotiating",       tone: "bg-amber-50 text-amber-700 border-amber-200" },
-  { key: "offer_made",        label: "Offer Made",        tone: "bg-orange-50 text-orange-700 border-orange-200" },
-  { key: "completed",         label: "Won",               tone: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  { key: "cancelled",         label: "Lost",              tone: "bg-rose-50 text-rose-700 border-rose-200" },
+  { key: "offer_made",        label: "Offer made",        tone: "bg-orange-50 text-orange-700 border-orange-200" },
+  { key: "completed",         label: "Completed",               tone: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  { key: "cancelled",         label: "Closed",              tone: "bg-rose-50 text-rose-700 border-rose-200" },
 ];
 
 type Deal = {
@@ -256,7 +256,7 @@ function AgentPerformancePage() {
 
         {/* Overview */}
         <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Link to="/leads" className="block"><StatCard label="Active Leads" value={assignedLeads} icon={Contact} tone="brand" /></Link>
+          <Link to="/leads" className="block"><StatCard label="Active Inquiries" value={assignedLeads} icon={Contact} tone="brand" /></Link>
           <StatCard label="Active Listings"   value={activeListings}      icon={Home}         tone="gold" />
           <StatCard label="Scheduled Viewings"value={scheduledViewings}   icon={Calendar}     tone="brand" />
           <StatCard label="Deals In Progress" value={dealsInProgress}     icon={Handshake}    tone="brand" />
