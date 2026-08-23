@@ -219,7 +219,11 @@ function NotificationsPage() {
   );
 }
 
-function NotifList({ items }: { items: SpacesNotification[] }) {
+function NotifList({ items, onRead, onDelete }: {
+  items: DbNotification[];
+  onRead: (id: string) => void | Promise<void>;
+  onDelete: (id: string) => void | Promise<void>;
+}) {
   if (items.length === 0) {
     return (
       <EmptyState
@@ -232,7 +236,8 @@ function NotifList({ items }: { items: SpacesNotification[] }) {
   return (
     <ul className="space-y-2">
       {items.map((n) => {
-        const Icon = KIND_ICON[n.kind];
+        const Icon = kindIcon(n.kind);
+        const alert = isPropertyAlert(n.kind) ? n.property : null;
         return (
           <li
             key={n.id}
@@ -256,23 +261,51 @@ function NotifList({ items }: { items: SpacesNotification[] }) {
                 </div>
                 <span className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground">{timeAgo(n.createdAt)}</span>
               </div>
+
+              {alert && (
+                <div className="mt-2 flex gap-3 rounded-xl border border-border/60 bg-secondary/30 p-2">
+                  <div className="h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
+                    {alert.image ? (
+                      <img src={alert.image} alt={alert.title} loading="lazy" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center text-muted-foreground"><Home className="h-4 w-4" /></div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{alert.title}</p>
+                    <p className="truncate text-xs text-muted-foreground">{alert.location || "—"}</p>
+                    {n.kind === "price_change" && n.data.old_price ? (
+                      <p className="mt-0.5 text-xs">
+                        <span className="text-muted-foreground line-through">{money(n.data.old_price, alert.currency)}</span>{" "}
+                        <span className="font-semibold text-primary">{money(n.data.new_price ?? alert.price, alert.currency)}</span>
+                      </p>
+                    ) : (
+                      <p className="mt-0.5 text-xs font-semibold text-primary">{money(alert.price, alert.currency)}</p>
+                    )}
+                  </div>
+                  <Button asChild size="sm" className="h-8 shrink-0 self-center rounded-xl text-xs">
+                    <Link to="/properties/$slug" params={{ slug: alert.id }}>View Space</Link>
+                  </Button>
+                </div>
+              )}
+
               <div className="mt-2 flex items-center justify-between gap-2">
-                <Badge variant="outline" className="rounded-full text-[10px]">{KIND_META[n.kind].label}</Badge>
+                <Badge variant="outline" className="rounded-full text-[10px]">{kindLabel(n.kind)}</Badge>
 
                 {/* Desktop: inline action buttons */}
                 <div className="hidden flex-wrap items-center gap-1 md:flex">
-                  {n.href && (
+                  {n.link && !alert && (
                     <Button asChild size="sm" variant="ghost" className="h-7 px-2 text-xs">
-                      <Link to={n.href}>Open</Link>
+                      <a href={n.link}>Open</a>
                     </Button>
                   )}
                   {!n.read && (
-                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => markRead(n.id)}>
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => void onRead(n.id)}>
                       <Check className="mr-1 h-3.5 w-3.5" />Mark read
                     </Button>
                   )}
                   <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
-                    onClick={() => { removeNotification(n.id); toast.success("Notification deleted"); }}>
+                    onClick={() => void onDelete(n.id)}>
                     <Trash2 className="mr-1 h-3.5 w-3.5" />Delete
                   </Button>
                 </div>
@@ -285,19 +318,19 @@ function NotifList({ items }: { items: SpacesNotification[] }) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-44">
-                    {n.href && (
+                    {n.link && (
                       <DropdownMenuItem asChild>
-                        <Link to={n.href}>Open</Link>
+                        <a href={n.link}>Open</a>
                       </DropdownMenuItem>
                     )}
                     {!n.read && (
-                      <DropdownMenuItem onClick={() => markRead(n.id)}>
+                      <DropdownMenuItem onClick={() => void onRead(n.id)}>
                         <Check className="mr-2 h-4 w-4" />Mark as read
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem
                       className="text-destructive focus:text-destructive"
-                      onClick={() => { removeNotification(n.id); toast.success("Notification deleted"); }}
+                      onClick={() => void onDelete(n.id)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />Delete
                     </DropdownMenuItem>
@@ -310,6 +343,7 @@ function NotifList({ items }: { items: SpacesNotification[] }) {
       })}
     </ul>
   );
+
 }
 
 const PROVIDER_META: { id: keyof ProviderStatus; name: string; icon: React.ComponentType<{ className?: string }>; description: string }[] = [
