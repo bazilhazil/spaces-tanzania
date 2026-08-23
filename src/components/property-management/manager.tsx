@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PROPERTY_TYPES } from "./constants";
 import { TZ_REGIONS } from "@/lib/tz-locations";
+import { friendlyError } from "@/lib/errors";
 
 export type ManagedStatus =
   | "draft" | "live" | "archived" | "pending" | "paused" | "sold" | "rented" | "rejected";
@@ -255,7 +256,7 @@ export function PropertiesManager() {
     }
     if (action === "archive") {
       const { error } = await supabase.from("properties").update({ status: "archived" as const }).in("id", ids);
-      if (error) return toast.error(error.message);
+      if (error) return toast.error(friendlyError(error));
       setRows((r) => r.map((x) => (selected.has(x.id) ? { ...x, status: "archived" } : x)));
       setSelected(new Set());
       toast.success(`Archived ${ids.length}`);
@@ -264,7 +265,7 @@ export function PropertiesManager() {
     if (action === "pause" || action === "resume") {
       const next = action === "pause" ? "paused" : "live";
       const { error } = await supabase.from("properties").update({ status: next as never }).in("id", ids);
-      if (error) return toast.error(error.message);
+      if (error) return toast.error(friendlyError(error));
       setRows((r) => r.map((x) => (selected.has(x.id) ? { ...x, status: next as never } : x)));
       setSelected(new Set());
       toast.success(`${action === "pause" ? "Paused" : "Resumed"} ${ids.length}`);
@@ -323,7 +324,7 @@ export function PropertiesManager() {
     if (a.startsWith("status:")) {
       const next = a.split(":")[1] as ManagedProperty["status"];
       const { error } = await supabase.from("properties").update({ status: next as never }).eq("id", p.id);
-      if (error) return toast.error(error.message);
+      if (error) return toast.error(friendlyError(error));
       setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: next } : x)));
       toast.success(t("spaces.toast.statusChanged", { status: statusLabel(next) }));
       return;
@@ -1022,7 +1023,7 @@ async function handleCardAction(
     case "resume": {
       const next = a === "pause" ? "paused" : "live";
       const { error } = await supabase.from("properties").update({ status: next as never }).eq("id", p.id);
-      if (error) return toast.error(error.message);
+      if (error) return toast.error(friendlyError(error));
       setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: next as never } : x)));
       toast.success(a === "pause" ? "Paused" : "Resumed");
       break;

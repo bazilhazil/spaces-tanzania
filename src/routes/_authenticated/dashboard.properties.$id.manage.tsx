@@ -24,6 +24,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PROPERTY_TYPES } from "@/components/property-management/constants";
+import { friendlyError } from "@/lib/errors";
 
 type ManageTab = "overview" | "details" | "photos" | "settings";
 const MANAGE_TABS: ManageTab[] = ["overview", "details", "photos", "settings"];
@@ -157,7 +158,7 @@ function ManagePropertyPage() {
       error = res.error;
     }
     setSaving(false);
-    if (error) { toast.error(error.message); return false; }
+    if (error) { toast.error(friendlyError(error)); return false; }
     setProp({ ...prop, ...fields });
     setLastSavedAt(Date.now());
     toast.success(label ? `✓ ${label} updated successfully` : "✓ Changes saved");
@@ -641,7 +642,7 @@ function PhotosSection({
   async function removePhoto(m: MediaRow) {
     if (!confirm("Delete this photo?")) return;
     const { error } = await supabase.from("property_media").delete().eq("id", m.id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     await supabase.storage.from("property-media").remove([m.storage_path]);
     setMedia((prev) => {
       const next = prev.filter((x) => x.id !== m.id);

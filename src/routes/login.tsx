@@ -13,6 +13,7 @@ import { supabase as sb } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { GoogleIcon } from "@/components/auth-gate-dialog";
 import { useI18n } from "@/hooks/use-i18n";
+import { friendlyError } from "@/lib/errors";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -44,7 +45,7 @@ function LoginPage() {
       if (msg.includes("email not confirmed")) return toast.error("Please confirm your email before signing in.");
       if (msg.includes("disabled")) return toast.error("This account has been disabled. Contact support.");
       if (msg.includes("network") || msg.includes("fetch")) return toast.error("Network error. Check your connection and try again.");
-      return toast.error(error.message);
+      return toast.error(friendlyError(error));
     }
     toast.success(t("auth.login.welcomeToast"));
 

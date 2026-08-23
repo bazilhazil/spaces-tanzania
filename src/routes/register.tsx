@@ -11,6 +11,7 @@ import { Brand } from "@/components/brand";
 import { toast } from "sonner";
 import { GoogleIcon } from "@/components/auth-gate-dialog";
 import { useI18n } from "@/hooks/use-i18n";
+import { friendlyError } from "@/lib/errors";
 
 export const Route = createFileRoute("/register")({
   component: RegisterPage,
@@ -60,7 +61,7 @@ function RegisterPage() {
       },
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error));
     toast.success(t("auth.register.toastWelcome"));
     navigate({ to: "/welcome" });
   }

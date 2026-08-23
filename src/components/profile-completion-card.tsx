@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
+import { friendlyError } from "@/lib/errors";
 
 export function ProfileCompletionCard() {
   const { user, profile, refresh } = useAuth();
@@ -32,7 +33,7 @@ export function ProfileCompletionCard() {
     setSaving(true);
     const { error } = await supabase.from("profiles").update(form).eq("id", user.id);
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(friendlyError(error));
     toast.success(t("profileCard.saved"));
     await refresh();
     setOpen(false);

@@ -13,9 +13,10 @@ import { StatCard } from "@/components/ds/stat-card";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { CheckoutDialog } from "@/components/billing/checkout-dialog";
-import { isGatewayConfigured, setGatewayConfigured, VERIFICATION_FEES, type PaymentIntent } from "@/lib/payments-store";
+import { VERIFICATION_FEES, type PaymentIntent } from "@/lib/payments-store";
+import { useMyPayments, useMySubscription, useMyListingCount, type InvoiceLike } from "@/lib/billing-db";
 import {
-  PLANS, ADDONS, PAYMENT_METHODS, CURRENT_SUBSCRIPTION, INVOICES, COUPONS,
+  PLANS, ADDONS, PAYMENT_METHODS, COUPONS,
   REVENUE_KPI, REVENUE_BY_PLAN, REVENUE_TREND,
   formatTZS, planById, type PlanId, type BillingCycle, type AddOn,
 } from "@/lib/billing-mock";
@@ -77,7 +78,8 @@ export function BillingCenter() {
 /* ─────────────────────────── Plans ─────────────────────────── */
 
 function PlansPanel({ cycle, onCycleChange, onCheckout }: { cycle: BillingCycle; onCycleChange: (c: BillingCycle) => void; onCheckout: (i: PaymentIntent) => void }) {
-  const currentId = CURRENT_SUBSCRIPTION.planId;
+  const { subscription } = useMySubscription();
+  const currentId = (subscription?.plan ?? null) as PlanId | null;
 
   return (
     <section className="space-y-5">
@@ -226,11 +228,14 @@ function AddOnsPanel({ onCheckout }: { onCheckout: (i: PaymentIntent) => void })
 /* ─────────────────────────── Billing (owner) ─────────────────────────── */
 
 function BillingPanel() {
-  const sub = CURRENT_SUBSCRIPTION;
-  const plan = planById(sub.planId);
-  const quotaLimit = plan.listingsQuota === "unlimited" ? Infinity : plan.listingsQuota;
-  const quotaPct = quotaLimit === Infinity ? 0 : Math.min(100, (sub.listingsUsed / quotaLimit) * 100);
-  const renews = new Date(sub.renewsOn);
+  const { subscription, loading } = useMySubscription();
+  const { invoices, loading: invoicesLoading } = useMyPayments();
+  const listingsUsed = useMyListingCount();
+
+  const plan = subscription ? PLANS.find((p) => p.id === subscription.plan) ?? null : null;
+  const quotaLimit = !plan || plan.listingsQuota === "unlimited" ? Infinity : plan.listingsQuota;
+  const quotaPct = quotaLimit === Infinity ? 0 : Math.min(100, (listingsUsed / quotaLimit) * 100);
+  const renews = subscription?.current_period_end ? new Date(subscription.current_period_end) : null;
 
   return (
     <section className="space-y-6">
@@ -239,49 +244,53 @@ function BillingPanel() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="ds-caption">Current plan</div>
-              <div className="mt-1 font-display text-2xl font-semibold">{plan.name}</div>
-              <div className="mt-1 text-sm text-muted-foreground">{plan.tagline}</div>
+              <div className="mt-1 font-display text-2xl font-semibold">
+                {loading ? "…" : plan?.name ?? "No active plan"}
+              </div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                {plan?.tagline ?? "You're on the free listing experience."}
+              </div>
             </div>
-            <Badge className="bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)] hover:bg-[color:var(--color-success-50)]">
-              <Sparkles className="mr-1 h-3 w-3" /> {sub.status}
-            </Badge>
+            {subscription && (
+              <Badge className="bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)] hover:bg-[color:var(--color-success-50)]">
+                <Sparkles className="mr-1 h-3 w-3" /> {subscription.status}
+              </Badge>
+            )}
           </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             <div>
               <div className="ds-caption">Renews on</div>
-              <div className="mt-1 font-semibold">{renews.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}</div>
+              <div className="mt-1 font-semibold">
+                {renews ? renews.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }) : "—"}
+              </div>
             </div>
             <div>
               <div className="ds-caption">Billing cycle</div>
-              <div className="mt-1 font-semibold capitalize">{sub.cycle}</div>
+              <div className="mt-1 font-semibold capitalize">{subscription?.billing_cycle ?? "—"}</div>
             </div>
             <div>
               <div className="ds-caption">Payment method</div>
-              <div className="mt-1 font-semibold">{PAYMENT_METHODS.find(m => m.id === sub.paymentMethod)?.name ?? "—"}</div>
+              <div className="mt-1 font-semibold">—</div>
             </div>
           </div>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => toast("Renewal management coming soon.")}>
-              Manage renewal
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => toast("Downgrade requested.")}>Change plan</Button>
-            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => toast("Cancellation flow will open here.")}>
-              Cancel subscription
-            </Button>
+          <div className="mt-6 rounded-xl border border-amber-500/30 bg-amber-500/[0.05] px-4 py-3 text-sm text-foreground/75">
+            Payment gateway setup required — plan changes are handled by our team for now.
           </div>
         </div>
 
         <div className="ds-card p-5">
           <div className="ds-caption">Listing quota</div>
           <div className="mt-1 font-display text-3xl font-semibold">
-            {sub.listingsUsed}
-            <span className="text-lg text-muted-foreground"> / {plan.listingsQuota === "unlimited" ? "∞" : plan.listingsQuota}</span>
+            {listingsUsed}
+            <span className="text-lg text-muted-foreground"> / {quotaLimit === Infinity ? "∞" : quotaLimit}</span>
           </div>
           <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
             <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${quotaPct}%` }} />
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            {plan.listingsQuota === "unlimited" ? "Unlimited listings included." : `${Math.max(0, quotaLimit - sub.listingsUsed)} listings remaining this cycle.`}
+            {quotaLimit === Infinity
+              ? "Unlimited listings included."
+              : `${Math.max(0, quotaLimit - listingsUsed)} listings remaining this cycle.`}
           </p>
         </div>
       </div>
@@ -297,30 +306,35 @@ function BillingPanel() {
           </Button>
         </div>
 
-        <div className="divide-y divide-border/60">
-          {INVOICES.map((inv) => (
-            <div key={inv.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
-              <div className="min-w-0">
-                <div className="font-medium text-foreground">{inv.description}</div>
-                <div className="text-xs text-muted-foreground">{inv.id} · {new Date(inv.date).toLocaleDateString()}</div>
+        {invoicesLoading ? (
+          <div className="px-5 py-8 text-center text-sm text-muted-foreground">Loading…</div>
+        ) : invoices.length === 0 ? (
+          <div className="px-5 py-8 text-center text-sm text-muted-foreground">
+            No payments yet. Your invoices will appear here.
+          </div>
+        ) : (
+          <div className="divide-y divide-border/60">
+            {invoices.slice(0, 5).map((inv: InvoiceLike) => (
+              <div key={inv.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
+                <div className="min-w-0">
+                  <div className="font-medium text-foreground">{inv.description}</div>
+                  <div className="text-xs text-muted-foreground">{inv.id} · {new Date(inv.date).toLocaleDateString()}</div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold">{formatTZS(inv.amountTZS)}</span>
+                  <Badge variant="outline" className={cn(
+                    "capitalize",
+                    inv.status === "paid" && "border-emerald-500/30 text-emerald-700 dark:text-emerald-300",
+                    inv.status === "refunded" && "border-amber-500/30 text-amber-700 dark:text-amber-300",
+                    inv.status === "failed" && "border-red-500/30 text-red-700 dark:text-red-300",
+                  )}>
+                    {inv.status}
+                  </Badge>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold">{formatTZS(inv.amountTZS)}</span>
-                <Badge variant="outline" className={cn(
-                  "capitalize",
-                  inv.status === "paid" && "border-emerald-500/30 text-emerald-700 dark:text-emerald-300",
-                  inv.status === "refunded" && "border-amber-500/30 text-amber-700 dark:text-amber-300",
-                  inv.status === "failed" && "border-red-500/30 text-red-700 dark:text-red-300",
-                )}>
-                  {inv.status}
-                </Badge>
-                <Button variant="ghost" size="sm" onClick={() => toast.success(`Receipt ${inv.id} downloaded`)}>
-                  <Download className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -332,44 +346,20 @@ function PaymentMethodsPanel() {
   const mobile = PAYMENT_METHODS.filter(m => m.category === "mobile");
   const card = PAYMENT_METHODS.filter(m => m.category === "card");
   const bank = PAYMENT_METHODS.filter(m => m.category === "bank");
-  const [configured, setConfigured] = useState(isGatewayConfigured());
   const [intent, setIntent] = useState<PaymentIntent | null>(null);
 
   return (
     <section className="space-y-6">
-      {configured ? (
-        <div className="ds-card border-emerald-500/30 bg-emerald-500/[0.04] p-5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-emerald-500/10 text-emerald-600">
-                <ShieldCheck className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="font-semibold">Preview gateway active</div>
-                <p className="mt-1 text-sm text-foreground/75">
-                  Checkout flows are enabled in preview mode. All payments generate real invoices in your history — no funds are moved.
-                </p>
-              </div>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => { setGatewayConfigured(false); setConfigured(false); toast("Preview gateway disabled"); }}>
-              Disable
-            </Button>
-          </div>
+      <div className="ds-card border-amber-500/30 bg-amber-500/[0.05] p-6 text-center">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-amber-500/10 text-amber-600">
+          <Wallet className="h-6 w-6" />
         </div>
-      ) : (
-        <div className="ds-card border-amber-500/30 bg-amber-500/[0.05] p-6 text-center">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-amber-500/10 text-amber-600">
-            <Wallet className="h-6 w-6" />
-          </div>
-          <div className="mt-3 font-display text-lg font-semibold">Payment gateway setup required</div>
-          <p className="mx-auto mt-1 max-w-md text-sm text-foreground/75">
-            Connect a payment provider to accept live subscriptions, boosts and verification fees on SPACES.
-          </p>
-          <Button className="mt-4" onClick={() => { setGatewayConfigured(true); setConfigured(true); toast.success("Preview gateway enabled"); }}>
-            <Settings2 className="mr-2 h-4 w-4" /> Configure payment provider
-          </Button>
-        </div>
-      )}
+        <div className="mt-3 font-display text-lg font-semibold">Payment gateway setup required</div>
+        <p className="mx-auto mt-1 max-w-md text-sm text-foreground/75">
+          No payment provider is connected yet, so online payments are unavailable. The methods
+          below are the ones SPACES will support once setup is complete.
+        </p>
+      </div>
 
       <PaymentGroup title="Mobile money" icon={Smartphone} items={mobile} />
       <PaymentGroup title="Cards" icon={CreditCard} items={card} />
