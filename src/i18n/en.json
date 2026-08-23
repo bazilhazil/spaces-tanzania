@@ -209,7 +209,9 @@
   "agents": {
     "eyebrow": "Featured people",
     "title": "Trusted agents across Tanzania",
-    "subtitle": "Every SPACES agent is vetted for professionalism, licensing, and response time."
+    "subtitle": "Every SPACES agent is vetted for professionalism, licensing, and response time.",
+    "emptyTitle": "No verified agents yet",
+    "emptyBody": "Verified agents will appear here as they join SPACES."
   },
   "footer": {
     "explore": "Explore",

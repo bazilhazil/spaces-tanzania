@@ -209,7 +209,9 @@
   "agents": {
     "eyebrow": "Watu pendekezwa",
     "title": "Mawakala wa kuaminika kote Tanzania",
-    "subtitle": "Kila wakala wa SPACES amehakikiwa kwa taaluma, leseni na muda wa majibu."
+    "subtitle": "Kila wakala wa SPACES amehakikiwa kwa taaluma, leseni na muda wa majibu.",
+    "emptyTitle": "Bado hakuna madalali walioidhinishwa",
+    "emptyBody": "Madalali walioidhinishwa wataonekana hapa wanapojiunga na SPACES."
   },
   "footer": {
     "explore": "Chunguza",
