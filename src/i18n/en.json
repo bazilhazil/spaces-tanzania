@@ -566,27 +566,27 @@
   "crm": {
     "kpi": {
       "today": "New today",
-      "active": "Active leads",
-      "deals": "With deals",
-      "won": "Won"
+      "active": "Active inquiries",
+      "deals": "In pipeline",
+      "won": "Completed"
     },
     "tabs": {
       "active": "Active",
-      "won": "Won",
-      "lost": "Lost"
+      "won": "Completed",
+      "lost": "Closed"
     },
-    "searchPlaceholder": "Search name, phone, property…",
+    "searchPlaceholder": "Search name, phone or property…",
     "allStatuses": "All statuses",
-    "empty": "No leads yet. Inquiries, messages and viewing requests appear here automatically.",
+    "empty": "No inquiries yet. Messages, calls and viewing requests appear here automatically.",
     "status": {
-      "new": "New Inquiry",
+      "new": "New",
       "contacted": "Contacted",
-      "viewing_scheduled": "Viewing Scheduled",
-      "viewing_completed": "Viewing Completed",
+      "viewing_scheduled": "Viewing",
+      "viewing_completed": "Viewed",
       "negotiating": "Negotiating",
-      "offer_made": "Offer Made",
-      "won": "Won",
-      "lost": "Lost"
+      "offer_made": "Offer made",
+      "won": "Completed",
+      "lost": "Closed"
     },
     "field": {
       "phone": "Phone",
@@ -598,22 +598,22 @@
     },
     "none": "None",
     "lastActivity": "Last activity",
-    "createDeal": "Create Deal",
-    "dealCreated": "Deal created from this lead",
-    "dealExists": "This lead is already linked to a deal",
+    "createDeal": "Start deal",
+    "dealCreated": "Deal started from this inquiry",
+    "dealExists": "This inquiry is already linked to a deal",
     "relatedDeal": "Related Deal",
-    "relatedLead": "Related Lead",
-    "statusUpdated": "Lead status updated",
+    "relatedLead": "Related inquiry",
+    "statusUpdated": "Status updated",
     "actionFailed": "Something went wrong. Please try again.",
     "notes": "Notes",
-    "notesPlaceholder": "Add context about this lead…",
+    "notesPlaceholder": "Add context about this person…",
     "saveNote": "Save note",
     "noteSaved": "Note saved",
     "timeline": "Activity timeline",
     "call": "Call",
     "viewings": "Viewings",
     "event": {
-      "lead_created": "Lead created",
+      "lead_created": "Inquiry received",
       "message_sent": "Message sent",
       "viewing_requested": "Viewing requested",
       "viewing_approved": "Viewing approved",
@@ -622,7 +622,7 @@
       "offer_made": "Offer made",
       "offer_accepted": "Offer accepted",
       "offer_rejected": "Offer rejected",
-      "stage_changed": "Stage changed",
+      "stage_changed": "Status changed",
       "note_added": "Note added",
       "document_uploaded": "Document uploaded",
       "agent_assigned": "Agent assigned",
@@ -632,7 +632,7 @@
       "deal_cancelled": "Deal cancelled",
       "reminder": "Reminder"
     },
-    "lostReasonTitle": "Why was this deal lost?",
+    "lostReasonTitle": "Why is this closing?",
     "lostReasonDesc": "Choose a reason so your team can learn from it.",
     "lostReason": {
       "price": "Price",
@@ -643,7 +643,7 @@
       "other": "Other"
     },
     "lostReasonNotes": "Add more detail (optional)",
-    "confirmLost": "Mark as lost"
+    "confirmLost": "Mark as closed"
   },
   "spaces": {
     "title": "My Spaces",

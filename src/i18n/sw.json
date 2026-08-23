@@ -566,27 +566,27 @@
   "crm": {
     "kpi": {
       "today": "Mpya leo",
-      "active": "Wateja hai",
-      "deals": "Zenye mikataba",
-      "won": "Zilizoshinda"
+      "active": "Maulizo hai",
+      "deals": "Katika mchakato",
+      "won": "Zilizokamilika"
     },
     "tabs": {
       "active": "Hai",
-      "won": "Zilizoshinda",
-      "lost": "Zilizopotea"
+      "won": "Zilizokamilika",
+      "lost": "Zilizofungwa"
     },
     "searchPlaceholder": "Tafuta jina, simu, mali…",
     "allStatuses": "Hali zote",
-    "empty": "Bado hakuna wateja. Maulizo, ujumbe na maombi ya kutembelea yataonekana hapa moja kwa moja.",
+    "empty": "Bado hakuna maulizo. Ujumbe, simu na maombi ya ziara yataonekana hapa moja kwa moja.",
     "status": {
-      "new": "Ulizo Jipya",
+      "new": "Mpya",
       "contacted": "Amewasiliana",
-      "viewing_scheduled": "Ziara Imepangwa",
-      "viewing_completed": "Ziara Imekamilika",
+      "viewing_scheduled": "Ziara",
+      "viewing_completed": "Imetazamwa",
       "negotiating": "Mazungumzo",
-      "offer_made": "Ofa Imetolewa",
-      "won": "Imeshinda",
-      "lost": "Imepotea"
+      "offer_made": "Ofa imetolewa",
+      "won": "Imekamilika",
+      "lost": "Imefungwa"
     },
     "field": {
       "phone": "Simu",
@@ -598,12 +598,12 @@
     },
     "none": "Hakuna",
     "lastActivity": "Shughuli ya mwisho",
-    "createDeal": "Tengeneza Mkataba",
-    "dealCreated": "Mkataba umetengenezwa kutoka kwa mteja huyu",
-    "dealExists": "Mteja huyu tayari ameunganishwa na mkataba",
+    "createDeal": "Anzisha mkataba",
+    "dealCreated": "Mkataba umeanzishwa kutoka ulizo hili",
+    "dealExists": "Ulizo hili tayari lina mkataba",
     "relatedDeal": "Mkataba Husika",
-    "relatedLead": "Mteja Husika",
-    "statusUpdated": "Hali ya mteja imesasishwa",
+    "relatedLead": "Ulizo husika",
+    "statusUpdated": "Hali imesasishwa",
     "actionFailed": "Kuna hitilafu. Tafadhali jaribu tena.",
     "notes": "Maelezo",
     "notesPlaceholder": "Ongeza maelezo kuhusu mteja huyu…",
@@ -613,7 +613,7 @@
     "call": "Piga simu",
     "viewings": "Ziara",
     "event": {
-      "lead_created": "Mteja ameongezwa",
+      "lead_created": "Ulizo limepokelewa",
       "message_sent": "Ujumbe umetumwa",
       "viewing_requested": "Ziara imeombwa",
       "viewing_approved": "Ziara imeidhinishwa",
@@ -622,7 +622,7 @@
       "offer_made": "Ofa imetolewa",
       "offer_accepted": "Ofa imekubaliwa",
       "offer_rejected": "Ofa imekataliwa",
-      "stage_changed": "Hatua imebadilika",
+      "stage_changed": "Hali imebadilika",
       "note_added": "Maelezo yameongezwa",
       "document_uploaded": "Hati imepakiwa",
       "agent_assigned": "Wakala amepangwa",
@@ -632,7 +632,7 @@
       "deal_cancelled": "Mkataba umeghairiwa",
       "reminder": "Kumbusho"
     },
-    "lostReasonTitle": "Kwa nini mkataba huu umepotea?",
+    "lostReasonTitle": "Kwa nini inafungwa?",
     "lostReasonDesc": "Chagua sababu ili timu yako ijifunze.",
     "lostReason": {
       "price": "Bei",
@@ -643,7 +643,7 @@
       "other": "Nyingine"
     },
     "lostReasonNotes": "Ongeza maelezo zaidi (hiari)",
-    "confirmLost": "Weka kama imepotea"
+    "confirmLost": "Weka kama imefungwa"
   },
   "spaces": {
     "title": "Nafasi Zangu",
