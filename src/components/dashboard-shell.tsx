@@ -115,9 +115,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   async function handleSignOut() {
     await signOut();
-    toast.success(t("common.signedOut"));
     navigate({ to: "/" });
+    toast.success(t("common.signedOut"), { duration: 1500 });
   }
+
 
   const initials = (profile?.full_name || user?.email || "S")
     .split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
