@@ -333,7 +333,7 @@ export function PropertyMiniCard({ p }: { p: RecentProperty }) {
 function NonOwnerHome({ role }: { role: SpacesMode }) {
   const items = role === "agent"
     ? [
-        { label: "Active Leads", value: 0, icon: Users, delta: "+0", tone: "primary" },
+        { label: "Active Inquiries", value: 0, icon: Users, delta: "+0", tone: "primary" },
         { label: "Listings", value: 0, icon: Home, delta: "+0", tone: "emerald" },
         { label: "Deals", value: 0, icon: DollarSign, delta: "+0", tone: "amber" },
         { label: "Rating", value: "—", icon: BarChart3, delta: "—", tone: "violet" },
