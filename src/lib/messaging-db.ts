@@ -130,9 +130,15 @@ export async function listConversations(userId: string): Promise<DbConversation[
     ((propRes.data ?? []) as { id: string; title: string }[]).map((p) => [p.id, p.title]),
   );
   const leadStatus = new Map<string, string>();
-  for (const l of ((leadRes.data ?? []) as { property_id: string; visitor_id: string | null; status: string }[])) {
+  const leadIdByPair = new Map<string, string>();
+  const leadByConversation = new Map<string, LeadLite>();
+  for (const l of ((leadRes.data ?? []) as LeadLite[])) {
     const key = `${l.property_id}:${l.visitor_id ?? ""}`;
     if (!leadStatus.has(key)) leadStatus.set(key, l.status);
+    if (!leadIdByPair.has(key)) leadIdByPair.set(key, l.id);
+    if (l.conversation_id && !leadByConversation.has(l.conversation_id)) {
+      leadByConversation.set(l.conversation_id, l);
+    }
   }
 
   return rows.map((c) => {
@@ -149,7 +155,12 @@ export async function listConversations(userId: string): Promise<DbConversation[
       lastMessage: last?.body ?? "No messages yet",
       lastAt: last?.created_at ?? c.last_message_at ?? c.created_at,
       unread: mine.filter((m) => m.sender_id !== userId && !m.read_at).length,
-      inquiryStatus: c.property_id ? leadStatus.get(`${c.property_id}:${c.buyer_id}`) ?? null : null,
+      inquiryStatus:
+        leadByConversation.get(c.id)?.status ??
+        (c.property_id ? leadStatus.get(`${c.property_id}:${c.buyer_id}`) ?? null : null),
+      inquiryId:
+        leadByConversation.get(c.id)?.id ??
+        (c.property_id ? leadIdByPair.get(`${c.property_id}:${c.buyer_id}`) ?? null : null),
     };
   }).sort((a, b) => +new Date(b.lastAt) - +new Date(a.lastAt));
 }
