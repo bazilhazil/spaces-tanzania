@@ -206,7 +206,7 @@ function NotificationsPage() {
 
           {(["all", "unread", "read", "today", "week", "earlier"] as const).map((t) => (
             <TabsContent key={t} value={t} className="mt-0">
-              <NotifList items={filtered} />
+              <NotifList items={filtered} onRead={onRead} onDelete={onDelete} />
             </TabsContent>
           ))}
 
