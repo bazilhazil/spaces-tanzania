@@ -14,18 +14,39 @@ export const DEAL_STAGES = [
 ] as const;
 export type DealStage = (typeof DEAL_STAGES)[number];
 
+/** Simple, universal wording shown to users (no CRM jargon). */
 export const STAGE_LABEL: Record<DealStage, string> = {
-  new_inquiry: "New Inquiry",
+  new_inquiry: "New",
   contacted: "Contacted",
-  viewing_scheduled: "Viewing Scheduled",
-  viewing_completed: "Viewing Completed",
-  negotiation: "Negotiation",
-  offer_made: "Offer Made",
-  offer_accepted: "Offer Accepted",
-  agreement_signed: "Agreement Signed",
+  viewing_scheduled: "Viewing",
+  viewing_completed: "Viewed",
+  negotiation: "Negotiating",
+  offer_made: "Offer made",
+  offer_accepted: "Offer accepted",
+  agreement_signed: "Agreement signed",
   completed: "Completed",
-  cancelled: "Cancelled",
+  cancelled: "Closed",
 };
+
+/** Columns users actually see in the pipeline. */
+export const PIPELINE_STAGES = [
+  "new_inquiry",
+  "contacted",
+  "viewing_scheduled",
+  "viewing_completed",
+  "negotiation",
+  "completed",
+  "cancelled",
+] as const;
+export type PipelineStage = (typeof PIPELINE_STAGES)[number];
+
+/** Maps every internal stage onto one of the visible pipeline columns. */
+export function pipelineColumnFor(stage: DealStage): PipelineStage {
+  if (stage === "offer_made" || stage === "offer_accepted" || stage === "agreement_signed") {
+    return "negotiation";
+  }
+  return stage as PipelineStage;
+}
 
 export const STAGE_TONE: Record<DealStage, string> = {
   new_inquiry: "bg-sky-500/10 text-sky-700 ring-sky-500/20",
