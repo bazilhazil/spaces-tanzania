@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BadgeCheck, Bath, BedDouble, Building2, Calendar, Car, ChevronLeft, ChevronRight,
   Heart, Mail, MapPin, MessageCircle, Phone, Ruler, Share2, ShieldCheck, Sparkles,
-  Star, X, Play, Calculator, Send, CheckCircle2, Maximize2, FileText,
+  Star, X, Play, Send, CheckCircle2, Maximize2, FileText,
   Flag, ZoomIn, ZoomOut, Eye,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -512,7 +512,7 @@ function PropertyDetailPage() {
                 <LocationChip label={t("discovery.region")} value={property.city} />
                 <LocationChip label={t("discovery.district")} value={property.district} />
                 <LocationChip label={t("discovery.area")} value={property.ward} />
-                <LocationChip label={t("upload.street")} value={property.street} />
+                <LocationChip label={t("discovery.street")} value={property.street} />
               </div>
               <div className="mt-3 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-border">
                 <iframe
@@ -723,16 +723,6 @@ function LocationChip({ label, value }: { label: string; value: string }) {
     <div className="rounded-lg border border-border bg-card px-3 py-2">
       <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
       <p className="truncate text-sm font-medium text-foreground">{value || "—"}</p>
-    </div>
-  );
-}
-
-function NearbyItem({ label }: { label: string }) {
-  const { t } = useI18n();
-  return (
-    <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
-      <MapPin className="h-3.5 w-3.5 text-primary" />
-      <span>{t("properties.detail.nearby", { label })}</span>
     </div>
   );
 }
