@@ -6,8 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, Loader2, CheckCircle2, AlertTriangle, Settings2, Smartphone, CreditCard, Building2 } from "lucide-react";
 import { PAYMENT_METHODS, formatTZS, type PaymentMethodId } from "@/lib/billing-mock";
-import { isGatewayConfigured, setGatewayConfigured, recordPayment, type PaymentIntent } from "@/lib/payments-store";
-import { toast } from "sonner";
+import { type PaymentIntent } from "@/lib/payments-store";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 
