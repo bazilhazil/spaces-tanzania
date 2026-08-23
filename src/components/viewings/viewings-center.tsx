@@ -87,7 +87,10 @@ export function ViewingsCenter({ role = "buyer", propertyId = null }: { role?: R
         <h1 className="font-display text-2xl font-semibold tracking-tight md:text-3xl">
           {t("viewings.title")}
         </h1>
-        <p className="text-sm text-muted-foreground">{t("viewings.subtitle")}</p>
+        <p className="text-sm text-muted-foreground">
+          {propertyId ? "Showing viewing requests for this property only." : t("viewings.subtitle")}
+        </p>
+
       </header>
 
       <KpiRow items={kpiSource} />
