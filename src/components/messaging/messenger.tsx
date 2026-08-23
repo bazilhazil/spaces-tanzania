@@ -446,6 +446,8 @@ function ChatPane({
   const [text, setText] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
   const [blockOpen, setBlockOpen] = useState(false);
+  const [reportMessageId, setReportMessageId] = useState<string | null>(null);
+  const { blocked, setBlocked } = useBlockState(p.id);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
