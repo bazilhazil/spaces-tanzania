@@ -9,7 +9,6 @@ export type InvoiceStatus = "paid" | "pending" | "failed" | "refunded";
 
 export type PaymentMethodId =
   | "mpesa"
-  | "mixx"
   | "selcom"
   | "airtel"
   | "halopesa"
@@ -146,7 +145,6 @@ export type PaymentMethod = {
 
 export const PAYMENT_METHODS: PaymentMethod[] = [
   { id: "mpesa", name: "M-Pesa", category: "mobile", status: "planned", description: "Vodacom mobile money" },
-  { id: "mixx", name: "Mixx by Yas", category: "mobile", status: "planned", description: "Yas Tanzania wallet" },
   { id: "selcom", name: "Selcom", category: "mobile", status: "planned", description: "Selcom Pesa wallet" },
   { id: "airtel", name: "Airtel Money", category: "mobile", status: "planned", description: "Airtel mobile money" },
   { id: "halopesa", name: "HaloPesa", category: "mobile", status: "planned", description: "Halotel mobile money" },
@@ -197,13 +195,6 @@ export const CURRENT_SUBSCRIPTION: Subscription = {
   paymentMethod: "mpesa",
 };
 
-export const INVOICES: Invoice[] = [
-  { id: "INV-2026-0142", date: "2026-06-11", amountTZS: 49_000, description: "Professional — Monthly", status: "paid", method: "mpesa" },
-  { id: "INV-2026-0121", date: "2026-05-11", amountTZS: 49_000, description: "Professional — Monthly", status: "paid", method: "mpesa" },
-  { id: "INV-2026-0108", date: "2026-05-02", amountTZS: 25_000, description: "Featured Listing — 7 days", status: "paid", method: "visa" },
-  { id: "INV-2026-0097", date: "2026-04-11", amountTZS: 49_000, description: "Professional — Monthly", status: "paid", method: "mpesa" },
-  { id: "INV-2026-0084", date: "2026-04-03", amountTZS: 35_000, description: "Verified Listing", status: "refunded", method: "airtel" },
-];
 
 export const COUPONS: Coupon[] = [
   { code: "SPACES20", discountPct: 20, appliesTo: "all", expiresOn: "2026-12-31", usage: 142, cap: 500, active: true },
