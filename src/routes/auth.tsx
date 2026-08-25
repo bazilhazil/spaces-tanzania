@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff, Loader2, Mail, Lock, Phone, User as UserIcon, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -12,7 +12,8 @@ import { Brand } from "@/components/brand";
 import { GoogleIcon } from "@/components/auth-gate-dialog";
 import { redirectPathForRole, type AppRole } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { friendlyError } from "@/lib/errors";
+import { friendlyError, errorMessage } from "@/lib/errors";
+import { normalizeTzPhone, maskTzPhone } from "@/lib/phone";
 
 type Search = { redirect?: string; mode?: "signin" | "signup" };
 
@@ -281,36 +282,58 @@ function PhoneForm({
   navigate: ReturnType<typeof useNavigate>;
 }) {
   const [phone, setPhone] = useState("");
+  const [e164, setE164] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
-  function normalize(raw: string) {
-    const cleaned = raw.replace(/\s+/g, "");
-    if (cleaned.startsWith("+")) return cleaned;
-    if (cleaned.startsWith("0")) return "+255" + cleaned.slice(1);
-    return "+" + cleaned;
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(id);
+  }, [cooldown]);
+
+  async function send(target: string) {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOtp({ phone: target });
+    setLoading(false);
+    if (error) {
+      if (import.meta.env.DEV) {
+        console.error("[auth/phone] OTP request failed", {
+          phone: target,
+          code: (error as { code?: string }).code,
+          status: error.status,
+          message: error.message,
+        });
+      }
+      toast.error(friendlyError(error, "otpSendFailed"));
+      return false;
+    }
+    setCooldown(45);
+    setStep("otp");
+    return true;
   }
 
   async function requestCode(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    const p = normalize(phone);
-    const { error } = await supabase.auth.signInWithOtp({ phone: p });
-    setLoading(false);
-    if (error) return toast.error(friendlyError(error));
-    toast.success(`Verification code sent to ${p}`);
-    setStep("otp");
+    if (loading) return;
+    const target = normalizeTzPhone(phone);
+    if (!target) return toast.error(errorMessage("invalidPhone"));
+    setE164(target);
+    await send(target);
   }
 
   async function verify(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
-    const p = normalize(phone);
-    const { data, error } = await supabase.auth.verifyOtp({ phone: p, token: otp, type: "sms" });
+    const { data, error } = await supabase.auth.verifyOtp({ phone: e164, token: otp, type: "sms" });
     setLoading(false);
-    if (error) return toast.error(friendlyError(error));
-    toast.success("Signed in.");
+    if (error) {
+      if (import.meta.env.DEV) console.error("[auth/phone] OTP verify failed", error);
+      return toast.error(friendlyError(error, "otpWrong"));
+    }
     const to = await resolveRedirect(data.user?.id, redirect);
     navigate({ to, replace: true });
   }
@@ -319,20 +342,31 @@ function PhoneForm({
     return (
       <form onSubmit={verify} className="space-y-4">
         <div className="text-center">
-          <Label className="text-white/70">Enter the 6-digit code</Label>
-          <p className="mt-1 text-xs text-white/50">Sent to {normalize(phone)}</p>
+          <Label className="text-white/70">Verify your phone</Label>
+          <p className="mt-1 text-xs text-white/50">We sent a verification code to {maskTzPhone(e164)}</p>
         </div>
         <OtpField value={otp} onChange={setOtp} length={6} className="justify-center" />
         <Button type="submit" disabled={loading || otp.length < 6} className="h-11 w-full rounded-xl text-base font-semibold">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify & continue"}
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}
         </Button>
-        <button
-          type="button"
-          onClick={() => setStep("phone")}
-          className="w-full text-center text-xs text-white/60 hover:text-white"
-        >
-          Use a different number
-        </button>
+        <div className="flex items-center justify-center gap-4 text-xs text-white/60">
+          <button
+            type="button"
+            disabled={loading || cooldown > 0}
+            onClick={() => void send(e164)}
+            className="hover:text-white disabled:opacity-50"
+          >
+            {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
+          </button>
+          <span className="text-white/20">|</span>
+          <button
+            type="button"
+            onClick={() => { setStep("phone"); setOtp(""); }}
+            className="hover:text-white"
+          >
+            Change number
+          </button>
+        </div>
       </form>
     );
   }
@@ -343,20 +377,22 @@ function PhoneForm({
         <Input
           required
           type="tel"
+          inputMode="tel"
           autoComplete="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="+255 712 345 678"
+          placeholder="0712 345 678"
           className="h-11 rounded-xl border-white/10 bg-white/[0.04] pl-10 text-white placeholder:text-white/40 focus-visible:border-primary focus-visible:ring-primary/40"
         />
       </Field>
       <p className="text-xs text-white/50">We'll text you a one-time code. Standard SMS rates may apply.</p>
       <Button type="submit" disabled={loading} className="h-11 w-full rounded-xl text-base font-semibold">
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send code"}
+        {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending code...</>) : "Send code"}
       </Button>
     </form>
   );
 }
+
 
 /* ─────────────── Google ─────────────── */
 function GoogleContinue({ redirect }: { redirect?: string }) {
