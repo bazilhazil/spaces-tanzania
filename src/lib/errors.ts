@@ -11,7 +11,12 @@ type Key =
   | "credentials"
   | "duplicate"
   | "tooMany"
-  | "invalid";
+  | "invalid"
+  | "invalidPhone"
+  | "otpSendFailed"
+  | "otpUnavailable"
+  | "otpWrong"
+  | "otpExpired";
 
 const MESSAGES: Record<"en" | "sw", Record<Key, string>> = {
   en: {
@@ -24,6 +29,11 @@ const MESSAGES: Record<"en" | "sw", Record<Key, string>> = {
     duplicate: "This already exists.",
     tooMany: "Too many attempts. Please wait a moment and try again.",
     invalid: "Please check the details you entered.",
+    invalidPhone: "Please enter a valid Tanzanian phone number.",
+    otpSendFailed: "We couldn't send the code right now. Please try again.",
+    otpUnavailable: "Phone sign-in isn't available yet. Please use email or Google.",
+    otpWrong: "That code is incorrect. Please try again.",
+    otpExpired: "This code has expired. Request a new code.",
   },
   sw: {
     offline: "Hakuna muunganisho wa intaneti.",
@@ -35,6 +45,11 @@ const MESSAGES: Record<"en" | "sw", Record<Key, string>> = {
     duplicate: "Hii tayari ipo.",
     tooMany: "Majaribio mengi mno. Subiri kidogo kisha jaribu tena.",
     invalid: "Tafadhali angalia taarifa ulizojaza.",
+    invalidPhone: "Tafadhali weka namba sahihi ya simu ya Tanzania.",
+    otpSendFailed: "Hatujaweza kutuma msimbo kwa sasa. Tafadhali jaribu tena.",
+    otpUnavailable: "Kuingia kwa simu bado hakupatikani. Tumia barua pepe au Google.",
+    otpWrong: "Msimbo huo si sahihi. Tafadhali jaribu tena.",
+    otpExpired: "Msimbo umeisha muda. Omba msimbo mpya.",
   },
 };
 
@@ -54,7 +69,11 @@ function classify(raw: string): Key {
   if (m.includes("jwt") || m.includes("session") || m.includes("token") || m.includes("401")) return "session";
   if (m.includes("row-level security") || m.includes("permission denied") || m.includes("not authorized") || m.includes("403")) return "permission";
   if (m.includes("duplicate key") || m.includes("already registered") || m.includes("already exists")) return "duplicate";
-  if (m.includes("rate limit") || m.includes("too many")) return "tooMany";
+  if (m.includes("rate limit") || m.includes("too many") || m.includes("security purposes")) return "tooMany";
+  if (m.includes("phone provider") || m.includes("unsupported phone")) return "otpUnavailable";
+  if (m.includes("expired")) return "otpExpired";
+  if (m.includes("otp") || m.includes("invalid token")) return "otpWrong";
+  if (m.includes("invalid phone")) return "invalidPhone";
   if (m.includes("no rows") || m.includes("not found") || m.includes("404")) return "notFound";
   if (m.includes("violates") || m.includes("invalid input") || m.includes("check constraint")) return "invalid";
   return "generic";
