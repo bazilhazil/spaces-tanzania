@@ -13,7 +13,7 @@ import { GoogleIcon } from "@/components/auth-gate-dialog";
 import { redirectPathForRole, type AppRole } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { friendlyError, errorMessage } from "@/lib/errors";
-import { normalizeTzPhone, maskTzPhone } from "@/lib/phone";
+import { normalizeTanzanianPhoneNumber, maskTzPhone } from "@/lib/phone";
 
 type Search = { redirect?: string; mode?: "signin" | "signup" };
 
@@ -318,7 +318,7 @@ function PhoneForm({
   async function requestCode(e: React.FormEvent) {
     e.preventDefault();
     if (loading) return;
-    const target = normalizeTzPhone(phone);
+    const target = normalizeTanzanianPhoneNumber(phone);
     if (!target) return toast.error(errorMessage("invalidPhone"));
     setE164(target);
     await send(target);

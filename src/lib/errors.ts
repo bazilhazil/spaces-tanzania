@@ -81,12 +81,17 @@ function classify(raw: string): Key {
 
 /** Turn any thrown value / Supabase error into a friendly message. */
 export function friendlyError(err: unknown, fallback?: Key): string {
-  const raw =
+  const message =
     typeof err === "string"
       ? err
       : err && typeof err === "object" && "message" in err
         ? String((err as { message?: unknown }).message ?? "")
         : "";
+  const code =
+    err && typeof err === "object" && "code" in err
+      ? String((err as { code?: unknown }).code ?? "")
+      : "";
+  const raw = `${code} ${message}`.trim();
   const key = raw ? classify(raw) : fallback ?? "generic";
   return MESSAGES[lang()][key];
 }
