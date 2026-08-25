@@ -7,7 +7,7 @@
  * Accepts: 0658610015, 658610015, 255658610015, +255 658 610 015.
  * Returns null when the input is not a valid TZ mobile number.
  */
-export function normalizeTzPhone(raw: string): string | null {
+export function normalizeTanzanianPhoneNumber(raw: string): string | null {
   // Keep digits only (a leading "+" carries no extra information once we
   // know the country prefix rules below).
   let digits = (raw ?? "").replace(/\D/g, "");
@@ -27,7 +27,7 @@ export function normalizeTzPhone(raw: string): string | null {
 }
 
 export function isValidTzPhone(raw: string): boolean {
-  return normalizeTzPhone(raw) !== null;
+  return normalizeTanzanianPhoneNumber(raw) !== null;
 }
 
 /** +255658610015 → +255 *** *** 015 */
