@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff, Loader2, Mail, Lock, Phone, User as UserIcon, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -12,7 +12,8 @@ import { Brand } from "@/components/brand";
 import { GoogleIcon } from "@/components/auth-gate-dialog";
 import { redirectPathForRole, type AppRole } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { friendlyError } from "@/lib/errors";
+import { friendlyError, errorMessage } from "@/lib/errors";
+import { normalizeTzPhone, maskTzPhone } from "@/lib/phone";
 
 type Search = { redirect?: string; mode?: "signin" | "signup" };
 
