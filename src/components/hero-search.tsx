@@ -79,7 +79,7 @@ export function HeroSearch() {
         }}
         className="relative z-30 grid grid-cols-2 gap-3 rounded-r-2xl rounded-bl-2xl bg-background/95 p-4 shadow-[var(--shadow-elevated)] backdrop-blur md:grid-cols-12 md:items-center md:p-3"
       >
-        <div className="relative z-50 md:col-span-4">
+        <div className="relative z-50 col-span-2 md:col-span-4">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={q}
@@ -163,7 +163,7 @@ export function HeroSearch() {
         <Button
           type="submit"
           size="lg"
-          className="h-12 gap-2 bg-primary px-6 text-primary-foreground hover:bg-primary/90 md:col-span-2"
+          className="col-span-2 h-12 gap-2 bg-primary px-6 text-primary-foreground hover:bg-primary/90 md:col-span-2"
         >
           <Search className="h-4 w-4" /> {t("search.submit")}
         </Button>
