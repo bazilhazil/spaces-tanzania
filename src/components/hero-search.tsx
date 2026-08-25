@@ -77,7 +77,7 @@ export function HeroSearch() {
             },
           });
         }}
-        className="relative z-30 grid gap-3 rounded-r-2xl rounded-bl-2xl bg-background/95 p-4 shadow-[var(--shadow-elevated)] backdrop-blur md:grid-cols-12 md:items-center md:p-3"
+        className="relative z-30 grid max-h-[65svh] grid-cols-2 gap-3 overflow-y-auto overscroll-contain rounded-r-2xl rounded-bl-2xl bg-background/95 p-4 shadow-[var(--shadow-elevated)] backdrop-blur md:max-h-none md:grid-cols-12 md:items-center md:overflow-visible md:p-3"
       >
         <div className="relative z-50 md:col-span-4">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
