@@ -41,7 +41,9 @@
     "all": "All",
     "remove": "Remove",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "close": "Close",
+    "errorGeneric": "Something went wrong. Please try again."
   },
   "home": {
     "hero": {
@@ -1381,5 +1383,105 @@
     "refine": "Refine your search",
     "noMatches": "No spaces found in this location.",
     "searchIn": "Search in {name}"
+  },
+  "billing": {
+    "tabs": {
+      "plans": "Plans",
+      "promotions": "Promote listings",
+      "billing": "Billing & Invoices",
+      "payments": "Payment Methods",
+      "admin": "Revenue & Config"
+    },
+    "choosePlan": "Choose your plan",
+    "choosePlanSub": "Simple, transparent pricing in TZS. Change or cancel anytime.",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "perMonth": "mo",
+    "perYear": "yr",
+    "days": "days",
+    "currentPlan": "Current plan",
+    "selectedPlan": "Selected plan",
+    "billingPeriod": "Billing period",
+    "price": "Price",
+    "paymentMethod": "Payment method",
+    "paymentStatus": "Payment status",
+    "renewalDate": "Renewal date",
+    "listingAllowance": "Listing allowance",
+    "unlimitedListings": "Unlimited active listings",
+    "listingsIncluded": "Up to {count} active listings",
+    "freePlan": "Free plan",
+    "upgradeTo": "Upgrade to {plan}",
+    "continueToPayment": "Continue to Payment",
+    "invoiceHistory": "Invoice history",
+    "invoiceHistorySub": "Download receipts for accounting.",
+    "fullHistory": "Full history",
+    "noInvoices": "No payments yet. Your invoices will appear here.",
+    "gatewayTitle": "Payment gateway setup required",
+    "gatewayBody": "No payment provider is connected yet, so online payments cannot be completed automatically. Orders you place are recorded and confirmed by our team before any plan or promotion is activated.",
+    "mobileMoney": "Mobile money",
+    "cards": "Cards",
+    "bank": "Bank",
+    "status": {
+      "active": "Active",
+      "trial": "Trial",
+      "expiring": "Expiring soon",
+      "expired": "Expired",
+      "cancelled": "Cancelled",
+      "pending": "Awaiting payment"
+    },
+    "limit": {
+      "title": "You've reached your free listing limit.",
+      "body": "Upgrade your plan to publish more spaces, or manage the listings you already have.",
+      "upgrade": "Upgrade Plan",
+      "manage": "Manage Spaces"
+    },
+    "promo": {
+      "title": "Promote a listing",
+      "subtitle": "Give one property extra visibility for a fixed period.",
+      "chooseProperty": "Choose a property",
+      "noProperties": "You have no listings yet.",
+      "promote": "Promote",
+      "property": "Property",
+      "duration": "Duration (days)",
+      "startsAfterPayment": "The promotion starts once your payment is confirmed.",
+      "myPromotions": "My promotions",
+      "none": "No promotions yet."
+    },
+    "checkout": {
+      "title": "Confirm your order",
+      "orderCreated": "Order created",
+      "pendingTitle": "Awaiting payment confirmation",
+      "pendingBody": "We have recorded your order. Nothing is activated until the payment is confirmed - you will be notified as soon as it is.",
+      "failed": "We couldn't create your order.",
+      "failedBody": "Your current plan has not changed. Please try again.",
+      "security": "We never store card or mobile money credentials. Payments are handled by the provider.",
+      "manualNote": "No plan is activated until payment is confirmed"
+    },
+    "admin": {
+      "revenue": "Revenue",
+      "config": "Configuration",
+      "mrr": "Revenue this month",
+      "collected": "Collected (confirmed)",
+      "promoRevenue": "Promotion revenue",
+      "activeSubs": "Active subscriptions",
+      "byPlan": "Subscriptions by plan",
+      "noSubs": "No subscription records yet.",
+      "pendingPayments": "Payments awaiting confirmation",
+      "pendingHelp": "Confirm only after the funds have actually been received.",
+      "noPending": "No pending payments.",
+      "confirm": "Confirm payment",
+      "markFailed": "Mark failed",
+      "failedCount": "{count} failed payment(s) recorded.",
+      "paymentUpdated": "Payment updated",
+      "plans": "Plans",
+      "promotions": "Promotion products",
+      "planName": "Plan name",
+      "monthlyPrice": "Monthly price (TZS)",
+      "annualPrice": "Annual price (TZS)",
+      "listingLimit": "Listing limit",
+      "agentLimit": "Agent limit",
+      "saved": "Saved",
+      "configHelp": "Changes apply to new purchases. Existing subscriptions keep the terms they were bought on."
+    }
   }
 }

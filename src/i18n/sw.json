@@ -41,7 +41,9 @@
     "all": "Zote",
     "remove": "Ondoa",
     "edit": "Hariri",
-    "delete": "Futa"
+    "delete": "Futa",
+    "close": "Funga",
+    "errorGeneric": "Hitilafu imetokea. Tafadhali jaribu tena."
   },
   "home": {
     "hero": {
@@ -1381,5 +1383,105 @@
     "refine": "Boresha utafutaji wako",
     "noMatches": "Hakuna nafasi zilizopatikana katika eneo hili.",
     "searchIn": "Tafuta katika {name}"
+  },
+  "billing": {
+    "tabs": {
+      "plans": "Mipango",
+      "promotions": "Tangaza nafasi",
+      "billing": "Malipo na Ankara",
+      "payments": "Njia za Malipo",
+      "admin": "Mapato na Mipangilio"
+    },
+    "choosePlan": "Chagua mpango wako",
+    "choosePlanSub": "Bei wazi kwa TZS. Badilisha au sitisha wakati wowote.",
+    "monthly": "Kwa mwezi",
+    "annual": "Kwa mwaka",
+    "perMonth": "mwezi",
+    "perYear": "mwaka",
+    "days": "siku",
+    "currentPlan": "Mpango wa sasa",
+    "selectedPlan": "Mpango uliochagua",
+    "billingPeriod": "Kipindi cha malipo",
+    "price": "Bei",
+    "paymentMethod": "Njia ya malipo",
+    "paymentStatus": "Hali ya malipo",
+    "renewalDate": "Tarehe ya kuhuisha",
+    "listingAllowance": "Kiwango cha matangazo",
+    "unlimitedListings": "Matangazo yasiyo na kikomo",
+    "listingsIncluded": "Hadi matangazo {count} yanayotumika",
+    "freePlan": "Mpango wa bure",
+    "upgradeTo": "Pandisha hadi {plan}",
+    "continueToPayment": "Endelea na Malipo",
+    "invoiceHistory": "Historia ya ankara",
+    "invoiceHistorySub": "Pakua risiti kwa hesabu zako.",
+    "fullHistory": "Historia kamili",
+    "noInvoices": "Bado hakuna malipo. Ankara zako zitaonekana hapa.",
+    "gatewayTitle": "Mtoa huduma wa malipo anahitajika",
+    "gatewayBody": "Bado hatujaunganisha mtoa huduma wa malipo, hivyo malipo hayakamiliki mtandaoni moja kwa moja. Oda unazoweka zinahifadhiwa na timu yetu inathibitisha kabla mpango au tangazo halijawashwa.",
+    "mobileMoney": "Pesa za simu",
+    "cards": "Kadi",
+    "bank": "Benki",
+    "status": {
+      "active": "Inatumika",
+      "trial": "Jaribio",
+      "expiring": "Inakaribia kuisha",
+      "expired": "Imeisha",
+      "cancelled": "Imesitishwa",
+      "pending": "Inasubiri malipo"
+    },
+    "limit": {
+      "title": "Umefikia kikomo cha matangazo ya bure.",
+      "body": "Pandisha mpango wako ili kuweka nafasi zaidi, au simamia matangazo uliyonayo.",
+      "upgrade": "Pandisha Mpango",
+      "manage": "Simamia Nafasi"
+    },
+    "promo": {
+      "title": "Tangaza nafasi",
+      "subtitle": "Ipe nyumba moja mwonekano zaidi kwa muda maalum.",
+      "chooseProperty": "Chagua nafasi",
+      "noProperties": "Bado huna matangazo.",
+      "promote": "Tangaza",
+      "property": "Nafasi",
+      "duration": "Muda (siku)",
+      "startsAfterPayment": "Tangazo litaanza pindi malipo yatakapothibitishwa.",
+      "myPromotions": "Matangazo yangu",
+      "none": "Bado hakuna matangazo."
+    },
+    "checkout": {
+      "title": "Thibitisha oda yako",
+      "orderCreated": "Oda imetengenezwa",
+      "pendingTitle": "Inasubiri uthibitisho wa malipo",
+      "pendingBody": "Tumehifadhi oda yako. Hakuna kinachowashwa hadi malipo yathibitishwe - utaarifiwa mara moja.",
+      "failed": "Hatukuweza kutengeneza oda yako.",
+      "failedBody": "Mpango wako wa sasa haujabadilika. Tafadhali jaribu tena.",
+      "security": "Hatuhifadhi taarifa za kadi wala pesa za simu. Malipo hushughulikiwa na mtoa huduma.",
+      "manualNote": "Hakuna mpango unaowashwa kabla ya uthibitisho wa malipo"
+    },
+    "admin": {
+      "revenue": "Mapato",
+      "config": "Mipangilio",
+      "mrr": "Mapato mwezi huu",
+      "collected": "Yaliyokusanywa (yamethibitishwa)",
+      "promoRevenue": "Mapato ya matangazo",
+      "activeSubs": "Michango inayotumika",
+      "byPlan": "Michango kwa mpango",
+      "noSubs": "Bado hakuna rekodi za michango.",
+      "pendingPayments": "Malipo yanayosubiri uthibitisho",
+      "pendingHelp": "Thibitisha tu baada ya fedha kupokelewa kweli.",
+      "noPending": "Hakuna malipo yanayosubiri.",
+      "confirm": "Thibitisha malipo",
+      "markFailed": "Weka kama yameshindikana",
+      "failedCount": "Malipo {count} yaliyoshindikana yamerekodiwa.",
+      "paymentUpdated": "Malipo yamesasishwa",
+      "plans": "Mipango",
+      "promotions": "Bidhaa za matangazo",
+      "planName": "Jina la mpango",
+      "monthlyPrice": "Bei ya mwezi (TZS)",
+      "annualPrice": "Bei ya mwaka (TZS)",
+      "listingLimit": "Kikomo cha matangazo",
+      "agentLimit": "Kikomo cha mawakala",
+      "saved": "Imehifadhiwa",
+      "configHelp": "Mabadiliko yanahusu manunuzi mapya. Michango iliyopo inabaki na masharti yake."
+    }
   }
 }
