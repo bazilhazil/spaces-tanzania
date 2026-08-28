@@ -208,9 +208,12 @@ function PropertiesPage() {
 
   const mapped = sorted.filter((p) => p.latitude != null && p.longitude != null);
   const mapView = search.view === "map";
-  const regions = TZ_REGIONS;
-  const districts = regions.find((r) => r.name === search.city)?.districts ?? [];
-  const wards = districts.find((d) => d.name === search.district)?.wards ?? [];
+  // Filter options come from real listing data only — no empty locations.
+  const regions = facets;
+  const districts: DistrictFacet[] = regions.find((r) => r.name === search.city)?.districts ?? [];
+  const wards: WardFacet[] = districts.find((d) => d.name === search.district)?.wards ?? [];
+  const suggestions = useMemo(() => searchFacets(facets, queryText, 6), [facets, queryText]);
+  const page = sorted.slice(0, visible);
 
   const filterPanel = (
     <FilterPanel
