@@ -18,6 +18,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { loadDraft, saveDraft, clearDraft, type WizardDraft } from "@/lib/property-draft";
+import { fetchPlanUsage, listingLimitReached } from "@/lib/monetization-db";
+import { useI18n } from "@/hooks/use-i18n";
+
 import { compressImageFile, uploadMediaFile } from "@/lib/property-media";
 import { watermarkImage } from "@/lib/image-watermark";
 import { generateVideoThumbnail } from "@/lib/video-utils";
