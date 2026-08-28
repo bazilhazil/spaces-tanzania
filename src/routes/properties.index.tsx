@@ -95,6 +95,9 @@ function PropertiesPage() {
   const { user } = useAuth();
   const [saveSearchOpen, setSaveSearchOpen] = useState(false);
   const [authGate, setAuthGate] = useState(false);
+  const [facets, setFacets] = useState<RegionFacet[]>([]);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [visible, setVisible] = useState(PAGE_SIZE);
 
   // Filters currently applied on screen — reused when saving the search.
   const currentFilters: SavedSearchFilters = useMemo(() => ({
