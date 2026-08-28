@@ -59,8 +59,21 @@ export type ViewingErrorCode =
 export async function createViewingRequest(
   input: CreateViewingInput,
 ): Promise<{ ok: boolean; error?: ViewingErrorCode; detail?: string; updated?: boolean }> {
-  const { data: session } = await supabase.auth.getSession();
-  const user = session.session?.user;
+  // Revalidate the identity with Auth instead of trusting a cached browser session.
+  const { data: identity, error: identityError } = await supabase.auth.getUser();
+  const user = identity.user;
+  if (identityError) {
+    if (import.meta.env.DEV) {
+      console.error("[viewings] authenticated user validation failed", {
+        operation: "createViewingRequest:auth.getUser",
+        name: identityError.name,
+        status: identityError.status,
+        code: identityError.code,
+        message: identityError.message,
+      });
+    }
+    return { ok: false, error: "auth", detail: identityError.message };
+  }
   if (!user) return { ok: false, error: "auth" };
 
   if (!input.propertyId) return { ok: false, error: "property_missing" };
@@ -76,21 +89,44 @@ export async function createViewingRequest(
     .select("id,owner_id")
     .eq("id", input.propertyId)
     .maybeSingle();
-  if (propErr) console.error("Viewing request property lookup failed:", propErr);
-  const ownerId = (prop as { owner_id?: string } | null)?.owner_id ?? input.ownerId ?? null;
-  const propertyId = (prop as { id?: string } | null)?.id ?? input.propertyId;
-  if (!ownerId) return { ok: false, error: "property_missing" };
+  if (propErr) {
+    if (import.meta.env.DEV) {
+      console.error("[viewings] property lookup failed", {
+        operation: "createViewingRequest:property.select",
+        propertyId: input.propertyId,
+        code: propErr.code,
+        message: propErr.message,
+        details: propErr.details,
+        hint: propErr.hint,
+      });
+    }
+    return { ok: false, error: "failed", detail: propErr.message };
+  }
+  const property = prop as { id: string; owner_id: string } | null;
+  if (!property?.owner_id) return { ok: false, error: "property_missing" };
+  const ownerId = property.owner_id;
+  const propertyId = property.id;
 
   // 2. Route to an assigned agent when one manages viewings for this listing.
   let agentId = input.agentId ?? null;
   if (!agentId) {
-    const { data: assigned } = await supabase
+    const { data: assigned, error: assignmentError } = await supabase
       .from("property_agents")
       .select("agent_id,permission")
       .eq("property_id", propertyId)
       .in("permission", ["manage_viewings", "full_management"])
       .limit(1)
       .maybeSingle();
+    if (assignmentError && import.meta.env.DEV) {
+      console.error("[viewings] agent routing lookup failed", {
+        operation: "createViewingRequest:property_agents.select",
+        propertyId,
+        code: assignmentError.code,
+        message: assignmentError.message,
+        details: assignmentError.details,
+        hint: assignmentError.hint,
+      });
+    }
     agentId = (assigned as { agent_id?: string } | null)?.agent_id ?? null;
   }
 
@@ -149,6 +185,8 @@ export async function createViewingRequest(
         agentId,
         code: (updErr as { code?: string }).code,
         message: updErr.message,
+        details: updErr.details,
+        hint: updErr.hint,
       });
       return { ok: false, error: "failed", detail: updErr.message };
     }
@@ -168,6 +206,7 @@ export async function createViewingRequest(
       recipientId: recipient,
       scheduledAt: payload.scheduled_at,
       code,
+      status: (error as { status?: number }).status,
       message: error.message,
       details: (error as { details?: string }).details,
       hint: (error as { hint?: string }).hint,
