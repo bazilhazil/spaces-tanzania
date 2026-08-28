@@ -579,7 +579,11 @@
     "viewSpace": "Angalia Nafasi",
     "verified": "Imethibitishwa",
     "activeFilters": "{count} hai",
-    "street": "Mtaa"
+    "street": "Mtaa",
+    "noResultsLocation": "Hakuna nafasi zilizopatikana katika eneo hili.",
+    "searchAnotherLocation": "Tafuta eneo lingine",
+    "viewNearby": "Angalia nafasi za jirani",
+    "loadMore": "Pakia nafasi zaidi"
   },
   "viewings": {
     "title": "Maombi ya kutazama",
@@ -1364,5 +1368,18 @@
       "paused": "Tangazo limesimamishwa",
       "archived": "Tangazo limehifadhiwa"
     }
+  },
+  "location": {
+    "eyebrow": "Tanzania",
+    "heading": "Nafasi katika {name}",
+    "summary": "Matangazo {count} yapo - {rent} ya kupanga na {sale} ya kuuza.",
+    "types": "Aina za mali",
+    "priceFrom": "Bei kuanzia",
+    "browseAll": "Angalia nafasi zote",
+    "forRent": "Za kupanga",
+    "forSale": "Za kuuza",
+    "refine": "Boresha utafutaji wako",
+    "noMatches": "Hakuna nafasi zilizopatikana katika eneo hili.",
+    "searchIn": "Tafuta katika {name}"
   }
 }

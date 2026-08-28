@@ -579,7 +579,11 @@
     "viewSpace": "View Space",
     "verified": "Verified",
     "activeFilters": "{count} active",
-    "street": "Street"
+    "street": "Street",
+    "noResultsLocation": "No spaces found in this location.",
+    "searchAnotherLocation": "Search another location",
+    "viewNearby": "View nearby spaces",
+    "loadMore": "Load more spaces"
   },
   "viewings": {
     "title": "Viewing requests",
@@ -1364,5 +1368,18 @@
       "paused": "Listing paused",
       "archived": "Listing archived"
     }
+  },
+  "location": {
+    "eyebrow": "Tanzania",
+    "heading": "Spaces in {name}",
+    "summary": "{count} listings available - {rent} for rent and {sale} for sale.",
+    "types": "Property types",
+    "priceFrom": "Prices from",
+    "browseAll": "Browse all spaces",
+    "forRent": "For rent",
+    "forSale": "For sale",
+    "refine": "Refine your search",
+    "noMatches": "No spaces found in this location.",
+    "searchIn": "Search in {name}"
   }
 }
