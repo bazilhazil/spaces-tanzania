@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Building2, Home, Landmark, MapPin, Search, Store, Trees, Warehouse } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
 import { TZ_REGION_NAMES, searchLocations } from "@/lib/tz-locations";
+import { fetchLocationFacets, searchFacets, type RegionFacet } from "@/lib/location-facets";
 import { track } from "@/lib/analytics";
 
 type Tab = "rent" | "sale" | "commercial";
@@ -40,7 +41,32 @@ export function HeroSearch() {
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [q, setQ] = useState("");
   const [showHits, setShowHits] = useState(false);
-  const hits = useMemo(() => searchLocations(q, 6), [q]);
+  const [district, setDistrict] = useState<string | undefined>();
+  const [area, setArea] = useState<string | undefined>();
+  const [facets, setFacets] = useState<RegionFacet[]>([]);
+
+  // Suggestions come from places that actually have live listings; the static
+  // Tanzania list is only a fallback while the facets are still loading.
+  useEffect(() => {
+    let alive = true;
+    void fetchLocationFacets().then((f) => {
+      if (alive) setFacets(f);
+    });
+    return () => { alive = false; };
+  }, []);
+
+  const hits = useMemo(() => {
+    if (facets.length) {
+      return searchFacets(facets, q, 6).map((h) => ({
+        label: h.label, kind: h.kind, region: h.region, district: h.district, ward: h.ward,
+      }));
+    }
+    return searchLocations(q, 6).map((h) => ({
+      label: h.label, kind: h.kind, region: h.region, district: h.district, ward: h.ward,
+    }));
+  }, [facets, q]);
+
+  const regionOptions = facets.length ? facets.map((f) => f.name) : TZ_REGION_NAMES;
 
   return (
     <div className="w-full">
@@ -70,6 +96,8 @@ export function HeroSearch() {
             search: {
               type: tab,
               city: city || undefined,
+              district: district || undefined,
+              area: area || undefined,
               category: category || undefined,
               minPrice: minPrice ? Number(minPrice) : undefined,
               maxPrice: maxPrice ? Number(maxPrice) : undefined,
@@ -99,7 +127,9 @@ export function HeroSearch() {
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
                     setCity(h.region);
-                    setQ(h.ward ?? h.district ?? h.region);
+                    setDistrict(h.district);
+                    setArea(h.ward);
+                    setQ("");
                     setShowHits(false);
                   }}
                   className="flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-muted focus:bg-muted focus:outline-none"
@@ -115,12 +145,12 @@ export function HeroSearch() {
           )}
         </div>
 
-        <Select value={city} onValueChange={setCity}>
+        <Select value={city} onValueChange={(v) => { setCity(v); setDistrict(undefined); setArea(undefined); }}>
           <SelectTrigger className="h-12 border-transparent bg-secondary/60 md:col-span-2">
             <SelectValue placeholder={t("search.city")} />
           </SelectTrigger>
           <SelectContent className="max-h-72">
-            {TZ_REGION_NAMES.map((r) => (
+            {regionOptions.map((r) => (
               <SelectItem key={r} value={r}>{r}</SelectItem>
             ))}
           </SelectContent>
