@@ -27,7 +27,13 @@ import {
 import type { Property } from "@/lib/mock-data";
 import { fetchLiveProperties } from "@/lib/properties-db";
 import { AMENITY_OPTIONS, DISCOVERY_CATEGORIES } from "@/lib/property-options";
-import { TZ_REGIONS } from "@/lib/tz-locations";
+import {
+  fetchLocationFacets,
+  searchFacets,
+  type DistrictFacet,
+  type RegionFacet,
+  type WardFacet,
+} from "@/lib/location-facets";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
 
