@@ -60,6 +60,9 @@ const searchSchema = z.object({
 
 type SearchState = z.infer<typeof searchSchema>;
 
+/** Results are paged so we never render every listing in Tanzania at once. */
+const PAGE_SIZE = 24;
+
 export const Route = createFileRoute("/properties/")({
   validateSearch: zodValidator(searchSchema),
   component: PropertiesPage,
