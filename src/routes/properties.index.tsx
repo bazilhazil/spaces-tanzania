@@ -130,8 +130,14 @@ function PropertiesPage() {
       setProperties(rows);
       setLoading(false);
     });
+    void fetchLocationFacets().then((f) => {
+      if (alive) setFacets(f);
+    });
     return () => { alive = false; };
   }, []);
+
+  // Any filter change restarts paging from the first page of results.
+  useEffect(() => setVisible(PAGE_SIZE), [search]);
 
   function patch(next: Partial<SearchState>) {
     void navigate({
