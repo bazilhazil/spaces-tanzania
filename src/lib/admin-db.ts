@@ -333,12 +333,13 @@ export interface AdminPayment {
   status: string;
   createdAt: string;
   reference: string | null;
+  purpose: string;
 }
 
 export async function fetchAdminPayments(): Promise<AdminPayment[]> {
   const { data } = await supabase
     .from("payments")
-    .select("id,amount,currency,provider,status,created_at,reference")
+    .select("id,amount,currency,provider,status,created_at,reference,purpose")
     .order("created_at", { ascending: false })
     .limit(100);
   return ((data ?? []) as any[]).map((p) => ({
@@ -349,6 +350,7 @@ export async function fetchAdminPayments(): Promise<AdminPayment[]> {
     status: p.status,
     createdAt: p.created_at,
     reference: p.reference ?? null,
+    purpose: p.purpose ?? "other",
   }));
 }
 

@@ -18,6 +18,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { loadDraft, saveDraft, clearDraft, type WizardDraft } from "@/lib/property-draft";
+import { fetchPlanUsage, listingLimitReached } from "@/lib/monetization-db";
+import { useI18n } from "@/hooks/use-i18n";
+
 import { compressImageFile, uploadMediaFile } from "@/lib/property-media";
 import { watermarkImage } from "@/lib/image-watermark";
 import { generateVideoThumbnail } from "@/lib/video-utils";
@@ -89,6 +92,18 @@ function UploadWizardPage() {
   const [submitting, setSubmitting] = useState(false);
   const [savedTick, setSavedTick] = useState<number>(0);
   const [success, setSuccess] = useState<{ status: "live" | "draft"; id?: string } | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
+
+  // Plan listing allowance — checked up-front so owners are never surprised.
+  useEffect(() => {
+    if (isEdit) return;
+    let alive = true;
+    void fetchPlanUsage()
+      .then((usage) => { if (alive && listingLimitReached(usage)) setLimitReached(true); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [isEdit]);
+
   const dirtyRef = useRef(false);
   const draftRef = useRef(draft);
   const stepRef = useRef(step);
@@ -394,7 +409,12 @@ function UploadWizardPage() {
       }
     } catch (e: any) {
       console.error(e);
-      toast.error(e.message ?? "Something went wrong");
+      const msg = String(e?.message ?? "");
+      if (msg.includes("LISTING_LIMIT_REACHED")) {
+        setLimitReached(true);
+      } else {
+        toast.error(e.message ?? "Something went wrong");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -410,8 +430,10 @@ function UploadWizardPage() {
     );
   }
 
+  if (!isEdit && limitReached) return <ListingLimitScreen />;
 
   if (success) return <SuccessScreen status={success.status} />;
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -1047,6 +1069,30 @@ function SuccessScreen({ status }: { status: "live" | "draft" }) {
           </Button>
           <Button asChild className="rounded-full">
             <Link to="/upload">Publish another</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* Free listing limit reached — encourage upgrade without blocking the marketplace. */
+function ListingLimitScreen() {
+  const { t } = useI18n();
+  return (
+    <div className="grid min-h-screen place-items-center bg-background px-4">
+      <div className="ds-card w-full max-w-md p-6 text-center">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+          <Sparkles className="h-6 w-6" />
+        </div>
+        <h1 className="mt-4 font-display text-xl font-semibold">{t("billing.limit.title")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t("billing.limit.body")}</p>
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+          <Button asChild className="w-full">
+            <Link to="/billing">{t("billing.limit.upgrade")}</Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full">
+            <Link to="/dashboard/properties">{t("billing.limit.manage")}</Link>
           </Button>
         </div>
       </div>

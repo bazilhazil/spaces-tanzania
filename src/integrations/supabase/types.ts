@@ -93,6 +93,57 @@ export type Database = {
           },
         ]
       }
+      billing_plans: {
+        Row: {
+          active: boolean
+          agent_limit: number | null
+          badge: string | null
+          created_at: string
+          currency: string
+          features: Json
+          id: string
+          listing_limit: number | null
+          name: string
+          price_annual: number
+          price_monthly: number
+          sort_order: number
+          tagline: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          agent_limit?: number | null
+          badge?: string | null
+          created_at?: string
+          currency?: string
+          features?: Json
+          id: string
+          listing_limit?: number | null
+          name: string
+          price_annual?: number
+          price_monthly?: number
+          sort_order?: number
+          tagline?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          agent_limit?: number | null
+          badge?: string | null
+          created_at?: string
+          currency?: string
+          features?: Json
+          id?: string
+          listing_limit?: number | null
+          name?: string
+          price_annual?: number
+          price_monthly?: number
+          sort_order?: number
+          tagline?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           agent_id: string | null
@@ -698,11 +749,14 @@ export type Database = {
       payments: {
         Row: {
           amount: number
+          billing_cycle: string | null
           created_at: string
           currency: string
           id: string
           metadata: Json
+          plan_id: string | null
           provider: string
+          purpose: string
           reference: string | null
           status: string
           subscription_id: string | null
@@ -711,11 +765,14 @@ export type Database = {
         }
         Insert: {
           amount: number
+          billing_cycle?: string | null
           created_at?: string
           currency?: string
           id?: string
           metadata?: Json
+          plan_id?: string | null
           provider: string
+          purpose?: string
           reference?: string | null
           status?: string
           subscription_id?: string | null
@@ -724,11 +781,14 @@ export type Database = {
         }
         Update: {
           amount?: number
+          billing_cycle?: string | null
           created_at?: string
           currency?: string
           id?: string
           metadata?: Json
+          plan_id?: string | null
           provider?: string
+          purpose?: string
           reference?: string | null
           status?: string
           subscription_id?: string | null
@@ -736,6 +796,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "payments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payments_subscription_id_fkey"
             columns: ["subscription_id"]
@@ -808,6 +875,45 @@ export type Database = {
           verified_business?: boolean
           verified_identity?: boolean
           verified_owner?: boolean
+        }
+        Relationships: []
+      }
+      promotion_products: {
+        Row: {
+          active: boolean
+          created_at: string
+          currency: string
+          description: string
+          duration_days: number
+          id: string
+          name: string
+          price: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          description?: string
+          duration_days?: number
+          id: string
+          name: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          description?: string
+          duration_days?: number
+          id?: string
+          name?: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1068,6 +1174,90 @@ export type Database = {
           },
           {
             foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_promotions: {
+        Row: {
+          created_at: string
+          currency: string
+          duration_days: number
+          ends_at: string | null
+          id: string
+          payment_id: string | null
+          price: number
+          product_id: string
+          property_id: string
+          starts_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          duration_days?: number
+          ends_at?: string | null
+          id?: string
+          payment_id?: string | null
+          price?: number
+          product_id: string
+          property_id: string
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          duration_days?: number
+          ends_at?: string | null
+          id?: string
+          payment_id?: string | null
+          price?: number
+          product_id?: string
+          property_id?: string
+          starts_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_promotions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_promotions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "promotion_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_promotions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_promotions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_promotions_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "public_properties"
@@ -1543,8 +1733,10 @@ export type Database = {
           created_at: string
           current_period_end: string | null
           current_period_start: string
+          expiry_notified_at: string | null
           id: string
           plan: string
+          plan_id: string | null
           status: string
           updated_at: string
           user_id: string
@@ -1555,8 +1747,10 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string
+          expiry_notified_at?: string | null
           id?: string
           plan?: string
+          plan_id?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -1567,13 +1761,23 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string
+          expiry_notified_at?: string | null
           id?: string
           plan?: string
+          plan_id?: string | null
           status?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_blocks: {
         Row: {
@@ -1984,10 +2188,15 @@ export type Database = {
       }
     }
     Functions: {
+      admin_set_payment_status: {
+        Args: { _payment_id: string; _status: string }
+        Returns: undefined
+      }
       agent_permission_for: {
         Args: { _agent_id: string; _property_id: string }
         Returns: Database["public"]["Enums"]["agent_permission"]
       }
+      check_my_subscription_expiry: { Args: never; Returns: undefined }
       crm_lead_status_for_stage: {
         Args: { _stage: Database["public"]["Enums"]["deal_stage"] }
         Returns: string
@@ -2036,6 +2245,19 @@ export type Database = {
           until: string
         }[]
       }
+      my_plan_usage: {
+        Args: never
+        Returns: {
+          agent_limit: number
+          cancel_at_period_end: boolean
+          current_period_end: string
+          listing_limit: number
+          listings_used: number
+          plan_id: string
+          plan_name: string
+          status: string
+        }[]
+      }
       my_review_opportunities: {
         Args: never
         Returns: {
@@ -2051,6 +2273,7 @@ export type Database = {
           source_id: string
         }[]
       }
+      plan_id_for_user: { Args: { _user_id: string }; Returns: string }
       property_rating: {
         Args: { _property_id: string }
         Returns: {
