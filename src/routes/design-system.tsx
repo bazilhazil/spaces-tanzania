@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Eye, Heart, MessageSquare, TrendingUp, Home, Upload, BarChart3,
@@ -16,6 +16,10 @@ import {
 } from "@/components/ds";
 
 export const Route = createFileRoute("/design-system")({
+  // Internal design/QA reference - not part of the production site.
+  beforeLoad: () => {
+    if (!import.meta.env.DEV) throw redirect({ to: "/", replace: true });
+  },
   component: DesignSystemPage,
   head: () => ({
     meta: [

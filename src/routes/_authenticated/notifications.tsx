@@ -16,8 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   KIND_META,
-  getPrefs, setPrefs, getProviders, setProviders, anyProviderConfigured,
-  type NotificationKind, type ChannelPrefs, type ProviderStatus,
+  getPrefs, setPrefs,
+  type NotificationKind, type ChannelPrefs,
 } from "@/lib/notifications-store";
 import {
   listNotificationsDb, markNotificationRead, markAllNotificationsRead,
