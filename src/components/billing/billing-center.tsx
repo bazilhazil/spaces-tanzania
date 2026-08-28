@@ -18,8 +18,7 @@ import { CheckoutDialog } from "@/components/billing/checkout-dialog";
 import { VERIFICATION_FEES, type PaymentIntent } from "@/lib/payments-store";
 import { useMyPayments, useMySubscription, useMyListingCount, type InvoiceLike } from "@/lib/billing-db";
 import {
-  PLANS, ADDONS, PAYMENT_METHODS, COUPONS,
-  REVENUE_KPI, REVENUE_BY_PLAN, REVENUE_TREND,
+  PLANS, ADDONS, PAYMENT_METHODS,
   formatTZS, planById, type PlanId, type BillingCycle, type AddOn,
 } from "@/lib/billing-mock";
 
