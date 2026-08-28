@@ -333,6 +333,7 @@ export interface AdminPayment {
   status: string;
   createdAt: string;
   reference: string | null;
+  purpose: string;
 }
 
 export async function fetchAdminPayments(): Promise<AdminPayment[]> {
@@ -349,6 +350,7 @@ export async function fetchAdminPayments(): Promise<AdminPayment[]> {
     status: p.status,
     createdAt: p.created_at,
     reference: p.reference ?? null,
+    purpose: p.purpose ?? "other",
   }));
 }
 

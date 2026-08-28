@@ -524,7 +524,7 @@ function AdminRevenue() {
   const thisMonth = confirmed.filter((p) => new Date(p.createdAt) >= monthStart);
   const mrr = thisMonth.reduce((a, p) => a + p.amount, 0);
   const promoRevenue = confirmed
-    .filter((p) => (p as unknown as { purpose?: string }).purpose === "promotion")
+    .filter((p) => p.purpose === "promotion")
     .reduce((a, p) => a + p.amount, 0);
   const activeSubs = subs.reduce((a, s) => a + s.active, 0);
   const pending = payments.filter((p) => p.status === "pending");
