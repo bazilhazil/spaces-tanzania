@@ -394,7 +394,12 @@ function UploadWizardPage() {
       }
     } catch (e: any) {
       console.error(e);
-      toast.error(e.message ?? "Something went wrong");
+      const msg = String(e?.message ?? "");
+      if (msg.includes("LISTING_LIMIT_REACHED")) {
+        setLimitReached(true);
+      } else {
+        toast.error(e.message ?? "Something went wrong");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -410,8 +415,10 @@ function UploadWizardPage() {
     );
   }
 
+  if (!isEdit && limitReached) return <ListingLimitScreen />;
 
   if (success) return <SuccessScreen status={success.status} />;
+
 
   return (
     <div className="min-h-screen bg-background">
