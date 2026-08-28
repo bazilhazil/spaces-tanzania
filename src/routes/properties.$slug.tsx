@@ -668,7 +668,7 @@ function PropertyDetailPage() {
         onOpenChange={setInquiryOpen}
         propertyTitle={property.title}
         propertyId={property.id}
-        ownerId={property.agentId}
+        ownerId={ownerId ?? property.agentId}
         ownerName={agent?.name ?? ""}
       />
 
@@ -872,7 +872,12 @@ function InquiryDialog({
 
 
 function ViewingDialog({ open, onOpenChange, propertyTitle, propertyId, ownerId }: { open: boolean; onOpenChange: (v: boolean) => void; propertyTitle: string; propertyId: string; ownerId: string }) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Dar_es_Salaam",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
   const [date, setDate] = useState(today);
   const [time, setTime] = useState("10:00");
   const [notes, setNotes] = useState("");
@@ -880,7 +885,9 @@ function ViewingDialog({ open, onOpenChange, propertyTitle, propertyId, ownerId 
   async function submit() {
     if (sending) return; // guard against double taps
     if (!date || !time) { toast.error("Choose a date and a time"); return; }
-    const when = new Date(`${date}T${time}`);
+    // Tanzania has no daylight-saving changes, so preserve the selected wall time
+    // explicitly instead of interpreting it in the browser's current timezone.
+    const when = new Date(`${date}T${time}:00+03:00`);
     if (Number.isNaN(when.getTime()) || when.getTime() < Date.now() - 60_000) {
       toast.error("Please choose a future date and time");
       return;

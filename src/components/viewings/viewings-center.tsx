@@ -264,11 +264,11 @@ function ViewingCard({
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <CalendarIcon className="h-3 w-3" />
-              {when.toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" })}
+              {when.toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short", timeZone: "Africa/Dar_es_Salaam" })}
             </span>
             <span className="inline-flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {when.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })} · {v.durationMinutes}m
+              {when.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Dar_es_Salaam" })} · {v.durationMinutes}m
             </span>
             <span className="inline-flex items-center gap-1">
               <User className="h-3 w-3" />
