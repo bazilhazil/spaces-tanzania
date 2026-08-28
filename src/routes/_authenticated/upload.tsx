@@ -89,6 +89,18 @@ function UploadWizardPage() {
   const [submitting, setSubmitting] = useState(false);
   const [savedTick, setSavedTick] = useState<number>(0);
   const [success, setSuccess] = useState<{ status: "live" | "draft"; id?: string } | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
+
+  // Plan listing allowance — checked up-front so owners are never surprised.
+  useEffect(() => {
+    if (isEdit) return;
+    let alive = true;
+    void fetchPlanUsage()
+      .then((usage) => { if (alive && listingLimitReached(usage)) setLimitReached(true); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [isEdit]);
+
   const dirtyRef = useRef(false);
   const draftRef = useRef(draft);
   const stepRef = useRef(step);
