@@ -424,7 +424,25 @@
       "verification": "Uthibitisho",
       "reports": "Ripoti",
       "payments": "Malipo",
-      "performance": "Utendaji"
+      "performance": "Utendaji",
+      "upload": "Tangaza Mali",
+      "inquiries": "Maswali",
+      "deals": "Mikataba Yangu",
+      "reviews": "Maoni",
+      "notifications": "Arifa",
+      "safety": "Kituo cha Usalama",
+      "drafts": "Rasimu Zilizohifadhiwa",
+      "trust": "Alama ya Uaminifu",
+      "billing": "Malipo na Mipango",
+      "paymentHistory": "Historia ya Malipo",
+      "profile": "Wasifu",
+      "settings": "Mipangilio",
+      "support": "Msaada",
+      "compare": "Linganisha",
+      "recent": "Zilizotazamwa Karibuni",
+      "agentPerformance": "Utendaji wa Wakala",
+      "businessIntelligence": "Uchambuzi wa Biashara",
+      "admin": "Kituo cha Usimamizi"
     }
   },
   "profileCard": {

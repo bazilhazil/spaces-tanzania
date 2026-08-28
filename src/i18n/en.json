@@ -424,7 +424,25 @@
       "verification": "Verification",
       "reports": "Reports",
       "payments": "Payments",
-      "performance": "Performance"
+      "performance": "Performance",
+      "upload": "Upload Property",
+      "inquiries": "Inquiries",
+      "deals": "My Deals",
+      "reviews": "Reviews",
+      "notifications": "Notifications",
+      "safety": "Safety Center",
+      "drafts": "Saved Drafts",
+      "trust": "Trust Score",
+      "billing": "Billing & Plans",
+      "paymentHistory": "Payment History",
+      "profile": "Profile",
+      "settings": "Settings",
+      "support": "Support",
+      "compare": "Compare",
+      "recent": "Recently Viewed",
+      "agentPerformance": "Agent Performance",
+      "businessIntelligence": "Business Intelligence",
+      "admin": "Admin Control Center"
     }
   },
   "profileCard": {
