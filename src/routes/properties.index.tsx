@@ -249,18 +249,53 @@ function PropertiesPage() {
 
             {/* Prominent search bar */}
             <form
-              onSubmit={(e) => { e.preventDefault(); patch({ q: queryText || undefined }); }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSuggestOpen(false);
+                patch({ q: queryText || undefined });
+              }}
               className="mt-4 flex w-full flex-col gap-2 sm:flex-row"
             >
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={queryText}
-                  onChange={(e) => setQueryText(e.target.value)}
+                  onChange={(e) => { setQueryText(e.target.value); setSuggestOpen(true); }}
+                  onFocus={() => setSuggestOpen(true)}
+                  onBlur={() => window.setTimeout(() => setSuggestOpen(false), 150)}
                   placeholder={t("discovery.searchPlaceholder")}
                   aria-label={t("discovery.search")}
                   className="h-12 w-full rounded-xl border-border bg-background pl-10 text-sm"
                 />
+                {suggestOpen && suggestions.length > 0 && (
+                  <ul className="absolute left-0 right-0 top-[calc(100%+4px)] z-40 overflow-hidden rounded-xl border border-border bg-popover shadow-lg">
+                    {suggestions.map((s) => (
+                      <li key={`${s.kind}-${s.label}`}>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => {
+                            setSuggestOpen(false);
+                            setQueryText("");
+                            patch({
+                              q: undefined,
+                              city: s.region,
+                              district: s.district,
+                              area: s.ward,
+                            });
+                          }}
+                          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-accent"
+                        >
+                          <span className="flex min-w-0 items-center gap-2">
+                            <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                            <span className="truncate">{s.label}</span>
+                          </span>
+                          <span className="shrink-0 text-xs text-muted-foreground">{s.count}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
               <div className="flex gap-2">
                 <Button type="submit" className="h-12 flex-1 gap-2 rounded-xl px-6 sm:flex-none">
