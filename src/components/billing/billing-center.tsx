@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Check, Star, Crown, Search as SearchIcon, CreditCard, Receipt, TrendingUp, Users,
-  Smartphone, Wallet, Building2, History, Settings2, Loader2, ShieldCheck, RefreshCw,
+  Smartphone, Wallet, Building2, History, Settings2, Loader2, RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -729,4 +729,3 @@ function Field({ label, value, onChange, type = "text", placeholder }: {
   );
 }
 
-export { ShieldCheck };
