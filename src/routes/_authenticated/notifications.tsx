@@ -346,7 +346,7 @@ function NotifList({ items, onRead, onDelete }: {
 
 }
 
-const PROVIDER_META: { id: keyof ProviderStatus; name: string; icon: React.ComponentType<{ className?: string }>; description: string }[] = [
+const PROVIDER_META: { id: string; name: string; icon: React.ComponentType<{ className?: string }>; description: string }[] = [
   { id: "sms", name: "SMS", icon: Smartphone, description: "OTP, viewing reminders, payment & deal alerts." },
   { id: "email", name: "Email", icon: MailCheck, description: "Welcome, invoices, verification status, weekly reports." },
   { id: "whatsapp", name: "WhatsApp", icon: MessageCircle, description: "Viewing confirmations, deal updates, messages, alerts." },
