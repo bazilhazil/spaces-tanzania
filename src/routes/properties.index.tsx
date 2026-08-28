@@ -27,7 +27,13 @@ import {
 import type { Property } from "@/lib/mock-data";
 import { fetchLiveProperties } from "@/lib/properties-db";
 import { AMENITY_OPTIONS, DISCOVERY_CATEGORIES } from "@/lib/property-options";
-import { TZ_REGIONS } from "@/lib/tz-locations";
+import {
+  fetchLocationFacets,
+  searchFacets,
+  type DistrictFacet,
+  type RegionFacet,
+  type WardFacet,
+} from "@/lib/location-facets";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +59,9 @@ const searchSchema = z.object({
 });
 
 type SearchState = z.infer<typeof searchSchema>;
+
+/** Results are paged so we never render every listing in Tanzania at once. */
+const PAGE_SIZE = 24;
 
 export const Route = createFileRoute("/properties/")({
   validateSearch: zodValidator(searchSchema),
@@ -89,6 +98,9 @@ function PropertiesPage() {
   const { user } = useAuth();
   const [saveSearchOpen, setSaveSearchOpen] = useState(false);
   const [authGate, setAuthGate] = useState(false);
+  const [facets, setFacets] = useState<RegionFacet[]>([]);
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [visible, setVisible] = useState(PAGE_SIZE);
 
   // Filters currently applied on screen — reused when saving the search.
   const currentFilters: SavedSearchFilters = useMemo(() => ({
@@ -118,8 +130,14 @@ function PropertiesPage() {
       setProperties(rows);
       setLoading(false);
     });
+    void fetchLocationFacets().then((f) => {
+      if (alive) setFacets(f);
+    });
     return () => { alive = false; };
   }, []);
+
+  // Any filter change restarts paging from the first page of results.
+  useEffect(() => setVisible(PAGE_SIZE), [search]);
 
   function patch(next: Partial<SearchState>) {
     void navigate({
@@ -196,9 +214,12 @@ function PropertiesPage() {
 
   const mapped = sorted.filter((p) => p.latitude != null && p.longitude != null);
   const mapView = search.view === "map";
-  const regions = TZ_REGIONS;
-  const districts = regions.find((r) => r.name === search.city)?.districts ?? [];
-  const wards = districts.find((d) => d.name === search.district)?.wards ?? [];
+  // Filter options come from real listing data only — no empty locations.
+  const regions = facets;
+  const districts: DistrictFacet[] = regions.find((r) => r.name === search.city)?.districts ?? [];
+  const wards: WardFacet[] = districts.find((d) => d.name === search.district)?.wards ?? [];
+  const suggestions = useMemo(() => searchFacets(facets, queryText, 6), [facets, queryText]);
+  const page = sorted.slice(0, visible);
 
   const filterPanel = (
     <FilterPanel
@@ -228,18 +249,53 @@ function PropertiesPage() {
 
             {/* Prominent search bar */}
             <form
-              onSubmit={(e) => { e.preventDefault(); patch({ q: queryText || undefined }); }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSuggestOpen(false);
+                patch({ q: queryText || undefined });
+              }}
               className="mt-4 flex w-full flex-col gap-2 sm:flex-row"
             >
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={queryText}
-                  onChange={(e) => setQueryText(e.target.value)}
+                  onChange={(e) => { setQueryText(e.target.value); setSuggestOpen(true); }}
+                  onFocus={() => setSuggestOpen(true)}
+                  onBlur={() => window.setTimeout(() => setSuggestOpen(false), 150)}
                   placeholder={t("discovery.searchPlaceholder")}
                   aria-label={t("discovery.search")}
                   className="h-12 w-full rounded-xl border-border bg-background pl-10 text-sm"
                 />
+                {suggestOpen && suggestions.length > 0 && (
+                  <ul className="absolute left-0 right-0 top-[calc(100%+4px)] z-40 overflow-hidden rounded-xl border border-border bg-popover shadow-lg">
+                    {suggestions.map((s) => (
+                      <li key={`${s.kind}-${s.label}`}>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => {
+                            setSuggestOpen(false);
+                            setQueryText("");
+                            patch({
+                              q: undefined,
+                              city: s.region,
+                              district: s.district,
+                              area: s.ward,
+                            });
+                          }}
+                          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-accent"
+                        >
+                          <span className="flex min-w-0 items-center gap-2">
+                            <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                            <span className="truncate">{s.label}</span>
+                          </span>
+                          <span className="shrink-0 text-xs text-muted-foreground">{s.count}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
               <div className="flex gap-2">
                 <Button type="submit" className="h-12 flex-1 gap-2 rounded-xl px-6 sm:flex-none">
@@ -365,44 +421,66 @@ function PropertiesPage() {
                   {[0, 1, 2, 3, 4, 5].map((i) => <SkeletonCard key={i} />)}
                 </div>
               ) : sorted.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border p-10 text-center md:p-16">
+                <div className="rounded-2xl border border-dashed border-border p-8 text-center md:p-16">
                   <h3 className="font-display text-lg font-semibold text-foreground">
-                    {t("discovery.noResultsTitle")}
+                    {t("discovery.noResultsLocation")}
                   </h3>
                   <p className="mt-2 text-sm text-muted-foreground">{t("discovery.noResultsBody")}</p>
                   <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
-                    <Button onClick={clearAll}>{t("discovery.clear")}</Button>
+                    <Button className="h-11" onClick={clearAll}>{t("discovery.clear")}</Button>
                     <Button
                       variant="outline"
-                      onClick={() => patch({ city: undefined, district: undefined, area: undefined })}
+                      className="h-11"
+                      onClick={() => {
+                        setQueryText("");
+                        patch({ q: undefined, city: undefined, district: undefined, area: undefined });
+                      }}
                     >
-                      {t("discovery.changeLocation")}
+                      {t("discovery.searchAnotherLocation")}
                     </Button>
-                  </div>
-                </div>
-              ) : mapView ? (
-                <div className="grid gap-4">
-                  <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border md:aspect-[16/9]">
-                    {mapped.length > 0 ? (
-                      <iframe
-                        title="Property map"
-                        loading="lazy"
-                        className="h-full w-full"
-                        src={`https://maps.google.com/maps?q=${mapped[0]!.latitude},${mapped[0]!.longitude}&z=12&output=embed`}
-                      />
-                    ) : (
-                      <div className="grid h-full place-items-center bg-muted/40 p-6 text-center text-sm text-muted-foreground">
-                        {t("discovery.mapEmpty")}
-                      </div>
+                    {(search.district || search.area) && (
+                      <Button
+                        variant="outline"
+                        className="h-11"
+                        onClick={() => patch({ district: undefined, area: undefined })}
+                      >
+                        {t("discovery.viewNearby")}
+                      </Button>
                     )}
-                  </div>
-                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                    {sorted.map((p) => <PropertyCard key={p.id} property={p} />)}
                   </div>
                 </div>
               ) : (
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                  {sorted.map((p) => <PropertyCard key={p.id} property={p} />)}
+                <div className="grid gap-4">
+                  {mapView && (
+                    <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border md:aspect-[16/9]">
+                      {mapped.length > 0 ? (
+                        <iframe
+                          title="Property map"
+                          loading="lazy"
+                          className="h-full w-full"
+                          src={`https://maps.google.com/maps?q=${mapped[0]!.latitude},${mapped[0]!.longitude}&z=12&output=embed`}
+                        />
+                      ) : (
+                        <div className="grid h-full place-items-center bg-muted/40 p-6 text-center text-sm text-muted-foreground">
+                          {t("discovery.mapEmpty")}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                    {page.map((p) => <PropertyCard key={p.id} property={p} />)}
+                  </div>
+                  {visible < sorted.length && (
+                    <div className="mt-2 flex justify-center">
+                      <Button
+                        variant="outline"
+                        className="h-11 rounded-xl px-8"
+                        onClick={() => setVisible((v) => v + PAGE_SIZE)}
+                      >
+                        {t("discovery.loadMore")}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -444,9 +522,9 @@ function FilterPanel({
   search: SearchState;
   selectedAmenities: string[];
   patch: (n: Partial<SearchState>) => void;
-  regions: { name: string; districts: { name: string; wards: string[] }[] }[];
-  districts: { name: string; wards: string[] }[];
-  wards: string[];
+  regions: RegionFacet[];
+  districts: DistrictFacet[];
+  wards: WardFacet[];
 }) {
   const { t } = useI18n();
   const ANY = "__any";
@@ -494,7 +572,9 @@ function FilterPanel({
           <SelectTrigger className="h-10"><SelectValue placeholder={t("discovery.allRegions")} /></SelectTrigger>
           <SelectContent className="max-h-72">
             <SelectItem value={ANY}>{t("discovery.allRegions")}</SelectItem>
-            {regions.map((r) => <SelectItem key={r.name} value={r.name}>{r.name}</SelectItem>)}
+            {regions.map((r) => (
+              <SelectItem key={r.name} value={r.name}>{r.name} ({r.count})</SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -507,7 +587,9 @@ function FilterPanel({
           <SelectTrigger className="h-10"><SelectValue placeholder={t("discovery.allDistricts")} /></SelectTrigger>
           <SelectContent className="max-h-72">
             <SelectItem value={ANY}>{t("discovery.allDistricts")}</SelectItem>
-            {districts.map((d) => <SelectItem key={d.name} value={d.name}>{d.name}</SelectItem>)}
+            {districts.map((d) => (
+              <SelectItem key={d.name} value={d.name}>{d.name} ({d.count})</SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -520,7 +602,9 @@ function FilterPanel({
           <SelectTrigger className="h-10"><SelectValue placeholder={t("discovery.allAreas")} /></SelectTrigger>
           <SelectContent className="max-h-72">
             <SelectItem value={ANY}>{t("discovery.allAreas")}</SelectItem>
-            {wards.map((w) => <SelectItem key={w} value={w}>{w}</SelectItem>)}
+            {wards.map((w) => (
+              <SelectItem key={w.name} value={w.name}>{w.name} ({w.count})</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
