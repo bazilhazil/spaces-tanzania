@@ -539,7 +539,9 @@ function FilterPanel({
           <SelectTrigger className="h-10"><SelectValue placeholder={t("discovery.allAreas")} /></SelectTrigger>
           <SelectContent className="max-h-72">
             <SelectItem value={ANY}>{t("discovery.allAreas")}</SelectItem>
-            {wards.map((w) => <SelectItem key={w} value={w}>{w}</SelectItem>)}
+            {wards.map((w) => (
+              <SelectItem key={w.name} value={w.name}>{w.name} ({w.count})</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
