@@ -338,7 +338,7 @@ export interface AdminPayment {
 export async function fetchAdminPayments(): Promise<AdminPayment[]> {
   const { data } = await supabase
     .from("payments")
-    .select("id,amount,currency,provider,status,created_at,reference")
+    .select("id,amount,currency,provider,status,created_at,reference,purpose")
     .order("created_at", { ascending: false })
     .limit(100);
   return ((data ?? []) as any[]).map((p) => ({

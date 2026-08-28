@@ -1075,3 +1075,27 @@ function SuccessScreen({ status }: { status: "live" | "draft" }) {
     </div>
   );
 }
+
+/* Free listing limit reached — encourage upgrade without blocking the marketplace. */
+function ListingLimitScreen() {
+  const { t } = useI18n();
+  return (
+    <div className="grid min-h-screen place-items-center bg-background px-4">
+      <div className="ds-card w-full max-w-md p-6 text-center">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+          <Sparkles className="h-6 w-6" />
+        </div>
+        <h1 className="mt-4 font-display text-xl font-semibold">{t("billing.limit.title")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t("billing.limit.body")}</p>
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+          <Button asChild className="w-full">
+            <Link to="/billing">{t("billing.limit.upgrade")}</Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full">
+            <Link to="/dashboard/properties">{t("billing.limit.manage")}</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
