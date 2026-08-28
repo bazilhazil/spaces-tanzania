@@ -111,6 +111,12 @@
       "body": "Fikia maelfu ya wanunuzi na wapangaji nchini Tanzania. Matangazo ya msingi bila malipo, nafasi za premium zinapatikana.",
       "upload": "Ongeza mali yako",
       "becomeAgent": "Kuwa wakala"
+    },
+    "stats": {
+      "liveListings": "Matangazo hai",
+      "verifiedListings": "Matangazo yaliyothibitishwa",
+      "cities": "Miji",
+      "partners": "Mawakala washirika"
     }
   },
   "search": {

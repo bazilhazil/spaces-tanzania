@@ -111,6 +111,12 @@
       "body": "Reach thousands of qualified buyers and renters across Tanzania. Free basic listings, premium placement available.",
       "upload": "Upload your property",
       "becomeAgent": "Become an agent"
+    },
+    "stats": {
+      "liveListings": "Live listings",
+      "verifiedListings": "Verified listings",
+      "cities": "Cities",
+      "partners": "Partner agents"
     }
   },
   "search": {
