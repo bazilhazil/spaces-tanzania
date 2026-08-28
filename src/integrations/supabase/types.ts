@@ -2188,10 +2188,15 @@ export type Database = {
       }
     }
     Functions: {
+      admin_set_payment_status: {
+        Args: { _payment_id: string; _status: string }
+        Returns: undefined
+      }
       agent_permission_for: {
         Args: { _agent_id: string; _property_id: string }
         Returns: Database["public"]["Enums"]["agent_permission"]
       }
+      check_my_subscription_expiry: { Args: never; Returns: undefined }
       crm_lead_status_for_stage: {
         Args: { _stage: Database["public"]["Enums"]["deal_stage"] }
         Returns: string
