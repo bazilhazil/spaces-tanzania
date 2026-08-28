@@ -459,9 +459,9 @@ function FilterPanel({
   search: SearchState;
   selectedAmenities: string[];
   patch: (n: Partial<SearchState>) => void;
-  regions: { name: string; districts: { name: string; wards: string[] }[] }[];
-  districts: { name: string; wards: string[] }[];
-  wards: string[];
+  regions: RegionFacet[];
+  districts: DistrictFacet[];
+  wards: WardFacet[];
 }) {
   const { t } = useI18n();
   const ANY = "__any";
