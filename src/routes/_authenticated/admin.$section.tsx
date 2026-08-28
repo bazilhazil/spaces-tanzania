@@ -41,12 +41,15 @@ export const Route = createFileRoute("/_authenticated/admin/$section")({
       <p className="mt-2 text-sm text-muted-foreground">The admin section you requested doesn't exist.</p>
     </div>
   ),
-  errorComponent: ({ error }) => (
-    <div className="mx-auto max-w-md py-16 text-center">
-      <h2 className="font-display text-2xl font-semibold">Something went wrong</h2>
-      <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
-    </div>
-  ),
+  errorComponent: ({ error }) => {
+    if (import.meta.env.DEV) console.error("[admin/section]", error);
+    return (
+      <div className="mx-auto max-w-md py-16 text-center">
+        <h2 className="font-display text-2xl font-semibold">Something went wrong</h2>
+        <p className="mt-2 text-sm text-muted-foreground">Please try again.</p>
+      </div>
+    );
+  },
 });
 
 function SectionPage() {

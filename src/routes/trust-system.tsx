@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ListingBadge, ListingBadgeStrip } from "@/components/trust/listing-badge";
@@ -10,6 +10,10 @@ import { ReportDialog } from "@/components/trust/report-dialog";
 import { LISTING_BADGE_META, MOCK_TRUST_SIGNALS, computeTrustScore, type ListingBadgeKind } from "@/lib/trust-engine";
 
 export const Route = createFileRoute("/trust-system")({
+  // Internal design/QA reference - not part of the production site.
+  beforeLoad: () => {
+    if (!import.meta.env.DEV) throw redirect({ to: "/", replace: true });
+  },
   head: () => ({
     meta: [
       { title: "Trust System · SPACES" },

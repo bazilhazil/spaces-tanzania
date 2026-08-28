@@ -1,6 +1,6 @@
-// SPACES Revenue & Subscription Management — mock data layer.
-// Payment gateway integration is intentionally deferred; this module models
-// plans, add-ons, invoices, promotions, and revenue analytics.
+// SPACES pricing catalogue: plans, add-ons and payment-method metadata.
+// No payment gateway is connected yet; real invoices/subscriptions are read
+// from the database in @/lib/billing-db. No fabricated revenue lives here.
 
 export type PlanId = "free" | "professional" | "agency" | "enterprise";
 export type BillingCycle = "monthly" | "annual";
@@ -183,52 +183,6 @@ export type Coupon = {
   cap: number;
   active: boolean;
 };
-
-export const CURRENT_SUBSCRIPTION: Subscription = {
-  planId: "professional",
-  status: "active",
-  cycle: "monthly",
-  renewsOn: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString(),
-  startedOn: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString(),
-  seatsUsed: 1,
-  listingsUsed: 8,
-  paymentMethod: "mpesa",
-};
-
-
-export const COUPONS: Coupon[] = [
-  { code: "SPACES20", discountPct: 20, appliesTo: "all", expiresOn: "2026-12-31", usage: 142, cap: 500, active: true },
-  { code: "AGENCY50", discountPct: 50, appliesTo: ["agency"], expiresOn: "2026-09-30", usage: 12, cap: 50, active: true },
-  { code: "WELCOME10", discountPct: 10, appliesTo: ["professional"], expiresOn: "2026-12-31", usage: 88, cap: 1000, active: true },
-];
-
-// Admin revenue analytics (mock aggregates)
-export const REVENUE_KPI = {
-  mrrTZS: 8_940_000,
-  mrrDelta: 12.4,
-  arrTZS: 107_280_000,
-  activeSubs: 214,
-  activeSubsDelta: 8.1,
-  churnPct: 3.2,
-  churnDelta: -0.4,
-  arpuTZS: 41_775,
-};
-
-export const REVENUE_BY_PLAN = [
-  { plan: "Free", subs: 1284, mrrTZS: 0 },
-  { plan: "Professional", subs: 168, mrrTZS: 8_232_000 },
-  { plan: "Agency", subs: 42, mrrTZS: 6_258_000 },
-  { plan: "Enterprise", subs: 4, mrrTZS: 1_800_000 },
-];
-
-export const REVENUE_TREND = [
-  { month: "Jan", mrrTZS: 5_120_000 },
-  { month: "Feb", mrrTZS: 5_680_000 },
-  { month: "Mar", mrrTZS: 6_290_000 },
-  { month: "Apr", mrrTZS: 7_010_000 },
-  { month: "May", mrrTZS: 7_920_000 },
-  { month: "Jun", mrrTZS: 8_940_000 },
-];
 
 export function formatTZS(v: number | null): string {
   if (v == null) return "Custom";

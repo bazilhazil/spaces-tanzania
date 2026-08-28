@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAdminPayments, fetchAdminSubscriptions } from "@/lib/admin-db";
 import {
   Check, Star, Flame, ShieldCheck, Home, Search, Crown, Sparkles,
   CreditCard, Receipt, Download, Tag, TrendingUp, Users, BadgePercent,
@@ -16,8 +18,7 @@ import { CheckoutDialog } from "@/components/billing/checkout-dialog";
 import { VERIFICATION_FEES, type PaymentIntent } from "@/lib/payments-store";
 import { useMyPayments, useMySubscription, useMyListingCount, type InvoiceLike } from "@/lib/billing-db";
 import {
-  PLANS, ADDONS, PAYMENT_METHODS, COUPONS,
-  REVENUE_KPI, REVENUE_BY_PLAN, REVENUE_TREND,
+  PLANS, ADDONS, PAYMENT_METHODS,
   formatTZS, planById, type PlanId, type BillingCycle, type AddOn,
 } from "@/lib/billing-mock";
 
@@ -431,136 +432,76 @@ function PaymentGroup({ title, icon: Icon, items }: { title: string; icon: typeo
 /* ─────────────────────────── Admin revenue ─────────────────────────── */
 
 function AdminPanel() {
-  const [couponCode, setCouponCode] = useState("");
-  const [couponPct, setCouponPct] = useState(10);
-  const maxTrend = Math.max(...REVENUE_TREND.map((t) => t.mrrTZS));
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-revenue"],
+    queryFn: async () => {
+      const [payments, subs] = await Promise.all([fetchAdminPayments(), fetchAdminSubscriptions()]);
+      return { payments, subs };
+    },
+  });
+
+  const payments = data?.payments ?? [];
+  const subs = data?.subs ?? [];
+
+  const succeeded = payments.filter((p) => p.status === "succeeded" || p.status === "paid");
+  const collected = succeeded.reduce((a, p) => a + p.amount, 0);
+  const activeSubs = subs.reduce((a, s) => a + s.active, 0);
+  const last30 = succeeded.filter((p) => Date.now() - new Date(p.createdAt).getTime() < 30 * 86400000);
+  const last30Total = last30.reduce((a, p) => a + p.amount, 0);
 
   return (
     <section className="space-y-6">
+      <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
+        <span className="font-semibold">No payment provider is connected yet.</span>{" "}
+        <span className="text-muted-foreground">
+          Figures below come only from records already saved in the database. They stay at zero until a live
+          gateway (M-Pesa, Selcom, Airtel Money or a card processor) is configured.
+        </span>
+      </div>
+
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-        <StatCard label="MRR" value={formatTZS(REVENUE_KPI.mrrTZS)} delta={REVENUE_KPI.mrrDelta} icon={TrendingUp} tone="brand" />
-        <StatCard label="ARR" value={formatTZS(REVENUE_KPI.arrTZS)} icon={Building2} tone="gold" />
-        <StatCard label="Active subscribers" value={REVENUE_KPI.activeSubs} delta={REVENUE_KPI.activeSubsDelta} icon={Users} tone="success" />
-        <StatCard label="Churn" value={`${REVENUE_KPI.churnPct}%`} delta={REVENUE_KPI.churnDelta} icon={BadgePercent} tone="muted" />
+        <StatCard label="Collected (all time)" value={isLoading ? "…" : formatTZS(collected)} icon={TrendingUp} tone="brand" />
+        <StatCard label="Collected (last 30 days)" value={isLoading ? "…" : formatTZS(last30Total)} icon={Building2} tone="gold" />
+        <StatCard label="Active subscriptions" value={isLoading ? "…" : activeSubs} icon={Users} tone="success" />
+        <StatCard label="Payment records" value={isLoading ? "…" : payments.length} icon={Receipt} tone="muted" />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="ds-card p-5 lg:col-span-2">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="font-semibold">MRR trend</div>
-              <div className="text-xs text-muted-foreground">Last 6 months</div>
-            </div>
-            <TrendingUp className="h-5 w-5 text-primary" />
-          </div>
-          <div className="mt-6 flex h-40 items-end gap-3">
-            {REVENUE_TREND.map((t) => (
-              <div key={t.month} className="flex flex-1 flex-col items-center gap-2">
-                <div className="flex w-full flex-1 items-end">
-                  <div
-                    className="w-full rounded-t-xl bg-gradient-to-t from-primary/70 to-primary transition-all"
-                    style={{ height: `${(t.mrrTZS / maxTrend) * 100}%` }}
-                    title={formatTZS(t.mrrTZS)}
-                  />
-                </div>
-                <div className="text-[10px] font-medium text-muted-foreground">{t.month}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="ds-card p-5">
-          <div className="font-semibold">Revenue by plan</div>
+      <div className="ds-card p-5">
+        <div className="font-semibold">Subscriptions by plan</div>
+        {subs.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">No subscription records yet.</p>
+        ) : (
           <div className="mt-4 space-y-3">
-            {REVENUE_BY_PLAN.map((r) => (
-              <div key={r.plan}>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">{r.plan}</span>
-                  <span className="text-muted-foreground">{r.subs} subs · {formatTZS(r.mrrTZS)}</span>
-                </div>
-                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary"
-                    style={{ width: `${Math.min(100, (r.mrrTZS / REVENUE_KPI.mrrTZS) * 100)}%` }}
-                  />
-                </div>
+            {subs.map((s) => (
+              <div key={s.plan} className="flex items-center justify-between text-sm">
+                <span className="font-medium capitalize">{s.plan}</span>
+                <span className="text-muted-foreground">{s.active} active · {s.total} total</span>
               </div>
             ))}
           </div>
-        </div>
+        )}
       </div>
 
       <div className="ds-card p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="font-semibold">Promotions & coupons</div>
-            <div className="text-xs text-muted-foreground">Create discount codes for campaigns.</div>
-          </div>
-          <Tag className="h-5 w-5 text-muted-foreground" />
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Input
-            className="max-w-[200px]"
-            placeholder="COUPON CODE"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-          />
-          <Input
-            type="number"
-            className="max-w-[120px]"
-            value={couponPct}
-            onChange={(e) => setCouponPct(Number(e.target.value))}
-            min={1} max={100}
-          />
-          <Button
-            onClick={() => {
-              if (!couponCode) return toast.error("Enter a code");
-              toast.success(`Coupon ${couponCode} created (${couponPct}% off)`);
-              setCouponCode("");
-            }}
-          >
-            <Plus className="mr-1 h-4 w-4" /> Create coupon
-          </Button>
-        </div>
-        <div className="mt-5 divide-y divide-border/60 rounded-2xl border border-border/60">
-          {COUPONS.map((c) => (
-            <div key={c.code} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-              <div>
-                <div className="font-mono font-semibold">{c.code}</div>
-                <div className="text-xs text-muted-foreground">
-                  {c.discountPct}% off · {c.appliesTo === "all" ? "all plans" : c.appliesTo.join(", ")} · used {c.usage}/{c.cap}
+        <div className="font-semibold">Recent payments</div>
+        {payments.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">No payments have been recorded yet.</p>
+        ) : (
+          <div className="mt-4 divide-y divide-border/60 rounded-2xl border border-border/60">
+            {payments.slice(0, 10).map((p) => (
+              <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                <div>
+                  <div className="font-semibold">{formatTZS(p.amount)}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {p.provider} · {new Date(p.createdAt).toLocaleDateString("en-GB")}
+                    {p.reference ? ` · ${p.reference}` : ""}
+                  </div>
                 </div>
+                <Badge variant="outline" className="capitalize">{p.status}</Badge>
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className={c.active ? "border-emerald-500/30 text-emerald-700 dark:text-emerald-300" : ""}>
-                  {c.active ? "Active" : "Disabled"}
-                </Badge>
-                <Button variant="ghost" size="sm" onClick={() => toast(`${c.active ? "Paused" : "Resumed"} ${c.code}`)}>
-                  {c.active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => toast.success(`Deleted ${c.code}`)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="ds-card p-5">
-        <div className="font-semibold">Subscription controls</div>
-        <div className="mt-1 text-xs text-muted-foreground">Manually upgrade, downgrade, or suspend accounts.</div>
-        <div className="mt-4 grid gap-2 sm:grid-cols-3">
-          <Button variant="outline" onClick={() => toast.success("Upgrade queued")}>
-            <ArrowRight className="mr-1 h-4 w-4" /> Upgrade user
-          </Button>
-          <Button variant="outline" onClick={() => toast.success("Downgrade queued")}>
-            <ArrowRight className="mr-1 h-4 w-4 rotate-180" /> Downgrade user
-          </Button>
-          <Button variant="outline" className="text-destructive" onClick={() => toast.success("Subscription suspended")}>
-            <Pause className="mr-1 h-4 w-4" /> Suspend subscription
-          </Button>
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -16,8 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   KIND_META,
-  getPrefs, setPrefs, getProviders, setProviders, anyProviderConfigured,
-  type NotificationKind, type ChannelPrefs, type ProviderStatus,
+  getPrefs, setPrefs,
+  type NotificationKind, type ChannelPrefs,
 } from "@/lib/notifications-store";
 import {
   listNotificationsDb, markNotificationRead, markAllNotificationsRead,
@@ -346,7 +346,7 @@ function NotifList({ items, onRead, onDelete }: {
 
 }
 
-const PROVIDER_META: { id: keyof ProviderStatus; name: string; icon: React.ComponentType<{ className?: string }>; description: string }[] = [
+const PROVIDER_META: { id: string; name: string; icon: React.ComponentType<{ className?: string }>; description: string }[] = [
   { id: "sms", name: "SMS", icon: Smartphone, description: "OTP, viewing reminders, payment & deal alerts." },
   { id: "email", name: "Email", icon: MailCheck, description: "Welcome, invoices, verification status, weekly reports." },
   { id: "whatsapp", name: "WhatsApp", icon: MessageCircle, description: "Viewing confirmations, deal updates, messages, alerts." },
@@ -363,48 +363,40 @@ const CHANNEL_TOGGLES: { id: keyof ChannelPrefs; label: string; description: str
 ];
 
 function SettingsPanel() {
-  const providers = useLive<ProviderStatus>(getProviders, "spaces:notif-providers-changed");
   const prefs = useLive<ChannelPrefs>(getPrefs, "spaces:notif-prefs-changed");
-  const configured = anyProviderConfigured();
 
-  function toggleProvider(id: keyof ProviderStatus, v: boolean) {
-    setProviders({ ...providers, [id]: v });
-    toast.success(`${id.toUpperCase()} provider ${v ? "enabled" : "disabled"}`);
-  }
   function togglePref(id: keyof ChannelPrefs, v: boolean) {
     setPrefs({ ...prefs, [id]: v });
   }
 
   return (
     <div className="space-y-6">
-      {!configured && (
-        <div className="flex flex-col gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
-            <div>
-              <div className="font-semibold">Notification provider setup required</div>
-              <p className="text-sm text-foreground/75">Connect at least one provider to deliver SMS, email, WhatsApp or push notifications.</p>
-            </div>
-          </div>
-          <Button onClick={() => { setProviders({ sms: true, email: true, whatsapp: false, push: true }); toast.success("Preview providers configured"); }}>
-            <Settings2 className="mr-2 h-4 w-4" /> Configure providers
-          </Button>
+      <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-4">
+        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+        <div>
+          <div className="font-semibold">In-app notifications only</div>
+          <p className="text-sm text-foreground/75">
+            SMS, email, WhatsApp and push delivery are not connected yet. Those channels need an external
+            provider and credentials before SPACES can send anything outside the app.
+          </p>
         </div>
-      )}
+      </div>
 
       <section className="rounded-2xl border border-border/60 bg-background p-4 md:p-6">
-        <h2 className="font-display text-lg font-semibold">Delivery providers</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Enable the channels you want SPACES to send through.</p>
+        <h2 className="font-display text-lg font-semibold">Delivery channels</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Current delivery status for this account.</p>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {PROVIDER_META.map(({ id, name, icon: Icon, description }) => (
             <div key={id} className="flex items-start gap-3 rounded-xl border border-border/60 p-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground">
                 <Icon className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <div className="font-semibold">{name}</div>
-                  <Switch checked={providers[id]} onCheckedChange={(v) => toggleProvider(id, v)} />
+                  <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                    Not connected
+                  </span>
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
               </div>
