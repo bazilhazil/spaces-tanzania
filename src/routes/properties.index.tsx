@@ -386,44 +386,66 @@ function PropertiesPage() {
                   {[0, 1, 2, 3, 4, 5].map((i) => <SkeletonCard key={i} />)}
                 </div>
               ) : sorted.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border p-10 text-center md:p-16">
+                <div className="rounded-2xl border border-dashed border-border p-8 text-center md:p-16">
                   <h3 className="font-display text-lg font-semibold text-foreground">
-                    {t("discovery.noResultsTitle")}
+                    {t("discovery.noResultsLocation")}
                   </h3>
                   <p className="mt-2 text-sm text-muted-foreground">{t("discovery.noResultsBody")}</p>
                   <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
-                    <Button onClick={clearAll}>{t("discovery.clear")}</Button>
+                    <Button className="h-11" onClick={clearAll}>{t("discovery.clear")}</Button>
                     <Button
                       variant="outline"
-                      onClick={() => patch({ city: undefined, district: undefined, area: undefined })}
+                      className="h-11"
+                      onClick={() => {
+                        setQueryText("");
+                        patch({ q: undefined, city: undefined, district: undefined, area: undefined });
+                      }}
                     >
-                      {t("discovery.changeLocation")}
+                      {t("discovery.searchAnotherLocation")}
                     </Button>
-                  </div>
-                </div>
-              ) : mapView ? (
-                <div className="grid gap-4">
-                  <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border md:aspect-[16/9]">
-                    {mapped.length > 0 ? (
-                      <iframe
-                        title="Property map"
-                        loading="lazy"
-                        className="h-full w-full"
-                        src={`https://maps.google.com/maps?q=${mapped[0]!.latitude},${mapped[0]!.longitude}&z=12&output=embed`}
-                      />
-                    ) : (
-                      <div className="grid h-full place-items-center bg-muted/40 p-6 text-center text-sm text-muted-foreground">
-                        {t("discovery.mapEmpty")}
-                      </div>
+                    {(search.district || search.area) && (
+                      <Button
+                        variant="outline"
+                        className="h-11"
+                        onClick={() => patch({ district: undefined, area: undefined })}
+                      >
+                        {t("discovery.viewNearby")}
+                      </Button>
                     )}
-                  </div>
-                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                    {sorted.map((p) => <PropertyCard key={p.id} property={p} />)}
                   </div>
                 </div>
               ) : (
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                  {sorted.map((p) => <PropertyCard key={p.id} property={p} />)}
+                <div className="grid gap-4">
+                  {mapView && (
+                    <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border md:aspect-[16/9]">
+                      {mapped.length > 0 ? (
+                        <iframe
+                          title="Property map"
+                          loading="lazy"
+                          className="h-full w-full"
+                          src={`https://maps.google.com/maps?q=${mapped[0]!.latitude},${mapped[0]!.longitude}&z=12&output=embed`}
+                        />
+                      ) : (
+                        <div className="grid h-full place-items-center bg-muted/40 p-6 text-center text-sm text-muted-foreground">
+                          {t("discovery.mapEmpty")}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                    {page.map((p) => <PropertyCard key={p.id} property={p} />)}
+                  </div>
+                  {visible < sorted.length && (
+                    <div className="mt-2 flex justify-center">
+                      <Button
+                        variant="outline"
+                        className="h-11 rounded-xl px-8"
+                        onClick={() => setVisible((v) => v + PAGE_SIZE)}
+                      >
+                        {t("discovery.loadMore")}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
