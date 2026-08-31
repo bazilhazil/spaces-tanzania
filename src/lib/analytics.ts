@@ -11,7 +11,12 @@ export type AnalyticsEvent =
   | "contact_clicked"
   | "whatsapp_clicked"
   | "viewing_requested"
-  | "property_shared";
+  | "property_shared"
+  | "find_space_clicked"
+  | "list_space_clicked"
+  | "save_search_clicked"
+  | "signup_completed"
+  | "listing_published";
 
 type Payload = Record<string, string | number | boolean | undefined>;
 

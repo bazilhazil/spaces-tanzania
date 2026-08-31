@@ -1515,5 +1515,30 @@
       "saved": "Imehifadhiwa",
       "configHelp": "Mabadiliko yanahusu manunuzi mapya. Michango iliyopo inabaki na masharti yake."
     }
+  },
+  "convert": {
+    "findSpace": "Tafuta Nafasi",
+    "listSpace": "Tangaza Nafasi Yako",
+    "cantFind": "Hukupata unachotafuta?",
+    "saveThisSearch": "Hifadhi utafutaji huu",
+    "owner": {
+      "title": "Una nafasi ya kupangisha au kuuza?",
+      "body": "Tangaza nafasi yako kwenye SPACES na uungane na wanunuzi na wapangaji wanaovutiwa."
+    },
+    "trust": {
+      "verifiedSpaces": "Nafasi zilizothibitishwa",
+      "verifiedPeople": "Wamiliki na madalali waliothibitishwa",
+      "viewings": "Maombi ya kutembelea",
+      "secure": "Mfumo salama wa akaunti"
+    },
+    "benefits": {
+      "title": "Kwa nini utangaze SPACES",
+      "reach": "Fikia watu wengi zaidi wanaotafuta Tanzania",
+      "inquiries": "Pokea maswali moja kwa moja",
+      "viewings": "Simamia maombi ya kutembelea",
+      "leads": "Fuatilia wateja wako",
+      "manage": "Simamia tangazo lako wakati wowote",
+      "trust": "Jenga uaminifu kupitia uthibitisho"
+    }
   }
 }

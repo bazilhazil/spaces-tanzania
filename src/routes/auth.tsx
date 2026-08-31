@@ -11,6 +11,7 @@ import { OtpField } from "@/components/ds/otp-field";
 import { Brand } from "@/components/brand";
 import { GoogleIcon } from "@/components/auth-gate-dialog";
 import { redirectPathForRole, type AppRole } from "@/hooks/use-auth";
+import { track } from "@/lib/analytics";
 import { toast } from "sonner";
 import { friendlyError, errorMessage } from "@/lib/errors";
 import { normalizeTanzanianPhoneNumber, maskTzPhone } from "@/lib/phone";
@@ -208,6 +209,7 @@ function EmailForm({
           },
         });
         if (error) return toast.error(friendlyError(error));
+        track("signup_completed", { method: "email" });
         toast.success(t("auth.page.accountCreated"));
         const to = await resolveRedirect(data.user?.id, redirect);
         navigate({ to, replace: true });

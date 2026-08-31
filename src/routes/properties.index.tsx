@@ -36,6 +36,8 @@ import {
 } from "@/lib/location-facets";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
+import { track } from "@/lib/analytics";
+import { OwnerCta } from "@/components/convert/owner-cta";
 
 const searchSchema = z.object({
   type: fallback(z.string().optional(), undefined),
@@ -481,12 +483,27 @@ function PropertiesPage() {
                       </Button>
                     </div>
                   )}
+                  <div className="mt-2 flex flex-col items-center justify-between gap-3 rounded-2xl border border-border/70 bg-secondary/40 px-5 py-4 sm:flex-row">
+                    <p className="text-sm text-muted-foreground">{t("convert.cantFind")}</p>
+                    <Button
+                      variant="outline"
+                      className="h-10 gap-1.5 rounded-xl"
+                      onClick={() => {
+                        track("save_search_clicked", { source: "results" });
+                        if (user) setSaveSearchOpen(true);
+                        else setAuthGate(true);
+                      }}
+                    >
+                      <BookmarkPlus className="h-4 w-4" /> {t("convert.saveThisSearch")}
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </section>
       </main>
+      <OwnerCta source="search_results" />
       <SiteFooter />
       <SaveSearchDialog
         open={saveSearchOpen}
