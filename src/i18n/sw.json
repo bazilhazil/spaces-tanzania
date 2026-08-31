@@ -451,6 +451,32 @@
       "agentPerformance": "Utendaji wa Wakala",
       "businessIntelligence": "Uchambuzi wa Biashara",
       "admin": "Kituo cha Usimamizi"
+    },
+    "home": {
+      "activeSpaces": "Nafasi Hai",
+      "assignedSpaces": "Nafasi Ulizopewa",
+      "newLeads": "Miongozo Mipya",
+      "viewingRequests": "Maombi ya Kutazama",
+      "activeDeals": "Mikataba Hai",
+      "attention": "Zinahitaji Uangalizi Wako",
+      "attentionNone": "Hakuna kinachohitaji uangalizi wako sasa.",
+      "open": "Fungua",
+      "need": {
+        "lead": "Mwongozo mpya unasubiri jibu",
+        "viewing": "Ombi la kutazama linasubiri idhini",
+        "deal": "Mkataba unasubiri kusasishwa",
+        "verification": "Uthibitisho unahitaji maelezo zaidi",
+        "draft": "Rasimu ya mali haijawasilishwa"
+      },
+      "listSpace": "Tangaza Nafasi",
+      "viewLeads": "Ona Miongozo",
+      "manage": "Simamia",
+      "viewAll": "Ona Zote",
+      "recentActivity": "Shughuli za Hivi Karibuni",
+      "activityNone": "Hakuna shughuli za hivi karibuni.",
+      "emptySpacesTitle": "Anza kwa kutangaza Nafasi yako ya kwanza.",
+      "noLeads": "Hakuna miongozo mipya.",
+      "noViewings": "Hakuna maombi ya kutazama."
     }
   },
   "profileCard": {

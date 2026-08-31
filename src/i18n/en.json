@@ -451,6 +451,32 @@
       "agentPerformance": "Agent Performance",
       "businessIntelligence": "Business Intelligence",
       "admin": "Admin Control Center"
+    },
+    "home": {
+      "activeSpaces": "Active Spaces",
+      "assignedSpaces": "Assigned Spaces",
+      "newLeads": "New Leads",
+      "viewingRequests": "Viewing Requests",
+      "activeDeals": "Active Deals",
+      "attention": "Needs Your Attention",
+      "attentionNone": "Nothing needs your attention right now.",
+      "open": "Open",
+      "need": {
+        "lead": "New lead waiting for a response",
+        "viewing": "Viewing request waiting for approval",
+        "deal": "Deal waiting for an update",
+        "verification": "Verification needs more information",
+        "draft": "Property draft not submitted"
+      },
+      "listSpace": "List a Space",
+      "viewLeads": "View Leads",
+      "manage": "Manage",
+      "viewAll": "View All",
+      "recentActivity": "Recent Activity",
+      "activityNone": "No recent activity.",
+      "emptySpacesTitle": "Start by listing your first Space.",
+      "noLeads": "No new leads.",
+      "noViewings": "No viewing requests."
     }
   },
   "profileCard": {
