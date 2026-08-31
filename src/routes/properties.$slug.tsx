@@ -309,7 +309,7 @@ function PropertyDetailPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
-      <main className="flex-1">
+      <main className="flex-1 pb-24 md:pb-0">
         <div className="container-page pt-6">
           <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-muted-foreground">
             <Link to="/" className="hover:text-primary">{t("properties.breadcrumbHome")}</Link>
