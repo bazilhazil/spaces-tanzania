@@ -461,6 +461,7 @@ function UploadWizardPage() {
 
       <main className="mx-auto max-w-2xl px-4 pb-36 pt-6 sm:pt-10">
         <div key={step} className="animate-fade-in">
+          {step === 1 && !isEdit && <ListingBenefits />}
           {step === 1 && <StepType value={draft.property_type} onChange={(v) => setField("property_type", v)} />}
           {step === 2 && (
             <div className="space-y-4">
@@ -1096,6 +1097,26 @@ function ListingLimitScreen() {
           </Button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ListingBenefits() {
+  const { t } = useI18n();
+  const items = [
+    "reach", "inquiries", "viewings", "leads", "manage", "trust",
+  ] as const;
+  return (
+    <div className="mb-6 rounded-2xl border border-border/60 bg-secondary/40 p-4">
+      <p className="text-sm font-semibold text-foreground">{t("convert.benefits.title")}</p>
+      <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
+        {items.map((k) => (
+          <li key={k} className="flex items-start gap-2 text-sm text-muted-foreground">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            {t(`convert.benefits.${k}`)}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
