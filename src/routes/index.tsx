@@ -159,7 +159,23 @@ function Hero() {
         <p className="mt-4 max-w-xl text-base text-white/85 md:text-lg">
           {t("home.hero.subtitle")}
         </p>
-        <div className="mt-8 max-w-4xl">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Link to="/properties" onClick={() => track("find_space_clicked", { source: "hero" })}>
+            <Button size="lg" className="h-12 w-full gap-2 bg-gold text-gold-foreground hover:bg-gold/90 sm:w-auto">
+              <SearchIcon className="h-4 w-4" /> {t("convert.findSpace")}
+            </Button>
+          </Link>
+          <Link to="/upload" onClick={() => track("list_space_clicked", { source: "hero" })}>
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-12 w-full gap-2 border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white sm:w-auto"
+            >
+              <Upload className="h-4 w-4" /> {t("convert.listSpace")}
+            </Button>
+          </Link>
+        </div>
+        <div className="mt-6 max-w-4xl">
           <HeroSearch />
         </div>
         <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-white/80">
