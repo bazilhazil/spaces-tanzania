@@ -248,6 +248,10 @@ export async function uploadDocument(
   kind: DealDocumentKind,
   actorId?: string | null,
 ) {
+  // uploaded_by must match the signed-in user (RLS blocks uploader spoofing).
+  const { data: auth } = await supabase.auth.getUser();
+  const uploaderId = auth.user?.id ?? actorId ?? null;
+  if (!uploaderId) throw new Error("You need to be signed in to upload documents.");
   const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
   const path = `${dealId}/${Date.now()}_${safeName}`;
   const up = await supabase.storage.from(BUCKET).upload(path, file, {
@@ -262,7 +266,7 @@ export async function uploadDocument(
     storage_path: path,
     size: file.size,
     mime_type: file.type || null,
-    uploaded_by: actorId ?? null,
+    uploaded_by: uploaderId,
   } as never);
   if (error) throw error;
   await supabase.from("deal_activities").insert({
@@ -270,7 +274,7 @@ export async function uploadDocument(
     kind: "document_uploaded",
     label: `${DOC_LABEL[kind]} uploaded`,
     detail: file.name,
-    actor_id: actorId ?? null,
+    actor_id: uploaderId,
   } as never);
   await supabase.from("deals").update({ last_activity_at: new Date().toISOString() }).eq("id", dealId);
 }
