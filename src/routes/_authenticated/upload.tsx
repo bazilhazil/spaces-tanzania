@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { loadDraft, saveDraft, clearDraft, type WizardDraft } from "@/lib/property-draft";
 import { fetchPlanUsage, listingLimitReached } from "@/lib/monetization-db";
 import { useI18n } from "@/hooks/use-i18n";
+import { track } from "@/lib/analytics";
 
 import { compressImageFile, uploadMediaFile } from "@/lib/property-media";
 import { watermarkImage } from "@/lib/image-watermark";
@@ -405,6 +406,7 @@ function UploadWizardPage() {
         toast.success("Property updated");
         navigate({ to: "/dashboard/properties" });
       } else {
+        track("listing_published", { status: mode === "publish" ? "live" : "draft" });
         setSuccess({ status: mode === "publish" ? "live" : "draft", id: propertyId });
       }
     } catch (e: any) {
