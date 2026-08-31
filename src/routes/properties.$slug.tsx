@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { getListingSeo } from "@/lib/public-listings.functions";
 import { canonicalPropertyUrl, idFromSlug, propertySlug, SITE_URL } from "@/lib/seo";
 import { track } from "@/lib/analytics";
+import { OwnerCta } from "@/components/convert/owner-cta";
 
 export const Route = createFileRoute("/properties/$slug")({
   loader: async ({ params }) => {
@@ -648,8 +649,26 @@ function PropertyDetailPage() {
             </div>
           </section>
         )}
+        <OwnerCta source="property_detail" />
       </main>
       <SiteFooter />
+
+      {/* Mobile sticky actions — kept slim, content has matching bottom padding */}
+      {!unavailable && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-3 py-2 backdrop-blur md:hidden">
+          <div className="grid grid-cols-3 gap-2">
+            <Button size="sm" className="h-11 gap-1.5" onClick={() => requireAuth(() => setInquiryOpen(true))}>
+              <Send className="h-4 w-4" /> {t("inquiry.message")}
+            </Button>
+            <Button size="sm" className="h-11 gap-1.5 bg-success text-success-foreground hover:bg-success/90" onClick={openWhatsApp}>
+              <MessageCircle className="h-4 w-4" /> {t("inquiry.whatsapp")}
+            </Button>
+            <Button size="sm" variant="outline" className="h-11 gap-1.5" onClick={() => requireAuth(() => setViewingOpen(true))}>
+              <Calendar className="h-4 w-4" /> {t("inquiry.requestViewing")}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Fullscreen lightbox */}
       {lightbox && (
