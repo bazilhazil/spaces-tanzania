@@ -523,9 +523,9 @@ function CTA() {
             </p>
           </div>
           <div className="flex flex-col gap-3 md:items-end">
-            <Link to="/auth">
+            <Link to="/upload" onClick={() => track("list_space_clicked", { source: "home_cta" })}>
               <Button size="lg" className="bg-gold text-gold-foreground hover:bg-gold/90">
-                <HomeIcon className="mr-2 h-4 w-4" /> {t("home.cta.upload")}
+                <HomeIcon className="mr-2 h-4 w-4" /> {t("convert.listSpace")}
               </Button>
             </Link>
             <Link to="/auth">
