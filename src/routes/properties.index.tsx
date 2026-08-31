@@ -36,6 +36,8 @@ import {
 } from "@/lib/location-facets";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
+import { track } from "@/lib/analytics";
+import { OwnerCta } from "@/components/convert/owner-cta";
 
 const searchSchema = z.object({
   type: fallback(z.string().optional(), undefined),
@@ -501,6 +503,7 @@ function PropertiesPage() {
           </div>
         </section>
       </main>
+      <OwnerCta source="search_results" />
       <SiteFooter />
       <SaveSearchDialog
         open={saveSearchOpen}
