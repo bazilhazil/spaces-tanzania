@@ -2057,34 +2057,6 @@ export type Database = {
           verified_identity: boolean | null
           verified_owner: boolean | null
         }
-        Insert: {
-          agency_name?: string | null
-          avatar_url?: string | null
-          bio?: string | null
-          business_name?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          location?: string | null
-          verified_agent?: boolean | null
-          verified_business?: boolean | null
-          verified_identity?: boolean | null
-          verified_owner?: boolean | null
-        }
-        Update: {
-          agency_name?: string | null
-          avatar_url?: string | null
-          bio?: string | null
-          business_name?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          location?: string | null
-          verified_agent?: boolean | null
-          verified_business?: boolean | null
-          verified_identity?: boolean | null
-          verified_owner?: boolean | null
-        }
         Relationships: []
       }
       public_properties: {
