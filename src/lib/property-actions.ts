@@ -64,6 +64,11 @@ export async function fetchPropertyMetricsBatch(
   for (const id of propertyIds) out[id] = EMPTY_METRICS();
   if (!propertyIds.length) return out;
 
+  // These tables are readable only by signed-in owners/agents; skip entirely for
+  // signed-out visitors so we don't fire permission-denied queries.
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session) return out;
+
   const [viewsRes, favsRes, booksRes, convosRes, leadsRes, dealsRes] = await Promise.all([
     supabase.from("property_views").select("property_id").in("property_id", propertyIds),
     supabase.from("favorites").select("property_id").in("property_id", propertyIds),
