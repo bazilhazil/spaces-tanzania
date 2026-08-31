@@ -119,7 +119,8 @@ async function decorate(rows: any[]): Promise<Review[]> {
 
   const [profiles, props] = await Promise.all([
     userIds.length
-      ? supabase.from("profiles").select("id, full_name, avatar_url").in("id", userIds)
+      ? // public_profiles is the anon-readable projection of profiles
+        supabase.from("public_profiles").select("id, full_name, avatar_url").in("id", userIds)
       : Promise.resolve({ data: [] as any[] }),
     propIds.length
       ? supabase.from("properties").select("id, title").in("id", propIds)
