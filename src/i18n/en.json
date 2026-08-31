@@ -1515,5 +1515,30 @@
       "saved": "Saved",
       "configHelp": "Changes apply to new purchases. Existing subscriptions keep the terms they were bought on."
     }
+  },
+  "convert": {
+    "findSpace": "Find a Space",
+    "listSpace": "List Your Space",
+    "cantFind": "Can't find what you're looking for?",
+    "saveThisSearch": "Save this search",
+    "owner": {
+      "title": "Have a Space to Rent or Sell?",
+      "body": "List your property on SPACES and connect with interested buyers and renters."
+    },
+    "trust": {
+      "verifiedSpaces": "Verified Spaces",
+      "verifiedPeople": "Verified owners & agents",
+      "viewings": "Viewing requests",
+      "secure": "Secure account system"
+    },
+    "benefits": {
+      "title": "Why list on SPACES",
+      "reach": "Reach more people searching in Tanzania",
+      "inquiries": "Receive inquiries directly",
+      "viewings": "Manage viewing requests",
+      "leads": "Track your leads",
+      "manage": "Manage your listing anytime",
+      "trust": "Build trust through verification"
+    }
   }
 }
