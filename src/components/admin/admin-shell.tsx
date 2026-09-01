@@ -32,12 +32,13 @@ const NAV: { group: string; items: Item[] }[] = [
   {
     group: "Operations",
     items: [
-      { label: "Properties", section: "properties", icon: Home, badge: "27" },
+      { label: "Properties", section: "properties", icon: Home },
+      { label: "Inquiries", section: "leads", icon: MessageSquare },
+      { label: "Viewings", section: "viewings", icon: Calendar },
+      { label: "Deals", section: "deals", icon: Briefcase },
       { label: "Verification", section: "verification", icon: ShieldCheck },
       { label: "Safety & Reports", section: "reports", icon: Flag },
       { label: "Reviews", section: "reviews", icon: Star },
-      { label: "Bookings", section: "bookings", icon: Calendar },
-      { label: "Messages", section: "messages", icon: MessageSquare },
       { label: "Support", section: "support", icon: LifeBuoy },
     ],
   },
@@ -51,6 +52,7 @@ const NAV: { group: string; items: Item[] }[] = [
   {
     group: "Revenue",
     items: [
+      { label: "Revenue", section: "revenue", icon: DollarSign },
       { label: "Payments", section: "payments", icon: CreditCard },
       { label: "Subscriptions", section: "subscriptions", icon: Receipt },
     ],
