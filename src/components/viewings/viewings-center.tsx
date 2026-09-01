@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
+import { NeedHelp } from "@/components/support/need-help";
 import {
   fetchIncomingViewings, fetchMyViewings, fetchAllViewings, setViewingStatus,
   suggestNewTime, acceptSuggestedTime,
@@ -146,6 +147,10 @@ export function ViewingsCenter({ role = "buyer", propertyId = null }: { role?: R
           </TabsContent>
         )}
       </Tabs>
+
+      <div className="flex justify-end">
+        <NeedHelp topic="viewings" />
+      </div>
 
       <RescheduleDialog
         viewing={reschedule}

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { StatCard } from "@/components/ds/stat-card";
 import { useAuth } from "@/hooks/use-auth";
+import { NeedHelp } from "@/components/support/need-help";
 import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,6 +74,10 @@ export function BillingCenter() {
       {tab === "billing" && <BillingPanel />}
       {tab === "payments" && <PaymentMethodsPanel />}
       {tab === "admin" && isAdmin && <AdminPanel />}
+
+      <div className="flex justify-end">
+        <NeedHelp topic="payments" />
+      </div>
 
       <CheckoutDialog
         open={request !== null}
