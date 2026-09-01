@@ -11,6 +11,7 @@ import {
 import { ReviewsPanel } from "@/components/admin/reviews-panel";
 import { SafetyPanel } from "@/components/admin/safety-panel";
 import { SupportPanel } from "@/components/admin/support-panel";
+import { DataBackupPanel } from "@/components/admin/data-backup-panel";
 
 const PANELS: Record<string, React.ComponentType> = {
   properties: PropertiesPanel,
@@ -34,6 +35,7 @@ const PANELS: Record<string, React.ComponentType> = {
   marketing: MarketingPanel,
   notifications: NotificationsPanel,
   settings: SettingsPanel,
+  data: DataBackupPanel,
   superadmin: SuperAdminPanel,
 };
 

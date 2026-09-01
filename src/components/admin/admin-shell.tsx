@@ -69,6 +69,7 @@ const NAV: { group: string; items: Item[] }[] = [
     group: "System",
     items: [
       { label: "System Settings", section: "settings", icon: Settings },
+      { label: "Data & Backup", section: "data", icon: Database },
       { label: "Super Admin", section: "superadmin", icon: ShieldAlert },
     ],
   },

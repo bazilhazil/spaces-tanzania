@@ -117,7 +117,7 @@ export function PropertiesManager() {
       const cols =
         "id,owner_id,title,region,district,ward,price,currency,status,view_count,created_at,listing_type,property_type,verified,featured";
       const [ownedRes, assignedRes] = await Promise.all([
-        supabase.from("properties").select(cols).eq("owner_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("properties").select(cols).eq("owner_id", user.id).is("deleted_at", null).order("created_at", { ascending: false }),
         assignedIds.length
           ? supabase.from("properties").select(cols).in("id", assignedIds).order("created_at", { ascending: false })
           : Promise.resolve({ data: [] as any[] }),

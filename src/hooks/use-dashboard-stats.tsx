@@ -59,7 +59,7 @@ export function useDashboardStats() {
     const [leads, deals, ownedRes, assignedRes, favRes, bookRes, convos] = await Promise.all([
       fetchCrmLeads().catch(() => []),
       fetchDeals().catch(() => []),
-      supabase.from("properties").select("id,status,view_count").eq("owner_id", user.id),
+      supabase.from("properties").select("id,status,view_count").eq("owner_id", user.id).is("deleted_at", null),
       assignedIds.length
         ? supabase.from("properties").select("id,status,view_count").in("id", assignedIds)
         : Promise.resolve({ data: [] as any[] } as never),

@@ -88,6 +88,7 @@ export function useDashboardHome(mode: "owner" | "agent"): DashboardHome {
             .from("properties")
             .select("id,title,region,district,price,currency,status,view_count,updated_at")
             .eq("owner_id", user.id)
+            .is("deleted_at", null)
             .order("updated_at", { ascending: false })
             .limit(6),
       supabase
