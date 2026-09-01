@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Users, UserCheck, ShieldCheck, Calendar, MessageSquare,
   CreditCard, Receipt, Flag, LifeBuoy, Megaphone, Bell, BarChart3, FileClock,
-  Settings, ShieldAlert, LogOut, Menu, X, Search, Command, Star,
+  Settings, ShieldAlert, LogOut, Menu, X, Search, Command, Star, Briefcase, DollarSign,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminSearchDialog } from "@/components/admin/admin-search-dialog";
 
 type Item = {
   label: string;
@@ -32,12 +33,13 @@ const NAV: { group: string; items: Item[] }[] = [
   {
     group: "Operations",
     items: [
-      { label: "Properties", section: "properties", icon: Home, badge: "27" },
+      { label: "Properties", section: "properties", icon: Home },
+      { label: "Inquiries", section: "leads", icon: MessageSquare },
+      { label: "Viewings", section: "viewings", icon: Calendar },
+      { label: "Deals", section: "deals", icon: Briefcase },
       { label: "Verification", section: "verification", icon: ShieldCheck },
       { label: "Safety & Reports", section: "reports", icon: Flag },
       { label: "Reviews", section: "reviews", icon: Star },
-      { label: "Bookings", section: "bookings", icon: Calendar },
-      { label: "Messages", section: "messages", icon: MessageSquare },
       { label: "Support", section: "support", icon: LifeBuoy },
     ],
   },
@@ -51,6 +53,7 @@ const NAV: { group: string; items: Item[] }[] = [
   {
     group: "Revenue",
     items: [
+      { label: "Revenue", section: "revenue", icon: DollarSign },
       { label: "Payments", section: "payments", icon: CreditCard },
       { label: "Subscriptions", section: "subscriptions", icon: Receipt },
     ],
@@ -80,6 +83,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [pendingVerifications, setPendingVerifications] = useState(0);
 
   const isSuperAdmin = roles.includes("super_admin");
@@ -158,13 +162,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
 
           <div className="border-b border-border/60 p-3">
-            <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => { setOpen(false); setSearchOpen(true); }}
+              className="h-auto w-full justify-start gap-2 rounded-xl border border-border/60 bg-secondary/40 px-3 py-2 text-sm font-normal text-muted-foreground transition-colors hover:bg-secondary hover:text-muted-foreground"
+            >
               <Search className="h-4 w-4" />
-              <span className="flex-1">Search anything…</span>
+              <span className="flex-1 text-left">Search users, spaces, inquiries…</span>
               <kbd className="hidden items-center gap-1 rounded border border-border/60 bg-background px-1.5 py-0.5 text-[10px] font-medium md:inline-flex">
                 <Command className="h-2.5 w-2.5" /> K
               </kbd>
-            </div>
+            </Button>
           </div>
 
           <nav className="flex-1 space-y-4 overflow-y-auto p-3">
@@ -219,6 +228,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         {open && <div onClick={() => setOpen(false)} className="fixed inset-0 z-20 bg-black/40 lg:hidden" />}
 
         <main className="min-w-0 flex-1 p-4 md:p-8">{children}</main>
+      <AdminSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
       </div>
     </div>
   );

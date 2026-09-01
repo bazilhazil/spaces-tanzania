@@ -2,9 +2,12 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import {
   PropertiesPanel, UsersPanel, AgentsPanel, VerificationPanel,
   BookingsPanel, MessagesPanel, SupportPanel, PaymentsPanel, SubscriptionsPanel,
-  AnalyticsPanel, AuditPanel, MarketingPanel, NotificationsPanel, SettingsPanel,
+  AnalyticsPanel, MarketingPanel, NotificationsPanel, SettingsPanel,
   SuperAdminPanel,
 } from "@/components/admin/panels";
+import {
+  LeadOpsPanel, ViewingOpsPanel, DealOpsPanel, RevenueOpsPanel, ActivityLogPanel,
+} from "@/components/admin/ops-panels";
 import { ReviewsPanel } from "@/components/admin/reviews-panel";
 import { SafetyPanel } from "@/components/admin/safety-panel";
 
@@ -16,13 +19,17 @@ const PANELS: Record<string, React.ComponentType> = {
   reports: SafetyPanel,
   safety: SafetyPanel,
   reviews: ReviewsPanel,
+  leads: LeadOpsPanel,
+  viewings: ViewingOpsPanel,
+  deals: DealOpsPanel,
+  revenue: RevenueOpsPanel,
   bookings: BookingsPanel,
   messages: MessagesPanel,
   support: SupportPanel,
   payments: PaymentsPanel,
   subscriptions: SubscriptionsPanel,
   analytics: AnalyticsPanel,
-  audit: AuditPanel,
+  audit: ActivityLogPanel,
   marketing: MarketingPanel,
   notifications: NotificationsPanel,
   settings: SettingsPanel,
