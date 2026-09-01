@@ -25,6 +25,8 @@ export const Route = createFileRoute("/auth")({
     mode: s.mode === "signup" ? "signup" : "signin",
   }),
   component: AuthPage,
+  // Keep sign-in usable even if something inside the page throws.
+  errorComponent: () => <AuthPage />,
   head: () => ({
     meta: [
       { title: "Sign in to SPACES - Tanzania's premium property marketplace" },
