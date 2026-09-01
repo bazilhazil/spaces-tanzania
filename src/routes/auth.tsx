@@ -330,9 +330,11 @@ function recordSend(phone: string) {
 function PhoneForm({
   redirect,
   navigate,
+  onUseEmail,
 }: {
   redirect?: string;
   navigate: ReturnType<typeof useNavigate>;
+  onUseEmail?: () => void;
 }) {
   const { t } = useI18n();
   const [phone, setPhone] = useState("");
