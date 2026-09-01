@@ -1025,7 +1025,7 @@ async function handleCardAction(
       break;
     }
     case "delete":
-      setConfirmDelete({ ids: [p.id], label: p.title });
+      toast.info("Use the confirmation dialog to remove this Space.");
       break;
     case "share":
       if (navigator.share) {
