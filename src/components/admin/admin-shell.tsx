@@ -227,6 +227,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         {open && <div onClick={() => setOpen(false)} className="fixed inset-0 z-20 bg-black/40 lg:hidden" />}
 
         <main className="min-w-0 flex-1 p-4 md:p-8">{children}</main>
+      <AdminSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
       </div>
     </div>
   );
