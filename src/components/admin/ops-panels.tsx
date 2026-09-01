@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Users, Home, MessageSquare, Calendar, Briefcase, ShieldCheck, Flag, DollarSign,
-  RefreshCw, ArrowRight, FileClock, AlertTriangle, CheckCircle2, Search,
+  RefreshCw, ArrowRight, FileClock, AlertTriangle, CheckCircle2, Search, LifeBuoy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ import {
   type RevenueBreakdown, type AdminActionLog, type AgentOption,
   type LeadOpsFilter, type ViewingOpsFilter, type DealOpsFilter,
 } from "@/lib/admin-ops";
+import { fetchSupportStats, type SupportStats } from "@/lib/support-db";
 
 // ------------------------------------------------------------- helpers
 
@@ -118,6 +119,7 @@ export function AdminHomePanel() {
   const { t } = useI18n();
   const { data: today, loading, reload } = useLive<AdminToday | null>(fetchAdminToday, null);
   const { data: attention, loading: loadingAttention, reload: reloadAttention } = useLive<AttentionItem[]>(fetchNeedsAttention, []);
+  const { data: support, reload: reloadSupport } = useLive<SupportStats | null>(fetchSupportStats, null);
 
   const cards = today
     ? [
@@ -129,6 +131,14 @@ export function AdminHomePanel() {
         { label: t("admin.ops.pendingVerifications"), value: nf.format(today.pendingVerifications), icon: ShieldCheck, tone: "gold" as const },
         { label: t("admin.ops.openReports"), value: nf.format(today.openReports), icon: Flag, tone: "danger" as const },
         { label: t("admin.ops.revenueToday"), value: money(today.revenueToday, today.currency), icon: DollarSign, tone: "success" as const },
+        ...(support
+          ? [
+              { label: t("support.stats.open"), value: nf.format(support.open), icon: LifeBuoy, tone: "brand" as const },
+              { label: t("support.stats.high"), value: nf.format(support.highPriority), icon: LifeBuoy, tone: "danger" as const },
+              { label: t("support.stats.waiting"), value: nf.format(support.waitingUser), icon: LifeBuoy, tone: "gold" as const },
+              { label: t("support.stats.resolvedToday"), value: nf.format(support.resolvedToday), icon: LifeBuoy, tone: "success" as const },
+            ]
+          : []),
       ]
     : [];
 
@@ -139,7 +149,7 @@ export function AdminHomePanel() {
         title={t("admin.ops.title")}
         subtitle={t("admin.ops.sub")}
         actions={
-          <Button size="sm" className="gap-2" onClick={() => { reload(); reloadAttention(); }}>
+          <Button size="sm" className="gap-2" onClick={() => { reload(); reloadAttention(); reloadSupport(); }}>
             <RefreshCw className="h-4 w-4" /> {t("admin.action.refresh")}
           </Button>
         }
