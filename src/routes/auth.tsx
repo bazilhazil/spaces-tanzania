@@ -368,21 +368,29 @@ function PhoneForm({
   }
 
   async function send(target: string) {
+    if (smsUnavailable) return false;
     if (!canSend(target)) {
       toast.error(errorMessage("otpAttempts"));
       return false;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ phone: target });
+    let error: unknown = null;
+    try {
+      ({ error } = await supabase.auth.signInWithOtp({ phone: target }));
+    } catch (err) {
+      error = err;
+    }
     setLoading(false);
     if (error) {
-      if (import.meta.env.DEV) {
-        console.error("[auth/phone] OTP request failed", {
-          code: (error as { code?: string }).code,
-          status: error.status,
-        });
+      const code = (error as { code?: string }).code ?? "";
+      const msg = (error as { message?: string }).message ?? "";
+      if (code === "phone_provider_disabled" || /provider.*disabled|sms/i.test(msg)) {
+        // Missing SMS configuration is an expected state — keep the UI usable.
+        setSmsUnavailable(true);
+        setStep("phone");
+        return false;
       }
-      toast.error(friendlyError(error, "otpSendFailed"));
+      toast.error(friendlyError(error as never, "otpSendFailed"));
       return false;
     }
     recordSend(target);
