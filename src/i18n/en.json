@@ -352,6 +352,8 @@
       "changeNumber": "Change number",
       "phonePlaceholder": "0712 345 678",
       "smsNote": "We'll text you a one-time code. Standard SMS rates may apply.",
+      "smsUnavailable": "Phone verification is temporarily unavailable. Please use email login or try again later.",
+      "useEmailInstead": "Use Email Instead",
       "sendingCode": "Sending code...",
       "sendCode": "Send code",
       "continueGoogle": "Continue with Google",

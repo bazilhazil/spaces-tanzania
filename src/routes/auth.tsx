@@ -25,6 +25,8 @@ export const Route = createFileRoute("/auth")({
     mode: s.mode === "signup" ? "signup" : "signin",
   }),
   component: AuthPage,
+  // Keep sign-in usable even if something inside the page throws.
+  errorComponent: () => <AuthPage />,
   head: () => ({
     meta: [
       { title: "Sign in to SPACES - Tanzania's premium property marketplace" },
@@ -48,6 +50,7 @@ function AuthPage() {
   const { t } = useI18n();
   const search = useSearch({ from: "/auth" });
   const [mode, setMode] = useState<"signin" | "signup">(search.mode ?? "signin");
+  const [tab, setTab] = useState<"email" | "phone" | "google">("email");
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#05070d] text-white">
@@ -133,7 +136,7 @@ function AuthPage() {
                   ))}
                 </div>
 
-                <Tabs defaultValue="email" className="w-full">
+                <Tabs value={tab} onValueChange={(v) => setTab(v as "email" | "phone" | "google")} className="w-full">
                   <TabsList className="grid w-full grid-cols-3 bg-white/5 text-white/70">
                     <TabsTrigger value="email" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">{t("auth.page.tabEmail")}</TabsTrigger>
                     <TabsTrigger value="phone" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">{t("auth.page.tabPhone")}</TabsTrigger>
@@ -144,7 +147,7 @@ function AuthPage() {
                     <EmailForm mode={mode} redirect={search.redirect} navigate={navigate} />
                   </TabsContent>
                   <TabsContent value="phone" className="mt-5">
-                    <PhoneForm redirect={search.redirect} navigate={navigate} />
+                    <PhoneForm redirect={search.redirect} navigate={navigate} onUseEmail={() => setTab("email")} />
                   </TabsContent>
                   <TabsContent value="google" className="mt-5">
                     <GoogleContinue redirect={search.redirect} />
@@ -329,9 +332,11 @@ function recordSend(phone: string) {
 function PhoneForm({
   redirect,
   navigate,
+  onUseEmail,
 }: {
   redirect?: string;
   navigate: ReturnType<typeof useNavigate>;
+  onUseEmail?: () => void;
 }) {
   const { t } = useI18n();
   const [phone, setPhone] = useState("");
@@ -342,6 +347,8 @@ function PhoneForm({
   const [cooldown, setCooldown] = useState(0);
   const [expiresIn, setExpiresIn] = useState(0);
   const [attempts, setAttempts] = useState(0);
+  // Set when the backend reports the SMS provider is not configured.
+  const [smsUnavailable, setSmsUnavailable] = useState(false);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -363,21 +370,29 @@ function PhoneForm({
   }
 
   async function send(target: string) {
+    if (smsUnavailable) return false;
     if (!canSend(target)) {
       toast.error(errorMessage("otpAttempts"));
       return false;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ phone: target });
+    let error: unknown = null;
+    try {
+      ({ error } = await supabase.auth.signInWithOtp({ phone: target }));
+    } catch (err) {
+      error = err;
+    }
     setLoading(false);
     if (error) {
-      if (import.meta.env.DEV) {
-        console.error("[auth/phone] OTP request failed", {
-          code: (error as { code?: string }).code,
-          status: error.status,
-        });
+      const code = (error as { code?: string }).code ?? "";
+      const msg = (error as { message?: string }).message ?? "";
+      if (code === "phone_provider_disabled" || /provider.*disabled|sms/i.test(msg)) {
+        // Missing SMS configuration is an expected state — keep the UI usable.
+        setSmsUnavailable(true);
+        setStep("phone");
+        return false;
       }
-      toast.error(friendlyError(error, "otpSendFailed"));
+      toast.error(friendlyError(error as never, "otpSendFailed"));
       return false;
     }
     recordSend(target);
@@ -404,9 +419,15 @@ function PhoneForm({
     if (expiresIn <= 0) return toast.error(errorMessage("otpExpired"));
     if (attempts >= MAX_ATTEMPTS) return toast.error(errorMessage("otpAttempts"));
     setLoading(true);
-    const { data, error } = await supabase.auth.verifyOtp({ phone: e164, token: otp, type: "sms" });
+    let data: Awaited<ReturnType<typeof supabase.auth.verifyOtp>>["data"] | null = null;
+    let error: unknown = null;
+    try {
+      ({ data, error } = await supabase.auth.verifyOtp({ phone: e164, token: otp, type: "sms" }));
+    } catch (err) {
+      error = err;
+    }
     setLoading(false);
-    if (error) {
+    if (error || !data) {
       const next = attempts + 1;
       setAttempts(next);
       setOtp("");
@@ -415,7 +436,7 @@ function PhoneForm({
         resetToPhone();
         return;
       }
-      return toast.error(friendlyError(error, "otpWrong"));
+      return toast.error(friendlyError(error as never, "otpWrong"));
     }
     
     const user = data.user;
@@ -485,8 +506,24 @@ function PhoneForm({
           className="h-12 rounded-xl border-white/10 bg-white/[0.04] pl-10 text-base text-white placeholder:text-white/40 focus-visible:border-primary focus-visible:ring-primary/40"
         />
       </Field>
-      <p className="text-xs text-white/50">{t("auth.page.smsNote")}</p>
-      <Button type="submit" disabled={loading} className="h-11 w-full rounded-xl text-base font-semibold">
+      {smsUnavailable ? (
+        <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 p-3 text-xs leading-relaxed text-amber-100">
+          {t("auth.page.smsUnavailable")}
+          {onUseEmail && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onUseEmail}
+              className="mt-3 h-9 w-full rounded-lg border-white/15 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+            >
+              {t("auth.page.useEmailInstead")}
+            </Button>
+          )}
+        </div>
+      ) : (
+        <p className="text-xs text-white/50">{t("auth.page.smsNote")}</p>
+      )}
+      <Button type="submit" disabled={loading || smsUnavailable} className="h-11 w-full rounded-xl text-base font-semibold">
         {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("auth.page.sendingCode")}</>) : t("auth.page.sendCode")}
       </Button>
     </form>

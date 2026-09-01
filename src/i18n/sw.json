@@ -352,6 +352,8 @@
       "changeNumber": "Badilisha namba",
       "phonePlaceholder": "0712 345 678",
       "smsNote": "Tutakutumia msimbo wa mara moja kwa SMS. Gharama za kawaida za SMS zaweza kutumika.",
+      "smsUnavailable": "Uthibitishaji kwa simu haupatikani kwa sasa. Tafadhali tumia barua pepe au jaribu tena baadaye.",
+      "useEmailInstead": "Tumia Barua Pepe Badala Yake",
       "sendingCode": "Inatuma msimbo...",
       "sendCode": "Tuma msimbo",
       "continueGoogle": "Endelea na Google",
