@@ -21,7 +21,8 @@ import { cn } from "@/lib/utils";
 import {
   fetchAdminToday, fetchNeedsAttention, fetchAdminLeads, fetchAdminViewings, fetchAdminDeals,
   fetchRevenueBreakdown, fetchAdminActionLog, fetchAgentOptions, reassignLeadAgent,
-  type AdminToday, type AttentionItem, type AdminLead, type AdminViewing, type AdminDeal,
+  GROUP_ORDER,
+  type AdminToday, type AttentionItem, type AttentionGroup, type AdminLead, type AdminViewing, type AdminDeal,
   type RevenueBreakdown, type AdminActionLog, type AgentOption,
   type LeadOpsFilter, type ViewingOpsFilter, type DealOpsFilter,
 } from "@/lib/admin-ops";
@@ -97,8 +98,21 @@ const ATTENTION_META: Record<AttentionItem["kind"], { icon: React.ComponentType<
   report_open: { icon: Flag, tone: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]" },
   payment_issue: { icon: DollarSign, tone: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]" },
   user_suspended: { icon: Users, tone: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]" },
+  user_new: { icon: Users, tone: "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]" },
+  viewing_pending: { icon: Calendar, tone: "bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]" },
   lead_waiting: { icon: MessageSquare, tone: "bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]" },
 };
+
+const GROUP_LABEL: Record<AttentionGroup, string> = {
+  spaces: "admin.ops.group.spaces",
+  users: "admin.ops.group.users",
+  leads: "admin.ops.group.leads",
+  viewings: "admin.ops.group.viewings",
+  verification: "admin.ops.group.verification",
+  reports: "admin.ops.group.reports",
+  payments: "admin.ops.group.payments",
+};
+
 
 export function AdminHomePanel() {
   const { t } = useI18n();
@@ -140,7 +154,7 @@ export function AdminHomePanel() {
       )}
 
       <Section
-        title={t("admin.ops.attention")}
+        title={t("admin.ops.todayTasks")}
         right={attention.length > 0 ? <Badge variant="warning">{attention.length}</Badge> : undefined}
       >
         {loadingAttention ? (
@@ -148,30 +162,48 @@ export function AdminHomePanel() {
         ) : attention.length === 0 ? (
           <EmptyState icon={CheckCircle2} title={t("admin.ops.allClearTitle")} description={t("admin.ops.allClearBody")} />
         ) : (
-          <ul className="divide-y divide-border/50">
-            {attention.slice(0, 15).map((item) => {
-              const meta = ATTENTION_META[item.kind];
-              const Icon = meta.icon;
+          <div className="space-y-5">
+            {GROUP_ORDER.filter((g) => attention.some((i) => i.group === g)).map((g) => {
+              const items = attention.filter((i) => i.group === g).slice(0, 6);
+              const total = attention.filter((i) => i.group === g).length;
               return (
-                <li key={item.id} className="flex items-center gap-3 py-3">
-                  <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-xl", meta.tone)}>
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{item.title}</p>
-                    <p className="truncate text-xs text-muted-foreground">{item.detail} · {relative(item.at)}</p>
+                <div key={g}>
+                  <div className="mb-2 flex items-center gap-2">
+                    <h3 className="text-sm font-semibold">{t(GROUP_LABEL[g])}</h3>
+                    <Badge variant="muted" className="rounded-full">{total}</Badge>
                   </div>
-                  <Button size="sm" variant="outline" className="shrink-0 gap-1" asChild>
-                    <Link to="/admin/$section" params={{ section: item.section }}>
-                      {t("admin.ops.open")} <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </Button>
-                </li>
+                  <ul className="divide-y divide-border/50 rounded-xl border border-border/50">
+                    {items.map((item) => {
+                      const meta = ATTENTION_META[item.kind];
+                      const Icon = meta.icon;
+                      return (
+                        <li key={item.id} className="flex items-center gap-3 p-3">
+                          <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-xl", meta.tone)}>
+                            <Icon className="h-4 w-4" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="flex items-center gap-1.5 truncate text-sm font-medium">
+                              {item.urgency <= 1 && <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-[color:var(--color-danger-500)]" />}
+                              <span className="truncate">{item.title}</span>
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">{item.detail} · {relative(item.at)}</p>
+                          </div>
+                          <Button size="sm" variant="outline" className="shrink-0 gap-1" asChild>
+                            <Link to="/admin/$section" params={{ section: item.section }}>
+                              {t("admin.ops.open")} <ArrowRight className="h-3.5 w-3.5" />
+                            </Link>
+                          </Button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               );
             })}
-          </ul>
+          </div>
         )}
       </Section>
+
 
       <DashboardPanel />
     </>

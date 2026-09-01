@@ -55,7 +55,38 @@ const EXTRA_META: Record<string, { label: string; icon: React.ComponentType<{ cl
   property_verified: { label: "Property Verified", icon: ShieldCheck },
   property_available: { label: "Space Available", icon: Home },
   saved_search_match: { label: "New Match", icon: Search },
+  listing_queue: { label: "Space Awaiting Approval", icon: Home },
+  listing_moderation: { label: "Listing Update", icon: Home },
+  user_queue: { label: "New User", icon: Users },
+  payment_queue: { label: "Payment Issue", icon: AlertTriangle },
 };
+
+/** Category buckets used by the notification filters. */
+type NotifCategory = "properties" | "users" | "leads" | "viewings" | "verification" | "payments" | "reports" | "other";
+
+const KIND_CATEGORY: Record<string, NotifCategory> = {
+  listing_queue: "properties", listing_moderation: "properties",
+  property_approved: "properties", property_rejected: "properties",
+  property_verified: "properties", property_available: "properties",
+  price_change: "properties", saved_search_match: "properties",
+  user_queue: "users",
+  new_lead: "leads", new_inquiry: "leads", new_message: "leads",
+  viewing_request: "viewings", viewing_approved: "viewings", viewing_rejected: "viewings",
+  verification_approved: "verification", verification_rejected: "verification",
+  verification_submitted: "verification",
+  payment_queue: "payments", payment_failed: "payments", payment_successful: "payments",
+  subscription_purchased: "payments", subscription_expiring: "payments",
+  report_new: "reports", report_update: "reports", report_resolved: "reports",
+};
+
+const URGENT_KINDS = new Set([
+  "payment_queue", "payment_failed", "report_new", "report_update",
+  "listing_queue", "viewing_request", "verification_rejected", "property_rejected",
+]);
+
+function categoryOf(kind: string): NotifCategory {
+  return KIND_CATEGORY[kind] ?? "other";
+}
 
 function kindLabel(kind: string) {
   return EXTRA_META[kind]?.label ?? KIND_META[kind as NotificationKind]?.label ?? "Update";
@@ -101,6 +132,8 @@ function useLive<T>(read: () => T, event: string): T {
   return v;
 }
 
+const CATEGORY_TABS = ["properties", "users", "leads", "viewings", "verification", "payments", "reports"] as const;
+
 function NotificationsPage() {
   const { user } = useAuth();
   const [notifs, setNotifs] = useState<DbNotification[]>([]);
@@ -123,6 +156,8 @@ function NotificationsPage() {
       if (tab === "today" && bucket(n.createdAt) !== "today") return false;
       if (tab === "week" && bucket(n.createdAt) === "earlier") return false;
       if (tab === "earlier" && bucket(n.createdAt) !== "earlier") return false;
+      if (tab === "urgent" && !URGENT_KINDS.has(n.kind)) return false;
+      if (CATEGORY_TABS.some((c) => c === tab) && categoryOf(n.kind) !== tab) return false;
       if (!needle) return true;
       return (n.title + " " + n.body + " " + kindLabel(n.kind)).toLowerCase().includes(needle);
     });
@@ -180,6 +215,10 @@ function NotificationsPage() {
                 <TabsTrigger value="today" className="shrink-0">Today</TabsTrigger>
                 <TabsTrigger value="week" className="shrink-0">This week</TabsTrigger>
                 <TabsTrigger value="earlier" className="shrink-0">Earlier</TabsTrigger>
+                <TabsTrigger value="urgent" className="shrink-0">Urgent</TabsTrigger>
+                {CATEGORY_TABS.map((c) => (
+                  <TabsTrigger key={c} value={c} className="shrink-0 capitalize">{c}</TabsTrigger>
+                ))}
                 <TabsTrigger value="settings" className="hidden shrink-0 md:inline-flex">
                   <Settings2 className="mr-1.5 h-3.5 w-3.5" />Settings
                 </TabsTrigger>
@@ -204,7 +243,7 @@ function NotificationsPage() {
             </div>
           )}
 
-          {(["all", "unread", "read", "today", "week", "earlier"] as const).map((t) => (
+          {(["all", "unread", "read", "today", "week", "earlier", "urgent", ...CATEGORY_TABS] as const).map((t) => (
             <TabsContent key={t} value={t} className="mt-0">
               <NotifList items={filtered} onRead={onRead} onDelete={onDelete} />
             </TabsContent>
