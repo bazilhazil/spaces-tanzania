@@ -145,7 +145,7 @@ function AuthPage() {
                     <EmailForm mode={mode} redirect={search.redirect} navigate={navigate} />
                   </TabsContent>
                   <TabsContent value="phone" className="mt-5">
-                    <PhoneForm redirect={search.redirect} navigate={navigate} />
+                    <PhoneForm redirect={search.redirect} navigate={navigate} onUseEmail={() => setTab("email")} />
                   </TabsContent>
                   <TabsContent value="google" className="mt-5">
                     <GoogleContinue redirect={search.redirect} />
