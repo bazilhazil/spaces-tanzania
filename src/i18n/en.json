@@ -355,7 +355,11 @@
       "sendingCode": "Sending code...",
       "sendCode": "Send code",
       "continueGoogle": "Continue with Google",
-      "googleNote": "Fastest option - no password to remember."
+      "googleNote": "Fastest option - no password to remember.",
+      "codeExpiresIn": "Code expires in {time}",
+      "codeExpired": "This code has expired. Request a new code.",
+      "noCode": "Didn't receive the code?",
+      "confirmEmail": "Check your email to confirm your account."
     }
   },
   "dashboard": {

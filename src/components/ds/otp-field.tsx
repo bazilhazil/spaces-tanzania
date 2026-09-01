@@ -5,12 +5,21 @@ type Props = {
   onChange: (v: string) => void;
   length?: 4 | 6;
   className?: string;
+  autoFocus?: boolean;
 };
 
-export function OtpField({ value, onChange, length = 6, className }: Props) {
+export function OtpField({ value, onChange, length = 6, className, autoFocus }: Props) {
   const half = Math.floor(length / 2);
   return (
-    <InputOTP maxLength={length} value={value} onChange={onChange} containerClassName={className}>
+    <InputOTP
+      maxLength={length}
+      value={value}
+      onChange={onChange}
+      containerClassName={className}
+      autoFocus={autoFocus}
+      inputMode="numeric"
+      pattern="[0-9]*"
+    >
       <InputOTPGroup>
         {Array.from({ length: half }).map((_, i) => (
           <InputOTPSlot key={i} index={i} className="h-14 w-12 rounded-xl text-lg font-semibold" />

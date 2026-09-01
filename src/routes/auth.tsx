@@ -207,6 +207,23 @@ function EmailForm({
           toast.error(t("auth.page.passwordShort"));
           return;
         }
+
+        // Account linking: a phone-based account adding an email keeps the
+        // same account instead of creating a second one.
+        const { data: current } = await supabase.auth.getUser();
+        if (current.user && !current.user.email) {
+          const { error: linkError } = await supabase.auth.updateUser({
+            email,
+            password,
+            data: fullName ? { full_name: fullName } : undefined,
+          });
+          if (linkError) return toast.error(friendlyError(linkError));
+          toast.success(errorMessage("emailLinked"));
+          const to = await resolveRedirect(current.user.id, redirect);
+          navigate({ to, replace: true });
+          return;
+        }
+
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -216,8 +233,16 @@ function EmailForm({
           },
         });
         if (error) return toast.error(friendlyError(error));
+        // Supabase returns a user with no identities when the email already exists.
+        if (data.user && (data.user.identities?.length ?? 0) === 0) {
+          return toast.error(errorMessage("emailTaken"));
+        }
         track("signup_completed", { method: "email" });
         toast.success(t("auth.page.accountCreated"));
+        if (!data.session) {
+          toast.info(t("auth.page.confirmEmail"));
+          return;
+        }
         const to = await resolveRedirect(data.user?.id, redirect);
         navigate({ to, replace: true });
       } else {
@@ -284,6 +309,23 @@ function EmailForm({
 }
 
 /* ─────────────── Phone ─────────────── */
+const OTP_TTL_SECONDS = 300; // codes are short-lived
+const MAX_SENDS = 3; // per number, per window
+const MAX_ATTEMPTS = 5;
+const SEND_WINDOW_MS = 15 * 60 * 1000;
+
+const sendLog: Record<string, number[]> = {};
+
+function canSend(phone: string) {
+  const now = Date.now();
+  const list = (sendLog[phone] ?? []).filter((t) => now - t < SEND_WINDOW_MS);
+  sendLog[phone] = list;
+  return list.length < MAX_SENDS;
+}
+function recordSend(phone: string) {
+  sendLog[phone] = [...(sendLog[phone] ?? []), Date.now()];
+}
+
 function PhoneForm({
   redirect,
   navigate,
@@ -298,6 +340,8 @@ function PhoneForm({
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [expiresIn, setExpiresIn] = useState(0);
+  const [attempts, setAttempts] = useState(0);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -305,23 +349,42 @@ function PhoneForm({
     return () => clearTimeout(id);
   }, [cooldown]);
 
+  useEffect(() => {
+    if (expiresIn <= 0) return;
+    const id = setTimeout(() => setExpiresIn((c) => c - 1), 1000);
+    return () => clearTimeout(id);
+  }, [expiresIn]);
+
+  function resetToPhone() {
+    setStep("phone");
+    setOtp("");
+    setAttempts(0);
+    setExpiresIn(0);
+  }
+
   async function send(target: string) {
+    if (!canSend(target)) {
+      toast.error(errorMessage("otpAttempts"));
+      return false;
+    }
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({ phone: target });
     setLoading(false);
     if (error) {
       if (import.meta.env.DEV) {
         console.error("[auth/phone] OTP request failed", {
-          phone: target,
           code: (error as { code?: string }).code,
           status: error.status,
-          message: error.message,
         });
       }
       toast.error(friendlyError(error, "otpSendFailed"));
       return false;
     }
+    recordSend(target);
     setCooldown(45);
+    setExpiresIn(OTP_TTL_SECONDS);
+    setOtp("");
+    setAttempts(0);
     setStep("otp");
     return true;
   }
@@ -338,45 +401,71 @@ function PhoneForm({
   async function verify(e: React.FormEvent) {
     e.preventDefault();
     if (loading) return;
+    if (expiresIn <= 0) return toast.error(errorMessage("otpExpired"));
+    if (attempts >= MAX_ATTEMPTS) return toast.error(errorMessage("otpAttempts"));
     setLoading(true);
     const { data, error } = await supabase.auth.verifyOtp({ phone: e164, token: otp, type: "sms" });
     setLoading(false);
     if (error) {
-      if (import.meta.env.DEV) console.error("[auth/phone] OTP verify failed", error);
+      const next = attempts + 1;
+      setAttempts(next);
+      setOtp("");
+      if (next >= MAX_ATTEMPTS) {
+        toast.error(errorMessage("otpAttempts"));
+        resetToPhone();
+        return;
+      }
       return toast.error(friendlyError(error, "otpWrong"));
     }
-    const to = await resolveRedirect(data.user?.id, redirect);
+    
+    const user = data.user;
+    // Brand-new accounts continue into the existing onboarding flow.
+    const isNew =
+      !!user &&
+      !!user.created_at &&
+      Date.now() - new Date(user.created_at).getTime() < 60_000;
+    const to = isNew && !redirect ? "/welcome" : await resolveRedirect(user?.id, redirect);
     navigate({ to, replace: true });
   }
 
   if (step === "otp") {
+    const mm = Math.floor(expiresIn / 60);
+    const ss = String(expiresIn % 60).padStart(2, "0");
     return (
       <form onSubmit={verify} className="space-y-4">
         <div className="text-center">
           <Label className="text-white/70">{t("auth.page.verifyPhone")}</Label>
           <p className="mt-1 text-xs text-white/50">{t("auth.page.sentCode", { phone: maskTzPhone(e164) })}</p>
         </div>
-        <OtpField value={otp} onChange={setOtp} length={6} className="justify-center" />
-        <Button type="submit" disabled={loading || otp.length < 6} className="h-11 w-full rounded-xl text-base font-semibold">
+        <OtpField value={otp} onChange={setOtp} length={6} className="justify-center" autoFocus />
+        <p className="text-center text-xs text-white/50">
+          {expiresIn > 0
+            ? t("auth.page.codeExpiresIn", { time: `${mm}:${ss}` })
+            : t("auth.page.codeExpired")}
+        </p>
+        <Button
+          type="submit"
+          disabled={loading || otp.length < 6 || expiresIn <= 0}
+          className="h-11 w-full rounded-xl text-base font-semibold"
+        >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("auth.page.verify")}
         </Button>
-        <div className="flex items-center justify-center gap-4 text-xs text-white/60">
-          <button
-            type="button"
-            disabled={loading || cooldown > 0}
-            onClick={() => void send(e164)}
-            className="hover:text-white disabled:opacity-50"
-          >
-            {cooldown > 0 ? t("auth.page.resendIn", { s: cooldown }) : t("auth.page.resendCode")}
-          </button>
-          <span className="text-white/20">|</span>
-          <button
-            type="button"
-            onClick={() => { setStep("phone"); setOtp(""); }}
-            className="hover:text-white"
-          >
-            {t("auth.page.changeNumber")}
-          </button>
+        <div className="space-y-2 text-center text-xs text-white/60">
+          <p>{t("auth.page.noCode")}</p>
+          <div className="flex items-center justify-center gap-4">
+            <button
+              type="button"
+              disabled={loading || cooldown > 0}
+              onClick={() => void send(e164)}
+              className="hover:text-white disabled:opacity-50"
+            >
+              {cooldown > 0 ? t("auth.page.resendIn", { s: cooldown }) : t("auth.page.resendCode")}
+            </button>
+            <span className="text-white/20">|</span>
+            <button type="button" onClick={resetToPhone} className="hover:text-white">
+              {t("auth.page.changeNumber")}
+            </button>
+          </div>
         </div>
       </form>
     );
@@ -388,12 +477,12 @@ function PhoneForm({
         <Input
           required
           type="tel"
-          inputMode="tel"
+          inputMode="numeric"
           autoComplete="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder={t("auth.page.phonePlaceholder")}
-          className="h-11 rounded-xl border-white/10 bg-white/[0.04] pl-10 text-white placeholder:text-white/40 focus-visible:border-primary focus-visible:ring-primary/40"
+          className="h-12 rounded-xl border-white/10 bg-white/[0.04] pl-10 text-base text-white placeholder:text-white/40 focus-visible:border-primary focus-visible:ring-primary/40"
         />
       </Field>
       <p className="text-xs text-white/50">{t("auth.page.smsNote")}</p>

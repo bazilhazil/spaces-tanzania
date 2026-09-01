@@ -355,7 +355,11 @@
       "sendingCode": "Inatuma msimbo...",
       "sendCode": "Tuma msimbo",
       "continueGoogle": "Endelea na Google",
-      "googleNote": "Njia ya haraka zaidi - hakuna nenosiri la kukumbuka."
+      "googleNote": "Njia ya haraka zaidi - hakuna nenosiri la kukumbuka.",
+      "codeExpiresIn": "Msimbo utaisha baada ya {time}",
+      "codeExpired": "Msimbo umeisha muda. Omba msimbo mpya.",
+      "noCode": "Hujapokea msimbo?",
+      "confirmEmail": "Angalia barua pepe yako kuthibitisha akaunti."
     }
   },
   "dashboard": {
