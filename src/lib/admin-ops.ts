@@ -69,6 +69,15 @@ export async function fetchAdminToday(): Promise<AdminToday> {
 
 // ---------------------------------------------------- needs attention
 
+export type AttentionGroup =
+  | "spaces"
+  | "users"
+  | "leads"
+  | "viewings"
+  | "verification"
+  | "reports"
+  | "payments";
+
 export interface AttentionItem {
   id: string;
   kind:
@@ -78,54 +87,83 @@ export interface AttentionItem {
     | "payment_issue"
     | "property_suspended"
     | "user_suspended"
+    | "user_new"
+    | "viewing_pending"
     | "lead_waiting";
+  group: AttentionGroup;
+  /** 1 = most urgent. Used to sort Today's Tasks. */
+  urgency: number;
   title: string;
   detail: string;
   at: string;
   section: string; // admin section to open
 }
 
+/** Lower number = handled first. */
+export const GROUP_ORDER: AttentionGroup[] = [
+  "reports",
+  "payments",
+  "verification",
+  "spaces",
+  "viewings",
+  "leads",
+  "users",
+];
+
 export async function fetchNeedsAttention(): Promise<AttentionItem[]> {
-  const [props, verifications, reports, payments, users, leads] = await Promise.all([
+  const since = startOfToday();
+  const [props, verifications, reports, payments, users, leads, viewings, newUsers] = await Promise.all([
     supabase.from("properties").select("id,title,status,created_at,under_review").in("status", ["pending", "draft", "paused"]).order("created_at", { ascending: false }).limit(20),
     supabase.from("verification_requests").select("id,subject_type,created_at").eq("status", "pending").order("created_at", { ascending: false }).limit(20),
     supabase.from("safety_reports").select("id,reference,reason,priority,created_at").in("status", ["new", "under_review", "more_info"]).order("created_at", { ascending: false }).limit(20),
     supabase.from("payments").select("id,amount,currency,status,purpose,created_at").in("status", ["pending", "failed"]).order("created_at", { ascending: false }).limit(20),
     supabase.from("profiles").select("id,full_name,account_status,updated_at").in("account_status", ["suspended", "banned"]).limit(20),
     supabase.from("leads").select("id,visitor_name,status,created_at,last_activity_at").in("status", ["new", "contacted"]).order("created_at", { ascending: false }).limit(30),
+    supabase.from("bookings").select("id,status,scheduled_at,created_at,buyer_name").eq("status", "pending").order("created_at", { ascending: false }).limit(20),
+    supabase.from("profiles").select("id,full_name,created_at").gte("created_at", since).order("created_at", { ascending: false }).limit(20),
   ]);
 
   const items: AttentionItem[] = [];
 
   for (const p of ((props.data ?? []) as any[])) {
     if (p.status === "paused") {
-      items.push({ id: `ps-${p.id}`, kind: "property_suspended", title: p.title ?? "Untitled space", detail: "Suspended listing needs review", at: p.created_at, section: "properties" });
+      items.push({ id: `ps-${p.id}`, kind: "property_suspended", group: "spaces", urgency: 2, title: p.title ?? "Untitled space", detail: "Suspended listing needs review", at: p.created_at, section: "properties" });
     } else {
-      items.push({ id: `pp-${p.id}`, kind: "property_pending", title: p.title ?? "Untitled space", detail: p.status === "draft" ? "Draft awaiting submission" : "Awaiting approval", at: p.created_at, section: "properties" });
+      items.push({ id: `pp-${p.id}`, kind: "property_pending", group: "spaces", urgency: p.status === "draft" ? 4 : 1, title: p.title ?? "Untitled space", detail: p.status === "draft" ? "Draft awaiting submission" : "Awaiting approval", at: p.created_at, section: "properties" });
     }
   }
   for (const v of ((verifications.data ?? []) as any[])) {
-    items.push({ id: `v-${v.id}`, kind: "verification_pending", title: `${String(v.subject_type ?? "account").replace(/_/g, " ")} verification`, detail: "Awaiting review", at: v.created_at, section: "verification" });
+    items.push({ id: `v-${v.id}`, kind: "verification_pending", group: "verification", urgency: 2, title: `${String(v.subject_type ?? "account").replace(/_/g, " ")} verification`, detail: "Awaiting review", at: v.created_at, section: "verification" });
   }
   for (const r of ((reports.data ?? []) as any[])) {
-    items.push({ id: `r-${r.id}`, kind: "report_open", title: `${r.reference}`, detail: `${String(r.reason).replace(/_/g, " ")} · ${r.priority} priority`, at: r.created_at, section: "reports" });
+    items.push({ id: `r-${r.id}`, kind: "report_open", group: "reports", urgency: r.priority === "urgent" ? 0 : r.priority === "high" ? 1 : 2, title: `${r.reference}`, detail: `${String(r.reason).replace(/_/g, " ")} · ${r.priority} priority`, at: r.created_at, section: "reports" });
   }
   for (const p of ((payments.data ?? []) as any[])) {
-    items.push({ id: `y-${p.id}`, kind: "payment_issue", title: `${p.currency ?? "TZS"} ${Number(p.amount ?? 0).toLocaleString()}`, detail: `Payment ${p.status} · ${String(p.purpose ?? "other").replace(/_/g, " ")}`, at: p.created_at, section: "payments" });
+    items.push({ id: `y-${p.id}`, kind: "payment_issue", group: "payments", urgency: p.status === "failed" ? 1 : 3, title: `${p.currency ?? "TZS"} ${Number(p.amount ?? 0).toLocaleString()}`, detail: `Payment ${p.status} · ${String(p.purpose ?? "other").replace(/_/g, " ")}`, at: p.created_at, section: "payments" });
   }
   for (const u of ((users.data ?? []) as any[])) {
-    items.push({ id: `u-${u.id}`, kind: "user_suspended", title: u.full_name || "Unnamed user", detail: `Account ${u.account_status}`, at: u.updated_at, section: "users" });
+    items.push({ id: `u-${u.id}`, kind: "user_suspended", group: "users", urgency: 2, title: u.full_name || "Unnamed user", detail: `Account ${u.account_status}`, at: u.updated_at, section: "users" });
+  }
+  for (const u of ((newUsers.data ?? []) as any[])) {
+    items.push({ id: `nu-${u.id}`, kind: "user_new", group: "users", urgency: 5, title: u.full_name || "New user", detail: "Registered today", at: u.created_at, section: "users" });
   }
   const dayAgo = Date.now() - 24 * 3600 * 1000;
+  for (const b of ((viewings.data ?? []) as any[])) {
+    const stale = new Date(b.created_at).getTime() < dayAgo;
+    items.push({ id: `b-${b.id}`, kind: "viewing_pending", group: "viewings", urgency: stale ? 1 : 3, title: b.buyer_name || "Viewing request", detail: stale ? "Waiting over 24 hours" : "Awaiting owner response", at: b.created_at, section: "viewings" });
+  }
   for (const l of ((leads.data ?? []) as any[])) {
     const last = new Date(l.last_activity_at ?? l.created_at).getTime();
     if (l.status === "new" || last < dayAgo) {
-      items.push({ id: `l-${l.id}`, kind: "lead_waiting", title: l.visitor_name || "New inquiry", detail: l.status === "new" ? "Waiting for first response" : "No recent activity", at: l.created_at, section: "leads" });
+      items.push({ id: `l-${l.id}`, kind: "lead_waiting", group: "leads", urgency: l.status === "new" ? 2 : 4, title: l.visitor_name || "New inquiry", detail: l.status === "new" ? "Waiting for first response" : "No recent activity", at: l.created_at, section: "leads" });
     }
   }
 
-  return items.sort((a, b) => (a.at < b.at ? 1 : -1)).slice(0, 40);
+  return items
+    .sort((a, b) => (a.urgency - b.urgency) || (a.at < b.at ? 1 : -1))
+    .slice(0, 60);
 }
+
 
 // ------------------------------------------------------------- leads
 

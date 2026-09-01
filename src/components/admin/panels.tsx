@@ -26,6 +26,11 @@ import {
   type AdminUser, type AdminReport, type AdminBooking, type AdminPayment,
   type AdminSubscription, type MonthPoint, type QueueFilter,
 } from "@/lib/admin-db";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import { logAdminAction } from "@/lib/admin-ops";
 import { friendlyError } from "@/lib/errors";
 import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
@@ -288,16 +293,30 @@ export function PropertiesPanel() {
   );
   const [selected, setSelected] = useState<string | null>(null);
   const item = items.find((m) => m.id === selected) ?? items[0] ?? null;
+  const [reasonFor, setReasonFor] = useState<null | "reject" | "request_changes">(null);
 
-  const act = async (id: string, action: Parameters<typeof moderateProperty>[1], label: string) => {
+  const act = async (
+    id: string,
+    action: Parameters<typeof moderateProperty>[1],
+    label: string,
+    reason?: string,
+  ) => {
     try {
-      await moderateProperty(id, action);
+      await moderateProperty(id, action, reason);
+      await logAdminAction({
+        action: `property_${action}`,
+        targetType: "property",
+        targetId: id,
+        targetLabel: items.find((m) => m.id === id)?.title ?? null,
+        reason: reason ?? null,
+      });
       toast.success(label);
       reload();
     } catch (e) {
       toast.error(friendlyError(e));
     }
   };
+
 
   return (
     <>
@@ -395,8 +414,9 @@ export function PropertiesPanel() {
 
               <div className="flex flex-wrap gap-2 border-t border-border/60 bg-secondary/30 p-4">
                 <Button variant="success" size="sm" className="gap-2" onClick={() => act(item.id, "approve", t("admin.toast.approved"))}><CheckCircle2 className="h-4 w-4" /> {t("admin.action.approve")}</Button>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => act(item.id, "request_changes", t("admin.toast.changes"))}><RefreshCw className="h-4 w-4" /> {t("admin.action.requestChanges")}</Button>
-                <Button variant="destructive" size="sm" className="gap-2" onClick={() => act(item.id, "reject", t("admin.toast.rejected"))}><XCircle className="h-4 w-4" /> {t("admin.action.reject")}</Button>
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => setReasonFor("request_changes")}><RefreshCw className="h-4 w-4" /> {t("admin.action.requestChanges")}</Button>
+                <Button variant="destructive" size="sm" className="gap-2" onClick={() => setReasonFor("reject")}><XCircle className="h-4 w-4" /> {t("admin.action.reject")}</Button>
+
                 <div className="mx-2 h-6 w-px bg-border" />
                 <Button variant="gold" size="sm" className="gap-2" onClick={() => act(item.id, "feature", t("admin.toast.featured"))}><Sparkles className="h-4 w-4" /> {t("admin.action.feature")}</Button>
                 <Button variant="ghost" size="sm" className="gap-2 ml-auto" onClick={() => act(item.id, "suspend", t("admin.toast.paused"))}><Power className="h-4 w-4" /> {t("admin.action.pause")}</Button>
@@ -406,9 +426,54 @@ export function PropertiesPanel() {
           ) : <EmptyState icon={Home} title={t("admin.queue.nothingSelected")} description={t("admin.queue.pick")} />}
         </div>
       )}
+
+      <ModerationReasonDialog
+        open={!!reasonFor && !!item}
+        mode={reasonFor}
+        onCancel={() => setReasonFor(null)}
+        onConfirm={async (reason) => {
+          if (!item || !reasonFor) return;
+          const label = reasonFor === "reject" ? t("admin.toast.rejected") : t("admin.toast.changes");
+          setReasonFor(null);
+          await act(item.id, reasonFor, label, reason);
+        }}
+      />
     </>
   );
 }
+
+function ModerationReasonDialog({
+  open, mode, onCancel, onConfirm,
+}: {
+  open: boolean;
+  mode: "reject" | "request_changes" | null;
+  onCancel: () => void;
+  onConfirm: (reason: string) => void;
+}) {
+  const { t } = useI18n();
+  const [reason, setReason] = useState("");
+  useEffect(() => { if (open) setReason(""); }, [open]);
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {mode === "reject" ? t("admin.action.reject") : t("admin.action.requestChanges")}
+          </DialogTitle>
+          <DialogDescription>{t("admin.ops.reasonRequired")}</DialogDescription>
+        </DialogHeader>
+        <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={4} placeholder={t("admin.ops.reasonPlaceholder")} />
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel}>{t("common.cancel")}</Button>
+          <Button disabled={reason.trim().length < 5} onClick={() => onConfirm(reason.trim())}>
+            {t("common.confirm")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 // ---------- Users ----------
 
