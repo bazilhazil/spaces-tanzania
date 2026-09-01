@@ -700,16 +700,6 @@ export function MessagesPanel() {
   );
 }
 
-export function SupportPanel() {
-  const { t } = useI18n();
-  return (
-    <>
-      <PageHeader kicker={t("admin.kicker.operations")} title={t("admin.support.title")} subtitle={t("admin.support.sub")} />
-      <EmptyState icon={LifeBuoy} title={t("admin.support.emptyTitle")} description={t("admin.support.emptyBody")} />
-    </>
-  );
-}
-
 // ---------- Payments & Subscriptions ----------
 
 export function PaymentsPanel() {

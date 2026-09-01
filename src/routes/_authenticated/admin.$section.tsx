@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import {
   PropertiesPanel, UsersPanel, AgentsPanel, VerificationPanel,
-  BookingsPanel, MessagesPanel, SupportPanel, PaymentsPanel, SubscriptionsPanel,
+  BookingsPanel, MessagesPanel, PaymentsPanel, SubscriptionsPanel,
   AnalyticsPanel, MarketingPanel, NotificationsPanel, SettingsPanel,
   SuperAdminPanel,
 } from "@/components/admin/panels";
@@ -10,6 +10,7 @@ import {
 } from "@/components/admin/ops-panels";
 import { ReviewsPanel } from "@/components/admin/reviews-panel";
 import { SafetyPanel } from "@/components/admin/safety-panel";
+import { SupportPanel } from "@/components/admin/support-panel";
 
 const PANELS: Record<string, React.ComponentType> = {
   properties: PropertiesPanel,
