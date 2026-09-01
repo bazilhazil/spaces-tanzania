@@ -48,6 +48,7 @@ function AuthPage() {
   const { t } = useI18n();
   const search = useSearch({ from: "/auth" });
   const [mode, setMode] = useState<"signin" | "signup">(search.mode ?? "signin");
+  const [tab, setTab] = useState<"email" | "phone" | "google">("email");
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#05070d] text-white">
