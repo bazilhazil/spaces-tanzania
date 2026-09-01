@@ -419,9 +419,15 @@ function PhoneForm({
     if (expiresIn <= 0) return toast.error(errorMessage("otpExpired"));
     if (attempts >= MAX_ATTEMPTS) return toast.error(errorMessage("otpAttempts"));
     setLoading(true);
-    const { data, error } = await supabase.auth.verifyOtp({ phone: e164, token: otp, type: "sms" });
+    let data: Awaited<ReturnType<typeof supabase.auth.verifyOtp>>["data"] | null = null;
+    let error: unknown = null;
+    try {
+      ({ data, error } = await supabase.auth.verifyOtp({ phone: e164, token: otp, type: "sms" }));
+    } catch (err) {
+      error = err;
+    }
     setLoading(false);
-    if (error) {
+    if (error || !data) {
       const next = attempts + 1;
       setAttempts(next);
       setOtp("");
