@@ -498,8 +498,24 @@ function PhoneForm({
           className="h-12 rounded-xl border-white/10 bg-white/[0.04] pl-10 text-base text-white placeholder:text-white/40 focus-visible:border-primary focus-visible:ring-primary/40"
         />
       </Field>
-      <p className="text-xs text-white/50">{t("auth.page.smsNote")}</p>
-      <Button type="submit" disabled={loading} className="h-11 w-full rounded-xl text-base font-semibold">
+      {smsUnavailable ? (
+        <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 p-3 text-xs leading-relaxed text-amber-100">
+          {t("auth.page.smsUnavailable")}
+          {onUseEmail && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onUseEmail}
+              className="mt-3 h-9 w-full rounded-lg border-white/15 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+            >
+              {t("auth.page.useEmailInstead")}
+            </Button>
+          )}
+        </div>
+      ) : (
+        <p className="text-xs text-white/50">{t("auth.page.smsNote")}</p>
+      )}
+      <Button type="submit" disabled={loading || smsUnavailable} className="h-11 w-full rounded-xl text-base font-semibold">
         {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("auth.page.sendingCode")}</>) : t("auth.page.sendCode")}
       </Button>
     </form>
