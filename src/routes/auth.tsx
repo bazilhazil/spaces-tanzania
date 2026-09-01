@@ -133,7 +133,7 @@ function AuthPage() {
                   ))}
                 </div>
 
-                <Tabs defaultValue="email" className="w-full">
+                <Tabs value={tab} onValueChange={(v) => setTab(v as "email" | "phone" | "google")} className="w-full">
                   <TabsList className="grid w-full grid-cols-3 bg-white/5 text-white/70">
                     <TabsTrigger value="email" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">{t("auth.page.tabEmail")}</TabsTrigger>
                     <TabsTrigger value="phone" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">{t("auth.page.tabPhone")}</TabsTrigger>
