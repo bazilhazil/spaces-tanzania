@@ -2372,6 +2372,7 @@ export type Database = {
       }
     }
     Functions: {
+      admin_analytics: { Args: { _from: string; _to: string }; Returns: Json }
       admin_set_payment_status: {
         Args: { _payment_id: string; _status: string }
         Returns: undefined
