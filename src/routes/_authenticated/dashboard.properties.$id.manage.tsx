@@ -13,13 +13,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl, uploadMediaFile, compressImageFile } from "@/lib/property-media";
-import { deletePropertyWithStorage } from "@/lib/property-actions";
+import { RemoveSpaceDialog } from "@/components/property-management/remove-space-dialog";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -171,17 +167,6 @@ function ManagePropertyPage() {
     await patch({ status: next as Property["status"] });
   }
 
-  async function doDelete() {
-    if (!prop) return;
-    try {
-      await deletePropertyWithStorage(prop.id);
-      toast.success("Property deleted");
-      navigate({ to: "/dashboard/properties" });
-    } catch (e: any) {
-      toast.error(e?.message ?? "Delete failed");
-    }
-  }
-
   if (loading) {
     return (
       <DashboardShell>
@@ -319,26 +304,13 @@ function ManagePropertyPage() {
         </div>
       </div>
 
-      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this property?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={doDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <RemoveSpaceDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        propertyId={prop.id}
+        title={prop.title}
+        onRemoved={() => navigate({ to: "/dashboard/properties" })}
+      />
     </DashboardShell>
   );
 }

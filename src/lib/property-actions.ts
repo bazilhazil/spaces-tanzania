@@ -1,25 +1,40 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const BUCKET = "property-media";
+export type ArchiveResult = {
+  retainedDeals: number;
+  retainedBillingRecords: number;
+};
 
 /**
- * Delete a property and its media (DB rows + storage objects).
- * Storage cleanup runs BEFORE the DB delete so cascade-removed media rows
- * don't leave the file paths unreachable to us.
+ * Safe removal of a Space.
+ *
+ * Nothing is erased: the listing is archived (removed from active listings and
+ * search) while inquiries, viewings, completed deals, reviews and billing
+ * records are retained. The database performs this in a single transaction, so
+ * a failure never leaves the listing half-deleted.
  */
-export async function deletePropertyWithStorage(propertyId: string): Promise<void> {
-  const { data: media } = await supabase
-    .from("property_media")
-    .select("storage_path")
-    .eq("property_id", propertyId);
-  const paths = (media ?? []).map((m: { storage_path: string }) => m.storage_path).filter(Boolean);
-  if (paths.length) {
-    // Best-effort — RLS may block some paths; continue with DB delete regardless.
-    await supabase.storage.from(BUCKET).remove(paths);
-  }
-  const { error } = await supabase.from("properties").delete().eq("id", propertyId);
+export async function archiveProperty(propertyId: string, reason?: string): Promise<ArchiveResult> {
+  const { data, error } = await supabase.rpc("archive_property" as never, {
+    _property_id: propertyId,
+    _reason: reason ?? null,
+  } as never);
+  if (error) throw error;
+  const r = (data ?? {}) as { retained_deals?: number; retained_billing_records?: number };
+  return {
+    retainedDeals: Number(r.retained_deals ?? 0),
+    retainedBillingRecords: Number(r.retained_billing_records ?? 0),
+  };
+}
+
+/** Bring an archived Space back as a paused listing the owner can review before publishing. */
+export async function restoreProperty(propertyId: string): Promise<void> {
+  const { error } = await supabase.rpc("restore_property" as never, { _property_id: propertyId } as never);
   if (error) throw error;
 }
+
+/** @deprecated Spaces are archived, never hard-deleted. Kept so existing callers stay safe. */
+export const deletePropertyWithStorage = archiveProperty;
+
 
 export async function updatePropertyStatus(
   propertyId: string,

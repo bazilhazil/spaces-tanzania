@@ -50,6 +50,30 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_settings: {
+        Row: {
+          created_at: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       agent_clients: {
         Row: {
           agent_id: string
@@ -189,6 +213,9 @@ export type Database = {
           contact_phone: string | null
           created_at: string
           deal_id: string | null
+          delete_reason: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           duration_minutes: number
           id: string
           lead_id: string | null
@@ -210,6 +237,9 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           deal_id?: string | null
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           duration_minutes?: number
           id?: string
           lead_id?: string | null
@@ -231,6 +261,9 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           deal_id?: string | null
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           duration_minutes?: number
           id?: string
           lead_id?: string | null
@@ -467,6 +500,9 @@ export type Database = {
           conversation_id: string | null
           created_at: string
           currency: string
+          delete_reason: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           expected_close_at: string | null
           health: Database["public"]["Enums"]["deal_health"]
           id: string
@@ -494,6 +530,9 @@ export type Database = {
           conversation_id?: string | null
           created_at?: string
           currency?: string
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           expected_close_at?: string | null
           health?: Database["public"]["Enums"]["deal_health"]
           id?: string
@@ -521,6 +560,9 @@ export type Database = {
           conversation_id?: string | null
           created_at?: string
           currency?: string
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           expected_close_at?: string | null
           health?: Database["public"]["Enums"]["deal_health"]
           id?: string
@@ -624,6 +666,9 @@ export type Database = {
           conversation_id: string | null
           created_at: string
           deal_id: string | null
+          delete_reason: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           last_activity_at: string
           message: string | null
@@ -642,6 +687,9 @@ export type Database = {
           conversation_id?: string | null
           created_at?: string
           deal_id?: string | null
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           last_activity_at?: string
           message?: string | null
@@ -660,6 +708,9 @@ export type Database = {
           conversation_id?: string | null
           created_at?: string
           deal_id?: string | null
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           last_activity_at?: string
           message?: string | null
@@ -962,6 +1013,9 @@ export type Database = {
           bedrooms: number | null
           created_at: string
           currency: string
+          delete_reason: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           district: string | null
           featured: boolean
@@ -998,6 +1052,9 @@ export type Database = {
           bedrooms?: number | null
           created_at?: string
           currency?: string
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           district?: string | null
           featured?: boolean
@@ -1034,6 +1091,9 @@ export type Database = {
           bedrooms?: number | null
           created_at?: string
           currency?: string
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           district?: string | null
           featured?: boolean
@@ -1532,6 +1592,9 @@ export type Database = {
           comment: string | null
           created_at: string
           deal_id: string | null
+          delete_reason: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           property_id: string | null
           published_at: string | null
@@ -1553,6 +1616,9 @@ export type Database = {
           comment?: string | null
           created_at?: string
           deal_id?: string | null
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           property_id?: string | null
           published_at?: string | null
@@ -1574,6 +1640,9 @@ export type Database = {
           comment?: string | null
           created_at?: string
           deal_id?: string | null
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           property_id?: string | null
           published_at?: string | null
@@ -1632,6 +1701,9 @@ export type Database = {
           assigned_admin_id: string | null
           conversation_id: string | null
           created_at: string
+          delete_reason: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           evidence_path: string | null
           id: string
@@ -1652,6 +1724,9 @@ export type Database = {
           assigned_admin_id?: string | null
           conversation_id?: string | null
           created_at?: string
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           evidence_path?: string | null
           id?: string
@@ -1672,6 +1747,9 @@ export type Database = {
           assigned_admin_id?: string | null
           conversation_id?: string | null
           created_at?: string
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           evidence_path?: string | null
           id?: string
@@ -1905,6 +1983,9 @@ export type Database = {
           closed_at: string | null
           created_at: string
           deal_id: string | null
+          delete_reason: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           last_message_at: string
           lead_id: string | null
@@ -1923,6 +2004,9 @@ export type Database = {
           closed_at?: string | null
           created_at?: string
           deal_id?: string | null
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           last_message_at?: string
           lead_id?: string | null
@@ -1941,6 +2025,9 @@ export type Database = {
           closed_at?: string | null
           created_at?: string
           deal_id?: string | null
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           last_message_at?: string
           lead_id?: string | null
@@ -2381,6 +2468,10 @@ export type Database = {
         Args: { _agent_id: string; _property_id: string }
         Returns: Database["public"]["Enums"]["agent_permission"]
       }
+      archive_property: {
+        Args: { _property_id: string; _reason?: string }
+        Returns: Json
+      }
       check_my_subscription_expiry: { Args: never; Returns: undefined }
       crm_lead_status_for_stage: {
         Args: { _stage: Database["public"]["Enums"]["deal_stage"] }
@@ -2471,6 +2562,7 @@ export type Database = {
         Args: { _response: string; _review_id: string }
         Returns: undefined
       }
+      restore_property: { Args: { _property_id: string }; Returns: undefined }
       saved_search_matches: {
         Args: {
           _filters: Json
