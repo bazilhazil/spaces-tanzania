@@ -1738,5 +1738,101 @@
       "emptyTitle": "No FAQs yet",
       "emptyBody": "Add an FAQ to publish it in the public Help Center."
     }
+  },
+  "bi": {
+    "title": "Business Intelligence",
+    "subtitle": "What is happening on SPACES right now — live platform data only.",
+    "open": "Open",
+    "range": {
+      "1d": "Today",
+      "7d": "7 days",
+      "30d": "30 days",
+      "90d": "90 days",
+      "ytd": "This year"
+    },
+    "kpi": {
+      "activeProperties": "Active Spaces",
+      "newProperties": "New Spaces",
+      "activeUsers": "Active Users",
+      "newUsers": "New Users",
+      "newLeads": "New Inquiries",
+      "viewingRequests": "Viewing Requests",
+      "activeDeals": "Active Deals",
+      "completedDeals": "Completed Deals",
+      "conversion": "Conversion",
+      "revenue": "Confirmed Revenue"
+    },
+    "growth": {
+      "notEnough": "Not enough data yet.",
+      "vsPrevious": "vs previous period"
+    },
+    "funnel": {
+      "title": "Inquiry funnel",
+      "views": "Property views",
+      "leads": "Inquiries",
+      "viewings": "Viewing requests",
+      "viewingsDone": "Completed viewings",
+      "deals": "Deals",
+      "dealsDone": "Completed deals"
+    },
+    "attention": {
+      "title": "Needs attention",
+      "allClear": "Nothing needs your attention right now.",
+      "leadsWaiting": "Inquiries waiting for a response",
+      "silentProperties": "Spaces with many views but no inquiries",
+      "viewingsPending": "Viewing requests awaiting approval",
+      "staleDeals": "Deals with no recent activity",
+      "failedPayments": "Failed payments",
+      "pendingVerifications": "Pending verification",
+      "openTickets": "Open support tickets",
+      "propertiesReview": "Spaces awaiting review"
+    },
+    "revenue": {
+      "title": "Revenue",
+      "confirmed": "Confirmed revenue",
+      "pending": "Pending revenue",
+      "pendingShort": "pending",
+      "none": "No payments in this period.",
+      "note": "Only confirmed payments count as revenue. Failed and unconfirmed payments are excluded."
+    },
+    "top": {
+      "title": "Top performing spaces"
+    },
+    "metric": {
+      "views": "Views",
+      "favorites": "Saves",
+      "leads": "Inquiries",
+      "viewings": "Viewings",
+      "deals": "Deals",
+      "listings": "Listings"
+    },
+    "market": {
+      "locations": "Most active locations",
+      "mostViewed": "Most viewed spaces",
+      "mostContacted": "Most contacted spaces",
+      "types": "Most requested types",
+      "areas": "Most active areas",
+      "response": "Median response time",
+      "responseNote": "Typical time to first reply in messages."
+    },
+    "agents": {
+      "title": "Agent performance"
+    },
+    "owners": {
+      "title": "Owner performance"
+    },
+    "people": {
+      "unnamed": "Unnamed user"
+    },
+    "empty": {
+      "title": "No activity yet",
+      "body": "Not enough data yet."
+    },
+    "export": {
+      "metric": "Metric",
+      "value": "Value",
+      "period": "Period",
+      "popupBlocked": "Allow pop-ups to export the PDF report."
+    }
   }
 }
