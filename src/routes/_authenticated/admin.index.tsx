@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DashboardPanel } from "@/components/admin/panels";
+import { AdminHomePanel } from "@/components/admin/ops-panels";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
-  component: DashboardPanel,
+  component: AdminHomePanel,
 });
