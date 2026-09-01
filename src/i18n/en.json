@@ -757,8 +757,8 @@
     "filters": "Filters",
     "listedOn": "Listed {date}",
     "activeDeal": "Active deal",
-    "deleteTitle": "Delete {label}?",
-    "deleteDesc": "This permanently removes the listing and all uploaded photos. It will disappear from your dashboard, search results and the homepage. This action cannot be undone.",
+    "deleteTitle": "Remove {label} from active listings?",
+    "deleteDesc": "The Space will be removed from active listings. Important transaction history may be retained.",
     "quick": {
       "addSpace": "Add Space",
       "leads": "Manage Leads",

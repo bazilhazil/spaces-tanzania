@@ -119,7 +119,7 @@ export function PropertiesManager() {
       const [ownedRes, assignedRes] = await Promise.all([
         supabase.from("properties").select(cols).eq("owner_id", user.id).is("deleted_at", null).order("created_at", { ascending: false }),
         assignedIds.length
-          ? supabase.from("properties").select(cols).in("id", assignedIds).order("created_at", { ascending: false })
+          ? supabase.from("properties").select(cols).in("id", assignedIds).is("deleted_at", null).order("created_at", { ascending: false })
           : Promise.resolve({ data: [] as any[] }),
       ]);
       const byId = new Map<string, any>();
@@ -244,7 +244,7 @@ export function PropertiesManager() {
     const set = new Set(ids);
     setRows((r) => r.filter((x) => !set.has(x.id)));
     setSelected((s) => { const n = new Set(s); ids.forEach((i) => n.delete(i)); return n; });
-    toast.success(`Deleted ${ids.length} propert${ids.length === 1 ? "y" : "ies"}`);
+    toast.success(`Removed ${ids.length} propert${ids.length === 1 ? "y" : "ies"} from active listings`);
   }
 
   async function bulk(action: "delete" | "pause" | "resume" | "archive" | "promote") {
@@ -1025,15 +1025,7 @@ async function handleCardAction(
       break;
     }
     case "delete":
-      if (!confirm(`Delete "${p.title}"? Photos will be removed and this cannot be undone.`)) return;
-      try {
-        await deletePropertyWithStorage(p.id);
-      } catch (e: any) {
-        return toast.error(e?.message ?? "Delete failed");
-      }
-      setRows((r) => r.filter((x) => x.id !== p.id));
-      setSelected((s) => { const n = new Set(s); n.delete(p.id); return n; });
-      toast.success("Property deleted");
+      setConfirmDelete({ ids: [p.id], label: p.title });
       break;
     case "share":
       if (navigator.share) {

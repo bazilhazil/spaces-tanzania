@@ -757,8 +757,8 @@
     "filters": "Vichujio",
     "listedOn": "Imewekwa {date}",
     "activeDeal": "Mkataba hai",
-    "deleteTitle": "Futa {label}?",
-    "deleteDesc": "Hii inaondoa tangazo na picha zote kabisa. Litatoweka kwenye dashibodi yako, matokeo ya utafutaji na ukurasa wa mwanzo. Hatua hii haiwezi kutenguliwa.",
+    "deleteTitle": "Ondoa {label} kwenye matangazo yanayoonekana?",
+    "deleteDesc": "Space itaondolewa kwenye matangazo yanayoonekana. Historia muhimu ya miamala inaweza kuhifadhiwa.",
     "quick": {
       "addSpace": "Ongeza Nafasi",
       "leads": "Simamia Wateja",
