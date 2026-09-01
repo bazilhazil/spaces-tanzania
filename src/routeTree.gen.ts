@@ -46,6 +46,7 @@ import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedPropertyIdRouteImport } from './routes/_authenticated/property.$id'
+import { Route as AuthenticatedDashboardSupportRouteImport } from './routes/_authenticated/dashboard.support'
 import { Route as AuthenticatedDashboardSearchesRouteImport } from './routes/_authenticated/dashboard.searches'
 import { Route as AuthenticatedDashboardSafetyRouteImport } from './routes/_authenticated/dashboard.safety'
 import { Route as AuthenticatedDashboardPropertiesRouteImport } from './routes/_authenticated/dashboard.properties'
@@ -246,6 +247,12 @@ const AuthenticatedPropertyIdRoute = AuthenticatedPropertyIdRouteImport.update({
   path: '/property/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDashboardSupportRoute =
+  AuthenticatedDashboardSupportRouteImport.update({
+    id: '/support',
+    path: '/support',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardSearchesRoute =
   AuthenticatedDashboardSearchesRouteImport.update({
     id: '/searches',
@@ -356,6 +363,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/properties': typeof AuthenticatedDashboardPropertiesRouteWithChildren
   '/dashboard/safety': typeof AuthenticatedDashboardSafetyRoute
   '/dashboard/searches': typeof AuthenticatedDashboardSearchesRoute
+  '/dashboard/support': typeof AuthenticatedDashboardSupportRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
@@ -404,6 +412,7 @@ export interface FileRoutesByTo {
   '/dashboard/properties': typeof AuthenticatedDashboardPropertiesRouteWithChildren
   '/dashboard/safety': typeof AuthenticatedDashboardSafetyRoute
   '/dashboard/searches': typeof AuthenticatedDashboardSearchesRoute
+  '/dashboard/support': typeof AuthenticatedDashboardSupportRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
@@ -455,6 +464,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/properties': typeof AuthenticatedDashboardPropertiesRouteWithChildren
   '/_authenticated/dashboard/safety': typeof AuthenticatedDashboardSafetyRoute
   '/_authenticated/dashboard/searches': typeof AuthenticatedDashboardSearchesRoute
+  '/_authenticated/dashboard/support': typeof AuthenticatedDashboardSupportRoute
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
@@ -506,6 +516,7 @@ export interface FileRouteTypes {
     | '/dashboard/properties'
     | '/dashboard/safety'
     | '/dashboard/searches'
+    | '/dashboard/support'
     | '/property/$id'
     | '/admin/'
     | '/dashboard/properties/$id/manage'
@@ -554,6 +565,7 @@ export interface FileRouteTypes {
     | '/dashboard/properties'
     | '/dashboard/safety'
     | '/dashboard/searches'
+    | '/dashboard/support'
     | '/property/$id'
     | '/admin'
     | '/dashboard/properties/$id/manage'
@@ -604,6 +616,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/properties'
     | '/_authenticated/dashboard/safety'
     | '/_authenticated/dashboard/searches'
+    | '/_authenticated/dashboard/support'
     | '/_authenticated/property/$id'
     | '/_authenticated/admin/'
     | '/_authenticated/dashboard/properties/$id/manage'
@@ -894,6 +907,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPropertyIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/support': {
+      id: '/_authenticated/dashboard/support'
+      path: '/support'
+      fullPath: '/dashboard/support'
+      preLoaderRoute: typeof AuthenticatedDashboardSupportRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/searches': {
       id: '/_authenticated/dashboard/searches'
       path: '/searches'
@@ -1021,6 +1041,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardPropertiesRoute: typeof AuthenticatedDashboardPropertiesRouteWithChildren
   AuthenticatedDashboardSafetyRoute: typeof AuthenticatedDashboardSafetyRoute
   AuthenticatedDashboardSearchesRoute: typeof AuthenticatedDashboardSearchesRoute
+  AuthenticatedDashboardSupportRoute: typeof AuthenticatedDashboardSupportRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
@@ -1035,6 +1056,7 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
       AuthenticatedDashboardPropertiesRouteWithChildren,
     AuthenticatedDashboardSafetyRoute: AuthenticatedDashboardSafetyRoute,
     AuthenticatedDashboardSearchesRoute: AuthenticatedDashboardSearchesRoute,
+    AuthenticatedDashboardSupportRoute: AuthenticatedDashboardSupportRoute,
   }
 
 const AuthenticatedDashboardRouteWithChildren =

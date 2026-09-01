@@ -1815,6 +1815,182 @@ export type Database = {
           },
         ]
       }
+      support_faqs: {
+        Row: {
+          answer: string
+          answer_sw: string | null
+          category: string
+          created_at: string
+          created_by: string | null
+          id: string
+          published: boolean
+          question: string
+          question_sw: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          answer_sw?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published?: boolean
+          question: string
+          question_sw?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          answer_sw?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published?: boolean
+          question?: string
+          question_sw?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          attachment_path: string | null
+          body: string
+          created_at: string
+          id: string
+          internal: boolean
+          is_staff: boolean
+          sender_id: string
+          ticket_id: string
+        }
+        Insert: {
+          attachment_path?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          internal?: boolean
+          is_staff?: boolean
+          sender_id: string
+          ticket_id: string
+        }
+        Update: {
+          attachment_path?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          internal?: boolean
+          is_staff?: boolean
+          sender_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assigned_admin_id: string | null
+          category: string
+          closed_at: string | null
+          created_at: string
+          deal_id: string | null
+          id: string
+          last_message_at: string
+          lead_id: string | null
+          priority: Database["public"]["Enums"]["support_priority"]
+          property_id: string | null
+          reference: string
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["support_status"]
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_admin_id?: string | null
+          category?: string
+          closed_at?: string | null
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          last_message_at?: string
+          lead_id?: string | null
+          priority?: Database["public"]["Enums"]["support_priority"]
+          property_id?: string | null
+          reference?: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["support_status"]
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_admin_id?: string | null
+          category?: string
+          closed_at?: string | null
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          last_message_at?: string
+          lead_id?: string | null
+          priority?: Database["public"]["Enums"]["support_priority"]
+          property_id?: string | null
+          reference?: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["support_status"]
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_blocks: {
         Row: {
           blocked_id: string
@@ -2408,6 +2584,13 @@ export type Database = {
       report_target_type: "property" | "user" | "message"
       review_status: "pending" | "published" | "flagged" | "removed"
       review_subject_type: "property" | "user"
+      support_priority: "normal" | "high" | "urgent"
+      support_status:
+        | "open"
+        | "in_progress"
+        | "waiting_user"
+        | "resolved"
+        | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2616,6 +2799,14 @@ export const Constants = {
       report_target_type: ["property", "user", "message"],
       review_status: ["pending", "published", "flagged", "removed"],
       review_subject_type: ["property", "user"],
+      support_priority: ["normal", "high", "urgent"],
+      support_status: [
+        "open",
+        "in_progress",
+        "waiting_user",
+        "resolved",
+        "closed",
+      ],
     },
   },
 } as const

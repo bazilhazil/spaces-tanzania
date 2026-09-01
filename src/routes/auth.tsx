@@ -162,6 +162,13 @@ function AuthPage() {
                   {t("auth.page.browseLink")}
                 </Link>
               </p>
+
+              <p className="mt-2 text-center text-sm">
+                <Link to="/help" search={{ topic: "account" } as never} className="font-medium text-white/70 hover:underline">
+                  {t("support.needHelp")}
+                </Link>
+              </p>
+
             </div>
           </div>
         </main>

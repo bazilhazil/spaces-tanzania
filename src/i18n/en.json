@@ -1346,9 +1346,9 @@
     },
     "support": {
       "title": "Support",
-      "sub": "User support tickets.",
-      "emptyTitle": "Support inbox not connected",
-      "emptyBody": "No ticketing system is connected to SPACES yet, so there are no tickets to show."
+      "sub": "User support tickets and Help Center FAQs.",
+      "emptyTitle": "No tickets yet",
+      "emptyBody": "Support requests submitted by users appear here."
     },
     "payments": {
       "title": "Payments",
@@ -1624,6 +1624,119 @@
       "leads": "Track your leads",
       "manage": "Manage your listing anytime",
       "trust": "Build trust through verification"
+    }
+  },
+  "support": {
+    "needHelp": "Need help?",
+    "contactSupport": "Contact Support",
+    "loading": "Loading…",
+    "help": {
+      "searchPlaceholder": "How can we help?",
+      "all": "All topics"
+    },
+    "cat": {
+      "account": "Account & Login",
+      "finding": "Finding a Space",
+      "listing": "Listing a Space",
+      "viewings": "Viewing Requests",
+      "messages": "Messages",
+      "deals": "Deals",
+      "verification": "Verification",
+      "payments": "Payments",
+      "safety": "Safety",
+      "technical": "Technical Problems",
+      "other": "Other"
+    },
+    "status": {
+      "open": "Open",
+      "in_progress": "In Progress",
+      "waiting_user": "Waiting for You",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "priority": {
+      "normal": "Normal",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "field": {
+      "category": "Category",
+      "subject": "Subject",
+      "subjectPlaceholder": "Short summary of the problem",
+      "message": "Message",
+      "messagePlaceholder": "Tell us what happened and what you expected.",
+      "attachment": "Attachment (optional)",
+      "related": "Related"
+    },
+    "form": {
+      "title": "Contact Support",
+      "sub": "We already know your account details — just tell us the problem.",
+      "invalid": "Please add a subject and describe the problem.",
+      "failed": "Sorry, that did not go through. Please try again.",
+      "sent": "Support request {ref} received."
+    },
+    "action": {
+      "send": "Send request",
+      "cancel": "Cancel",
+      "reply": "Reply",
+      "close": "Close request",
+      "closed": "Request closed",
+      "back": "Back"
+    },
+    "thread": {
+      "you": "You",
+      "support": "SPACES Support",
+      "internal": "Internal note",
+      "empty": "No messages yet.",
+      "closed": "This request is closed. Start a new one if you still need help.",
+      "replyPlaceholder": "Write your reply…"
+    },
+    "my": {
+      "title": "My Support Requests",
+      "subtitle": "Track your requests and reply to the SPACES team.",
+      "new": "New request",
+      "helpCenter": "Help Center",
+      "lastUpdate": "Last update",
+      "emptyTitle": "No support requests yet",
+      "emptyBody": "When you contact support, your requests appear here with their status."
+    },
+    "stats": {
+      "open": "Open tickets",
+      "high": "High priority",
+      "waiting": "Waiting for user",
+      "resolvedToday": "Resolved today"
+    },
+    "admin": {
+      "tab": {
+        "tickets": "Tickets",
+        "faq": "FAQ"
+      },
+      "searchPlaceholder": "Search ticket ID or subject",
+      "allStatuses": "All statuses",
+      "allCategories": "All categories",
+      "assignMe": "Assign to me",
+      "assigned": "Ticket assigned",
+      "updated": "Ticket updated",
+      "user": "User",
+      "emptyTitle": "No tickets match",
+      "emptyBody": "Try a different status, category or search term."
+    },
+    "faq": {
+      "add": "Add FAQ",
+      "edit": "Edit",
+      "delete": "Delete",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "published": "Published",
+      "draft": "Draft",
+      "question": "Question",
+      "answer": "Answer",
+      "questionSw": "Question (Kiswahili)",
+      "answerSw": "Answer (Kiswahili)",
+      "save": "Save",
+      "formTitle": "FAQ entry",
+      "emptyTitle": "No FAQs yet",
+      "emptyBody": "Add an FAQ to publish it in the public Help Center."
     }
   }
 }

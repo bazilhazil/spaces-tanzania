@@ -1346,9 +1346,9 @@
     },
     "support": {
       "title": "Msaada",
-      "sub": "Tiketi za msaada kwa watumiaji.",
-      "emptyTitle": "Msaada haujaunganishwa",
-      "emptyBody": "Hakuna mfumo wa tiketi ulioungwanishwa na SPACES, hivyo hakuna tiketi za kuonyesha."
+      "sub": "Maombi ya msaada na maswali ya Kituo cha Msaada.",
+      "emptyTitle": "Hakuna maombi bado",
+      "emptyBody": "Maombi ya msaada yaliyotumwa na watumiaji yataonekana hapa."
     },
     "payments": {
       "title": "Malipo",
@@ -1624,6 +1624,119 @@
       "leads": "Fuatilia wateja wako",
       "manage": "Simamia tangazo lako wakati wowote",
       "trust": "Jenga uaminifu kupitia uthibitisho"
+    }
+  },
+  "support": {
+    "needHelp": "Unahitaji msaada?",
+    "contactSupport": "Wasiliana na Msaada",
+    "loading": "Inapakia…",
+    "help": {
+      "searchPlaceholder": "Tunawezaje kukusaidia?",
+      "all": "Mada zote"
+    },
+    "cat": {
+      "account": "Akaunti na Kuingia",
+      "finding": "Kutafuta Nafasi",
+      "listing": "Kuweka Nafasi",
+      "viewings": "Maombi ya Ziara",
+      "messages": "Ujumbe",
+      "deals": "Mikataba",
+      "verification": "Uthibitisho",
+      "payments": "Malipo",
+      "safety": "Usalama",
+      "technical": "Matatizo ya Kiufundi",
+      "other": "Nyingine"
+    },
+    "status": {
+      "open": "Wazi",
+      "in_progress": "Inashughulikiwa",
+      "waiting_user": "Inakusubiri",
+      "resolved": "Imetatuliwa",
+      "closed": "Imefungwa"
+    },
+    "priority": {
+      "normal": "Kawaida",
+      "high": "Juu",
+      "urgent": "Dharura"
+    },
+    "field": {
+      "category": "Kundi",
+      "subject": "Mada",
+      "subjectPlaceholder": "Maelezo mafupi ya tatizo",
+      "message": "Ujumbe",
+      "messagePlaceholder": "Tueleze kilichotokea na ulichotarajia.",
+      "attachment": "Kiambatisho (hiari)",
+      "related": "Inahusiana na"
+    },
+    "form": {
+      "title": "Wasiliana na Msaada",
+      "sub": "Tayari tunajua taarifa za akaunti yako — tueleze tatizo tu.",
+      "invalid": "Tafadhali weka mada na ueleze tatizo.",
+      "failed": "Samahani, haikutumwa. Tafadhali jaribu tena.",
+      "sent": "Ombi la msaada {ref} limepokelewa."
+    },
+    "action": {
+      "send": "Tuma ombi",
+      "cancel": "Ghairi",
+      "reply": "Jibu",
+      "close": "Funga ombi",
+      "closed": "Ombi limefungwa",
+      "back": "Rudi"
+    },
+    "thread": {
+      "you": "Wewe",
+      "support": "Msaada wa SPACES",
+      "internal": "Dokezo la ndani",
+      "empty": "Hakuna ujumbe bado.",
+      "closed": "Ombi hili limefungwa. Anzisha jipya kama bado unahitaji msaada.",
+      "replyPlaceholder": "Andika jibu lako…"
+    },
+    "my": {
+      "title": "Maombi Yangu ya Msaada",
+      "subtitle": "Fuatilia maombi yako na ujibu timu ya SPACES.",
+      "new": "Ombi jipya",
+      "helpCenter": "Kituo cha Msaada",
+      "lastUpdate": "Sasisho la mwisho",
+      "emptyTitle": "Hakuna maombi ya msaada bado",
+      "emptyBody": "Ukiwasiliana na msaada, maombi yako yataonekana hapa na hali yake."
+    },
+    "stats": {
+      "open": "Maombi wazi",
+      "high": "Kipaumbele cha juu",
+      "waiting": "Yanasubiri mtumiaji",
+      "resolvedToday": "Yametatuliwa leo"
+    },
+    "admin": {
+      "tab": {
+        "tickets": "Maombi",
+        "faq": "Maswali"
+      },
+      "searchPlaceholder": "Tafuta namba au mada ya ombi",
+      "allStatuses": "Hali zote",
+      "allCategories": "Makundi yote",
+      "assignMe": "Nipe mimi",
+      "assigned": "Ombi limekabidhiwa",
+      "updated": "Ombi limesasishwa",
+      "user": "Mtumiaji",
+      "emptyTitle": "Hakuna ombi linalolingana",
+      "emptyBody": "Jaribu hali, kundi au maneno mengine."
+    },
+    "faq": {
+      "add": "Ongeza swali",
+      "edit": "Hariri",
+      "delete": "Futa",
+      "publish": "Chapisha",
+      "unpublish": "Ondoa",
+      "published": "Imechapishwa",
+      "draft": "Rasimu",
+      "question": "Swali",
+      "answer": "Jibu",
+      "questionSw": "Swali (Kiswahili)",
+      "answerSw": "Jibu (Kiswahili)",
+      "save": "Hifadhi",
+      "formTitle": "Swali la Maswali",
+      "emptyTitle": "Hakuna maswali bado",
+      "emptyBody": "Ongeza swali ili lichapishwe kwenye Kituo cha Msaada."
     }
   }
 }
