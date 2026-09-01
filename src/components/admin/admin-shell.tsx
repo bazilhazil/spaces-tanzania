@@ -82,6 +82,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [pendingVerifications, setPendingVerifications] = useState(0);
 
   const isSuperAdmin = roles.includes("super_admin");
