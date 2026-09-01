@@ -313,7 +313,36 @@ const en: SiteContent = {
           },
         ],
       },
+      {
+        id: "messages",
+        title: "Messages",
+        items: [
+          {
+            q: "Where do I find my messages?",
+            a: "Open Messages from your dashboard. Every conversation with an owner, agent or buyer is kept in one place.",
+          },
+          {
+            q: "Why can't I message someone?",
+            a: "You must be signed in to send messages, and the other person must not have blocked you. Blocked conversations stay hidden for safety.",
+          },
+        ],
+      },
+      {
+        id: "deals",
+        title: "Deals",
+        items: [
+          {
+            q: "What is a deal on SPACES?",
+            a: "A deal tracks an inquiry from first contact through viewing, negotiation and completion, so owners and agents always know the next step.",
+          },
+          {
+            q: "How do I move a deal forward?",
+            a: "Open My Deals, choose the deal and update its stage. Everyone involved sees the change and any follow-up you schedule.",
+          },
+        ],
+      },
     ],
+
   },
   terms: {
     title: "Terms of Service",
