@@ -160,13 +160,17 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
 
           <div className="border-b border-border/60 p-3">
-            <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
+            <button
+              type="button"
+              onClick={() => { setOpen(false); setSearchOpen(true); }}
+              className="flex w-full items-center gap-2 rounded-xl border border-border/60 bg-secondary/40 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary"
+            >
               <Search className="h-4 w-4" />
-              <span className="flex-1">Search anything…</span>
+              <span className="flex-1 text-left">Search users, spaces, inquiries…</span>
               <kbd className="hidden items-center gap-1 rounded border border-border/60 bg-background px-1.5 py-0.5 text-[10px] font-medium md:inline-flex">
                 <Command className="h-2.5 w-2.5" /> K
               </kbd>
-            </div>
+            </button>
           </div>
 
           <nav className="flex-1 space-y-4 overflow-y-auto p-3">
