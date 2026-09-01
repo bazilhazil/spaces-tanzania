@@ -436,7 +436,7 @@ function PhoneForm({
         resetToPhone();
         return;
       }
-      return toast.error(friendlyError(error, "otpWrong"));
+      return toast.error(friendlyError(error as never, "otpWrong"));
     }
     
     const user = data.user;
