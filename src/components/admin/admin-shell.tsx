@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Users, UserCheck, ShieldCheck, Calendar, MessageSquare,
   CreditCard, Receipt, Flag, LifeBuoy, Megaphone, Bell, BarChart3, FileClock,
-  Settings, ShieldAlert, LogOut, Menu, X, Search, Command, Star, Briefcase, DollarSign,
+  Settings, ShieldAlert, LogOut, Menu, X, Search, Command, Star, Briefcase, DollarSign, Database,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
