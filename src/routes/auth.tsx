@@ -345,6 +345,8 @@ function PhoneForm({
   const [cooldown, setCooldown] = useState(0);
   const [expiresIn, setExpiresIn] = useState(0);
   const [attempts, setAttempts] = useState(0);
+  // Set when the backend reports the SMS provider is not configured.
+  const [smsUnavailable, setSmsUnavailable] = useState(false);
 
   useEffect(() => {
     if (cooldown <= 0) return;
