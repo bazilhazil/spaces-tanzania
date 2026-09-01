@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { loadDraft, saveDraft, clearDraft, type WizardDraft } from "@/lib/property-draft";
 import { fetchPlanUsage, listingLimitReached } from "@/lib/monetization-db";
 import { useI18n } from "@/hooks/use-i18n";
+import { NeedHelp } from "@/components/support/need-help";
 import { track } from "@/lib/analytics";
 
 import { compressImageFile, uploadMediaFile } from "@/lib/property-media";
@@ -1097,6 +1098,9 @@ function ListingLimitScreen() {
           <Button asChild variant="outline" className="w-full">
             <Link to="/dashboard/properties">{t("billing.limit.manage")}</Link>
           </Button>
+        </div>
+        <div className="mt-4 flex justify-center">
+          <NeedHelp topic="listing" />
         </div>
       </div>
     </div>
