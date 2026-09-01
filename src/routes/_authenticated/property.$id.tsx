@@ -12,11 +12,12 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
+import { RemoveSpaceDialog } from "@/components/property-management/remove-space-dialog";
 import { signedUrl } from "@/lib/property-media";
 import { useAuth } from "@/hooks/use-auth";
 import { publicIdFrom } from "@/components/property-management/manager";
 import {
-  deletePropertyWithStorage, duplicateProperty, fetchPropertyMetrics, type PropertyMetrics,
+  duplicateProperty, fetchPropertyMetrics, type PropertyMetrics,
 } from "@/lib/property-actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -162,16 +163,8 @@ function PropertyDetail() {
     setRow({ ...row, status: next });
     toast.success("Status updated");
   }
-  async function del() {
-    if (!confirm("Delete this property? Photos will be removed and this cannot be undone.")) return;
-    try {
-      await deletePropertyWithStorage(id);
-    } catch (e: any) {
-      return toast.error(e?.message ?? "Delete failed");
-    }
-    toast.success("Deleted");
-    navigate({ to: "/dashboard/properties" });
-  }
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  function del() { setConfirmRemove(true); }
 
   const url = typeof window !== "undefined" ? `${window.location.origin}/properties/${row.id}` : "";
   async function share() {
@@ -282,7 +275,7 @@ function PropertyDetail() {
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem onClick={del} className="text-destructive focus:text-destructive">
-                        <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
+                        <Trash2 className="mr-2 h-3.5 w-3.5" /> Remove
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -393,7 +386,14 @@ function PropertyDetail() {
           ]} />}
         </div>
       </div>
-    </DashboardShell>
+    <RemoveSpaceDialog
+        open={confirmRemove}
+        onOpenChange={setConfirmRemove}
+        propertyId={id}
+        title={row.title}
+        onRemoved={() => navigate({ to: "/dashboard/properties" })}
+      />
+      </DashboardShell>
   );
 }
 
