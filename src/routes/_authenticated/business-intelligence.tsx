@@ -300,7 +300,7 @@ function BIPage() {
                 <ul className="mt-3 divide-y divide-border/60 text-sm">
                   {report.revenue.rows.map((r) => (
                     <li key={r.purpose} className="flex items-center justify-between gap-2 py-2">
-                      <span className="capitalize text-muted-foreground">{t(`bi.revenue.purpose.${r.purpose}`, {}, r.purpose.replace(/_/g, " "))}</span>
+                      <span className="capitalize text-muted-foreground">{r.purpose.replace(/_/g, " ")}</span>
                       <span className="text-right">
                         <span className="font-semibold text-emerald-600">{money(r.confirmed)}</span>
                         <span className="ml-2 text-xs text-muted-foreground">+{money(r.pending)} {t("bi.revenue.pendingShort")}</span>
@@ -364,7 +364,7 @@ function BIPage() {
               />
               <RankList
                 title={t("bi.market.types")} icon={Building2}
-                items={report.top_types.map((x) => ({ key: x.name, label: t(`propertyType.${x.name}`, {}, x.name), value: `${nf.format(x.leads)} ${t("bi.metric.leads").toLowerCase()}` }))}
+                items={report.top_types.map((x) => ({ key: x.name, label: x.name.replace(/_/g, " "), value: `${nf.format(x.leads)} ${t("bi.metric.leads").toLowerCase()}` }))}
                 empty={t("bi.empty.body")}
               />
               <RankList

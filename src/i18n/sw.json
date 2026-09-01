@@ -1738,5 +1738,101 @@
       "emptyTitle": "Hakuna maswali bado",
       "emptyBody": "Ongeza swali ili lichapishwe kwenye Kituo cha Msaada."
     }
+  },
+  "bi": {
+    "title": "Takwimu za Biashara",
+    "subtitle": "Kinachoendelea SPACES sasa hivi — data halisi pekee.",
+    "open": "Fungua",
+    "range": {
+      "1d": "Leo",
+      "7d": "Siku 7",
+      "30d": "Siku 30",
+      "90d": "Siku 90",
+      "ytd": "Mwaka huu"
+    },
+    "kpi": {
+      "activeProperties": "Nafasi Hai",
+      "newProperties": "Nafasi Mpya",
+      "activeUsers": "Watumiaji Hai",
+      "newUsers": "Watumiaji Wapya",
+      "newLeads": "Maswali Mapya",
+      "viewingRequests": "Maombi ya Kutazama",
+      "activeDeals": "Mikataba Hai",
+      "completedDeals": "Mikataba Iliyokamilika",
+      "conversion": "Kiwango cha Ufanisi",
+      "revenue": "Mapato Yaliyothibitishwa"
+    },
+    "growth": {
+      "notEnough": "Bado hakuna data ya kutosha.",
+      "vsPrevious": "ikilinganishwa na kipindi kilichopita"
+    },
+    "funnel": {
+      "title": "Mkondo wa maswali",
+      "views": "Mionekano ya nafasi",
+      "leads": "Maswali",
+      "viewings": "Maombi ya kutazama",
+      "viewingsDone": "Kutazama kulikokamilika",
+      "deals": "Mikataba",
+      "dealsDone": "Mikataba iliyokamilika"
+    },
+    "attention": {
+      "title": "Yanayohitaji uangalizi",
+      "allClear": "Hakuna linalohitaji uangalizi kwa sasa.",
+      "leadsWaiting": "Maswali yanayosubiri majibu",
+      "silentProperties": "Nafasi zenye mionekano mingi bila maswali",
+      "viewingsPending": "Maombi ya kutazama yanayosubiri idhini",
+      "staleDeals": "Mikataba isiyo na shughuli za hivi karibuni",
+      "failedPayments": "Malipo yaliyoshindikana",
+      "pendingVerifications": "Uthibitisho unaosubiri",
+      "openTickets": "Tiketi za msaada zilizo wazi",
+      "propertiesReview": "Nafasi zinazosubiri ukaguzi"
+    },
+    "revenue": {
+      "title": "Mapato",
+      "confirmed": "Mapato yaliyothibitishwa",
+      "pending": "Mapato yanayosubiri",
+      "pendingShort": "yanasubiri",
+      "none": "Hakuna malipo katika kipindi hiki.",
+      "note": "Malipo yaliyothibitishwa pekee ndiyo huhesabiwa kama mapato."
+    },
+    "top": {
+      "title": "Nafasi zinazofanya vizuri zaidi"
+    },
+    "metric": {
+      "views": "Mionekano",
+      "favorites": "Zilizohifadhiwa",
+      "leads": "Maswali",
+      "viewings": "Kutazama",
+      "deals": "Mikataba",
+      "listings": "Matangazo"
+    },
+    "market": {
+      "locations": "Maeneo yenye shughuli nyingi",
+      "mostViewed": "Nafasi zilizotazamwa zaidi",
+      "mostContacted": "Nafasi zilizoulizwa zaidi",
+      "types": "Aina zinazohitajika zaidi",
+      "areas": "Maeneo yenye shughuli",
+      "response": "Muda wa wastani wa kujibu",
+      "responseNote": "Muda wa kawaida hadi jibu la kwanza."
+    },
+    "agents": {
+      "title": "Utendaji wa Madalali"
+    },
+    "owners": {
+      "title": "Utendaji wa Wamiliki"
+    },
+    "people": {
+      "unnamed": "Mtumiaji asiye na jina"
+    },
+    "empty": {
+      "title": "Bado hakuna shughuli",
+      "body": "Bado hakuna data ya kutosha."
+    },
+    "export": {
+      "metric": "Kipimo",
+      "value": "Thamani",
+      "period": "Kipindi",
+      "popupBlocked": "Ruhusu madirisha ibukizi ili kupakua ripoti ya PDF."
+    }
   }
 }
