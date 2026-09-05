@@ -954,11 +954,11 @@ function StepPreview({
 
           <div className="flex justify-end"><EditBtn s={4} label="Details" /></div>
 
-          {(draft.bedrooms || draft.bathrooms || draft.parking || draft.area_sqm) && (
+          {(draft.bedrooms || draft.bathrooms || draft.parking_available !== undefined || draft.area_sqm) && (
             <div className="grid grid-cols-4 gap-3 rounded-2xl bg-muted p-3 text-center text-sm">
               <div><div className="font-bold">{draft.bedrooms ?? "—"}</div><div className="text-xs text-muted-foreground">Beds</div></div>
               <div><div className="font-bold">{draft.bathrooms ?? "—"}</div><div className="text-xs text-muted-foreground">Baths</div></div>
-              <div><div className="font-bold">{draft.parking ?? "—"}</div><div className="text-xs text-muted-foreground">Parking</div></div>
+              <div><div className="font-bold">{draft.parking_available ? "Yes" : "No"}</div><div className="text-xs text-muted-foreground">Parking</div></div>
               <div><div className="font-bold">{draft.area_sqm ?? "—"}</div><div className="text-xs text-muted-foreground">sqm</div></div>
             </div>
           )}
