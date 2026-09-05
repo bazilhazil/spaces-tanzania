@@ -16,6 +16,7 @@ import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckoutDialog, type CheckoutRequest } from "@/components/billing/checkout-dialog";
+import { refreshPaymentStatus } from "@/lib/selcom.functions";
 import { useMyPayments, useMySubscription, type InvoiceLike } from "@/lib/billing-db";
 import { PAYMENT_METHODS } from "@/lib/billing-mock";
 import { fetchAdminPayments, fetchAdminSubscriptions } from "@/lib/admin-db";
