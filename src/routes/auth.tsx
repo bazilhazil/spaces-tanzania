@@ -357,33 +357,29 @@ function PhoneForm({
 
   async function send(target: string) {
     if (smsUnavailable) return false;
-    if (!canSend(target)) {
-      toast.error(errorMessage("otpAttempts"));
-      return false;
-    }
     setLoading(true);
-    let error: unknown = null;
+    let result: Awaited<ReturnType<typeof requestPhoneCode>> | null = null;
     try {
-      ({ error } = await supabase.auth.signInWithOtp({ phone: target }));
-    } catch (err) {
-      error = err;
+      result = await requestPhoneCode({ data: { phone: target } });
+    } catch {
+      result = null;
     }
     setLoading(false);
-    if (error) {
-      const code = (error as { code?: string }).code ?? "";
-      const msg = (error as { message?: string }).message ?? "";
-      if (code === "phone_provider_disabled" || /provider.*disabled|sms/i.test(msg)) {
-        // Missing SMS configuration is an expected state — keep the UI usable.
+    if (!result || !result.ok) {
+      const reason = result && !result.ok ? result.reason : "send_failed";
+      if (reason === "unconfigured") {
+        // Text messaging is not configured on the server — keep the UI usable.
         setSmsUnavailable(true);
         setStep("phone");
         return false;
       }
-      toast.error(friendlyError(error as never, "otpSendFailed"));
+      if (reason === "invalid_phone") toast.error(errorMessage("invalidPhone"));
+      else if (reason === "rate_limited" || reason === "cooldown") toast.error(errorMessage("otpAttempts"));
+      else toast.error(errorMessage("otpSendFailed"));
       return false;
     }
-    recordSend(target);
-    setCooldown(45);
-    setExpiresIn(OTP_TTL_SECONDS);
+    setCooldown(result.cooldown);
+    setExpiresIn(result.expiresIn);
     setOtp("");
     setAttempts(0);
     setStep("otp");
@@ -405,23 +401,39 @@ function PhoneForm({
     if (expiresIn <= 0) return toast.error(errorMessage("otpExpired"));
     if (attempts >= MAX_ATTEMPTS) return toast.error(errorMessage("otpAttempts"));
     setLoading(true);
-    let data: Awaited<ReturnType<typeof supabase.auth.verifyOtp>>["data"] | null = null;
-    let error: unknown = null;
+    let result: Awaited<ReturnType<typeof verifyPhoneCode>> | null = null;
     try {
-      ({ data, error } = await supabase.auth.verifyOtp({ phone: e164, token: otp, type: "sms" }));
-    } catch (err) {
-      error = err;
+      result = await verifyPhoneCode({ data: { phone: e164, code: otp } });
+    } catch {
+      result = null;
     }
-    setLoading(false);
-    if (error || !data) {
+
+    if (!result || !result.ok) {
+      setLoading(false);
+      const reason = result && !result.ok ? result.reason : "failed";
+      if (reason === "expired") {
+        setExpiresIn(0);
+        return toast.error(errorMessage("otpExpired"));
+      }
       const next = attempts + 1;
       setAttempts(next);
       setOtp("");
-      if (next >= MAX_ATTEMPTS) {
+      if (reason === "too_many" || next >= MAX_ATTEMPTS) {
         toast.error(errorMessage("otpAttempts"));
         resetToPhone();
         return;
       }
+      return toast.error(errorMessage("otpWrong"));
+    }
+
+    // Exchange the one-time token for a real session in the browser.
+    const { data, error } = await supabase.auth.verifyOtp({
+      type: "email",
+      token_hash: result.tokenHash,
+    });
+    setLoading(false);
+    if (error || !data.user) {
+      setOtp("");
       return toast.error(friendlyError(error as never, "otpWrong"));
     }
     
