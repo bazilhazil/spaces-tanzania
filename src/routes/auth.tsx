@@ -312,22 +312,8 @@ function EmailForm({
 }
 
 /* ─────────────── Phone ─────────────── */
-const OTP_TTL_SECONDS = 300; // codes are short-lived
-const MAX_SENDS = 3; // per number, per window
+const OTP_TTL_SECONDS = 300; // codes are short-lived (server enforces this too)
 const MAX_ATTEMPTS = 5;
-const SEND_WINDOW_MS = 15 * 60 * 1000;
-
-const sendLog: Record<string, number[]> = {};
-
-function canSend(phone: string) {
-  const now = Date.now();
-  const list = (sendLog[phone] ?? []).filter((t) => now - t < SEND_WINDOW_MS);
-  sendLog[phone] = list;
-  return list.length < MAX_SENDS;
-}
-function recordSend(phone: string) {
-  sendLog[phone] = [...(sendLog[phone] ?? []), Date.now()];
-}
 
 function PhoneForm({
   redirect,
