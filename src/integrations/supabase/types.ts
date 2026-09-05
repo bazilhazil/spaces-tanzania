@@ -899,6 +899,36 @@ export type Database = {
           },
         ]
       }
+      phone_otp_codes: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          phone: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          phone: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"]
@@ -1837,6 +1867,36 @@ export type Database = {
           name?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      sms_delivery_log: {
+        Row: {
+          created_at: string
+          error_code: string | null
+          id: string
+          masked_recipient: string
+          provider_message_id: string | null
+          purpose: string
+          success: boolean
+        }
+        Insert: {
+          created_at?: string
+          error_code?: string | null
+          id?: string
+          masked_recipient: string
+          provider_message_id?: string | null
+          purpose: string
+          success: boolean
+        }
+        Update: {
+          created_at?: string
+          error_code?: string | null
+          id?: string
+          masked_recipient?: string
+          provider_message_id?: string | null
+          purpose?: string
+          success?: boolean
         }
         Relationships: []
       }
