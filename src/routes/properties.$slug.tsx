@@ -705,7 +705,7 @@ function PropertyDetailPage() {
         open={shareOpen}
         onOpenChange={setShareOpen}
         title={property.title}
-        url={typeof window !== "undefined" ? window.location.href : ""}
+        url={canonicalPropertyUrl(propertySlug({ ...property, id: property.id }))}
       />
 
       <AuthGateDialog open={authGate} onOpenChange={setAuthGate} />

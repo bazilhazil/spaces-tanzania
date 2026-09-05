@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { PROPERTY_TYPES } from "./constants";
 import { TZ_REGIONS } from "@/lib/tz-locations";
 import { friendlyError } from "@/lib/errors";
+import { canonicalPropertyUrl } from "@/lib/seo";
 
 export type ManagedStatus =
   | "draft" | "live" | "archived" | "pending" | "paused" | "sold" | "rented" | "rejected";
@@ -1002,7 +1003,7 @@ async function handleCardAction(
   setRows: (fn: (r: ManagedProperty[]) => ManagedProperty[]) => void,
   setSelected: (fn: (s: Set<string>) => Set<string>) => void,
 ) {
-  const url = `${window.location.origin}/properties/${p.id}`;
+  const url = canonicalPropertyUrl(p.id);
   switch (a) {
     case "view":
       window.open(url, "_blank");

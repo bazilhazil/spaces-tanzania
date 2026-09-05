@@ -10,6 +10,7 @@ import { useI18n } from "@/hooks/use-i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
 import { cn } from "@/lib/utils";
+import { canonicalPropertyUrl } from "@/lib/seo";
 
 export const Route = createFileRoute("/_authenticated/dashboard/favorites")({
   component: FavoritesPage,
@@ -99,9 +100,7 @@ function FavoritesPage() {
     day: "numeric", month: "short", year: "numeric",
   });
 
-  const shareUrl = share
-    ? `${typeof window !== "undefined" ? window.location.origin : ""}/properties/${share.id}`
-    : "";
+  const shareUrl = share ? canonicalPropertyUrl(share.id) : "";
 
 
   return (

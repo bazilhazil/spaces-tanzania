@@ -22,6 +22,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
+import { canonicalPropertyUrl } from "@/lib/seo";
 
 export const Route = createFileRoute("/_authenticated/property/$id")({
   component: PropertyDetail,
@@ -166,7 +167,7 @@ function PropertyDetail() {
   const [confirmRemove, setConfirmRemove] = useState(false);
   function del() { setConfirmRemove(true); }
 
-  const url = typeof window !== "undefined" ? `${window.location.origin}/properties/${row.id}` : "";
+  const url = canonicalPropertyUrl(row.id);
   async function share() {
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try { await (navigator as any).share({ title: row.title, url }); return; } catch { /* cancelled */ }
