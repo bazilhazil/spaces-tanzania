@@ -181,7 +181,10 @@ function PropertiesPage() {
     if (search.minSize && p.size < search.minSize) return false;
     if (search.maxSize && p.size > search.maxSize) return false;
     if (search.furnished && !p.furnished) return false;
-    if (search.parking && !(p.parking > 0 || p.amenities.includes("parking"))) return false;
+    if (search.parking !== undefined) {
+      const hasParking = p.parkingAvailable || p.amenities.includes("parking");
+      if (search.parking !== hasParking) return false;
+    }
     if (search.verified && !p.verified) return false;
     if (selectedAmenities.length && !selectedAmenities.every((a) => p.amenities.includes(a))) return false;
     if (search.q) {

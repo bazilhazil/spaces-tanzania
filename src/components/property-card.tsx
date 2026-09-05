@@ -146,8 +146,8 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
           {property.bathrooms > 0 && (
             <span className="inline-flex items-center gap-1" title={t("card.bathrooms")}><Bath className="h-3.5 w-3.5" /> {property.bathrooms}</span>
           )}
-          {property.parking > 0 && (
-            <span className="inline-flex items-center gap-1" title={t("card.parking")}><Car className="h-3.5 w-3.5" /> {property.parking}</span>
+          {property.parkingAvailable && (
+            <span className="inline-flex items-center gap-1" title={t("card.parkingAvailable")}><Car className="h-3.5 w-3.5" /></span>
           )}
           {property.size > 0 && (
             <span className="ml-auto inline-flex items-center gap-1" title={t("card.size")}><Ruler className="h-3.5 w-3.5" /> {property.size} m²</span>

@@ -54,7 +54,7 @@ function mapRow(row: Row, images: string[]): Property {
     street: row.street ?? row.address ?? "",
     bedrooms: row.bedrooms ?? 0,
     bathrooms: row.bathrooms ?? 0,
-    parking: row.parking ?? 0,
+    parkingAvailable: row.parking_available === true || Number(row.parking ?? 0) > 0,
     size: Number(row.area_sqm ?? 0),
     yearBuilt: row.year_built ?? 0,
     furnished: Array.isArray(row.amenities) && row.amenities.includes("furnished"),
