@@ -650,10 +650,32 @@ function StepInfo({ draft, setField }: { draft: WizardDraft; setField: <K extend
         <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
           <NumField label="Bedrooms" value={draft.bedrooms} onChange={(n) => setField("bedrooms", n)} />
           <NumField label="Bathrooms" value={draft.bathrooms} onChange={(n) => setField("bathrooms", n)} />
-          <NumField label="Parking" value={draft.parking} onChange={(n) => setField("parking", n)} />
           <NumField label="Size (sqm)" value={draft.area_sqm} onChange={(n) => setField("area_sqm", n)} />
           <NumField label="Floor" value={draft.floor} onChange={(n) => setField("floor", n)} />
           <NumField label="Year built" value={draft.year_built} onChange={(n) => setField("year_built", n)} />
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-sm font-semibold">Parking</Label>
+        <div className="mt-2 grid grid-cols-2 gap-3">
+          {[
+            { v: true, label: "Available" },
+            { v: false, label: "Not available" },
+          ].map((o) => (
+            <button
+              key={String(o.v)}
+              type="button"
+              onClick={() => setField("parking_available", o.v)}
+              className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${
+                !!draft.parking_available === o.v
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:border-primary/40"
+              }`}
+            >
+              {o.label}
+            </button>
+          ))}
         </div>
       </div>
     </section>
