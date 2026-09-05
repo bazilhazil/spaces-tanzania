@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
 import { PAYMENT_METHODS } from "@/lib/billing-mock";
+import { onlinePaymentsAvailable, bankTransferDetails, startOnlinePayment } from "@/lib/selcom.functions";
 import {
   formatTZS, planPrice,
   createSubscriptionOrder, createPromotionOrder,
@@ -21,8 +23,9 @@ export type CheckoutRequest =
 
 /**
  * Upgrade / promotion checkout.
- * Creates a PENDING payment record only. Paid features are never unlocked here —
- * activation happens exclusively when the payment is confirmed.
+ * Creates a PENDING payment record and hands it to the secure payment
+ * backend. Paid features are never unlocked here — activation happens
+ * exclusively when the provider confirms the payment.
  */
 export function CheckoutDialog({
   open, onOpenChange, request, onOrdered,
@@ -35,8 +38,22 @@ export function CheckoutDialog({
   const { t } = useI18n();
   const [method, setMethod] = useState<string>("mpesa");
   const [busy, setBusy] = useState(false);
-  const [ordered, setOrdered] = useState<{ reference: string } | null>(null);
+  const [ordered, setOrdered] = useState<{ reference: string; bank: boolean } | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
+
+  const { data: gateway } = useQuery({
+    queryKey: ["online-payments-available"],
+    queryFn: () => onlinePaymentsAvailable(),
+    staleTime: 5 * 60_000,
+  });
+  const { data: bank } = useQuery({
+    queryKey: ["bank-transfer-details"],
+    queryFn: () => bankTransferDetails(),
+    staleTime: 5 * 60_000,
+    enabled: method === "bank",
+  });
+
+  useEffect(() => { if (open) { setOrdered(null); setFailed(null); } }, [open]);
 
   if (!request) return null;
 
@@ -58,16 +75,30 @@ export function CheckoutDialog({
       const res = request.kind === "plan"
         ? await createSubscriptionOrder(request.plan, request.cycle, method)
         : await createPromotionOrder(request.product, request.propertyId, method);
-      setOrdered({ reference: res.reference });
       onOrdered?.();
+
+      if (method === "bank") {
+        setOrdered({ reference: res.reference, bank: true });
+        return;
+      }
+
+      const start = await startOnlinePayment({ data: { reference: res.reference } });
+      if (start.ok) {
+        toast.info(t("billing.pay.redirecting"));
+        window.location.href = start.gatewayUrl;
+        return;
+      }
+      setOrdered({ reference: res.reference, bank: false });
+      setFailed(start.reason === "unconfigured" ? "unconfigured" : "provider");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setFailed(msg);
-      toast.error(t("billing.checkout.failed"));
+      toast.error(t("billing.pay.couldNotStart"));
     } finally {
       setBusy(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={close}>
