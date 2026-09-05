@@ -168,6 +168,8 @@
     "bedrooms": "Vyumba vya kulala",
     "bathrooms": "Bafu",
     "parking": "Maegesho",
+    "parkingAvailable": "Maegesho yapo",
+    "noParking": "Hakuna maegesho",
     "size": "Ukubwa",
     "viewSpace": "Angalia Nafasi"
   },
@@ -599,6 +601,7 @@
     "maxSize": "Ukubwa wa juu",
     "furnished": "Yenye samani",
     "parking": "Maegesho",
+    "parkingAny": "Zote",
     "amenities": "Huduma",
     "verifiedOnly": "Zilizothibitishwa pekee",
     "region": "Mkoa",

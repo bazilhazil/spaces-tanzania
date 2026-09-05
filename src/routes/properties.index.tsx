@@ -696,7 +696,27 @@ function FilterPanel({
 
       <div className="space-y-3 rounded-xl border border-border p-3">
         <ToggleRow label={t("discovery.furnished")} checked={!!search.furnished} onChange={(v) => patch({ furnished: v || undefined })} />
-        <ToggleRow label={t("discovery.parking")} checked={!!search.parking} onChange={(v) => patch({ parking: v || undefined })} />
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm">{t("discovery.parking")}</span>
+          <div className="flex gap-1">
+            {([
+              { v: undefined as boolean | undefined, label: t("discovery.parkingAny") },
+              { v: true, label: t("card.parkingAvailable") },
+              { v: false, label: t("card.noParking") },
+            ]).map((o) => (
+              <button
+                key={String(o.v)}
+                type="button"
+                onClick={() => patch({ parking: o.v })}
+                className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition ${
+                  search.parking === o.v ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"
+                }`}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <ToggleRow label={t("discovery.verifiedOnly")} checked={!!search.verified} onChange={(v) => patch({ verified: v || undefined })} />
       </div>
 
