@@ -1608,6 +1608,23 @@
       "agentLimit": "Kikomo cha mawakala",
       "saved": "Imehifadhiwa",
       "configHelp": "Mabadiliko yanahusu manunuzi mapya. Michango iliyopo inabaki na masharti yake."
+    },
+    "pay": {
+      "payNow": "Lipa Sasa",
+      "total": "Jumla",
+      "service": "Huduma",
+      "reference": "Kumbukumbu",
+      "bankTitle": "Taarifa za benki",
+      "bankPending": "Inasubiri uthibitisho",
+      "bankBody": "Tuma kiasi kamili ukitumia kumbukumbu hapa chini. Timu yetu huthibitisha malipo ya benki kwa mkono — hakuna huduma inayoanza kabla ya uthibitisho.",
+      "redirecting": "Tunafungua malipo salama…",
+      "processing": "Malipo yako yanashughulikiwa.",
+      "confirmed": "Malipo yamethibitishwa.",
+      "notCompleted": "Malipo hayakukamilika. Hujakatwa fedha na SPACES.",
+      "tryAgain": "Jaribu Tena",
+      "couldNotStart": "Malipo hayakuweza kukamilika. Tafadhali jaribu tena.",
+      "unconfigured": "Malipo mtandaoni bado hayajapatikana. Agizo lako limehifadhiwa na timu yetu itawasiliana nawe.",
+      "checkStatus": "Angalia hali ya malipo"
     }
   },
   "convert": {
