@@ -16,6 +16,7 @@ import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckoutDialog, type CheckoutRequest } from "@/components/billing/checkout-dialog";
+import { refreshPaymentStatus } from "@/lib/selcom.functions";
 import { useMyPayments, useMySubscription, type InvoiceLike } from "@/lib/billing-db";
 import { PAYMENT_METHODS } from "@/lib/billing-mock";
 import { fetchAdminPayments, fetchAdminSubscriptions } from "@/lib/admin-db";
@@ -42,6 +43,36 @@ export function BillingCenter() {
 
   // One expiry reminder per billing period (backend enforces the de-duplication).
   useEffect(() => { void checkSubscriptionExpiry().catch(() => {}); }, []);
+
+  // Returning from the payment page: confirm the real result with the provider.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (!ref) return;
+    let cancelled = false;
+    void (async () => {
+      for (let i = 0; i < 5 && !cancelled; i++) {
+        const res = await refreshPaymentStatus({ data: { reference: ref } }).catch(() => null);
+        const status = res?.status ?? "";
+        if (status === "paid" || status === "succeeded") {
+          toast.success(t("billing.pay.confirmed"));
+          break;
+        }
+        if (["failed", "cancelled", "expired"].includes(status)) {
+          toast.error(t("billing.pay.notCompleted"));
+          break;
+        }
+        if (i === 0) toast.info(t("billing.pay.processing"));
+        await new Promise((r) => setTimeout(r, 4000));
+      }
+      if (cancelled) return;
+      void queryClient.invalidateQueries();
+      window.history.replaceState({}, "", window.location.pathname);
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "plans", label: t("billing.tabs.plans") },

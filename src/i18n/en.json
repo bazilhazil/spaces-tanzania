@@ -1608,6 +1608,23 @@
       "agentLimit": "Agent limit",
       "saved": "Saved",
       "configHelp": "Changes apply to new purchases. Existing subscriptions keep the terms they were bought on."
+    },
+    "pay": {
+      "payNow": "Pay Now",
+      "total": "Total",
+      "service": "Service",
+      "reference": "Reference",
+      "bankTitle": "Bank transfer details",
+      "bankPending": "Pending verification",
+      "bankBody": "Send the exact amount using the reference below. Our team confirms bank transfers manually — nothing is activated until the payment is confirmed.",
+      "redirecting": "Opening secure payment…",
+      "processing": "Your payment is being processed.",
+      "confirmed": "Payment confirmed.",
+      "notCompleted": "Payment was not completed. You have not been charged by SPACES.",
+      "tryAgain": "Try Again",
+      "couldNotStart": "Payment could not be completed. Please try again.",
+      "unconfigured": "Online payments are not available yet. Your order has been recorded and our team will contact you.",
+      "checkStatus": "Check payment status"
     }
   },
   "convert": {

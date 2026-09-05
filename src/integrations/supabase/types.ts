@@ -837,14 +837,19 @@ export type Database = {
         Row: {
           amount: number
           billing_cycle: string | null
+          channel: string | null
           created_at: string
           currency: string
+          gateway_url: string | null
           id: string
           metadata: Json
+          paid_at: string | null
           plan_id: string | null
           provider: string
+          provider_reference: string | null
           purpose: string
           reference: string | null
+          refunded_at: string | null
           status: string
           subscription_id: string | null
           updated_at: string
@@ -853,14 +858,19 @@ export type Database = {
         Insert: {
           amount: number
           billing_cycle?: string | null
+          channel?: string | null
           created_at?: string
           currency?: string
+          gateway_url?: string | null
           id?: string
           metadata?: Json
+          paid_at?: string | null
           plan_id?: string | null
           provider: string
+          provider_reference?: string | null
           purpose?: string
           reference?: string | null
+          refunded_at?: string | null
           status?: string
           subscription_id?: string | null
           updated_at?: string
@@ -869,14 +879,19 @@ export type Database = {
         Update: {
           amount?: number
           billing_cycle?: string | null
+          channel?: string | null
           created_at?: string
           currency?: string
+          gateway_url?: string | null
           id?: string
           metadata?: Json
+          paid_at?: string | null
           plan_id?: string | null
           provider?: string
+          provider_reference?: string | null
           purpose?: string
           reference?: string | null
+          refunded_at?: string | null
           status?: string
           subscription_id?: string | null
           updated_at?: string

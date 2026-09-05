@@ -45,6 +45,7 @@ import { Route as AuthenticatedBusinessIntelligenceRouteImport } from './routes/
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as ApiPublicSelcomWebhookRouteImport } from './routes/api/public/selcom-webhook'
 import { Route as AuthenticatedPropertyIdRouteImport } from './routes/_authenticated/property.$id'
 import { Route as AuthenticatedDashboardSupportRouteImport } from './routes/_authenticated/dashboard.support'
 import { Route as AuthenticatedDashboardSearchesRouteImport } from './routes/_authenticated/dashboard.searches'
@@ -242,6 +243,11 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const ApiPublicSelcomWebhookRoute = ApiPublicSelcomWebhookRouteImport.update({
+  id: '/api/public/selcom-webhook',
+  path: '/api/public/selcom-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedPropertyIdRoute = AuthenticatedPropertyIdRouteImport.update({
   id: '/property/$id',
   path: '/property/$id',
@@ -365,6 +371,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/searches': typeof AuthenticatedDashboardSearchesRoute
   '/dashboard/support': typeof AuthenticatedDashboardSupportRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
+  '/api/public/selcom-webhook': typeof ApiPublicSelcomWebhookRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
   '/api/public/og/property/$id': typeof ApiPublicOgPropertyIdRoute
@@ -414,6 +421,7 @@ export interface FileRoutesByTo {
   '/dashboard/searches': typeof AuthenticatedDashboardSearchesRoute
   '/dashboard/support': typeof AuthenticatedDashboardSupportRoute
   '/property/$id': typeof AuthenticatedPropertyIdRoute
+  '/api/public/selcom-webhook': typeof ApiPublicSelcomWebhookRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
   '/api/public/og/property/$id': typeof ApiPublicOgPropertyIdRoute
@@ -466,6 +474,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/searches': typeof AuthenticatedDashboardSearchesRoute
   '/_authenticated/dashboard/support': typeof AuthenticatedDashboardSupportRoute
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
+  '/api/public/selcom-webhook': typeof ApiPublicSelcomWebhookRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
   '/api/public/og/property/$id': typeof ApiPublicOgPropertyIdRoute
@@ -518,6 +527,7 @@ export interface FileRouteTypes {
     | '/dashboard/searches'
     | '/dashboard/support'
     | '/property/$id'
+    | '/api/public/selcom-webhook'
     | '/admin/'
     | '/dashboard/properties/$id/manage'
     | '/api/public/og/property/$id'
@@ -567,6 +577,7 @@ export interface FileRouteTypes {
     | '/dashboard/searches'
     | '/dashboard/support'
     | '/property/$id'
+    | '/api/public/selcom-webhook'
     | '/admin'
     | '/dashboard/properties/$id/manage'
     | '/api/public/og/property/$id'
@@ -618,6 +629,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/searches'
     | '/_authenticated/dashboard/support'
     | '/_authenticated/property/$id'
+    | '/api/public/selcom-webhook'
     | '/_authenticated/admin/'
     | '/_authenticated/dashboard/properties/$id/manage'
     | '/api/public/og/property/$id'
@@ -643,6 +655,7 @@ export interface RootRouteChildren {
   PropertiesSlugRoute: typeof PropertiesSlugRoute
   SpacesLocationRoute: typeof SpacesLocationRoute
   PropertiesIndexRoute: typeof PropertiesIndexRoute
+  ApiPublicSelcomWebhookRoute: typeof ApiPublicSelcomWebhookRoute
   ApiPublicOgPropertyIdRoute: typeof ApiPublicOgPropertyIdRoute
 }
 
@@ -900,6 +913,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/api/public/selcom-webhook': {
+      id: '/api/public/selcom-webhook'
+      path: '/api/public/selcom-webhook'
+      fullPath: '/api/public/selcom-webhook'
+      preLoaderRoute: typeof ApiPublicSelcomWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/property/$id': {
       id: '/_authenticated/property/$id'
       path: '/property/$id'
@@ -1128,6 +1148,7 @@ const rootRouteChildren: RootRouteChildren = {
   PropertiesSlugRoute: PropertiesSlugRoute,
   SpacesLocationRoute: SpacesLocationRoute,
   PropertiesIndexRoute: PropertiesIndexRoute,
+  ApiPublicSelcomWebhookRoute: ApiPublicSelcomWebhookRoute,
   ApiPublicOgPropertyIdRoute: ApiPublicOgPropertyIdRoute,
 }
 export const routeTree = rootRouteImport

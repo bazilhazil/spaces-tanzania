@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useI18n } from "@/hooks/use-i18n";
 import { PAYMENT_METHODS } from "@/lib/billing-mock";
+import { onlinePaymentsAvailable, bankTransferDetails, startOnlinePayment } from "@/lib/selcom.functions";
 import {
   formatTZS, planPrice,
   createSubscriptionOrder, createPromotionOrder,
@@ -21,8 +23,9 @@ export type CheckoutRequest =
 
 /**
  * Upgrade / promotion checkout.
- * Creates a PENDING payment record only. Paid features are never unlocked here —
- * activation happens exclusively when the payment is confirmed.
+ * Creates a PENDING payment record and hands it to the secure payment
+ * backend. Paid features are never unlocked here — activation happens
+ * exclusively when the provider confirms the payment.
  */
 export function CheckoutDialog({
   open, onOpenChange, request, onOrdered,
@@ -35,8 +38,22 @@ export function CheckoutDialog({
   const { t } = useI18n();
   const [method, setMethod] = useState<string>("mpesa");
   const [busy, setBusy] = useState(false);
-  const [ordered, setOrdered] = useState<{ reference: string } | null>(null);
+  const [ordered, setOrdered] = useState<{ reference: string; bank: boolean } | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
+
+  const { data: gateway } = useQuery({
+    queryKey: ["online-payments-available"],
+    queryFn: () => onlinePaymentsAvailable(),
+    staleTime: 5 * 60_000,
+  });
+  const { data: bank } = useQuery({
+    queryKey: ["bank-transfer-details"],
+    queryFn: () => bankTransferDetails(),
+    staleTime: 5 * 60_000,
+    enabled: method === "bank",
+  });
+
+  useEffect(() => { if (open) { setOrdered(null); setFailed(null); } }, [open]);
 
   if (!request) return null;
 
@@ -58,16 +75,30 @@ export function CheckoutDialog({
       const res = request.kind === "plan"
         ? await createSubscriptionOrder(request.plan, request.cycle, method)
         : await createPromotionOrder(request.product, request.propertyId, method);
-      setOrdered({ reference: res.reference });
       onOrdered?.();
+
+      if (method === "bank") {
+        setOrdered({ reference: res.reference, bank: true });
+        return;
+      }
+
+      const start = await startOnlinePayment({ data: { reference: res.reference } });
+      if (start.ok) {
+        toast.info(t("billing.pay.redirecting"));
+        window.location.href = start.gatewayUrl;
+        return;
+      }
+      setOrdered({ reference: res.reference, bank: false });
+      setFailed(start.reason === "unconfigured" ? "unconfigured" : "provider");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setFailed(msg);
-      toast.error(t("billing.checkout.failed"));
+      toast.error(t("billing.pay.couldNotStart"));
     } finally {
       setBusy(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={close}>
@@ -84,16 +115,49 @@ export function CheckoutDialog({
 
         {ordered ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-4 text-sm text-foreground/80">
-              <div className="font-semibold text-foreground">{t("billing.checkout.pendingTitle")}</div>
-              <p className="mt-1">{t("billing.checkout.pendingBody")}</p>
-              <p className="mt-2 font-mono text-xs">{ordered.reference}</p>
-            </div>
+            {ordered.bank ? (
+              <div className="rounded-2xl border border-border/60 p-4 text-sm text-foreground/85">
+                <div className="font-semibold text-foreground">{t("billing.pay.bankTitle")}</div>
+                <p className="mt-1 text-muted-foreground">{t("billing.pay.bankBody")}</p>
+                <dl className="mt-3 space-y-1.5">
+                  {[
+                    [t("billing.pay.total"), formatTZS(amount)],
+                    ["Bank", bank?.bank_name],
+                    ["Account name", bank?.account_name],
+                    ["Account number", bank?.account_number],
+                    [bank?.branch ? "Branch" : "", bank?.branch],
+                    [bank?.swift ? "SWIFT" : "", bank?.swift],
+                  ].filter(([k, v]) => k && v).map(([k, v]) => (
+                    <div key={String(k)} className="flex justify-between gap-4">
+                      <dt className="text-muted-foreground">{k}</dt>
+                      <dd className="font-semibold">{v}</dd>
+                    </div>
+                  ))}
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-muted-foreground">{t("billing.pay.reference")}</dt>
+                    <dd className="font-mono text-xs font-semibold">{ordered.reference}</dd>
+                  </div>
+                </dl>
+                {bank?.instructions ? <p className="mt-3 text-xs text-muted-foreground">{bank.instructions}</p> : null}
+                <Badge variant="outline" className="mt-3 border-amber-500/30 text-amber-700 dark:text-amber-300">
+                  {t("billing.pay.bankPending")}
+                </Badge>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-4 text-sm text-foreground/80">
+                <div className="font-semibold text-foreground">{t("billing.checkout.pendingTitle")}</div>
+                <p className="mt-1">
+                  {failed === "unconfigured" ? t("billing.pay.unconfigured") : t("billing.checkout.pendingBody")}
+                </p>
+                <p className="mt-2 font-mono text-xs">{ordered.reference}</p>
+              </div>
+            )}
             <DialogFooter>
               <Button onClick={() => close(false)}>{t("common.close")}</Button>
             </DialogFooter>
           </div>
         ) : (
+
           <div className="space-y-5">
             {request.kind === "plan" && (
               <div className="rounded-2xl border border-border/60 p-4">
@@ -178,11 +242,16 @@ export function CheckoutDialog({
               </div>
             </div>
 
+            <div className="flex items-center justify-between rounded-xl border border-border/60 px-4 py-3">
+              <span className="text-sm text-muted-foreground">{t("billing.pay.total")}</span>
+              <span className="font-display text-lg font-semibold">{formatTZS(amount)}</span>
+            </div>
+
             {failed && (
               <div className="flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-500/[0.06] p-4">
                 <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
                 <div className="text-sm">
-                  <div className="font-semibold">{t("billing.checkout.failed")}</div>
+                  <div className="font-semibold">{t("billing.pay.couldNotStart")}</div>
                   <p className="text-foreground/75">{t("billing.checkout.failedBody")}</p>
                 </div>
               </div>
@@ -199,13 +268,19 @@ export function CheckoutDialog({
               </Button>
               <Button className="w-full sm:w-auto" onClick={submit} disabled={busy}>
                 {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {t("billing.continueToPayment")}
+                {failed ? t("billing.pay.tryAgain") : t("billing.pay.payNow")}
               </Button>
             </DialogFooter>
 
+            {gateway && !gateway.available && method !== "bank" && (
+              <Badge variant="outline" className="w-fit border-amber-500/30 text-amber-700 dark:text-amber-300">
+                {t("billing.pay.unconfigured")}
+              </Badge>
+            )}
             <Badge variant="outline" className="w-fit border-amber-500/30 text-amber-700 dark:text-amber-300">
               {t("billing.checkout.manualNote")}
             </Badge>
+
           </div>
         )}
       </DialogContent>
