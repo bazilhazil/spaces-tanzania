@@ -15,6 +15,7 @@ import { track } from "@/lib/analytics";
 import { toast } from "sonner";
 import { friendlyError, errorMessage } from "@/lib/errors";
 import { normalizeTanzanianPhoneNumber, maskTzPhone } from "@/lib/phone";
+import { requestPhoneCode, verifyPhoneCode } from "@/lib/phone-otp.functions";
 import { useI18n } from "@/hooks/use-i18n";
 
 type Search = { redirect?: string; mode?: "signin" | "signup" };
