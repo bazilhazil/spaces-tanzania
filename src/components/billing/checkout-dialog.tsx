@@ -242,11 +242,16 @@ export function CheckoutDialog({
               </div>
             </div>
 
+            <div className="flex items-center justify-between rounded-xl border border-border/60 px-4 py-3">
+              <span className="text-sm text-muted-foreground">{t("billing.pay.total")}</span>
+              <span className="font-display text-lg font-semibold">{formatTZS(amount)}</span>
+            </div>
+
             {failed && (
               <div className="flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-500/[0.06] p-4">
                 <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
                 <div className="text-sm">
-                  <div className="font-semibold">{t("billing.checkout.failed")}</div>
+                  <div className="font-semibold">{t("billing.pay.couldNotStart")}</div>
                   <p className="text-foreground/75">{t("billing.checkout.failedBody")}</p>
                 </div>
               </div>
@@ -263,13 +268,19 @@ export function CheckoutDialog({
               </Button>
               <Button className="w-full sm:w-auto" onClick={submit} disabled={busy}>
                 {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {t("billing.continueToPayment")}
+                {failed ? t("billing.pay.tryAgain") : t("billing.pay.payNow")}
               </Button>
             </DialogFooter>
 
+            {gateway && !gateway.available && method !== "bank" && (
+              <Badge variant="outline" className="w-fit border-amber-500/30 text-amber-700 dark:text-amber-300">
+                {t("billing.pay.unconfigured")}
+              </Badge>
+            )}
             <Badge variant="outline" className="w-fit border-amber-500/30 text-amber-700 dark:text-amber-300">
               {t("billing.checkout.manualNote")}
             </Badge>
+
           </div>
         )}
       </DialogContent>
