@@ -115,16 +115,49 @@ export function CheckoutDialog({
 
         {ordered ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-4 text-sm text-foreground/80">
-              <div className="font-semibold text-foreground">{t("billing.checkout.pendingTitle")}</div>
-              <p className="mt-1">{t("billing.checkout.pendingBody")}</p>
-              <p className="mt-2 font-mono text-xs">{ordered.reference}</p>
-            </div>
+            {ordered.bank ? (
+              <div className="rounded-2xl border border-border/60 p-4 text-sm text-foreground/85">
+                <div className="font-semibold text-foreground">{t("billing.pay.bankTitle")}</div>
+                <p className="mt-1 text-muted-foreground">{t("billing.pay.bankBody")}</p>
+                <dl className="mt-3 space-y-1.5">
+                  {[
+                    [t("billing.pay.total"), formatTZS(amount)],
+                    ["Bank", bank?.bank_name],
+                    ["Account name", bank?.account_name],
+                    ["Account number", bank?.account_number],
+                    [bank?.branch ? "Branch" : "", bank?.branch],
+                    [bank?.swift ? "SWIFT" : "", bank?.swift],
+                  ].filter(([k, v]) => k && v).map(([k, v]) => (
+                    <div key={String(k)} className="flex justify-between gap-4">
+                      <dt className="text-muted-foreground">{k}</dt>
+                      <dd className="font-semibold">{v}</dd>
+                    </div>
+                  ))}
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-muted-foreground">{t("billing.pay.reference")}</dt>
+                    <dd className="font-mono text-xs font-semibold">{ordered.reference}</dd>
+                  </div>
+                </dl>
+                {bank?.instructions ? <p className="mt-3 text-xs text-muted-foreground">{bank.instructions}</p> : null}
+                <Badge variant="outline" className="mt-3 border-amber-500/30 text-amber-700 dark:text-amber-300">
+                  {t("billing.pay.bankPending")}
+                </Badge>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-4 text-sm text-foreground/80">
+                <div className="font-semibold text-foreground">{t("billing.checkout.pendingTitle")}</div>
+                <p className="mt-1">
+                  {failed === "unconfigured" ? t("billing.pay.unconfigured") : t("billing.checkout.pendingBody")}
+                </p>
+                <p className="mt-2 font-mono text-xs">{ordered.reference}</p>
+              </div>
+            )}
             <DialogFooter>
               <Button onClick={() => close(false)}>{t("common.close")}</Button>
             </DialogFooter>
           </div>
         ) : (
+
           <div className="space-y-5">
             {request.kind === "plan" && (
               <div className="rounded-2xl border border-border/60 p-4">
