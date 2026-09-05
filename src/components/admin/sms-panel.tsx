@@ -55,7 +55,7 @@ export function SmsPanel() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="SMS" description="Send a test message and review recent delivery activity." />
+      <PageHeader title="SMS" subtitle="Send a test message and review recent delivery activity." />
 
       <div className="rounded-2xl border bg-card p-5">
         <Label htmlFor="sms-test">Test recipient</Label>
