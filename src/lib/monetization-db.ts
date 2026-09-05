@@ -128,8 +128,11 @@ export async function checkSubscriptionExpiry(): Promise<void> {
 }
 
 function reference(prefix: string): string {
-  return `${prefix}-${Date.now().toString(36).toUpperCase()}`;
+  // Alphanumeric only — payment providers reject punctuation in order ids.
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${prefix}${Date.now().toString(36).toUpperCase()}${rand}`;
 }
+
 
 export type PendingOrder = {
   paymentId: string;
