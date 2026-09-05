@@ -63,7 +63,7 @@ export function CompareView() {
     { label: "Category", render: (p) => p.category },
     { label: "Bedrooms", render: (p) => <span className="inline-flex items-center gap-1"><BedDouble className="h-3.5 w-3.5 text-muted-foreground" /> {p.bedrooms || "—"}</span> },
     { label: "Bathrooms", render: (p) => <span className="inline-flex items-center gap-1"><Bath className="h-3.5 w-3.5 text-muted-foreground" /> {p.bathrooms || "—"}</span> },
-    { label: "Parking", render: (p) => <span className="inline-flex items-center gap-1"><Car className="h-3.5 w-3.5 text-muted-foreground" /> {p.parking || "—"}</span> },
+    { label: "Parking", render: (p) => <span className="inline-flex items-center gap-1"><Car className="h-3.5 w-3.5 text-muted-foreground" /> {p.parkingAvailable ? "Parking available" : "No parking"}</span> },
     { label: "Size", render: (p) => <span className="inline-flex items-center gap-1"><Ruler className="h-3.5 w-3.5 text-muted-foreground" /> {p.size} m²</span> },
     { label: "Year built", render: (p) => p.yearBuilt },
     { label: "Furnished", render: (p) => (p.furnished ? "Yes" : "No") },

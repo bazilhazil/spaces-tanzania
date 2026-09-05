@@ -435,7 +435,7 @@ function PropertyDetailPage() {
             <div className="mt-6 grid grid-cols-2 gap-3 rounded-2xl border border-border bg-secondary/40 p-4 sm:grid-cols-4">
               <Fact icon={<BedDouble className="h-4 w-4" />} label={t("card.bedrooms")} value={property.bedrooms || "—"} />
               <Fact icon={<Bath className="h-4 w-4" />} label={t("card.bathrooms")} value={property.bathrooms} />
-              <Fact icon={<Car className="h-4 w-4" />} label={t("card.parking")} value={property.parking} />
+              <Fact icon={<Car className="h-4 w-4" />} label={t("card.parking")} value={property.parkingAvailable ? t("card.parkingAvailable") : t("card.noParking")} />
               <Fact icon={<Ruler className="h-4 w-4" />} label={t("card.size")} value={`${property.size} m²`} />
             </div>
 

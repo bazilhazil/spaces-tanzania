@@ -10,7 +10,7 @@ export type WizardDraft = {
   negotiable?: boolean;
   bedrooms?: number;
   bathrooms?: number;
-  parking?: number;
+  parking_available?: boolean;
   area_sqm?: number;
   floor?: number;
   year_built?: number;

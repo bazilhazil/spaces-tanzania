@@ -168,6 +168,8 @@
     "bedrooms": "Bedrooms",
     "bathrooms": "Bathrooms",
     "parking": "Parking",
+    "parkingAvailable": "Parking available",
+    "noParking": "No parking",
     "size": "Size",
     "viewSpace": "View Space"
   },
@@ -599,6 +601,7 @@
     "maxSize": "Max size",
     "furnished": "Furnished",
     "parking": "Parking",
+    "parkingAny": "Any",
     "amenities": "Amenities",
     "verifiedOnly": "Verified only",
     "region": "Region",

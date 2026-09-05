@@ -1058,6 +1058,7 @@ export type Database = {
           negotiable: boolean
           owner_id: string
           parking: number | null
+          parking_available: boolean
           preferred_contact: string | null
           price: number
           property_type: Database["public"]["Enums"]["property_type"]
@@ -1097,6 +1098,7 @@ export type Database = {
           negotiable?: boolean
           owner_id: string
           parking?: number | null
+          parking_available?: boolean
           preferred_contact?: string | null
           price?: number
           property_type: Database["public"]["Enums"]["property_type"]
@@ -1136,6 +1138,7 @@ export type Database = {
           negotiable?: boolean
           owner_id?: string
           parking?: number | null
+          parking_available?: boolean
           preferred_contact?: string | null
           price?: number
           property_type?: Database["public"]["Enums"]["property_type"]
@@ -2323,6 +2326,7 @@ export type Database = {
           negotiable: boolean | null
           owner_id: string | null
           parking: number | null
+          parking_available: boolean | null
           price: number | null
           property_type: Database["public"]["Enums"]["property_type"] | null
           region: string | null
@@ -2355,6 +2359,7 @@ export type Database = {
           negotiable?: boolean | null
           owner_id?: string | null
           parking?: number | null
+          parking_available?: boolean | null
           price?: number | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           region?: string | null
@@ -2387,6 +2392,7 @@ export type Database = {
           negotiable?: boolean | null
           owner_id?: string | null
           parking?: number | null
+          parking_available?: boolean | null
           price?: number | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           region?: string | null
@@ -2439,6 +2445,7 @@ export type Database = {
           negotiable: boolean | null
           owner_id: string | null
           parking: number | null
+          parking_available: boolean | null
           price: number | null
           property_type: Database["public"]["Enums"]["property_type"] | null
           region: string | null
@@ -2471,6 +2478,7 @@ export type Database = {
           negotiable?: boolean | null
           owner_id?: string | null
           parking?: number | null
+          parking_available?: boolean | null
           price?: number | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           region?: string | null
@@ -2503,6 +2511,7 @@ export type Database = {
           negotiable?: boolean | null
           owner_id?: string | null
           parking?: number | null
+          parking_available?: boolean | null
           price?: number | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           region?: string | null

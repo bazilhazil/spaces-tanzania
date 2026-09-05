@@ -181,7 +181,10 @@ function PropertiesPage() {
     if (search.minSize && p.size < search.minSize) return false;
     if (search.maxSize && p.size > search.maxSize) return false;
     if (search.furnished && !p.furnished) return false;
-    if (search.parking && !(p.parking > 0 || p.amenities.includes("parking"))) return false;
+    if (search.parking !== undefined) {
+      const hasParking = p.parkingAvailable || p.amenities.includes("parking");
+      if (search.parking !== hasParking) return false;
+    }
     if (search.verified && !p.verified) return false;
     if (selectedAmenities.length && !selectedAmenities.every((a) => p.amenities.includes(a))) return false;
     if (search.q) {
@@ -693,7 +696,27 @@ function FilterPanel({
 
       <div className="space-y-3 rounded-xl border border-border p-3">
         <ToggleRow label={t("discovery.furnished")} checked={!!search.furnished} onChange={(v) => patch({ furnished: v || undefined })} />
-        <ToggleRow label={t("discovery.parking")} checked={!!search.parking} onChange={(v) => patch({ parking: v || undefined })} />
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm">{t("discovery.parking")}</span>
+          <div className="flex gap-1">
+            {([
+              { v: undefined as boolean | undefined, label: t("discovery.parkingAny") },
+              { v: true, label: t("card.parkingAvailable") },
+              { v: false, label: t("card.noParking") },
+            ]).map((o) => (
+              <button
+                key={String(o.v)}
+                type="button"
+                onClick={() => patch({ parking: o.v })}
+                className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition ${
+                  search.parking === o.v ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"
+                }`}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <ToggleRow label={t("discovery.verifiedOnly")} checked={!!search.verified} onChange={(v) => patch({ verified: v || undefined })} />
       </div>
 

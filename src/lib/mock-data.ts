@@ -31,7 +31,7 @@ export interface Property {
   street: string;
   bedrooms: number;
   bathrooms: number;
-  parking: number;
+  parkingAvailable: boolean;
   size: number; // sqm
   yearBuilt: number;
   furnished: boolean;
