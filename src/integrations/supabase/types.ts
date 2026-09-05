@@ -2326,6 +2326,7 @@ export type Database = {
           negotiable: boolean | null
           owner_id: string | null
           parking: number | null
+          parking_available: boolean | null
           price: number | null
           property_type: Database["public"]["Enums"]["property_type"] | null
           region: string | null
@@ -2358,6 +2359,7 @@ export type Database = {
           negotiable?: boolean | null
           owner_id?: string | null
           parking?: number | null
+          parking_available?: boolean | null
           price?: number | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           region?: string | null
@@ -2390,6 +2392,7 @@ export type Database = {
           negotiable?: boolean | null
           owner_id?: string | null
           parking?: number | null
+          parking_available?: boolean | null
           price?: number | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           region?: string | null
@@ -2442,6 +2445,7 @@ export type Database = {
           negotiable: boolean | null
           owner_id: string | null
           parking: number | null
+          parking_available: boolean | null
           price: number | null
           property_type: Database["public"]["Enums"]["property_type"] | null
           region: string | null
@@ -2474,6 +2478,7 @@ export type Database = {
           negotiable?: boolean | null
           owner_id?: string | null
           parking?: number | null
+          parking_available?: boolean | null
           price?: number | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           region?: string | null
@@ -2506,6 +2511,7 @@ export type Database = {
           negotiable?: boolean | null
           owner_id?: string | null
           parking?: number | null
+          parking_available?: boolean | null
           price?: number | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           region?: string | null
