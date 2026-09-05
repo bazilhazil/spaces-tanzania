@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dialog";
 import { logAdminAction } from "@/lib/admin-ops";
 import { friendlyError } from "@/lib/errors";
+import { adminSetPaymentStatus } from "@/lib/monetization-db";
 import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 
@@ -733,6 +734,7 @@ export function PaymentsPanel() {
                   <th className="py-3 pr-4 font-medium">{t("admin.th.amount")}</th>
                   <th className="py-3 pr-4 font-medium">{t("admin.th.when")}</th>
                   <th className="py-3 pr-4 font-medium">{t("admin.th.status")}</th>
+                  <th className="py-3 pr-4 font-medium" />
                 </tr>
               </thead>
               <tbody>
@@ -743,6 +745,21 @@ export function PaymentsPanel() {
                     <td className="py-3 pr-4 font-semibold">{money(p.amount, p.currency)}</td>
                     <td className="py-3 pr-4 text-muted-foreground">{relative(p.createdAt)}</td>
                     <td className="py-3 pr-4">{p.status === "paid" || p.status === "succeeded" ? <Badge variant="success">{t("admin.status.paid")}</Badge> : <Badge variant="warning" className="capitalize">{titleCase(p.status)}</Badge>}</td>
+                    <td className="py-3 pr-4 text-right">
+                      {(p.status === "paid" || p.status === "succeeded") && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            void adminSetPaymentStatus(p.id, "refunded")
+                              .then(() => toast.success(t("admin.status.refunded")))
+                              .catch(() => toast.error(t("common.error")));
+                          }}
+                        >
+                          {t("admin.status.refunded")}
+                        </Button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
