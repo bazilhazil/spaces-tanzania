@@ -347,8 +347,11 @@ export function PropertiesPanel() {
                   {p.cover
                     ? <img src={p.cover} alt={p.title} className="h-full w-full object-cover" loading="lazy" />
                     : <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">{t("admin.queue.noPhoto")}</div>}
-                  <div className="absolute right-2 top-2 flex gap-1.5">
+                  <div className="absolute right-2 top-2 flex flex-wrap justify-end gap-1.5">
                     {p.verified && <StatusBadge kind="verified" />}
+                    {p.possibleDuplicates.length > 0 && (
+                      <Badge variant="warning">Possible duplicate</Badge>
+                    )}
                     <Badge variant="muted" className="capitalize">{titleCase(p.status)}</Badge>
                   </div>
                 </div>
