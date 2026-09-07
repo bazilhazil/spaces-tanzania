@@ -287,8 +287,24 @@ function UploadWizardPage() {
 
   async function submit(mode: "publish" | "draft") {
     if (!user) return toast.error("Please sign in");
-    const hasImages = media.some((m) => m.kind === "image") || existingPhotoCount > 0;
-    if (mode === "publish" && !hasImages) return toast.error("Add at least one photo");
+    const imageCount = media.filter((m) => m.kind === "image").length + existingPhotoCount;
+    if (mode === "publish") {
+      const missing = missingListingRequirements({
+        title: draft.title?.trim() || autoTitle,
+        propertyType: draft.property_type ?? null,
+        price: draft.price ?? null,
+        region: draft.region ?? null,
+        district: draft.district ?? null,
+        description: draft.description ?? null,
+        imageCount,
+        contactName: draft.contact_name ?? null,
+        contactPhone: draft.contact_phone ?? null,
+      });
+      if (missing.length) {
+        setMissingInfo(missing);
+        return;
+      }
+    }
     setSubmitting(true);
     try {
       const title = (draft.title?.trim() || autoTitle);
