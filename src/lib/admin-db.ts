@@ -113,6 +113,8 @@ export interface AdminQueueItem {
   createdAt: string;
   cover: string | null;
   quality: number;
+  /** Ids of listings that look like the same space — for admin review only. */
+  possibleDuplicates: string[];
 }
 
 /** Simple, deterministic completeness score from the record itself. */
