@@ -1266,7 +1266,7 @@
       "requestChanges": "Request Changes",
       "reject": "Reject",
       "feature": "Feature",
-      "pause": "Pause",
+      "pause": "Mark Unavailable",
       "archive": "Archive"
     },
     "queue": {
