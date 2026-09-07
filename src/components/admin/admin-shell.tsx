@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Users, UserCheck, ShieldCheck, Calendar, MessageSquare,
   CreditCard, Receipt, Flag, LifeBuoy, Megaphone, Bell, BarChart3, FileClock,
-  Settings, ShieldAlert, LogOut, Menu, X, Search, Command, Star, Briefcase, DollarSign, Database,
+  Settings, ShieldAlert, LogOut, Menu, X, Search, Command, Star, Briefcase, DollarSign, Database, Rocket,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,8 @@ const NAV: { group: string; items: Item[] }[] = [
     group: "Overview",
     items: [
       { label: "Dashboard", icon: LayoutDashboard },
+      { label: "Launch & Operations", section: "launch", icon: Rocket },
+
       { label: "Analytics", section: "analytics", icon: BarChart3 },
       { label: "Audit Logs", section: "audit", icon: FileClock },
     ],

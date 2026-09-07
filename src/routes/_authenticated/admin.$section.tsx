@@ -13,9 +13,12 @@ import { SafetyPanel } from "@/components/admin/safety-panel";
 import { SupportPanel } from "@/components/admin/support-panel";
 import { DataBackupPanel } from "@/components/admin/data-backup-panel";
 import { SmsPanel } from "@/components/admin/sms-panel";
+import { LaunchPanel } from "@/components/admin/launch-panel";
 
 const PANELS: Record<string, React.ComponentType> = {
+  launch: LaunchPanel,
   properties: PropertiesPanel,
+
   users: UsersPanel,
   agents: AgentsPanel,
   verification: VerificationPanel,
