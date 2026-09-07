@@ -416,6 +416,31 @@ export function PropertiesPanel() {
                 </div>
               </div>
 
+              {item.possibleDuplicates.length > 0 && (
+                <div className="mx-6 mb-6 rounded-2xl border border-[color:var(--color-warning-200)] bg-[color:var(--color-warning-50)] p-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--color-warning-800)]">
+                    <AlertTriangle className="h-4 w-4" /> Possible duplicate listing
+                  </div>
+                  <p className="mt-1 text-xs text-[color:var(--color-warning-800)]">
+                    This space closely matches {item.possibleDuplicates.length} other listing
+                    {item.possibleDuplicates.length > 1 ? "s" : ""} in the queue (similar title, location, price or the same owner).
+                    Nothing has been removed — please review before approving.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {item.possibleDuplicates.map((dupId) => {
+                      const dup = items.find((m) => m.id === dupId);
+                      if (!dup) return null;
+                      return (
+                        <Button key={dupId} size="sm" variant="outline" onClick={() => setSelected(dupId)}>
+                          {dup.title}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+
               <div className="flex flex-wrap gap-2 border-t border-border/60 bg-secondary/30 p-4">
                 <Button variant="success" size="sm" className="gap-2" onClick={() => act(item.id, "approve", t("admin.toast.approved"))}><CheckCircle2 className="h-4 w-4" /> {t("admin.action.approve")}</Button>
                 <Button variant="outline" size="sm" className="gap-2" onClick={() => setReasonFor("request_changes")}><RefreshCw className="h-4 w-4" /> {t("admin.action.requestChanges")}</Button>
