@@ -531,13 +531,42 @@ function UploadWizardPage() {
           ) : (
             <Button onClick={() => submit("publish")} disabled={submitting} size="lg" className="gap-2 rounded-full px-8">
               {submitting
-                ? <><Loader2 className="h-4 w-4 animate-spin" /> {isEdit ? "Saving…" : "Publishing…"}</>
-                : <><Sparkles className="h-4 w-4" /> {isEdit ? "Save changes" : "Publish now"}</>}
+                ? <><Loader2 className="h-4 w-4 animate-spin" /> {isEdit ? "Saving…" : "Sending…"}</>
+                : <><Sparkles className="h-4 w-4" /> {isEdit ? "Save changes" : "Submit for review"}</>}
             </Button>
           )}
         </div>
       </footer>
+
+      <MissingInfoDialog missing={missingInfo} onClose={() => setMissingInfo(null)} />
     </div>
+  );
+}
+
+/** Plain-language list of what still has to be completed before review. */
+function MissingInfoDialog({ missing, onClose }: { missing: string[] | null; onClose: () => void }) {
+  return (
+    <Dialog open={!!missing?.length} onOpenChange={(v) => { if (!v) onClose(); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>A few things are still missing</DialogTitle>
+          <DialogDescription>
+            Please complete these so buyers get the full picture and our team can review your space.
+          </DialogDescription>
+        </DialogHeader>
+        <ul className="space-y-2 text-sm">
+          {(missing ?? []).map((m) => (
+            <li key={m} className="flex items-start gap-2">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--color-warning-500)]" />
+              <span>{m}</span>
+            </li>
+          ))}
+        </ul>
+        <DialogFooter>
+          <Button onClick={onClose} className="w-full sm:w-auto">Continue editing</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
