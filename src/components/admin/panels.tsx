@@ -347,8 +347,11 @@ export function PropertiesPanel() {
                   {p.cover
                     ? <img src={p.cover} alt={p.title} className="h-full w-full object-cover" loading="lazy" />
                     : <div className="grid h-full w-full place-items-center text-xs text-muted-foreground">{t("admin.queue.noPhoto")}</div>}
-                  <div className="absolute right-2 top-2 flex gap-1.5">
+                  <div className="absolute right-2 top-2 flex flex-wrap justify-end gap-1.5">
                     {p.verified && <StatusBadge kind="verified" />}
+                    {p.possibleDuplicates.length > 0 && (
+                      <Badge variant="warning">Possible duplicate</Badge>
+                    )}
                     <Badge variant="muted" className="capitalize">{titleCase(p.status)}</Badge>
                   </div>
                 </div>
@@ -412,6 +415,31 @@ export function PropertiesPanel() {
                   {item.rejectionReason && <p className="mt-2 text-xs text-muted-foreground">Rejected: {item.rejectionReason}</p>}
                 </div>
               </div>
+
+              {item.possibleDuplicates.length > 0 && (
+                <div className="mx-6 mb-6 rounded-2xl border border-[color:var(--color-warning-200)] bg-[color:var(--color-warning-50)] p-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--color-warning-800)]">
+                    <AlertTriangle className="h-4 w-4" /> Possible duplicate listing
+                  </div>
+                  <p className="mt-1 text-xs text-[color:var(--color-warning-800)]">
+                    This space closely matches {item.possibleDuplicates.length} other listing
+                    {item.possibleDuplicates.length > 1 ? "s" : ""} in the queue (similar title, location, price or the same owner).
+                    Nothing has been removed — please review before approving.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {item.possibleDuplicates.map((dupId) => {
+                      const dup = items.find((m) => m.id === dupId);
+                      if (!dup) return null;
+                      return (
+                        <Button key={dupId} size="sm" variant="outline" onClick={() => setSelected(dupId)}>
+                          {dup.title}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
 
               <div className="flex flex-wrap gap-2 border-t border-border/60 bg-secondary/30 p-4">
                 <Button variant="success" size="sm" className="gap-2" onClick={() => act(item.id, "approve", t("admin.toast.approved"))}><CheckCircle2 className="h-4 w-4" /> {t("admin.action.approve")}</Button>

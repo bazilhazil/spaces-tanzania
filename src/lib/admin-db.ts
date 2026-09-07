@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
+import { findDuplicateGroups } from "@/lib/listing-quality";
 
 /**
  * Admin Control Center data layer.
@@ -113,6 +114,8 @@ export interface AdminQueueItem {
   createdAt: string;
   cover: string | null;
   quality: number;
+  /** Ids of listings that look like the same space — for admin review only. */
+  possibleDuplicates: string[];
 }
 
 /** Simple, deterministic completeness score from the record itself. */
@@ -163,6 +166,17 @@ export async function fetchModerationQueue(filter: QueueFilter = "review"): Prom
   );
   const ownerNames = new Map(((owners ?? []) as any[]).map((o) => [o.id, o.full_name]));
 
+  const dupes = findDuplicateGroups(
+    rows.map((r) => ({
+      id: r.id,
+      title: r.title ?? "",
+      ownerId: r.owner_id ?? "",
+      location: [r.ward, r.district, r.region].filter(Boolean).join(", "),
+      price: Number(r.price ?? 0),
+      createdAt: r.created_at,
+    })),
+  );
+
   return rows.map((r) => {
     const cover = covers.get(r.id) ?? null;
     return {
@@ -183,6 +197,7 @@ export async function fetchModerationQueue(filter: QueueFilter = "review"): Prom
       createdAt: r.created_at,
       cover,
       quality: completeness(r, !!cover),
+      possibleDuplicates: dupes.get(r.id) ?? [],
     };
   });
 }

@@ -22,6 +22,7 @@ import { fetchPlanUsage, listingLimitReached } from "@/lib/monetization-db";
 import { useI18n } from "@/hooks/use-i18n";
 import { NeedHelp } from "@/components/support/need-help";
 import { track } from "@/lib/analytics";
+import { missingListingRequirements } from "@/lib/listing-quality";
 
 import { compressImageFile, uploadMediaFile } from "@/lib/property-media";
 import { watermarkImage } from "@/lib/image-watermark";
@@ -93,7 +94,8 @@ function UploadWizardPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [savedTick, setSavedTick] = useState<number>(0);
-  const [success, setSuccess] = useState<{ status: "live" | "draft"; id?: string } | null>(null);
+  const [success, setSuccess] = useState<{ status: "pending" | "draft"; id?: string } | null>(null);
+  const [missingInfo, setMissingInfo] = useState<string[] | null>(null);
   const [limitReached, setLimitReached] = useState(false);
 
   // Plan listing allowance — checked up-front so owners are never surprised.
@@ -287,8 +289,24 @@ function UploadWizardPage() {
 
   async function submit(mode: "publish" | "draft") {
     if (!user) return toast.error("Please sign in");
-    const hasImages = media.some((m) => m.kind === "image") || existingPhotoCount > 0;
-    if (mode === "publish" && !hasImages) return toast.error("Add at least one photo");
+    const imageCount = media.filter((m) => m.kind === "image").length + existingPhotoCount;
+    if (mode === "publish") {
+      const missing = missingListingRequirements({
+        title: draft.title?.trim() || autoTitle,
+        propertyType: draft.property_type ?? null,
+        price: draft.price ?? null,
+        region: draft.region ?? null,
+        district: draft.district ?? null,
+        description: draft.description ?? null,
+        imageCount,
+        contactName: draft.contact_name ?? null,
+        contactPhone: draft.contact_phone ?? null,
+      });
+      if (missing.length) {
+        setMissingInfo(missing);
+        return;
+      }
+    }
     setSubmitting(true);
     try {
       const title = (draft.title?.trim() || autoTitle);
@@ -322,7 +340,7 @@ function UploadWizardPage() {
       let propertyId: string;
       if (isEdit && editId) {
         const updatePayload: any = { ...payload, updated_at: new Date().toISOString() };
-        if (mode === "publish") updatePayload.status = "live";
+        if (mode === "publish") updatePayload.status = "pending";
         const { data: upd, error: uErr } = await supabase
           .from("properties")
           .update(updatePayload)
@@ -339,7 +357,7 @@ function UploadWizardPage() {
           .insert({
             ...payload,
             owner_id: user.id,
-            status: mode === "publish" ? "live" : "draft",
+            status: mode === "publish" ? "pending" : "draft",
           } as any)
           .select("id")
           .single();
@@ -405,11 +423,11 @@ function UploadWizardPage() {
       if (!isEdit) clearDraft();
       dirtyRef.current = false;
       if (isEdit) {
-        toast.success("Property updated");
+        toast.success(mode === "publish" ? "Sent for review" : "Property updated");
         navigate({ to: "/dashboard/properties" });
       } else {
-        track("listing_published", { status: mode === "publish" ? "live" : "draft" });
-        setSuccess({ status: mode === "publish" ? "live" : "draft", id: propertyId });
+        track("listing_published", { status: mode === "publish" ? "pending" : "draft" });
+        setSuccess({ status: mode === "publish" ? "pending" : "draft", id: propertyId });
       }
     } catch (e: any) {
       console.error(e);
@@ -513,13 +531,42 @@ function UploadWizardPage() {
           ) : (
             <Button onClick={() => submit("publish")} disabled={submitting} size="lg" className="gap-2 rounded-full px-8">
               {submitting
-                ? <><Loader2 className="h-4 w-4 animate-spin" /> {isEdit ? "Saving…" : "Publishing…"}</>
-                : <><Sparkles className="h-4 w-4" /> {isEdit ? "Save changes" : "Publish now"}</>}
+                ? <><Loader2 className="h-4 w-4 animate-spin" /> {isEdit ? "Saving…" : "Sending…"}</>
+                : <><Sparkles className="h-4 w-4" /> {isEdit ? "Save changes" : "Submit for review"}</>}
             </Button>
           )}
         </div>
       </footer>
+
+      <MissingInfoDialog missing={missingInfo} onClose={() => setMissingInfo(null)} />
     </div>
+  );
+}
+
+/** Plain-language list of what still has to be completed before review. */
+function MissingInfoDialog({ missing, onClose }: { missing: string[] | null; onClose: () => void }) {
+  return (
+    <Dialog open={!!missing?.length} onOpenChange={(v) => { if (!v) onClose(); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>A few things are still missing</DialogTitle>
+          <DialogDescription>
+            Please complete these so buyers get the full picture and our team can review your space.
+          </DialogDescription>
+        </DialogHeader>
+        <ul className="space-y-2 text-sm">
+          {(missing ?? []).map((m) => (
+            <li key={m} className="flex items-start gap-2">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--color-warning-500)]" />
+              <span>{m}</span>
+            </li>
+          ))}
+        </ul>
+        <DialogFooter>
+          <Button onClick={onClose} className="w-full sm:w-auto">Continue editing</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -1058,14 +1105,14 @@ function StepPublish({
 // ============================================================
 // Success screen
 // ============================================================
-function SuccessScreen({ status }: { status: "live" | "draft" }) {
+function SuccessScreen({ status }: { status: "pending" | "draft" }) {
   const navigate = useNavigate();
   useEffect(() => {
     const t = setTimeout(() => navigate({ to: "/dashboard/properties" }), 3400);
     return () => clearTimeout(t);
   }, [navigate]);
 
-  const isLive = status === "live";
+  const isLive = status === "pending";
   return (
     <div className="grid min-h-screen place-items-center bg-gradient-to-br from-background via-background to-primary/5 px-4">
       <div className="max-w-md animate-fade-in text-center">
@@ -1080,14 +1127,14 @@ function SuccessScreen({ status }: { status: "live" | "draft" }) {
           isLive ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700",
         )}>
           <span className={cn("h-1.5 w-1.5 rounded-full", isLive ? "bg-emerald-500" : "bg-amber-500")} />
-          {isLive ? "Live" : "Saved as draft"}
+          {isLive ? "Pending review" : "Saved as draft"}
         </div>
         <h1 className="mt-4 font-display text-3xl font-semibold">
-          {isLive ? "You're live! 🎉" : "Draft saved 💾"}
+          {isLive ? "Sent for review 🎉" : "Draft saved 💾"}
         </h1>
         <p className="mt-3 text-muted-foreground">
           {isLive
-            ? "Your property is now visible to buyers on SPACES."
+            ? "Our team is checking your space. You'll be notified as soon as it is approved and visible to buyers."
             : "You can finish and publish it any time from My Properties."}
         </p>
         <div className="mt-6 flex justify-center gap-3">
