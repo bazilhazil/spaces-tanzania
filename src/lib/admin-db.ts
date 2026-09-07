@@ -196,6 +196,7 @@ export async function fetchModerationQueue(filter: QueueFilter = "review"): Prom
       createdAt: r.created_at,
       cover,
       quality: completeness(r, !!cover),
+      possibleDuplicates: dupes.get(r.id) ?? [],
     };
   });
 }
