@@ -165,6 +165,17 @@ export async function fetchModerationQueue(filter: QueueFilter = "review"): Prom
   );
   const ownerNames = new Map(((owners ?? []) as any[]).map((o) => [o.id, o.full_name]));
 
+  const dupes = findDuplicateGroups(
+    rows.map((r) => ({
+      id: r.id,
+      title: r.title ?? "",
+      ownerId: r.owner_id ?? "",
+      location: [r.ward, r.district, r.region].filter(Boolean).join(", "),
+      price: Number(r.price ?? 0),
+      createdAt: r.created_at,
+    })),
+  );
+
   return rows.map((r) => {
     const cover = covers.get(r.id) ?? null;
     return {
