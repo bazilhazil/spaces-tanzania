@@ -64,10 +64,12 @@ export interface LaunchReport {
 
 type Row = Record<string, unknown>;
 
-async function count(table: string, build: (q: never) => unknown): Promise<number | null> {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function count(table: string, build: (q: any) => any = (q) => q): Promise<number | null> {
   try {
-    const q = supabase.from(table as never).select("id", { count: "exact", head: true });
-    const { count: c, error } = (await (build as (x: unknown) => Promise<{ count: number | null; error: unknown }>)(q));
+    const { count: c, error } = await build(
+      supabase.from(table as never).select("id", { count: "exact", head: true }),
+    );
     if (error) return null;
     return c ?? 0;
   } catch {
@@ -75,7 +77,6 @@ async function count(table: string, build: (q: never) => unknown): Promise<numbe
   }
 }
 
-const same = (q: unknown) => q as never;
 
 async function safe<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
   try {
