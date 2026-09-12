@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -546,7 +547,7 @@ function UploadWizardPage() {
 /** Plain-language list of what still has to be completed before review. */
 function MissingInfoDialog({ missing, onClose }: { missing: string[] | null; onClose: () => void }) {
   return (
-    <Dialog open={!!missing?.length} onOpenChange={(v) => { if (!v) onClose(); }}>
+    <Dialog open={!!missing?.length} onOpenChange={(v: boolean) => { if (!v) onClose(); }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>A few things are still missing</DialogTitle>
