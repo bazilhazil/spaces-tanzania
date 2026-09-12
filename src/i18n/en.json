@@ -1284,6 +1284,7 @@
     "filter": {
       "live": "Live",
       "rejected": "Rejected",
+      "duplicates": "Possible duplicates",
       "all": "All"
     },
     "label": {
@@ -1915,5 +1916,4 @@
     "backupEmail": "Backup support email",
     "backupPhone": "Backup support phone"
   },
-  "admin.filter.duplicates": "Possible duplicates"
 }

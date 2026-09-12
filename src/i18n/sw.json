@@ -1284,6 +1284,7 @@
     "filter": {
       "live": "Hai",
       "rejected": "Yamekataliwa",
+      "duplicates": "Huenda zimejirudia",
       "all": "Yote"
     },
     "label": {
@@ -1915,5 +1916,4 @@
     "backupEmail": "Barua pepe ya ziada",
     "backupPhone": "Simu ya ziada ya msaada"
   },
-  "admin.filter.duplicates": "Zinazoweza kufanana"
 }
