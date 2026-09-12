@@ -3,7 +3,7 @@ import {
   BadgeCheck, Bath, BedDouble, Building2, Calendar, Car, ChevronLeft, ChevronRight,
   Heart, Mail, MapPin, MessageCircle, Phone, Ruler, Share2, ShieldCheck, Sparkles,
   Star, X, Play, Send, CheckCircle2, Maximize2, FileText,
-  Flag, ZoomIn, ZoomOut, Eye,
+  Flag, ZoomIn, ZoomOut, Eye, ShieldAlert,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
