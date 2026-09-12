@@ -66,13 +66,14 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
-          {badges.length > 0 ? (
-            <ListingBadgeStrip kinds={badges} size="xs" max={3} />
-          ) : (
-            <span className="rounded-full bg-background/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
-              Unverified
-            </span>
-          )}
+          <div className="flex flex-wrap items-start gap-1.5">
+            {badges.length > 0 && <ListingBadgeStrip kinds={badges} size="xs" max={3} />}
+            {!property.verified && (
+              <span className="rounded-full bg-background/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
+                Unverified
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-1.5">
             <button
               aria-label={comparing ? "Remove from compare" : "Add to compare"}
