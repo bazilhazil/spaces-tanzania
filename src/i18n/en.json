@@ -1914,5 +1914,6 @@
     "primaryEmail": "Primary support email",
     "backupEmail": "Backup support email",
     "backupPhone": "Backup support phone"
-  }
+  },
+  "admin.filter.duplicates": "Possible duplicates"
 }
