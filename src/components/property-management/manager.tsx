@@ -537,8 +537,10 @@ export type CardAction =
   | "share" | "copy" | "promote" | "analytics" | "leads" | "viewings" | "agents"
   | `status:${ManagedProperty["status"]}`;
 
+// Owners choose their own availability. "Rejected" is a moderation outcome and
+// is never something an owner can set on their own listing.
 const STATUS_CHOICES: ManagedStatus[] = [
-  "draft", "pending", "live", "paused", "sold", "rented", "rejected", "archived",
+  "draft", "pending", "live", "paused", "sold", "rented", "archived",
 ];
 
 

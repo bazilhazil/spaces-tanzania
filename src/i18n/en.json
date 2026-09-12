@@ -1284,6 +1284,7 @@
     "filter": {
       "live": "Live",
       "rejected": "Rejected",
+      "duplicates": "Possible duplicates",
       "all": "All"
     },
     "label": {

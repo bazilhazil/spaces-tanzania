@@ -135,7 +135,7 @@ function completeness(row: any, hasImage: boolean): number {
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
-export type QueueFilter = "review" | "live" | "rejected" | "all";
+export type QueueFilter = "review" | "live" | "rejected" | "duplicates" | "all";
 
 export async function fetchModerationQueue(filter: QueueFilter = "review"): Promise<AdminQueueItem[]> {
   let query = supabase.from("properties").select("*").order("created_at", { ascending: false }).limit(200);
@@ -177,7 +177,7 @@ export async function fetchModerationQueue(filter: QueueFilter = "review"): Prom
     })),
   );
 
-  return rows.map((r) => {
+  const items = rows.map((r) => {
     const cover = covers.get(r.id) ?? null;
     return {
       id: r.id,
@@ -200,6 +200,8 @@ export async function fetchModerationQueue(filter: QueueFilter = "review"): Prom
       possibleDuplicates: dupes.get(r.id) ?? [],
     };
   });
+  // Possible duplicates are only ever surfaced for review — nothing is removed automatically.
+  return filter === "duplicates" ? items.filter((i) => i.possibleDuplicates.length > 0) : items;
 }
 
 export type ModerationAction = "approve" | "request_changes" | "reject" | "suspend" | "archive" | "feature";

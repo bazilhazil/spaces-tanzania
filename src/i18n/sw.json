@@ -1284,6 +1284,7 @@
     "filter": {
       "live": "Hai",
       "rejected": "Yamekataliwa",
+      "duplicates": "Huenda zimejirudia",
       "all": "Yote"
     },
     "label": {

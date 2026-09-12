@@ -281,6 +281,7 @@ const QUEUE_FILTERS: { id: QueueFilter; labelKey: string }[] = [
   { id: "review", labelKey: "admin.kpi.awaiting" },
   { id: "live", labelKey: "admin.filter.live" },
   { id: "rejected", labelKey: "admin.filter.rejected" },
+  { id: "duplicates", labelKey: "admin.filter.duplicates" },
   { id: "all", labelKey: "admin.filter.all" },
 ];
 

@@ -3,7 +3,7 @@ import {
   BadgeCheck, Bath, BedDouble, Building2, Calendar, Car, ChevronLeft, ChevronRight,
   Heart, Mail, MapPin, MessageCircle, Phone, Ruler, Share2, ShieldCheck, Sparkles,
   Star, X, Play, Send, CheckCircle2, Maximize2, FileText,
-  Flag, ZoomIn, ZoomOut, Eye,
+  Flag, ZoomIn, ZoomOut, Eye, ShieldAlert,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -402,8 +402,12 @@ function PropertyDetailPage() {
                     <VerifiedBadge kind="owner" label={t("verify.badge.owner")} size="sm" />
                   )}
                 </div>
-                {property.verified && (
+                {property.verified ? (
                   <p className="mt-2 text-xs text-muted-foreground">{t("verify.spaceExplainer")}</p>
+                ) : (
+                  <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-xs text-muted-foreground">
+                    <ShieldAlert className="h-3.5 w-3.5" /> Not yet verified by SPACES — please confirm details before paying anything.
+                  </p>
                 )}
               </div>
               <div className="text-right">
