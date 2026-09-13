@@ -159,11 +159,22 @@ function PropertyDetail() {
   const quality = computeQuality(row, !!cover);
 
   async function updateStatus(next: "live" | "paused" | "draft" | "sold" | "rented" | "archived") {
-    const { error } = await supabase.from("properties").update({ status: next as never }).eq("id", id);
+    const { data, error } = await supabase
+      .from("properties")
+      .update({ status: next as never })
+      .eq("id", id)
+      .select("status")
+      .maybeSingle();
     if (error) return toast.error(friendlyError(error));
-    setRow({ ...row, status: next });
-    toast.success("Status updated");
+    const applied = ((data?.status as string) ?? next) as typeof next;
+    setRow({ ...row, status: applied });
+    toast.success(
+      applied === "pending"
+        ? "Sent for review — it goes live once approved"
+        : "Status updated",
+    );
   }
+
   const [confirmRemove, setConfirmRemove] = useState(false);
   function del() { setConfirmRemove(true); }
 
