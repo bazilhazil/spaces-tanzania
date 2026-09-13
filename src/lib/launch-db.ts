@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { COMPANY } from "@/lib/company";
 import { fetchBackupConfig } from "@/lib/backup-db";
 import { phoneCodeAvailable } from "@/lib/phone-otp.functions";
-import { onlinePaymentsAvailable } from "@/lib/selcom.functions";
+import { onlinePaymentsAvailable, bankTransferDetails } from "@/lib/selcom.functions";
 
 /**
  * Admin Operations Center — launch readiness, platform health, pending work and
