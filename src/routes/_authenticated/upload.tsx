@@ -439,7 +439,14 @@ function UploadWizardPage() {
       if (!isEdit) clearDraft();
       dirtyRef.current = false;
       if (isEdit) {
-        toast.success(mode === "publish" ? "Sent for review" : "Property updated");
+        toast.success(
+          mode !== "publish"
+            ? "Property updated"
+            : savedStatus === "pending"
+              ? "Sent for review"
+              : "Changes saved",
+        );
+
         navigate({ to: "/dashboard/properties" });
       } else {
         track("listing_published", { status: mode === "publish" ? "pending" : "draft" });
