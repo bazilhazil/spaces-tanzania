@@ -186,7 +186,15 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
       detail: COMPANY.email ? `${COMPANY.legalName} · ${COMPANY.email}` : "Contact details missing",
       section: "settings",
     },
-    { id: "domain", label: "Domain configured", state: "ready", detail: "spacestz.com is live over HTTPS" },
+    {
+      id: "domain",
+      label: "Domain configured",
+      state: domainReady ? "ready" : "pending",
+      detail: domainReady
+        ? "Served from spacestz.com over HTTPS"
+        : `Not verified from here — this session is on ${host || "an unknown host"}. Open the checklist on spacestz.com to confirm.`,
+    },
+
     {
       id: "auth",
       label: "Authentication",
@@ -264,8 +272,10 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
     {
       id: "payments",
       label: "Payments configured",
-      state: "ready",
-      detail: `Checkout, invoices and bank transfer active · ${plural(paidPayments ?? 0, "confirmed payment", "confirmed payments")}`,
+      state: paymentsReady ? "ready" : "action",
+      detail: paymentsReady
+        ? `${payReady ? "Online payments" : "Bank transfer"} available · ${plural(paidPayments ?? 0, "confirmed payment", "confirmed payments")}`
+        : "No payment route available yet — add bank transfer details or Selcom credentials",
       section: "payments",
     },
     {
@@ -278,10 +288,13 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
     {
       id: "security",
       label: "Security checks",
-      state: "ready",
-      detail: "Row-level access rules active on every table; secrets stay server-side",
+      state: securityReady ? "ready" : "action",
+      detail: securityReady
+        ? "Access-rule probe passed: protected records stay unreadable"
+        : "Access-rule probe returned protected records — review immediately",
       section: "superadmin",
     },
+
     {
       id: "backup",
       label: "Backup system",
