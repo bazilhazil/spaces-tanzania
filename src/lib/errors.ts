@@ -35,7 +35,7 @@ const MESSAGES: Record<"en" | "sw", Record<Key, string>> = {
     tooMany: "Too many attempts. Please wait a moment and try again.",
     invalid: "Please check the details you entered.",
     invalidPhone: "Please enter a valid Tanzanian phone number.",
-    otpSendFailed: "We couldn't send the code right now. Please try again.",
+    otpSendFailed: "Unable to send verification code right now. Please try again.",
     otpUnavailable: "Phone sign-in isn't available yet. Please use email or Google.",
     otpWrong: "That code is incorrect. Please try again.",
     otpExpired: "This code has expired. Request a new code.",
