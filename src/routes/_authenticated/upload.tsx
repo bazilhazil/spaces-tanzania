@@ -366,7 +366,6 @@ function UploadWizardPage() {
         savedStatus = (upd as any).status as string;
       } else {
 
-      } else {
         const { data: prop, error: pErr } = await supabase
           .from("properties")
           .insert({
