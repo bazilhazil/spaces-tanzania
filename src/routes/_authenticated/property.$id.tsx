@@ -166,13 +166,14 @@ function PropertyDetail() {
       .select("status")
       .maybeSingle();
     if (error) return toast.error(friendlyError(error));
-    const applied = ((data?.status as string) ?? next) as typeof next;
-    setRow({ ...row, status: applied });
+    const applied = ((data?.status as string) ?? next);
+    setRow({ ...row, status: applied as never });
     toast.success(
       applied === "pending"
         ? "Sent for review — it goes live once approved"
         : "Status updated",
     );
+
   }
 
   const [confirmRemove, setConfirmRemove] = useState(false);
