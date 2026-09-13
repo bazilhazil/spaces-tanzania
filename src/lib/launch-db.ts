@@ -115,7 +115,10 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
     payProbe,
     storageProbe,
     authProbe,
+    bankProbe,
+    rlsProbe,
   ] = await Promise.all([
+
     count("properties"),
     count("property_media"),
     count("leads"),
