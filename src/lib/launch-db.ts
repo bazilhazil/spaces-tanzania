@@ -167,6 +167,14 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
   const smsReady = Boolean(smsProbe?.available);
   const payReady = Boolean(payProbe?.available);
   const backupReady = Boolean(backup?.configured);
+  const host = typeof window !== "undefined" ? window.location.hostname : "";
+  const onProductionDomain = host === "spacestz.com" || host === "www.spacestz.com";
+  const httpsOk = typeof window !== "undefined" ? window.location.protocol === "https:" : false;
+  const domainReady = onProductionDomain && httpsOk;
+  const bankReady = Boolean(bankProbe);
+  const paymentsReady = payReady || bankReady;
+  const securityReady = Boolean(rlsProbe);
+
 
   const yes = (n: number | null) => (n ?? 0) > 0;
 
