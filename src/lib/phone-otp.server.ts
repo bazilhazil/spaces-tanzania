@@ -71,7 +71,7 @@ export async function requestPhoneOtp(rawPhone: string): Promise<RequestOtpResul
 
   const sent = await sendSakuraSms(
     phone,
-    `SPACES verification code: ${code}. This code expires in 5 minutes. Do not share it.`,
+    `Your SPACES verification code is ${code}. It expires in 5 minutes. Do not share this code.`,
     "phone_otp",
   );
   if (!sent.ok) {
