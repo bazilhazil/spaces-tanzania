@@ -148,7 +148,9 @@ function PropertiesPage() {
         const merged: Record<string, unknown> = { ...prev, ...next };
         for (const k of Object.keys(merged)) {
           const v = merged[k];
-          if (v === undefined || v === "" || v === false) delete merged[k];
+          // `parking: false` is a real choice ("No parking"), so it must survive.
+          if (v === undefined || v === "" || (v === false && k !== "parking")) delete merged[k];
+
         }
         return merged as never;
       },
