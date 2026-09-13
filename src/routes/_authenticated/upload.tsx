@@ -341,17 +341,31 @@ function UploadWizardPage() {
       let propertyId: string;
       if (isEdit && editId) {
         const updatePayload: any = { ...payload, updated_at: new Date().toISOString() };
-        if (mode === "publish") updatePayload.status = "pending";
+        if (mode === "publish") {
+          const { data: current } = await supabase
+            .from("properties")
+            .select("status")
+            .eq("id", editId)
+            .maybeSingle();
+          // Only listings that have never been approved need to go (back) for review.
+          // An already-approved listing stays visible when its details are edited.
+          if (!current || current.status === "draft" || current.status === "rejected") {
+            updatePayload.status = "pending";
+          }
+        }
         const { data: upd, error: uErr } = await supabase
           .from("properties")
           .update(updatePayload)
           .eq("id", editId)
           .eq("owner_id", user.id)
-          .select("id")
+          .select("id, status")
           .single();
         if (uErr) throw uErr;
         if (!upd) throw new Error("Update failed — you may not own this property");
         propertyId = upd.id as string;
+        savedStatus = (upd as any).status as string;
+      } else {
+
       } else {
         const { data: prop, error: pErr } = await supabase
           .from("properties")
