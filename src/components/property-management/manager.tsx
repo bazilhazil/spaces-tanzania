@@ -265,13 +265,24 @@ export function PropertiesManager() {
     }
     if (action === "pause" || action === "resume") {
       const next = action === "pause" ? "paused" : "live";
-      const { error } = await supabase.from("properties").update({ status: next as never }).in("id", ids);
+      const { data, error } = await supabase
+        .from("properties")
+        .update({ status: next as never })
+        .in("id", ids)
+        .select("id, status");
       if (error) return toast.error(friendlyError(error));
-      setRows((r) => r.map((x) => (selected.has(x.id) ? { ...x, status: next as never } : x)));
+      const byId = new Map((data ?? []).map((d: any) => [d.id as string, d.status as string]));
+      setRows((r) => r.map((x) => (selected.has(x.id) ? { ...x, status: (byId.get(x.id) ?? next) as never } : x)));
       setSelected(new Set());
-      toast.success(`${action === "pause" ? "Paused" : "Resumed"} ${ids.length}`);
+      const pending = (data ?? []).some((d: any) => d.status === "pending");
+      toast.success(
+        pending
+          ? `Sent for review (${ids.length})`
+          : `${action === "pause" ? "Paused" : "Resumed"} ${ids.length}`,
+      );
       return;
     }
+
     if (action === "promote") {
       toast.info("Promotion checkout coming soon");
     }
@@ -1021,10 +1032,21 @@ async function handleCardAction(
     case "pause":
     case "resume": {
       const next = a === "pause" ? "paused" : "live";
-      const { error } = await supabase.from("properties").update({ status: next as never }).eq("id", p.id);
+      const { data, error } = await supabase
+        .from("properties")
+        .update({ status: next as never })
+        .eq("id", p.id)
+        .select("status")
+        .maybeSingle();
       if (error) return toast.error(friendlyError(error));
-      setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: next as never } : x)));
-      toast.success(a === "pause" ? "Paused" : "Resumed");
+      const applied = ((data as any)?.status as string) ?? next;
+      setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: applied as never } : x)));
+      toast.success(
+        applied === "pending"
+          ? "Sent for review — it goes live once approved"
+          : a === "pause" ? "Paused" : "Resumed",
+      );
+
       break;
     }
     case "delete":

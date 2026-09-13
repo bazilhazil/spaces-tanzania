@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { COMPANY } from "@/lib/company";
 import { fetchBackupConfig } from "@/lib/backup-db";
 import { phoneCodeAvailable } from "@/lib/phone-otp.functions";
-import { onlinePaymentsAvailable } from "@/lib/selcom.functions";
+import { onlinePaymentsAvailable, bankTransferDetails } from "@/lib/selcom.functions";
 
 /**
  * Admin Operations Center — launch readiness, platform health, pending work and
@@ -115,7 +115,10 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
     payProbe,
     storageProbe,
     authProbe,
+    bankProbe,
+    rlsProbe,
   ] = await Promise.all([
+
     count("properties"),
     count("property_media"),
     count("leads"),
@@ -145,12 +148,33 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
       const { data, error } = await supabase.auth.getUser();
       return !error && Boolean(data.user);
     }, false),
+    safe(async () => {
+      const b = (await bankTransferDetails()) as { bank_name?: string; account_number?: string };
+      return Boolean(b?.bank_name && b?.account_number);
+    }, false),
+    safe(async () => {
+      // Real RLS probe: a protected table must never return rows to a normal session.
+      const { data, error } = await supabase
+        .from("phone_otp_codes" as never)
+        .select("id")
+        .limit(1);
+      return Boolean(error) || (data?.length ?? 0) === 0;
+    }, false),
   ]);
+
 
   const dbUp = properties !== null && users !== null;
   const smsReady = Boolean(smsProbe?.available);
   const payReady = Boolean(payProbe?.available);
   const backupReady = Boolean(backup?.configured);
+  const host = typeof window !== "undefined" ? window.location.hostname : "";
+  const onProductionDomain = host === "spacestz.com" || host === "www.spacestz.com";
+  const httpsOk = typeof window !== "undefined" ? window.location.protocol === "https:" : false;
+  const domainReady = onProductionDomain && httpsOk;
+  const bankReady = Boolean(bankProbe);
+  const paymentsReady = payReady || bankReady;
+  const securityReady = Boolean(rlsProbe);
+
 
   const yes = (n: number | null) => (n ?? 0) > 0;
 
@@ -162,7 +186,15 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
       detail: COMPANY.email ? `${COMPANY.legalName} · ${COMPANY.email}` : "Contact details missing",
       section: "settings",
     },
-    { id: "domain", label: "Domain configured", state: "ready", detail: "spacestz.com is live over HTTPS" },
+    {
+      id: "domain",
+      label: "Domain configured",
+      state: domainReady ? "ready" : "pending",
+      detail: domainReady
+        ? "Served from spacestz.com over HTTPS"
+        : `Not verified from here — this session is on ${host || "an unknown host"}. Open the checklist on spacestz.com to confirm.`,
+    },
+
     {
       id: "auth",
       label: "Authentication",
@@ -240,8 +272,10 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
     {
       id: "payments",
       label: "Payments configured",
-      state: "ready",
-      detail: `Checkout, invoices and bank transfer active · ${plural(paidPayments ?? 0, "confirmed payment", "confirmed payments")}`,
+      state: paymentsReady ? "ready" : "action",
+      detail: paymentsReady
+        ? `${payReady ? "Online payments" : "Bank transfer"} available · ${plural(paidPayments ?? 0, "confirmed payment", "confirmed payments")}`
+        : "No payment route available yet — add bank transfer details or Selcom credentials",
       section: "payments",
     },
     {
@@ -254,10 +288,13 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
     {
       id: "security",
       label: "Security checks",
-      state: "ready",
-      detail: "Row-level access rules active on every table; secrets stay server-side",
+      state: securityReady ? "ready" : "action",
+      detail: securityReady
+        ? "Access-rule probe passed: protected records stay unreadable"
+        : "Access-rule probe returned protected records — review immediately",
       section: "superadmin",
     },
+
     {
       id: "backup",
       label: "Backup system",

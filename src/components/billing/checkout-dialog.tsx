@@ -88,8 +88,10 @@ export function CheckoutDialog({
         window.location.href = start.gatewayUrl;
         return;
       }
-      setOrdered({ reference: res.reference, bank: false });
+      // The provider never started the payment — keep the user on the form with a retry.
       setFailed(start.reason === "unconfigured" ? "unconfigured" : "provider");
+      toast.error(t("billing.pay.couldNotStart"));
+
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setFailed(msg);
