@@ -145,7 +145,20 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
       const { data, error } = await supabase.auth.getUser();
       return !error && Boolean(data.user);
     }, false),
+    safe(async () => {
+      const b = (await bankTransferDetails()) as { bank_name?: string; account_number?: string };
+      return Boolean(b?.bank_name && b?.account_number);
+    }, false),
+    safe(async () => {
+      // Real RLS probe: a protected table must never return rows to a normal session.
+      const { data, error } = await supabase
+        .from("phone_otp_codes" as never)
+        .select("id")
+        .limit(1);
+      return Boolean(error) || (data?.length ?? 0) === 0;
+    }, false),
   ]);
+
 
   const dbUp = properties !== null && users !== null;
   const smsReady = Boolean(smsProbe?.available);
