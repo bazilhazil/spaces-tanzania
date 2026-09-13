@@ -310,7 +310,9 @@ function UploadWizardPage() {
     }
     setSubmitting(true);
     try {
+      let savedStatus = "";
       const title = (draft.title?.trim() || autoTitle);
+
       const payload = {
         property_type: draft.property_type as any,
         listing_type: (draft.listing_type ?? "rent") as any,
