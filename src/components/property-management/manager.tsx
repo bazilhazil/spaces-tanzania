@@ -1032,10 +1032,21 @@ async function handleCardAction(
     case "pause":
     case "resume": {
       const next = a === "pause" ? "paused" : "live";
-      const { error } = await supabase.from("properties").update({ status: next as never }).eq("id", p.id);
+      const { data, error } = await supabase
+        .from("properties")
+        .update({ status: next as never })
+        .eq("id", p.id)
+        .select("status")
+        .maybeSingle();
       if (error) return toast.error(friendlyError(error));
-      setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: next as never } : x)));
-      toast.success(a === "pause" ? "Paused" : "Resumed");
+      const applied = ((data as any)?.status as string) ?? next;
+      setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: applied as never } : x)));
+      toast.success(
+        applied === "pending"
+          ? "Sent for review — it goes live once approved"
+          : a === "pause" ? "Paused" : "Resumed",
+      );
+
       break;
     }
     case "delete":
