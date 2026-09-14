@@ -100,6 +100,7 @@ export interface AdminQueueItem {
   id: string;
   title: string;
   location: string;
+  region: string | null;
   price: number;
   currency: string;
   listingType: string;
@@ -114,9 +115,14 @@ export interface AdminQueueItem {
   createdAt: string;
   cover: string | null;
   quality: number;
+  /** Open safety reports filed against this listing. */
+  openReports: number;
   /** Ids of listings that look like the same space — for admin review only. */
   possibleDuplicates: string[];
+  /** Why this listing appears in the attention queue (most important first). */
+  attention: string[];
 }
+
 
 /** Simple, deterministic completeness score from the record itself. */
 function completeness(row: any, hasImage: boolean): number {
