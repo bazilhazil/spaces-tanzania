@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Building2, Home, Landmark, MapPin, Search, Store, Trees, Warehouse } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Building2, Home, Landmark, Search, Store, Trees, Warehouse } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { LocationSearchInput } from "@/components/location-search-input";
 import {
   Select,
   SelectContent,
@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
-import { TZ_REGION_NAMES, searchLocations } from "@/lib/tz-locations";
-import { fetchLocationFacets, searchFacets, type RegionFacet } from "@/lib/location-facets";
+import { TZ_REGION_NAMES } from "@/lib/tz-locations";
+import { fetchLocationFacets, type RegionFacet } from "@/lib/location-facets";
 import { track } from "@/lib/analytics";
 
 type Tab = "rent" | "sale" | "commercial";
@@ -40,7 +40,6 @@ export function HeroSearch() {
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [q, setQ] = useState("");
-  const [showHits, setShowHits] = useState(false);
   const [district, setDistrict] = useState<string | undefined>();
   const [area, setArea] = useState<string | undefined>();
   const [facets, setFacets] = useState<RegionFacet[]>([]);
@@ -55,16 +54,6 @@ export function HeroSearch() {
     return () => { alive = false; };
   }, []);
 
-  const hits = useMemo(() => {
-    if (facets.length) {
-      return searchFacets(facets, q, 6).map((h) => ({
-        label: h.label, kind: h.kind, region: h.region, district: h.district, ward: h.ward,
-      }));
-    }
-    return searchLocations(q, 6).map((h) => ({
-      label: h.label, kind: h.kind, region: h.region, district: h.district, ward: h.ward,
-    }));
-  }, [facets, q]);
 
   const regionOptions = facets.length ? facets.map((f) => f.name) : TZ_REGION_NAMES;
 
@@ -107,43 +96,27 @@ export function HeroSearch() {
         }}
         className="relative z-30 grid grid-cols-2 gap-3 rounded-r-2xl rounded-bl-2xl bg-background/95 p-4 shadow-[var(--shadow-elevated)] backdrop-blur md:grid-cols-12 md:items-center md:p-3"
       >
-        <div className="relative z-50 col-span-2 md:col-span-4">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={q}
-            onChange={(e) => { setQ(e.target.value); setShowHits(true); }}
-            onFocus={() => setShowHits(true)}
-            onBlur={() => setTimeout(() => setShowHits(false), 150)}
-            onKeyDown={(e) => { if (e.key === "Escape") { setShowHits(false); e.currentTarget.blur(); } }}
-            placeholder={t("search.placeholder")}
-            className="h-12 border-transparent bg-secondary/60 pl-10 text-sm focus-visible:border-ring"
-          />
-          {showHits && q && hits.length > 0 && (
-            <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-72 w-full overflow-y-auto overscroll-contain rounded-2xl border border-border bg-popover p-1 text-popover-foreground shadow-[var(--shadow-elevated)]">
-              {hits.map((h, i) => (
-                <button
-                  key={`${h.label}-${i}`}
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => {
-                    setCity(h.region);
-                    setDistrict(h.district);
-                    setArea(h.ward);
-                    setQ("");
-                    setShowHits(false);
-                  }}
-                  className="flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-muted focus:bg-muted focus:outline-none"
-                >
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium text-foreground">{h.label}</div>
-                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{h.kind}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <LocationSearchInput
+          className="z-50 col-span-2 md:col-span-4"
+          facets={facets}
+          selected={{ region: city || undefined, district, ward: area }}
+          text={q}
+          onTextChange={setQ}
+          placeholder={t("search.placeholder")}
+          onSelect={(h) => {
+            setCity(h.region);
+            setDistrict(h.district);
+            setArea(h.ward);
+            setQ("");
+          }}
+          onClear={() => {
+            setCity("");
+            setDistrict(undefined);
+            setArea(undefined);
+            setQ("");
+          }}
+          inputClassName="border-transparent bg-secondary/60"
+        />
 
         <Select value={city} onValueChange={(v) => { setCity(v); setDistrict(undefined); setArea(undefined); }}>
           <SelectTrigger className="h-12 border-transparent bg-secondary/60 md:col-span-2">

@@ -94,16 +94,25 @@ export function facetHits(facets: RegionFacet[]): LocationHitFacet[] {
   return hits;
 }
 
-/** Natural place lookup ("masaki", "mbezi", "zanzibar") over real listing data. */
+/**
+ * Natural place lookup ("sinza", "masaki", "mbezi") over real listing data.
+ * Strongest matches first: exact name, then name prefix, then a word inside the
+ * name, then anywhere in the full label. Popularity only breaks ties.
+ */
 export function searchFacets(facets: RegionFacet[], q: string, limit = 6): LocationHitFacet[] {
   const query = q.trim().toLowerCase();
-  if (query.length < 2) return [];
-  const starts: LocationHitFacet[] = [];
-  const contains: LocationHitFacet[] = [];
+  if (query.length < 1) return [];
+  const scored: { hit: LocationHitFacet; rank: number }[] = [];
   for (const h of facetHits(facets)) {
     const name = (h.ward ?? h.district ?? h.region).toLowerCase();
-    if (name.startsWith(query)) starts.push(h);
-    else if (h.label.toLowerCase().includes(query)) contains.push(h);
+    const label = h.label.toLowerCase();
+    let rank = -1;
+    if (name === query) rank = 0;
+    else if (name.startsWith(query)) rank = 1;
+    else if (name.split(/\s+/).some((w) => w.startsWith(query))) rank = 2;
+    else if (label.includes(query)) rank = 3;
+    if (rank >= 0) scored.push({ hit: h, rank });
   }
-  return [...starts, ...contains].slice(0, limit);
+  scored.sort((a, b) => a.rank - b.rank || b.hit.count - a.hit.count || a.hit.label.localeCompare(b.hit.label));
+  return scored.slice(0, limit).map((s) => s.hit);
 }
