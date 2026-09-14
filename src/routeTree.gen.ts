@@ -58,6 +58,8 @@ import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_aut
 import { Route as AuthenticatedBillingHistoryRouteImport } from './routes/_authenticated/billing.history'
 import { Route as AuthenticatedAdminSectionRouteImport } from './routes/_authenticated/admin.$section'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicOgPropertyIdRouteImport } from './routes/api/public/og.property.$id'
 import { Route as AuthenticatedDashboardPropertiesIdManageRouteImport } from './routes/_authenticated/dashboard.properties.$id.manage'
 
@@ -320,6 +322,16 @@ const LovableEmailTransactionalPreviewRoute =
     path: '/lovable/email/transactional/preview',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicOgPropertyIdRoute = ApiPublicOgPropertyIdRouteImport.update({
   id: '/api/public/og/property/$id',
   path: '/api/public/og/property/$id',
@@ -380,6 +392,8 @@ export interface FileRoutesByFullPath {
   '/property/$id': typeof AuthenticatedPropertyIdRoute
   '/api/public/selcom-webhook': typeof ApiPublicSelcomWebhookRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
   '/api/public/og/property/$id': typeof ApiPublicOgPropertyIdRoute
@@ -431,6 +445,8 @@ export interface FileRoutesByTo {
   '/property/$id': typeof AuthenticatedPropertyIdRoute
   '/api/public/selcom-webhook': typeof ApiPublicSelcomWebhookRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
   '/api/public/og/property/$id': typeof ApiPublicOgPropertyIdRoute
@@ -485,6 +501,8 @@ export interface FileRoutesById {
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
   '/api/public/selcom-webhook': typeof ApiPublicSelcomWebhookRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/_authenticated/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
   '/api/public/og/property/$id': typeof ApiPublicOgPropertyIdRoute
@@ -539,6 +557,8 @@ export interface FileRouteTypes {
     | '/property/$id'
     | '/api/public/selcom-webhook'
     | '/admin/'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/dashboard/properties/$id/manage'
     | '/api/public/og/property/$id'
@@ -590,6 +610,8 @@ export interface FileRouteTypes {
     | '/property/$id'
     | '/api/public/selcom-webhook'
     | '/admin'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/dashboard/properties/$id/manage'
     | '/api/public/og/property/$id'
@@ -643,6 +665,8 @@ export interface FileRouteTypes {
     | '/_authenticated/property/$id'
     | '/api/public/selcom-webhook'
     | '/_authenticated/admin/'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/_authenticated/dashboard/properties/$id/manage'
     | '/api/public/og/property/$id'
@@ -669,6 +693,8 @@ export interface RootRouteChildren {
   SpacesLocationRoute: typeof SpacesLocationRoute
   PropertiesIndexRoute: typeof PropertiesIndexRoute
   ApiPublicSelcomWebhookRoute: typeof ApiPublicSelcomWebhookRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   ApiPublicOgPropertyIdRoute: typeof ApiPublicOgPropertyIdRoute
 }
@@ -1018,6 +1044,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/og/property/$id': {
       id: '/api/public/og/property/$id'
       path: '/api/public/og/property/$id'
@@ -1170,6 +1210,8 @@ const rootRouteChildren: RootRouteChildren = {
   SpacesLocationRoute: SpacesLocationRoute,
   PropertiesIndexRoute: PropertiesIndexRoute,
   ApiPublicSelcomWebhookRoute: ApiPublicSelcomWebhookRoute,
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   ApiPublicOgPropertyIdRoute: ApiPublicOgPropertyIdRoute,
 }
