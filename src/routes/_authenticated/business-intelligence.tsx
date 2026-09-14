@@ -43,6 +43,7 @@ function BIPage() {
   const [report, setReport] = useState<AnalyticsReport | null>(null);
   const [responseMin, setResponseMin] = useState<number | null>(null);
   const [saves, setSaves] = useState<SavesInsights | null>(null);
+  const [leadInsights, setLeadInsights] = useState<LeadInsights | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,8 +55,10 @@ function BIPage() {
       fetchAnalytics(range),
       fetchResponseMinutes(range).catch(() => null),
       fetchSavesInsights().catch(() => null),
+      fetchLeadInsights().catch(() => null),
     ])
-      .then(([r, m, sv]) => { if (!alive) return; setReport(r); setResponseMin(m); setSaves(sv); })
+      .then(([r, m, sv, li]) => { if (!alive) return; setReport(r); setResponseMin(m); setSaves(sv); setLeadInsights(li); })
+
       .catch((e) => { if (alive) setError(friendlyError(e)); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
