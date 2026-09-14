@@ -31,8 +31,8 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  logAdminAction, setUserAccountStatus, fetchUserOperations, fetchMarketplaceOverview,
-  type UserOperations, type MarketplaceOverview,
+  logAdminAction, setUserAccountStatus, fetchUserOperations,
+  type UserOperations,
 } from "@/lib/admin-ops";
 import { friendlyError } from "@/lib/errors";
 import { adminSetPaymentStatus } from "@/lib/monetization-db";
