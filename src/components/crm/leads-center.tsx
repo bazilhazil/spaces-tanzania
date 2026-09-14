@@ -302,6 +302,10 @@ function LeadDrawer({
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
+  const [lostOpen, setLostOpen] = useState(false);
+  const [lostReason, setLostReason] = useState<LostReason>("no_response");
+  const [lostNote, setLostNote] = useState("");
+
 
   useEffect(() => {
     if (!lead) return;
