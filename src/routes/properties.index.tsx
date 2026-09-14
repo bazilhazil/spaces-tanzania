@@ -11,6 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PropertyCard } from "@/components/property-card";
+import { LocationSearchInput } from "@/components/location-search-input";
 import { SkeletonCard } from "@/components/ds";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
