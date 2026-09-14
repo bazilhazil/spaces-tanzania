@@ -34,10 +34,15 @@ export const adminSetPaymentStatusFn = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.rpc("admin_set_payment_status", {
-      _payment_id: data.paymentId,
-      _status: data.status,
-    } as never);
+    const now = new Date().toISOString();
+    const patch: Record<string, unknown> = { status: data.status, updated_at: now };
+    if (data.status === "paid" || data.status === "succeeded") patch.paid_at = now;
+    if (data.status === "refunded") patch.refunded_at = now;
+
+    const { error } = await supabaseAdmin
+      .from("payments")
+      .update(patch as never)
+      .eq("id", data.paymentId);
     if (error) throw error;
     return { ok: true as const };
   });
