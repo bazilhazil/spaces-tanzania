@@ -96,7 +96,7 @@ export function PublicProfile({ profile, userId, className }: { profile: PublicP
         />
       )}
 
-      {userId && <PersonReviews userId={userId} responseTime={profile.stats.responseTime} />}
+      {userId && <PersonReviews userId={userId} responseTime={profile.stats.responseTime === "—" ? undefined : profile.stats.responseTime} />}
     </div>
   );
 }
