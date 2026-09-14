@@ -243,6 +243,8 @@ export function AdminHomePanel() {
 
       <MarketplaceOverviewSection />
 
+      <TeamSnapshotSection />
+
 
       <Section
         title={t("admin.ops.todayTasks")}
