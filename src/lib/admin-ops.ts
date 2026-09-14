@@ -595,3 +595,142 @@ export async function fetchUserOperations(userId: string): Promise<UserOperation
   };
 }
 
+
+// -------------------------------------------- ownership & agent assignment
+
+export interface PersonOption {
+  id: string;
+  name: string;
+  email: string | null;
+  agency: string | null;
+}
+
+/** Registered users holding a given role. No free text, no invented people. */
+async function fetchPeopleWithRole(role: "owner" | "agent"): Promise<PersonOption[]> {
+  const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", role).limit(500);
+  const ids = Array.from(new Set(((roles ?? []) as any[]).map((r) => r.user_id)));
+  if (!ids.length) return [];
+  const { data } = await supabase
+    .from("profiles")
+    .select("id,full_name,email,agency_name,account_status")
+    .in("id", ids);
+  return ((data ?? []) as any[])
+    .filter((p) => p.account_status === "active")
+    .map((p) => ({
+      id: p.id,
+      name: p.full_name || p.email || "Unnamed member",
+      email: p.email ?? null,
+      agency: p.agency_name ?? null,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export const fetchOwnerCandidates = () => fetchPeopleWithRole("owner");
+export const fetchAgentCandidates = () => fetchPeopleWithRole("agent");
+
+export interface PropertyAssignment {
+  propertyId: string;
+  ownerId: string | null;
+  ownerName: string | null;
+  ownerStatus: string | null;
+  agents: { id: string; agentId: string; name: string; permission: string }[];
+  needsAssignment: boolean;
+}
+
+export async function fetchPropertyAssignment(propertyId: string): Promise<PropertyAssignment> {
+  const [{ data: prop }, { data: links }] = await Promise.all([
+    supabase.from("properties").select("id,owner_id").eq("id", propertyId).maybeSingle(),
+    supabase.from("property_agents").select("id,agent_id,permission").eq("property_id", propertyId),
+  ]);
+  const ownerId = (prop as any)?.owner_id ?? null;
+  const agentRows = (links ?? []) as any[];
+  const peopleIds = [ownerId, ...agentRows.map((a) => a.agent_id)].filter(Boolean) as string[];
+  const { data: people } = peopleIds.length
+    ? await supabase.from("profiles").select("id,full_name,email,account_status").in("id", peopleIds)
+    : { data: [] as any[] };
+  const byId = new Map(((people ?? []) as any[]).map((p) => [p.id, p]));
+  const owner = ownerId ? byId.get(ownerId) : null;
+  return {
+    propertyId,
+    ownerId,
+    ownerName: owner ? (owner.full_name || owner.email || "Unnamed member") : null,
+    ownerStatus: owner?.account_status ?? null,
+    agents: agentRows.map((a) => ({
+      id: a.id,
+      agentId: a.agent_id,
+      name: byId.get(a.agent_id)?.full_name || byId.get(a.agent_id)?.email || "Assigned agent",
+      permission: a.permission,
+    })),
+    needsAssignment: !owner || owner.account_status !== "active",
+  };
+}
+
+/** Admin-only: move a listing to a different registered owner. Database-enforced. */
+export async function assignPropertyOwner(propertyId: string, owner: PersonOption, propertyTitle?: string) {
+  const { error } = await supabase.from("properties").update({ owner_id: owner.id } as never).eq("id", propertyId);
+  if (error) throw error;
+  await logAdminAction({
+    action: "property_owner_assigned",
+    targetType: "property",
+    targetId: propertyId,
+    targetLabel: `${propertyTitle ?? "Space"} → ${owner.name}`,
+    meta: { owner_id: owner.id },
+  });
+}
+
+export async function assignPropertyAgent(
+  propertyId: string,
+  ownerId: string,
+  agent: PersonOption,
+  permission: string,
+  propertyTitle?: string,
+) {
+  const { error } = await supabase
+    .from("property_agents")
+    .upsert(
+      { property_id: propertyId, owner_id: ownerId, agent_id: agent.id, permission } as never,
+      { onConflict: "property_id,agent_id" },
+    );
+  if (error) throw error;
+  await logAdminAction({
+    action: "property_agent_assigned",
+    targetType: "property",
+    targetId: propertyId,
+    targetLabel: `${propertyTitle ?? "Space"} → ${agent.name}`,
+    meta: { agent_id: agent.id, permission },
+  });
+}
+
+export async function removePropertyAgent(linkId: string, propertyId: string, agentName: string) {
+  const { error } = await supabase.from("property_agents").delete().eq("id", linkId);
+  if (error) throw error;
+  await logAdminAction({
+    action: "property_agent_removed",
+    targetType: "property",
+    targetId: propertyId,
+    targetLabel: agentName,
+  });
+}
+
+/** Listings whose responsible person is missing or no longer active. */
+export async function fetchPropertiesNeedingAssignment(): Promise<{ id: string; title: string; reason: string; at: string }[]> {
+  const { data } = await supabase
+    .from("properties")
+    .select("id,title,owner_id,created_at")
+    .is("deleted_at", null)
+    .limit(500);
+  const rows = (data ?? []) as any[];
+  const ownerIds = Array.from(new Set(rows.map((r) => r.owner_id).filter(Boolean)));
+  const { data: people } = ownerIds.length
+    ? await supabase.from("profiles").select("id,account_status").in("id", ownerIds)
+    : { data: [] as any[] };
+  const status = new Map(((people ?? []) as any[]).map((p) => [p.id, p.account_status]));
+  return rows
+    .filter((r) => !r.owner_id || status.get(r.owner_id) !== "active")
+    .map((r) => ({
+      id: r.id,
+      title: r.title ?? "Untitled space",
+      reason: !r.owner_id ? "No owner on record" : "Owner account is not active",
+      at: r.created_at,
+    }));
+}
