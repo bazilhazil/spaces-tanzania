@@ -53,7 +53,9 @@ export const LOST_REASONS = [
   "changed_mind",
   "unavailable",
   "chose_other",
+  "no_response",
   "other",
+
 ] as const;
 export type LostReason = (typeof LOST_REASONS)[number];
 
