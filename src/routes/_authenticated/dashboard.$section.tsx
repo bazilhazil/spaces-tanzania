@@ -50,13 +50,20 @@ function SectionPage() {
   const navigate = useNavigate();
   const meta = META[section] ?? { title: section, desc: "" };
 
+  // These sections have full, live pages of their own — send people there
+  // instead of showing a second, weaker copy.
+  const REDIRECTS: Record<string, string> = {
+    properties: "/dashboard/properties",
+    viewings: "/viewings",
+    messages: "/messages",
+  };
+
   useEffect(() => {
-    if (section === "properties") {
-      navigate({ to: "/dashboard/properties", replace: true });
-    }
+    const to = REDIRECTS[section];
+    if (to) navigate({ to, replace: true });
   }, [section, navigate]);
 
-  if (section === "properties") return null;
+  if (REDIRECTS[section]) return null;
 
   return (
     <DashboardShell>
