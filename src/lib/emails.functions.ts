@@ -60,8 +60,13 @@ export const sendAdminTestEmail = createServerFn({ method: "POST" })
     }
   });
 
-/** Real delivery health for the admin Launch Checklist — never assumed. */
-export const emailDeliveryHealth = createServerFn({ method: "GET" }).handler(async () => {
+/** Real delivery health for the admin Launch Checklist — never assumed. Admins only. */
+export const emailDeliveryHealth = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+  if (!(await callerIsAdmin(context.supabase, context.userId))) {
+    return { state: "pending" as const, detail: "Email status is available to administrators only" };
+  }
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) return { state: "action" as const, detail: "Email service is not available on the server" };
   try {
