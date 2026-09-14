@@ -214,7 +214,12 @@
       "whatsappMessage": "Hello, I'm interested in {title} on SPACES.",
       "whatsappMessageFull": "Hi, I'm interested in {title} ({location}) on SPACES. Is it still available?",
       "contactUnavailable": "Contact details aren't available for this listing yet. Send an inquiry instead.",
-      "viewProfile": "View profile"
+      "viewProfile": "View profile",
+      "listedBy": "Listed by",
+      "roleAgent": "Agent",
+      "roleOwner": "Owner",
+      "verifiedBySpaces": "Verified by SPACES",
+      "notVerified": "Not yet verified"
     }
   },
   "agents": {
