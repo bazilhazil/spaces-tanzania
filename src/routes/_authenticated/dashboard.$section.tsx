@@ -76,8 +76,7 @@ function SectionPage() {
           <p className="mt-1 text-muted-foreground">{meta.desc}</p>
         </header>
 
-        {section === "viewings"     ? <ViewingsPanel /> :
-         section === "messages"     ? <MessagesPanel /> :
+        {
          section === "drafts"       ? <DraftsPanel /> :
          section === "analytics"    ? <AnalyticsPanel /> :
          section === "subscription" ? <SubscriptionPanel /> :
