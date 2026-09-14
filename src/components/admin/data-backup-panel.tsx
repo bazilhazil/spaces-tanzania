@@ -203,6 +203,61 @@ export function DataBackupPanel() {
         </div>
       </section>
 
+      {/* File storage backup */}
+      <section className="ds-card p-4">
+        <h2 className="ds-h-sm flex items-center gap-2"><HardDrive className="h-4 w-4" />{t("backup.storageTitle")}</h2>
+        <p className="mt-1 text-xs text-muted-foreground">{t("backup.storageNote")}</p>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label>{t("backup.storageProvider")}</Label>
+            <Input
+              value={cfg.storageProvider ?? ""}
+              onChange={(e) => setCfg({ ...cfg, storageProvider: e.target.value || null })}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t("backup.storageLastSuccess")}</Label>
+            <Input
+              type="datetime-local"
+              value={cfg.storageLastSuccessAt ? cfg.storageLastSuccessAt.slice(0, 16) : ""}
+              onChange={(e) => setCfg({ ...cfg, storageLastSuccessAt: e.target.value ? new Date(e.target.value).toISOString() : null })}
+            />
+          </div>
+        </div>
+        <label className="mt-4 flex items-center gap-3 text-sm">
+          <Switch checked={cfg.storageConfigured} onCheckedChange={(v) => setCfg({ ...cfg, storageConfigured: v })} />
+          <span>{t("backup.storageConfirm")}</span>
+        </label>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          {coverage?.buckets.map((b) => (
+            <div key={b.label} className="flex items-center justify-between rounded-xl border border-border/50 px-3 py-2 text-sm">
+              <span>{b.label}</span>
+              <span className="text-xs text-muted-foreground">{t("backup.private")}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 flex justify-end">
+          <Button onClick={persistConfig} disabled={savingCfg}>
+            {savingCfg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {t("common.save")}
+          </Button>
+        </div>
+      </section>
+
+      {/* Recoverable data */}
+      <section className="ds-card p-4">
+        <h2 className="ds-h-sm flex items-center gap-2"><Database className="h-4 w-4" />{t("backup.coverageTitle")}</h2>
+        <p className="mt-1 text-xs text-muted-foreground">{t("backup.coverageNote")}</p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {coverage?.datasets.map((d) => (
+            <div key={d.label} className="flex items-center justify-between rounded-xl border border-border/50 px-3 py-2 text-sm">
+              <span>{d.label}</span>
+              <span className="text-xs text-muted-foreground">{d.rows === null ? "—" : d.rows}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Restore safety */}
       <section className="ds-card p-4">
         <h2 className="ds-h-sm flex items-center gap-2"><RotateCcw className="h-4 w-4" />{t("backup.restoreTitle")}</h2>
@@ -213,7 +268,35 @@ export function DataBackupPanel() {
           <li>{t("backup.restoreReq3")}</li>
           <li>{t("backup.restoreReq4")}</li>
         </ul>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label>{t("backup.restoreVerifiedAt")}</Label>
+            <Input
+              type="datetime-local"
+              value={cfg.restoreVerifiedAt ? cfg.restoreVerifiedAt.slice(0, 16) : ""}
+              onChange={(e) => setCfg({ ...cfg, restoreVerifiedAt: e.target.value ? new Date(e.target.value).toISOString() : null })}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t("backup.restoreNotes")}</Label>
+            <Input
+              value={cfg.restoreNotes ?? ""}
+              onChange={(e) => setCfg({ ...cfg, restoreNotes: e.target.value || null })}
+            />
+          </div>
+        </div>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <label className="flex items-center gap-3 text-sm">
+            <Switch checked={cfg.restoreVerified} onCheckedChange={(v) => setCfg({ ...cfg, restoreVerified: v })} />
+            <span>{t("backup.restoreConfirm")}</span>
+          </label>
+          <Button onClick={persistConfig} disabled={savingCfg}>
+            {savingCfg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {t("common.save")}
+          </Button>
+        </div>
       </section>
+
 
       {/* Exports */}
       <section className="ds-card p-4">
