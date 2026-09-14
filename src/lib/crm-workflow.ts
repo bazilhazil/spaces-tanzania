@@ -84,6 +84,9 @@ export interface CrmLead {
   viewingAt: string | null;
   /** The message conversation this inquiry came from (when there is one). */
   conversationId: string | null;
+  /** When the owner/agent first moved this inquiry out of "New". */
+  firstRespondedAt: string | null;
+  lostReason: string | null;
 }
 
 export interface TimelineEntry {
@@ -93,6 +96,72 @@ export interface TimelineEntry {
   label: string;
   detail?: string | null;
 }
+
+/* ----------------------- Priority / next action ----------------------- */
+
+export type LeadPriority = "high" | "normal" | "low";
+
+/** Simple, explainable priority — no scoring model. */
+export function leadPriority(lead: CrmLead): LeadPriority {
+  if (isTerminalLead(lead.status)) return "low";
+  if (
+    lead.viewingStatus === "pending" ||
+    lead.viewingStatus === "approved" ||
+    lead.status === "viewing_scheduled" ||
+    lead.status === "negotiating" ||
+    lead.status === "offer_made" ||
+    lead.status === "interested" ||
+    (lead.dealId !== null && lead.status !== "new")
+  ) {
+    return "high";
+  }
+  if (lead.status === "new") return "normal";
+  return "normal";
+}
+
+export type NextAction =
+  | "contact_buyer"
+  | "schedule_viewing"
+  | "confirm_viewing"
+  | "follow_up"
+  | "update_deal"
+  | "mark_won"
+  | "mark_lost"
+  | "none";
+
+/** The single most useful next step for an active inquiry. */
+export function nextAction(lead: CrmLead): NextAction {
+  if (isTerminalLead(lead.status)) return "none";
+  if (lead.viewingStatus === "pending") return "confirm_viewing";
+  switch (lead.status) {
+    case "new":
+      return "contact_buyer";
+    case "contacted":
+      return needsFollowUp(lead) ? "follow_up" : "schedule_viewing";
+    case "interested":
+      return "schedule_viewing";
+    case "viewing_scheduled":
+      return "confirm_viewing";
+    case "viewing_completed":
+      return lead.dealId ? "update_deal" : "follow_up";
+    case "negotiating":
+      return "update_deal";
+    case "offer_made":
+      return "mark_won";
+    default:
+      return "follow_up";
+  }
+}
+
+/** New/Contacted inquiries with no activity for 2+ days need chasing. */
+export const FOLLOW_UP_AFTER_HOURS = 48;
+
+export function needsFollowUp(lead: CrmLead): boolean {
+  if (lead.status !== "new" && lead.status !== "contacted") return false;
+  const last = new Date(lead.lastActivityAt || lead.createdAt).getTime();
+  return Date.now() - last > FOLLOW_UP_AFTER_HOURS * 3600_000;
+}
+
 
 /* --------------------------------- Fetch --------------------------------- */
 
