@@ -32,7 +32,9 @@ import {
 } from "@/components/ui/dialog";
 import {
   logAdminAction, setUserAccountStatus, fetchUserOperations,
-  type UserOperations,
+  fetchOwnerCandidates, fetchAgentCandidates, fetchPropertyAssignment,
+  assignPropertyOwner, assignPropertyAgent, removePropertyAgent,
+  type UserOperations, type PersonOption, type PropertyAssignment,
 } from "@/lib/admin-ops";
 import { friendlyError } from "@/lib/errors";
 import { adminSetPaymentStatus } from "@/lib/monetization-db";
@@ -502,6 +504,9 @@ export function PropertiesPanel() {
               )}
 
 
+              <PropertyAssignmentCard propertyId={item.id} propertyTitle={item.title} />
+
+
               <div className="flex flex-wrap gap-2 border-t border-border/60 bg-secondary/30 p-4">
                 <Button variant="success" size="sm" className="gap-2" onClick={() => act(item.id, "approve", t("admin.toast.approved"))}><CheckCircle2 className="h-4 w-4" /> {t("admin.action.approve")}</Button>
                 <Button variant="outline" size="sm" className="gap-2" onClick={() => setReasonFor("request_changes")}><RefreshCw className="h-4 w-4" /> {t("admin.action.requestChanges")}</Button>
@@ -543,6 +548,130 @@ export function PropertiesPanel() {
   );
 }
 
+// ---------- Ownership & agent assignment (admin only) ----------
+
+const AGENT_PERMISSION_OPTIONS = [
+  { id: "manage_leads", label: "Manage inquiries" },
+  { id: "manage_viewings", label: "Manage viewings" },
+  { id: "edit_listing", label: "Edit the listing" },
+  { id: "full_management", label: "Full management" },
+  { id: "view_only", label: "View only" },
+];
+
+function PropertyAssignmentCard({ propertyId, propertyTitle }: { propertyId: string; propertyTitle: string }) {
+  const [data, setData] = useState<PropertyAssignment | null>(null);
+  const [owners, setOwners] = useState<PersonOption[]>([]);
+  const [agents, setAgents] = useState<PersonOption[]>([]);
+  const [ownerPick, setOwnerPick] = useState("");
+  const [agentPick, setAgentPick] = useState("");
+  const [permission, setPermission] = useState("manage_leads");
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    const [a, o, g] = await Promise.all([
+      fetchPropertyAssignment(propertyId),
+      fetchOwnerCandidates(),
+      fetchAgentCandidates(),
+    ]);
+    setData(a);
+    setOwners(o);
+    setAgents(g);
+    setOwnerPick(a.ownerId ?? "");
+    setAgentPick("");
+  }, [propertyId]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  async function saveOwner() {
+    const owner = owners.find((o) => o.id === ownerPick);
+    if (!owner || owner.id === data?.ownerId) return;
+    setBusy(true);
+    try {
+      await assignPropertyOwner(propertyId, owner, propertyTitle);
+      toast.success(`Owner set to ${owner.name}`);
+      await load();
+    } catch (e) { toast.error(friendlyError(e)); } finally { setBusy(false); }
+  }
+
+  async function addAgent() {
+    const agent = agents.find((a) => a.id === agentPick);
+    if (!agent || !data?.ownerId) return;
+    setBusy(true);
+    try {
+      await assignPropertyAgent(propertyId, data.ownerId, agent, permission, propertyTitle);
+      toast.success(`${agent.name} assigned`);
+      await load();
+    } catch (e) { toast.error(friendlyError(e)); } finally { setBusy(false); }
+  }
+
+  async function dropAgent(linkId: string, name: string) {
+    setBusy(true);
+    try {
+      await removePropertyAgent(linkId, propertyId, name);
+      toast.success("Agent removed");
+      await load();
+    } catch (e) { toast.error(friendlyError(e)); } finally { setBusy(false); }
+  }
+
+  if (!data) return null;
+
+  return (
+    <div className="mx-6 mb-6 rounded-2xl border border-border/60 p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="text-sm font-semibold">Responsible owner & agent</h3>
+        {data.needsAssignment && <Badge variant="warning">Owner/Agent assignment required</Badge>}
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto]">
+        <select value={ownerPick} onChange={(e) => setOwnerPick(e.target.value)}
+          className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm">
+          <option value="">
+            {owners.length ? "Select a registered owner…" : "No members hold the Owner role yet"}
+          </option>
+          {owners.map((o) => <option key={o.id} value={o.id}>{o.name}{o.email ? ` · ${o.email}` : ""}</option>)}
+        </select>
+        <Button size="sm" disabled={busy || !ownerPick || ownerPick === data.ownerId} onClick={saveOwner}>
+          Set owner
+        </Button>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Current owner: {data.ownerName ?? "not assigned"}
+        {data.ownerStatus && data.ownerStatus !== "active" ? ` (account ${data.ownerStatus})` : ""}
+      </p>
+
+      <div className="mt-4 space-y-2">
+        {data.agents.length === 0
+          ? <p className="text-xs text-muted-foreground">No agent is managing this space.</p>
+          : data.agents.map((a) => (
+            <div key={a.id} className="flex flex-wrap items-center gap-2 rounded-xl bg-secondary/40 px-3 py-2 text-sm">
+              <span className="min-w-0 truncate font-medium">{a.name}</span>
+              <Badge variant="muted" className="capitalize">{a.permission.replace(/_/g, " ")}</Badge>
+              <Button size="sm" variant="ghost" className="ml-auto" disabled={busy} onClick={() => dropAgent(a.id, a.name)}>
+                Remove
+              </Button>
+            </div>
+          ))}
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+        <select value={agentPick} onChange={(e) => setAgentPick(e.target.value)}
+          className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm">
+          <option value="">
+            {agents.length ? "Select a registered agent…" : "No members hold the Agent role yet"}
+          </option>
+          {agents.map((a) => <option key={a.id} value={a.id}>{a.name}{a.agency ? ` · ${a.agency}` : ""}</option>)}
+        </select>
+        <select value={permission} onChange={(e) => setPermission(e.target.value)}
+          className="h-10 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm">
+          {AGENT_PERMISSION_OPTIONS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+        </select>
+        <Button size="sm" variant="outline" disabled={busy || !agentPick || !data.ownerId} onClick={addAgent}>
+          Assign agent
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 
 // ---------- Users ----------
