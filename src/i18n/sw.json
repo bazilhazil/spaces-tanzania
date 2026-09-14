@@ -1964,6 +1964,17 @@
     "contactsNote": "Mawasiliano ya faragha yanaonekana kwa wasimamizi walioidhinishwa tu.",
     "primaryEmail": "Barua pepe kuu ya msaada",
     "backupEmail": "Barua pepe ya ziada",
-    "backupPhone": "Simu ya ziada ya msaada"
+    "backupPhone": "Simu ya ziada ya msaada",
+    "storageTitle": "Nakala ya faili zilizohifadhiwa",
+    "storageNote": "Picha, video na nyaraka za faragha. Andika tu mpango uliouthibitisha.",
+    "storageProvider": "Mpango wa nakala ya faili",
+    "storageLastSuccess": "Nakala ya faili ya mwisho iliyoripotiwa",
+    "storageConfirm": "Nimethibitisha mpango huu wa nakala ya faili",
+    "private": "Faragha",
+    "coverageTitle": "Taarifa zinazopaswa kurejeshwa",
+    "coverageNote": "Idadi halisi ya kumbukumbu. Miongozo, mikataba, malipo, ripoti na kumbukumbu za wasimamizi hazifutwi kiotomatiki.",
+    "restoreVerifiedAt": "Urejeshaji ulijaribiwa mara ya mwisho",
+    "restoreNotes": "Maelezo ya urejeshaji",
+    "restoreConfirm": "Nimejaribu urejeshaji na mtoa huduma"
   }
 }

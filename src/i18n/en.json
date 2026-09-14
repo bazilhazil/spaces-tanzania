@@ -1964,6 +1964,17 @@
     "contactsNote": "Private contacts are visible only to authorized administrators.",
     "primaryEmail": "Primary support email",
     "backupEmail": "Backup support email",
-    "backupPhone": "Backup support phone"
+    "backupPhone": "Backup support phone",
+    "storageTitle": "File storage backup",
+    "storageNote": "Uploaded photos, videos and private documents. Record only an arrangement you have confirmed.",
+    "storageProvider": "File backup arrangement",
+    "storageLastSuccess": "Last reported file backup",
+    "storageConfirm": "I have verified this file backup arrangement",
+    "private": "Private",
+    "coverageTitle": "Data that must be recoverable",
+    "coverageNote": "Live record counts. Historical leads, deals, payments, reports and audit records are never deleted automatically.",
+    "restoreVerifiedAt": "Restore last tested",
+    "restoreNotes": "Restore notes",
+    "restoreConfirm": "I have tested a restore with the provider"
   }
 }
