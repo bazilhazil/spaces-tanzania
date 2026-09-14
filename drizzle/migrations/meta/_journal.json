@@ -71,6 +71,13 @@
       "when": 1789387601162,
       "tag": "0009_agents_access_assigned_leads",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789387709912,
+      "tag": "0010_admins_read_user_roles",
+      "breakpoints": true
     }
   ]
 }
