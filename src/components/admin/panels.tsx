@@ -24,7 +24,7 @@ import {
   fetchAdminSubscriptions, fetchPropertyTypeMix, fetchRegionMix, moderateProperty,
   type AdminOverview, type AdminActivityItem, type AdminSeries, type AdminQueueItem,
   type AdminUser, type AdminReport, type AdminBooking, type AdminPayment,
-  type AdminSubscription, type MonthPoint, type QueueFilter,
+  type AdminSubscription, type MonthPoint, type QueueFilter, type ModerationAction,
 } from "@/lib/admin-db";
 import { Textarea } from "@/components/ui/textarea";
 import {
