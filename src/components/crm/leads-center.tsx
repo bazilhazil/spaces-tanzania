@@ -41,7 +41,7 @@ export function LeadsCenter() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<LeadStatus | "all">("all");
-  const [tab, setTab] = useState<"active" | "won" | "lost">("active");
+  const [tab, setTab] = useState<"active" | "followup" | "won" | "lost">("active");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
