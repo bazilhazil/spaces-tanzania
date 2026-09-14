@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Database, ShieldCheck, AlertTriangle, Download, Save, Loader2, LifeBuoy, RotateCcw,
+  Database, ShieldCheck, AlertTriangle, Download, Save, Loader2, LifeBuoy, RotateCcw, HardDrive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +13,10 @@ import { friendlyError } from "@/lib/errors";
 import { logAdminAction } from "@/lib/admin-ops";
 import {
   EMPTY_BACKUP, EMPTY_CONTACTS, downloadCsv, exportBusinessData, fetchBackupConfig,
-  fetchRecoveryContacts, saveBackupConfig, saveRecoveryContacts,
-  type BackupConfig, type ExportKind, type RecoveryContacts,
+  fetchBackupCoverage, fetchRecoveryContacts, saveBackupConfig, saveRecoveryContacts,
+  type BackupConfig, type BackupCoverage, type ExportKind, type RecoveryContacts,
 } from "@/lib/backup-db";
+
 
 const EXPORT_KINDS: ExportKind[] = ["users", "properties", "leads", "deals", "viewings", "revenue"];
 
@@ -29,6 +30,7 @@ export function DataBackupPanel() {
   const { t } = useI18n();
   const [cfg, setCfg] = useState<BackupConfig>(EMPTY_BACKUP);
   const [contacts, setContacts] = useState<RecoveryContacts>(EMPTY_CONTACTS);
+  const [coverage, setCoverage] = useState<BackupCoverage | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingCfg, setSavingCfg] = useState(false);
   const [savingContacts, setSavingContacts] = useState(false);
@@ -36,12 +38,13 @@ export function DataBackupPanel() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([fetchBackupConfig(), fetchRecoveryContacts()])
-      .then(([b, c]) => { if (!alive) return; setCfg(b); setContacts(c); })
+    Promise.all([fetchBackupConfig(), fetchRecoveryContacts(), fetchBackupCoverage()])
+      .then(([b, c, cov]) => { if (!alive) return; setCfg(b); setContacts(c); setCoverage(cov); })
       .catch((e) => toast.error(friendlyError(e)))
       .finally(() => alive && setLoading(false));
     return () => { alive = false; };
   }, []);
+
 
   const configured = cfg.configured && !!cfg.provider;
   const lastSuccess = fmt(cfg.lastSuccessAt);
