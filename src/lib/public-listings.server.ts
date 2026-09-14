@@ -102,3 +102,46 @@ export async function getCoverPath(id: string): Promise<string | null> {
   rows.sort((a, b) => (b.is_cover ? 1 : 0) - (a.is_cover ? 1 : 0) || (a.position ?? 0) - (b.position ?? 0));
   return rows[0].storage_path ?? null;
 }
+
+export type PublicProfileSeo = {
+  id: string;
+  name: string;
+  agency: string | null;
+  location: string | null;
+  bio: string | null;
+  isAgent: boolean;
+  isBusiness: boolean;
+  verified: boolean;
+  listings: number;
+};
+
+/** Public profile facts used for share previews and search metadata. */
+export async function getPublicProfileSeo(id: string): Promise<PublicProfileSeo | null> {
+  const client = publicClient();
+  const { data } = await client
+    .from("public_profiles")
+    .select("id,full_name,agency_name,business_name,location,bio,verified_identity,verified_owner,verified_agent,verified_business")
+    .eq("id", id)
+    .maybeSingle();
+  if (!data) return null;
+  const p = data as any;
+  const { count } = await client
+    .from("public_properties")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", id);
+  return {
+    id: p.id,
+    name: p.full_name || "SPACES member",
+    agency: p.agency_name ?? null,
+    location: p.location ?? null,
+    bio: p.bio ?? null,
+    isAgent: p.verified_agent === true,
+    isBusiness: p.verified_business === true,
+    verified:
+      p.verified_agent === true ||
+      p.verified_business === true ||
+      p.verified_owner === true ||
+      p.verified_identity === true,
+    listings: count ?? 0,
+  };
+}

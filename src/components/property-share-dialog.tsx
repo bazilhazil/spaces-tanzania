@@ -22,6 +22,8 @@ type Props = {
   /** Already formatted, public price text, e.g. "TZS 2,500,000/month". */
   price?: string;
   propertyId?: string;
+  /** Overrides the dialog heading (e.g. when sharing a profile). */
+  heading?: string;
 };
 
 export function PropertyShareDialog({
@@ -32,6 +34,7 @@ export function PropertyShareDialog({
   location,
   price,
   propertyId,
+  heading,
 }: Props) {
   const { t } = useI18n();
   const [canNativeShare, setCanNativeShare] = useState(false);
@@ -42,7 +45,7 @@ export function PropertyShareDialog({
 
   // Only public listing information is ever included — never owner contacts.
   const summary = [title, location, price].filter(Boolean).join("\n");
-  const whatsappText = `Check out this space on SPACES:\n${summary}\n\nView it here:\n${url}`;
+  const whatsappText = `Check this out on SPACES:\n${summary}\n\nView it here:\n${url}`;
   const shortText = `${title} — SPACES`;
 
   function logShare(channel: string) {
@@ -81,7 +84,7 @@ export function PropertyShareDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>{t("share.title")}</DialogTitle>
+          <DialogTitle>{heading ?? t("share.title")}</DialogTitle>
           <DialogDescription className="line-clamp-2">
             {[title, location, price].filter(Boolean).join(" · ")}
           </DialogDescription>

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { getPublicListing, listPublicListings } from "./public-listings.server";
+import { getPublicListing, getPublicProfileSeo, listPublicListings } from "./public-listings.server";
 import { locationSlug } from "./seo";
 
 export const getListingSeo = createServerFn({ method: "GET" })
@@ -37,3 +37,7 @@ export const getLocationSeo = createServerFn({ method: "GET" })
         .sort((a, b) => b.count - a.count),
     };
   });
+
+export const getProfileSeo = createServerFn({ method: "GET" })
+  .inputValidator((data) => z.object({ id: z.string() }).parse(data))
+  .handler(async ({ data }) => await getPublicProfileSeo(data.id));

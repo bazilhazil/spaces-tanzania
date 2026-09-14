@@ -32,6 +32,17 @@ export function PublicProfile({ profile, userId, className }: { profile: PublicP
                   {profile.verifiedBadges.map((b) => (
                     <VerificationBadge key={b} kind={b} size="sm" withLabel={false} />
                   ))}
+                  {/* Wording is driven only by real verification flags. */}
+                  <span
+                    className={cn(
+                      "rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1",
+                      profile.verifiedBadges.length
+                        ? "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)] ring-[color:var(--color-success-200)]"
+                        : "bg-muted text-muted-foreground ring-border",
+                    )}
+                  >
+                    {profile.verifiedBadges.length ? "Verified by SPACES" : "Not yet verified"}
+                  </span>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><Building2 className="h-3 w-3" /> {profile.role}</span>
@@ -40,8 +51,7 @@ export function PublicProfile({ profile, userId, className }: { profile: PublicP
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button className="rounded-full">Contact</Button>
+            <div className="flex flex-wrap items-center gap-2">
               <ReportSheet
                 target={{ type: "user", label: profile.displayName, userId: userId ?? null }}
                 trigger={
@@ -86,7 +96,7 @@ export function PublicProfile({ profile, userId, className }: { profile: PublicP
         />
       )}
 
-      {userId && <PersonReviews userId={userId} responseTime={profile.stats.responseTime} />}
+      {userId && <PersonReviews userId={userId} responseTime={profile.stats.responseTime === "—" ? undefined : profile.stats.responseTime} />}
     </div>
   );
 }

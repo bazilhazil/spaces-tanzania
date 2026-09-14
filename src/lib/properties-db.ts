@@ -225,3 +225,21 @@ export async function fetchOwnerPublicProfile(ownerId: string): Promise<OwnerPub
     reviews,
   };
 }
+
+/**
+ * Publicly visible listings for one owner/agent, used by their public profile.
+ * Reads the `public_properties` view so only marketplace-visible spaces appear.
+ */
+export async function fetchPropertiesByOwner(ownerId: string, limit = 24): Promise<Property[]> {
+  if (!ownerId) return [];
+  const { data } = await supabase
+    .from("public_properties")
+    .select("*")
+    .eq("owner_id", ownerId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  const rows = (data ?? []) as Row[];
+  if (!rows.length) return [];
+  const media = await mediaForProperties(rows.map((r) => r.id));
+  return rows.map((r) => mapRow(r, media[r.id] ?? []));
+}

@@ -534,6 +534,9 @@ function PropertyDetailPage() {
           <aside className="lg:sticky lg:top-24 lg:self-start">
             {agent && (
               <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  {t("properties.detail.listedBy")}
+                </p>
                 <div className="flex items-center gap-4">
                   <div className="relative">
                     <img
@@ -554,6 +557,17 @@ function PropertyDetailPage() {
                     <p className="truncate font-semibold text-foreground">{ownerProfile?.name || agent.name}</p>
                     {ownerProfile?.agency && (
                       <p className="truncate text-xs text-muted-foreground">{ownerProfile.agency}</p>
+                    )}
+                    {ownerProfile && (
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {ownerProfile.verifiedAgent
+                          ? t("properties.detail.roleAgent")
+                          : t("properties.detail.roleOwner")}
+                        {" · "}
+                        {ownerProfile.verifiedAgent || ownerProfile.verifiedOwner || ownerProfile.verifiedIdentity
+                          ? t("properties.detail.verifiedBySpaces")
+                          : t("properties.detail.notVerified")}
+                      </p>
                     )}
                     {ownerProfile?.rating != null && (
                       <p className="mt-1 inline-flex items-center gap-1 text-xs text-gold">
