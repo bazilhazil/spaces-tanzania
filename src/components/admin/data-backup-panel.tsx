@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Database, ShieldCheck, AlertTriangle, Download, Save, Loader2, LifeBuoy, RotateCcw,
+  Database, ShieldCheck, AlertTriangle, Download, Save, Loader2, LifeBuoy, RotateCcw, HardDrive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +13,10 @@ import { friendlyError } from "@/lib/errors";
 import { logAdminAction } from "@/lib/admin-ops";
 import {
   EMPTY_BACKUP, EMPTY_CONTACTS, downloadCsv, exportBusinessData, fetchBackupConfig,
-  fetchRecoveryContacts, saveBackupConfig, saveRecoveryContacts,
-  type BackupConfig, type ExportKind, type RecoveryContacts,
+  fetchBackupCoverage, fetchRecoveryContacts, saveBackupConfig, saveRecoveryContacts,
+  type BackupConfig, type BackupCoverage, type ExportKind, type RecoveryContacts,
 } from "@/lib/backup-db";
+
 
 const EXPORT_KINDS: ExportKind[] = ["users", "properties", "leads", "deals", "viewings", "revenue"];
 
@@ -29,6 +30,7 @@ export function DataBackupPanel() {
   const { t } = useI18n();
   const [cfg, setCfg] = useState<BackupConfig>(EMPTY_BACKUP);
   const [contacts, setContacts] = useState<RecoveryContacts>(EMPTY_CONTACTS);
+  const [coverage, setCoverage] = useState<BackupCoverage | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingCfg, setSavingCfg] = useState(false);
   const [savingContacts, setSavingContacts] = useState(false);
@@ -36,12 +38,13 @@ export function DataBackupPanel() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([fetchBackupConfig(), fetchRecoveryContacts()])
-      .then(([b, c]) => { if (!alive) return; setCfg(b); setContacts(c); })
+    Promise.all([fetchBackupConfig(), fetchRecoveryContacts(), fetchBackupCoverage()])
+      .then(([b, c, cov]) => { if (!alive) return; setCfg(b); setContacts(c); setCoverage(cov); })
       .catch((e) => toast.error(friendlyError(e)))
       .finally(() => alive && setLoading(false));
     return () => { alive = false; };
   }, []);
+
 
   const configured = cfg.configured && !!cfg.provider;
   const lastSuccess = fmt(cfg.lastSuccessAt);
@@ -203,6 +206,61 @@ export function DataBackupPanel() {
         </div>
       </section>
 
+      {/* File storage backup */}
+      <section className="ds-card p-4">
+        <h2 className="ds-h-sm flex items-center gap-2"><HardDrive className="h-4 w-4" />{t("backup.storageTitle")}</h2>
+        <p className="mt-1 text-xs text-muted-foreground">{t("backup.storageNote")}</p>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label>{t("backup.storageProvider")}</Label>
+            <Input
+              value={cfg.storageProvider ?? ""}
+              onChange={(e) => setCfg({ ...cfg, storageProvider: e.target.value || null })}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t("backup.storageLastSuccess")}</Label>
+            <Input
+              type="datetime-local"
+              value={cfg.storageLastSuccessAt ? cfg.storageLastSuccessAt.slice(0, 16) : ""}
+              onChange={(e) => setCfg({ ...cfg, storageLastSuccessAt: e.target.value ? new Date(e.target.value).toISOString() : null })}
+            />
+          </div>
+        </div>
+        <label className="mt-4 flex items-center gap-3 text-sm">
+          <Switch checked={cfg.storageConfigured} onCheckedChange={(v) => setCfg({ ...cfg, storageConfigured: v })} />
+          <span>{t("backup.storageConfirm")}</span>
+        </label>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          {coverage?.buckets.map((b) => (
+            <div key={b.label} className="flex items-center justify-between rounded-xl border border-border/50 px-3 py-2 text-sm">
+              <span>{b.label}</span>
+              <span className="text-xs text-muted-foreground">{t("backup.private")}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 flex justify-end">
+          <Button onClick={persistConfig} disabled={savingCfg}>
+            {savingCfg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {t("common.save")}
+          </Button>
+        </div>
+      </section>
+
+      {/* Recoverable data */}
+      <section className="ds-card p-4">
+        <h2 className="ds-h-sm flex items-center gap-2"><Database className="h-4 w-4" />{t("backup.coverageTitle")}</h2>
+        <p className="mt-1 text-xs text-muted-foreground">{t("backup.coverageNote")}</p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {coverage?.datasets.map((d) => (
+            <div key={d.label} className="flex items-center justify-between rounded-xl border border-border/50 px-3 py-2 text-sm">
+              <span>{d.label}</span>
+              <span className="text-xs text-muted-foreground">{d.rows === null ? "—" : d.rows}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Restore safety */}
       <section className="ds-card p-4">
         <h2 className="ds-h-sm flex items-center gap-2"><RotateCcw className="h-4 w-4" />{t("backup.restoreTitle")}</h2>
@@ -213,7 +271,35 @@ export function DataBackupPanel() {
           <li>{t("backup.restoreReq3")}</li>
           <li>{t("backup.restoreReq4")}</li>
         </ul>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label>{t("backup.restoreVerifiedAt")}</Label>
+            <Input
+              type="datetime-local"
+              value={cfg.restoreVerifiedAt ? cfg.restoreVerifiedAt.slice(0, 16) : ""}
+              onChange={(e) => setCfg({ ...cfg, restoreVerifiedAt: e.target.value ? new Date(e.target.value).toISOString() : null })}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t("backup.restoreNotes")}</Label>
+            <Input
+              value={cfg.restoreNotes ?? ""}
+              onChange={(e) => setCfg({ ...cfg, restoreNotes: e.target.value || null })}
+            />
+          </div>
+        </div>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <label className="flex items-center gap-3 text-sm">
+            <Switch checked={cfg.restoreVerified} onCheckedChange={(v) => setCfg({ ...cfg, restoreVerified: v })} />
+            <span>{t("backup.restoreConfirm")}</span>
+          </label>
+          <Button onClick={persistConfig} disabled={savingCfg}>
+            {savingCfg ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {t("common.save")}
+          </Button>
+        </div>
       </section>
+
 
       {/* Exports */}
       <section className="ds-card p-4">

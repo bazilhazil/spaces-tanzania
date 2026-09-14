@@ -19,6 +19,14 @@ export interface BackupConfig {
   lastSuccessAt: string | null;     // reported by the provider, never invented
   nextScheduledAt: string | null;
   notes: string | null;
+  // File storage (uploaded photos, videos and private documents)
+  storageProvider: string | null;
+  storageConfigured: boolean;
+  storageLastSuccessAt: string | null;
+  // Recovery / restore capability
+  restoreVerified: boolean;         // an admin actually tested a restore
+  restoreVerifiedAt: string | null;
+  restoreNotes: string | null;
 }
 
 export interface RecoveryContacts {
@@ -30,7 +38,10 @@ export interface RecoveryContacts {
 export const EMPTY_BACKUP: BackupConfig = {
   provider: null, configured: false, frequency: null, retentionPoints: null,
   lastSuccessAt: null, nextScheduledAt: null, notes: null,
+  storageProvider: null, storageConfigured: false, storageLastSuccessAt: null,
+  restoreVerified: false, restoreVerifiedAt: null, restoreNotes: null,
 };
+
 
 export const EMPTY_CONTACTS: RecoveryContacts = {
   primaryEmail: null, backupEmail: null, backupPhone: null,
@@ -94,4 +105,66 @@ export function downloadCsv(filename: string, csv: string) {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// -------------------------------------------------- recoverability coverage
+
+/** Production data that must be recoverable. Counts are read live, never cached. */
+export const CRITICAL_DATASETS: { label: string; table: string }[] = [
+  { label: "Users", table: "profiles" },
+  { label: "Roles", table: "user_roles" },
+  { label: "Properties", table: "properties" },
+  { label: "Property media references", table: "property_media" },
+  { label: "Leads", table: "leads" },
+  { label: "Viewing requests", table: "bookings" },
+  { label: "Deals", table: "deals" },
+  { label: "Reviews", table: "reviews" },
+  { label: "Saved spaces", table: "favorites" },
+  { label: "Saved searches", table: "saved_searches" },
+  { label: "Notifications", table: "notifications" },
+  { label: "Reports", table: "safety_reports" },
+  { label: "Payments", table: "payments" },
+  { label: "Verification records", table: "verification_requests" },
+  { label: "Audit log", table: "admin_actions" },
+  { label: "Support records", table: "support_tickets" },
+];
+
+/** Private buckets holding uploaded files. None of these are public. */
+export const STORAGE_AREAS: { label: string; bucket: string }[] = [
+  { label: "Property photos and video", bucket: "property-media" },
+  { label: "Verification documents", bucket: "verification-documents" },
+  { label: "Deal documents", bucket: "deal-documents" },
+  { label: "Report evidence", bucket: "report-evidence" },
+  { label: "Support attachments", bucket: "support-attachments" },
+];
+
+export interface BackupCoverage {
+  datasets: { label: string; rows: number | null }[];
+  buckets: { label: string; reachable: boolean }[];
+}
+
+export async function fetchBackupCoverage(): Promise<BackupCoverage> {
+  const datasets = await Promise.all(
+    CRITICAL_DATASETS.map(async ({ label, table }) => {
+      try {
+        const { count, error } = await supabase
+          .from(table as never)
+          .select("id", { count: "exact", head: true });
+        return { label, rows: error ? null : (count ?? 0) };
+      } catch {
+        return { label, rows: null };
+      }
+    }),
+  );
+  const buckets = await Promise.all(
+    STORAGE_AREAS.map(async ({ label, bucket }) => {
+      try {
+        const { error } = await supabase.storage.from(bucket).list("", { limit: 1 });
+        return { label, reachable: !error };
+      } catch {
+        return { label, reachable: false };
+      }
+    }),
+  );
+  return { datasets, buckets };
 }
