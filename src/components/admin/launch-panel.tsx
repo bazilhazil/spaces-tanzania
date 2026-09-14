@@ -210,6 +210,41 @@ export function LaunchPanel() {
       />
 
 
+      {readiness && (
+        <Section
+          title="SPACES launch readiness"
+          subtitle="Every status below comes from a real check of the live system."
+          right={
+            <div className="flex items-center gap-2">
+              <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide", LAUNCH_TONE[readiness.overall])}>
+                {LAUNCH_STATUS_LABEL[readiness.overall]}
+              </span>
+              <Button size="sm" variant="outline" className="gap-2" onClick={reload}>
+                <RefreshCw className="h-4 w-4" /> Recheck
+              </Button>
+            </div>
+          }
+        >
+          <div className="mb-4 rounded-xl border border-border/50 p-3">
+            <p className="text-sm font-semibold">Launch blockers</p>
+            {readiness.blockers.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Nothing currently prevents safe public operation.</p>
+            ) : (
+              <ul className="mt-1 space-y-1">
+                {readiness.blockers.map((b) => (
+                  <li key={b} className="text-xs text-[color:var(--color-danger-700)]">{b}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {readiness.categories.map((c) => (
+              <ReadinessCard key={c.id} c={c} />
+            ))}
+          </ul>
+        </Section>
+      )}
+
       {loading && !report ? (
         <p className="text-sm text-muted-foreground">Loading live status…</p>
       ) : !report ? (
