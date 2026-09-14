@@ -306,8 +306,8 @@ function PropertiesPage() {
                     <SheetHeader className="text-left">
                       <SheetTitle>{t("discovery.filters")}</SheetTitle>
                     </SheetHeader>
-                    <div className="mt-4">{filterPanel}</div>
-                    <div className="sticky bottom-0 mt-4 flex gap-2 border-t border-border bg-background pt-3">
+                    <div className="mt-4 pb-20">{filterPanel}</div>
+                    <div className="sticky bottom-0 flex gap-2 border-t border-border bg-background pt-3 pb-4">
                       <Button variant="outline" className="flex-1" onClick={clearAll}>
                         {t("discovery.clear")}
                       </Button>
