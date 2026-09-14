@@ -396,6 +396,7 @@ export async function fetchLaunchReadiness(): Promise<LaunchReadiness> {
         { label: "Roles enforced in the database", ok: true, detail: "Not just hidden buttons" },
         { label: "No secrets in the website code", ok: true, detail: "All credentials live on the server" },
         { label: "Admin actions checked server-side", ok: true, detail: "Direct calls by non-admins are refused" },
+        { label: "Administrator accounts", ok: admins > 0, detail: `${admins} administrator${admins === 1 ? "" : "s"}` },
       ],
     },
     {
