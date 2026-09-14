@@ -65,6 +65,9 @@ type SearchState = z.infer<typeof searchSchema>;
 /** Results are paged so we never render every listing in Tanzania at once. */
 const PAGE_SIZE = 24;
 
+/** Categories covered by the "Commercial" shortcut in the header and hero search. */
+const COMMERCIAL_CATEGORIES = ["Office", "Shop", "Warehouse", "Commercial Building"];
+
 export const Route = createFileRoute("/properties/")({
   validateSearch: zodValidator(searchSchema),
   component: PropertiesPage,
@@ -171,7 +174,10 @@ function PropertiesPage() {
   ].filter((v) => v !== undefined && v !== null && v !== "").length;
 
   const filtered = useMemo(() => properties.filter((p) => {
-    if (search.type && p.listingType !== search.type) return false;
+    // "Commercial" is a category shortcut in the header/hero, not a listing type.
+    if (search.type === "commercial") {
+      if (!COMMERCIAL_CATEGORIES.includes(p.category)) return false;
+    } else if (search.type && p.listingType !== search.type) return false;
     if (search.city && p.city !== search.city) return false;
     if (search.district && p.district !== search.district) return false;
     if (search.area && p.ward !== search.area) return false;
@@ -378,7 +384,7 @@ function PropertiesPage() {
             <div className="min-w-0">
               <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm text-muted-foreground">
-                  {t("discovery.results", { count: sorted.length })}
+                  {loading ? t("common.loading") : t("discovery.results", { count: sorted.length })}
                 </p>
                 <div className="flex items-center gap-2">
                   <Button
