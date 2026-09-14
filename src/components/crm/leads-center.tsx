@@ -411,10 +411,54 @@ function LeadDrawer({
               </a>
             </Button>
           )}
+          {lead.phone && (
+            <Button asChild variant="outline" className="h-11 rounded-xl">
+              <a href={`sms:${lead.phone}`}><MessageSquare className="mr-2 h-4 w-4" />SMS</a>
+            </Button>
+          )}
+          {lead.email && (
+            <Button asChild variant="outline" className="h-11 rounded-xl">
+              <a href={`mailto:${lead.email}`}><Mail className="mr-2 h-4 w-4" />{t("crm.field.email")}</a>
+            </Button>
+          )}
           <Button asChild variant="outline" className="h-11 rounded-xl">
             <Link to="/viewings"><CalendarIcon className="mr-2 h-4 w-4" />{t("crm.viewings")}</Link>
           </Button>
+          {!isTerminalLead(lead.status) && (
+            <Button variant="outline" onClick={() => setLostOpen(true)} className="h-11 rounded-xl text-rose-600 hover:text-rose-600">
+              {t("crm.markLost")}
+            </Button>
+          )}
         </div>
+
+        <Dialog open={lostOpen} onOpenChange={setLostOpen}>
+          <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] max-w-md overflow-y-auto rounded-2xl">
+            <DialogHeader>
+              <DialogTitle>{t("crm.lostReasonTitle")}</DialogTitle>
+              <DialogDescription>{t("crm.lostReasonDesc")}</DialogDescription>
+            </DialogHeader>
+            <Select value={lostReason} onValueChange={(v) => setLostReason(v as LostReason)}>
+              <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {LOST_REASONS.map((r) => <SelectItem key={r} value={r}>{t(`crm.lostReason.${r}`)}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Textarea
+              value={lostNote}
+              onChange={(e) => setLostNote(e.target.value)}
+              placeholder={t("crm.lostReasonNotes")}
+              className="min-h-20 rounded-xl"
+            />
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button variant="outline" className="rounded-xl" onClick={() => setLostOpen(false)}>{t("common.cancel")}</Button>
+              <Button className="rounded-xl" disabled={busy} onClick={confirmLost}>
+                {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("crm.confirmLost")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
 
         {/* Notes */}
         <section className="mt-6">
