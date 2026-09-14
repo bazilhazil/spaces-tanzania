@@ -669,8 +669,10 @@ export type Database = {
           delete_reason: string | null
           deleted_at: string | null
           deleted_by: string | null
+          first_responded_at: string | null
           id: string
           last_activity_at: string
+          lost_reason: string | null
           message: string | null
           notes: string | null
           owner_id: string
@@ -690,8 +692,10 @@ export type Database = {
           delete_reason?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          first_responded_at?: string | null
           id?: string
           last_activity_at?: string
+          lost_reason?: string | null
           message?: string | null
           notes?: string | null
           owner_id: string
@@ -711,8 +715,10 @@ export type Database = {
           delete_reason?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          first_responded_at?: string | null
           id?: string
           last_activity_at?: string
+          lost_reason?: string | null
           message?: string | null
           notes?: string | null
           owner_id?: string
