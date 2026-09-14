@@ -499,7 +499,7 @@
   },
   "profileCard": {
     "title": "Kamilisha wasifu wako",
-    "subtitle": "Si lazima — inakusaidia kujitokeza na kufungua vipengele.",
+    "subtitle": "Jina lako tu — mengine si lazima.",
     "photo": "URL ya picha ya wasifu",
     "photoPlaceholder": "https://…",
     "nationalId": "Kitambulisho cha Taifa (si lazima)",
@@ -515,7 +515,15 @@
     "save": "Hifadhi wasifu",
     "skip": "Ruka kwa sasa",
     "saved": "Wasifu umesasishwa",
-    "dismiss": "Funga"
+    "dismiss": "Funga",
+    "fullName": "Jina kamili",
+    "fullNamePlaceholder": "mf. Amina Juma",
+    "uploadPhoto": "Pakia picha",
+    "changePhoto": "Badilisha picha",
+    "photoInvalid": "Tafadhali chagua picha ya JPG, PNG au WEBP.",
+    "photoTooLarge": "Picha lazima iwe chini ya MB 5.",
+    "nameRequired": "Tafadhali andika jina lako.",
+    "locationOptional": "Eneo (si lazima)"
   },
   "welcome": {
     "title": "Karibu SPACES",

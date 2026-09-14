@@ -499,7 +499,7 @@
   },
   "profileCard": {
     "title": "Complete your profile",
-    "subtitle": "Optional — helps you stand out and unlock features.",
+    "subtitle": "Just your name — everything else is optional.",
     "photo": "Profile photo URL",
     "photoPlaceholder": "https://…",
     "nationalId": "National ID (optional)",
@@ -515,7 +515,15 @@
     "save": "Save profile",
     "skip": "Skip for now",
     "saved": "Profile updated",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "e.g. Amina Juma",
+    "uploadPhoto": "Upload photo",
+    "changePhoto": "Change photo",
+    "photoInvalid": "Please choose a JPG, PNG or WEBP image.",
+    "photoTooLarge": "Photo must be smaller than 5 MB.",
+    "nameRequired": "Please enter your name.",
+    "locationOptional": "Location (optional)"
   },
   "welcome": {
     "title": "Welcome to SPACES",
