@@ -569,7 +569,8 @@
     "x": "X",
     "email": "Email",
     "copyLink": "Copy link",
-    "copied": "Link copied"
+    "copied": "Link copied",
+    "native": "Share via device"
   },
   "contact": {
     "call": "Call",

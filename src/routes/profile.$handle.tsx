@@ -9,15 +9,17 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/profile/$handle")({
   component: ProfilePage,
-  head: () => ({
+  head: ({ params }) => ({
     meta: [
       { title: "Owner & agent profile · SPACES" },
       { name: "description", content: "Public SPACES profile with verification status, active listings and reviews." },
       { property: "og:title", content: "Owner & agent profile · SPACES" },
       { property: "og:description", content: "Verification status, active listings and reviews on SPACES." },
       { property: "og:type", content: "profile" },
+      { property: "og:url", content: `https://spacestz.com/profile/${params.handle}` },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: `https://spacestz.com/profile/${params.handle}` }],
   }),
 });
 
