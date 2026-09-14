@@ -231,11 +231,8 @@ export async function updatePromotionProduct(id: string, patch: Partial<Promotio
 }
 
 export async function adminSetPaymentStatus(paymentId: string, status: string): Promise<void> {
-  const { error } = await supabase.rpc("admin_set_payment_status", {
-    _payment_id: paymentId,
-    _status: status,
-  });
-  if (error) throw error;
+  const { adminSetPaymentStatusFn } = await import("./payments-admin.functions");
+  await adminSetPaymentStatusFn({ data: { paymentId, status: status as never } });
 }
 
 /** Human-readable listing-limit check used before opening the upload wizard. */
