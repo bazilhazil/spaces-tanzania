@@ -534,6 +534,9 @@ function PropertyDetailPage() {
           <aside className="lg:sticky lg:top-24 lg:self-start">
             {agent && (
               <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  {t("properties.detail.listedBy")}
+                </p>
                 <div className="flex items-center gap-4">
                   <div className="relative">
                     <img
