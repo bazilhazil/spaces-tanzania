@@ -244,7 +244,10 @@ export async function fetchCrmLeads(opts?: { all?: boolean }): Promise<CrmLead[]
       viewingAt: b?.scheduled_at ?? null,
       conversationId:
         r.conversation_id ?? convByPair.get(`${r.property_id}:${r.visitor_id ?? ""}`) ?? null,
+      firstRespondedAt: r.first_responded_at ?? null,
+      lostReason: r.lost_reason ?? null,
     };
+
   });
 }
 
