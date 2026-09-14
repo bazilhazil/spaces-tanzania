@@ -45,18 +45,19 @@ const META: Record<string, { title: string; desc: string }> = {
   payments:     { title: "Payments",        desc: "Payments overview." },
 };
 
+// These sections have full, live pages of their own — send people there
+// instead of showing a second, weaker copy.
+const REDIRECTS: Record<string, string> = {
+  properties: "/dashboard/properties",
+  viewings: "/viewings",
+  messages: "/messages",
+};
+
 function SectionPage() {
   const { section } = Route.useParams();
   const navigate = useNavigate();
   const meta = META[section] ?? { title: section, desc: "" };
 
-  // These sections have full, live pages of their own — send people there
-  // instead of showing a second, weaker copy.
-  const REDIRECTS: Record<string, string> = {
-    properties: "/dashboard/properties",
-    viewings: "/viewings",
-    messages: "/messages",
-  };
 
   useEffect(() => {
     const to = REDIRECTS[section];
