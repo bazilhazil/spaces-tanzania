@@ -6,34 +6,46 @@ import type { DealStage } from "@/lib/deals-db";
 export const LEAD_STATUSES = [
   "new",
   "contacted",
+  "interested",
   "viewing_scheduled",
   "viewing_completed",
   "negotiating",
   "offer_made",
   "won",
   "lost",
+  "closed",
 ] as const;
 export type LeadStatus = (typeof LEAD_STATUSES)[number];
+
+/** Statuses that end the follow-up cycle. */
+export const TERMINAL_LEAD_STATUSES: LeadStatus[] = ["won", "lost", "closed"];
+export const isTerminalLead = (s: LeadStatus) => TERMINAL_LEAD_STATUSES.includes(s);
 
 /** i18n key suffix per status (crm.status.<key>) */
 export const LEAD_STATUS_TONE: Record<LeadStatus, string> = {
   new: "border-sky-500/30 bg-sky-500/10 text-sky-600",
   contacted: "border-indigo-500/30 bg-indigo-500/10 text-indigo-600",
+  interested: "border-teal-500/30 bg-teal-500/10 text-teal-600",
   viewing_scheduled: "border-violet-500/30 bg-violet-500/10 text-violet-600",
   viewing_completed: "border-purple-500/30 bg-purple-500/10 text-purple-600",
   negotiating: "border-amber-500/30 bg-amber-500/10 text-amber-600",
   offer_made: "border-orange-500/30 bg-orange-500/10 text-orange-600",
   won: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
   lost: "border-rose-500/30 bg-rose-500/10 text-rose-600",
+  closed: "border-slate-500/30 bg-slate-500/10 text-slate-600",
 };
 
 export function normalizeLeadStatus(raw: string | null | undefined): LeadStatus {
   const v = (raw ?? "new").toLowerCase();
   if ((LEAD_STATUSES as readonly string[]).includes(v)) return v as LeadStatus;
   if (v === "new_inquiry" || v === "open") return "new";
-  if (v === "closed" || v === "converted") return "won";
+  if (v === "negotiation") return "negotiating";
+  if (v === "offer_accepted" || v === "agreement_signed") return "offer_made";
+  if (v === "converted" || v === "completed") return "won";
+  if (v === "cancelled") return "lost";
   return "new";
 }
+
 
 export const LOST_REASONS = [
   "price",
