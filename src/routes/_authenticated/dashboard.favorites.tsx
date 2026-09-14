@@ -33,6 +33,7 @@ type FavRow = {
   property_type: string | null;
   listing_type: string | null;
   verified: boolean | null;
+  status?: string | null;
   image?: string | null;
 };
 
@@ -66,7 +67,7 @@ function FavoritesPage() {
       setLoading(true);
       const { data } = await supabase
         .from("properties")
-        .select("id,title,price,currency,region,district,property_type,listing_type,verified")
+        .select("id,title,price,currency,region,district,property_type,listing_type,verified,status")
         .in("id", ids);
       const { data: media } = await supabase
         .from("property_media")
@@ -95,6 +96,9 @@ function FavoritesPage() {
   const items = favorites
     .map((f) => ({ fav: f, row: rows[f.propertyId] }))
     .filter((x): x is { fav: typeof favorites[number]; row: FavRow } => Boolean(x.row));
+
+  // Saves whose space is no longer visible on the marketplace (archived/removed).
+  const unlisted = favorites.filter((f) => ids.includes(f.propertyId) && !rows[f.propertyId]);
 
   const dateFmt = new Intl.DateTimeFormat(lang === "sw" ? "sw-TZ" : "en-GB", {
     day: "numeric", month: "short", year: "numeric",
@@ -125,7 +129,7 @@ function FavoritesPage() {
               <div key={i} className="h-72 animate-pulse rounded-3xl border border-border/60 bg-muted/40" />
             ))}
           </div>
-        ) : items.length === 0 ? (
+        ) : items.length === 0 && unlisted.length === 0 ? (
           <EmptyState />
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -157,9 +161,18 @@ function FavoritesPage() {
                         {row.listing_type === "rent" ? t("card.forRent") : t("card.forSale")}
                       </span>
                     )}
-                    {row.verified && (
+                    {row.verified ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600/90 px-2.5 py-1 text-[11px] font-medium text-white shadow-sm">
                         <ShieldCheck className="h-3 w-3" /> {t("saved.verified")}
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-background/90 px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-sm backdrop-blur">
+                        {t("favoritesPage.unverified")}
+                      </span>
+                    )}
+                    {row.status !== "live" && (
+                      <span className="rounded-full bg-amber-500/95 px-2.5 py-1 text-[11px] font-medium text-white shadow-sm">
+                        {t("favoritesPage.unavailable")}
                       </span>
                     )}
                   </div>
@@ -202,6 +215,29 @@ function FavoritesPage() {
                     </Button>
                   </div>
                 </div>
+              </article>
+            ))}
+            {unlisted.map((fav) => (
+              <article
+                key={fav.propertyId}
+                className="flex flex-col justify-between gap-3 rounded-3xl border border-dashed border-border/60 bg-muted/30 p-5"
+              >
+                <div>
+                  <p className="font-display text-base font-semibold text-foreground">
+                    {t("favoritesPage.notListed")}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {t("favoritesPage.savedOn", { date: dateFmt.format(new Date(fav.savedAt)) })}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full gap-1.5 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => { removeFavorite(fav.propertyId); toast.success(t("favoritesPage.removed")); }}
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> {t("favoritesPage.remove")}
+                </Button>
               </article>
             ))}
           </div>
