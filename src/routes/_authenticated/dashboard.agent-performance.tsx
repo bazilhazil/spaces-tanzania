@@ -89,12 +89,27 @@ function AgentPerformancePage() {
         .order("last_activity_at", { ascending: false, nullsFirst: false });
       const dList = (dealRows ?? []) as Deal[];
 
-      const [propRes, bookRes, convRes, notifRes] = await Promise.all([
+      // Listings I own plus listings an administrator assigned to me as agent.
+      const assignments = await fetchMyAssignments(user.id);
+      const assignedIds = Object.keys(assignments);
+
+      const [ownedRes, assignedRes, bookRes, convRes, notifRes] = await Promise.all([
         supabase.from("properties").select("id,title,region,district,price,currency,status,owner_id").eq("owner_id", user.id),
-        supabase.from("bookings").select("id,property_id,buyer_id,scheduled_at,status,created_at").eq("owner_id", user.id),
+        assignedIds.length
+          ? supabase.from("properties").select("id,title,region,district,price,currency,status,owner_id").in("id", assignedIds)
+          : Promise.resolve({ data: [] as Prop[] }),
+        supabase.from("bookings").select("id,property_id,buyer_id,scheduled_at,status,created_at").or(`owner_id.eq.${user.id},agent_id.eq.${user.id}`),
         supabase.from("conversations").select("id,property_id,buyer_id,last_message_at").eq("owner_id", user.id),
         supabase.from("notifications").select("id,kind,title,body,created_at,read_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(15),
       ]);
+      const propRes = {
+        data: [
+          ...((ownedRes.data ?? []) as Prop[]),
+          ...((assignedRes.data ?? []) as Prop[]).filter(
+            (p) => !((ownedRes.data ?? []) as Prop[]).some((o) => o.id === p.id),
+          ),
+        ],
+      };
       const convIds = (convRes.data ?? []).map((c) => c.id);
       const buyerIds = Array.from(new Set(dList.map((d) => d.buyer_id).filter(Boolean))) as string[];
       const [msgRes, profRes] = await Promise.all([
