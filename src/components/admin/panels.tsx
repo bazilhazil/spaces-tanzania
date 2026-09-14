@@ -499,61 +499,41 @@ export function PropertiesPanel() {
                 <Button variant="destructive" size="sm" className="gap-2" onClick={() => setReasonFor("reject")}><XCircle className="h-4 w-4" /> {t("admin.action.reject")}</Button>
 
                 <div className="mx-2 h-6 w-px bg-border" />
+                {item.verified
+                  ? <Button variant="outline" size="sm" className="gap-2" onClick={() => setReasonFor("unverify")}><ShieldAlert className="h-4 w-4" /> Remove verified badge</Button>
+                  : <Button variant="outline" size="sm" className="gap-2" onClick={() => act(item.id, "verify", "Space verified")}><ShieldCheck className="h-4 w-4" /> Verify</Button>}
                 <Button variant="gold" size="sm" className="gap-2" onClick={() => act(item.id, "feature", t("admin.toast.featured"))}><Sparkles className="h-4 w-4" /> {t("admin.action.feature")}</Button>
-                <Button variant="ghost" size="sm" className="gap-2 ml-auto" onClick={() => act(item.id, "suspend", t("admin.toast.paused"))}><Power className="h-4 w-4" /> {t("admin.action.pause")}</Button>
-                <Button variant="ghost" size="sm" className="gap-2" onClick={() => act(item.id, "archive", t("admin.toast.archived"))}><Database className="h-4 w-4" /> {t("admin.action.archive")}</Button>
+
+                <div className="mx-2 h-6 w-px bg-border" />
+                <Button variant="destructive" size="sm" className="gap-2" onClick={() => setReasonFor("take_offline")}><EyeOff className="h-4 w-4" /> Take offline</Button>
+                <Button variant="ghost" size="sm" className="gap-2" onClick={() => act(item.id, "unavailable", "Marked unavailable")}><Power className="h-4 w-4" /> Mark unavailable</Button>
+                {item.status !== "live" && (
+                  <Button variant="ghost" size="sm" className="gap-2" onClick={() => act(item.id, "restore", "Space restored")}><RefreshCw className="h-4 w-4" /> Restore</Button>
+                )}
+                <Button variant="ghost" size="sm" className="gap-2 ml-auto" onClick={() => act(item.id, "archive", t("admin.toast.archived"))}><Database className="h-4 w-4" /> {t("admin.action.archive")}</Button>
               </div>
             </div>
           ) : <EmptyState icon={Home} title={t("admin.queue.nothingSelected")} description={t("admin.queue.pick")} />}
         </div>
       )}
 
-      <ModerationReasonDialog
+      <ConfirmWithReasonDialog
         open={!!reasonFor && !!item}
-        mode={reasonFor}
+        title={reasonFor ? (ACTION_LABEL[reasonFor]?.title ?? "Confirm this action?") : ""}
+        description={reasonFor ? ACTION_LABEL[reasonFor]?.body : undefined}
+        confirmLabel={reasonFor ? (ACTION_LABEL[reasonFor]?.confirm ?? t("common.confirm")) : t("common.confirm")}
         onCancel={() => setReasonFor(null)}
         onConfirm={async (reason) => {
-          if (!item || !reasonFor) return;
-          const label = reasonFor === "reject" ? t("admin.toast.rejected") : t("admin.toast.changes");
+          const a = reasonFor;
           setReasonFor(null);
-          await act(item.id, reasonFor, label, reason);
+          if (!item || !a) return;
+          await act(item.id, a, ACTION_LABEL[a]?.done ?? "Done", reason);
         }}
       />
     </>
   );
 }
 
-function ModerationReasonDialog({
-  open, mode, onCancel, onConfirm,
-}: {
-  open: boolean;
-  mode: "reject" | "request_changes" | null;
-  onCancel: () => void;
-  onConfirm: (reason: string) => void;
-}) {
-  const { t } = useI18n();
-  const [reason, setReason] = useState("");
-  useEffect(() => { if (open) setReason(""); }, [open]);
-  return (
-    <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === "reject" ? t("admin.action.reject") : t("admin.action.requestChanges")}
-          </DialogTitle>
-          <DialogDescription>{t("admin.ops.reasonRequired")}</DialogDescription>
-        </DialogHeader>
-        <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={4} placeholder={t("admin.ops.reasonPlaceholder")} />
-        <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>{t("common.cancel")}</Button>
-          <Button disabled={reason.trim().length < 5} onClick={() => onConfirm(reason.trim())}>
-            {t("common.confirm")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 
 // ---------- Users ----------
