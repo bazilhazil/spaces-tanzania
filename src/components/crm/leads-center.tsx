@@ -207,8 +207,37 @@ function StatusPill({ status }: { status: LeadStatus }) {
   );
 }
 
+function PriorityPill({ priority }: { priority: LeadPriority }) {
+  const { t } = useI18n();
+  const tone =
+    priority === "high"
+      ? "border-rose-500/30 bg-rose-500/10 text-rose-600"
+      : priority === "normal"
+        ? "border-sky-500/30 bg-sky-500/10 text-sky-600"
+        : "border-border bg-muted text-muted-foreground";
+  return (
+    <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium", tone)}>
+      {priority === "high" && <Flame className="h-3 w-3" />}
+      {t(`crm.priority.${priority}`)}
+    </span>
+  );
+}
+
+function NextActionLine({ lead }: { lead: CrmLead }) {
+  const { t } = useI18n();
+  const action = nextAction(lead);
+  if (action === "none") return null;
+  return (
+    <p className="mt-2 flex items-start gap-1.5 text-xs font-medium text-primary">
+      <ArrowRight className="mt-0.5 h-3 w-3 shrink-0" />
+      <span className="min-w-0 break-words">{t(`crm.next.${action}`)}</span>
+    </p>
+  );
+}
+
 function LeadCard({ lead, onOpen }: { lead: CrmLead; onOpen: () => void }) {
   const { t } = useI18n();
+  const follow = needsFollowUp(lead);
   return (
     <button
       onClick={onOpen}
@@ -221,17 +250,32 @@ function LeadCard({ lead, onOpen }: { lead: CrmLead; onOpen: () => void }) {
             <Home className="h-3 w-3 shrink-0" /> {lead.propertyTitle}
           </p>
         </div>
-        <StatusPill status={lead.status} />
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <StatusPill status={lead.status} />
+          {!isTerminalLead(lead.status) && <PriorityPill priority={leadPriority(lead)} />}
+        </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-        {lead.phone && <span className="flex items-center gap-1 truncate"><Phone className="h-3 w-3" />{lead.phone}</span>}
-        {lead.email && <span className="flex items-center gap-1 truncate"><Mail className="h-3 w-3" />{lead.email}</span>}
-        {lead.propertyLocation && <span className="flex items-center gap-1 truncate"><MapPin className="h-3 w-3" />{lead.propertyLocation}</span>}
-        <span className="flex items-center gap-1 truncate"><Clock className="h-3 w-3" />{timeAgo(lead.lastActivityAt)}</span>
+      <NextActionLine lead={lead} />
+
+      <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+        {lead.phone && <span className="flex items-center gap-1 truncate"><Phone className="h-3 w-3 shrink-0" />{lead.phone}</span>}
+        {lead.email && <span className="flex items-center gap-1 truncate"><Mail className="h-3 w-3 shrink-0" />{lead.email}</span>}
+        {lead.propertyLocation && <span className="flex items-center gap-1 truncate"><MapPin className="h-3 w-3 shrink-0" />{lead.propertyLocation}</span>}
+        <span className="flex items-center gap-1 truncate"><Clock className="h-3 w-3 shrink-0" />{timeAgo(lead.lastActivityAt)}</span>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
+        {follow && (
+          <Badge variant="outline" className="gap-1 border-amber-500/30 bg-amber-500/10 text-[11px] text-amber-600">
+            <AlertTriangle className="h-3 w-3" /> {t("crm.needsFollowUp")}
+          </Badge>
+        )}
+        {lead.firstRespondedAt && (
+          <Badge variant="outline" className="gap-1 text-[11px]">
+            <CheckCircle2 className="h-3 w-3" /> {t("crm.responded")}
+          </Badge>
+        )}
         {lead.viewingStatus && (
           <Badge variant="outline" className="gap-1 text-[11px]">
             <CalendarIcon className="h-3 w-3" /> {t(`viewings.status.${lead.viewingStatus}`)}
@@ -242,11 +286,12 @@ function LeadCard({ lead, onOpen }: { lead: CrmLead; onOpen: () => void }) {
             <Handshake className="h-3 w-3" /> {lead.dealReference}
           </Badge>
         )}
-        <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
+        <ChevronRight className="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />
       </div>
     </button>
   );
 }
+
 
 /* ================================ DRAWER ================================ */
 
