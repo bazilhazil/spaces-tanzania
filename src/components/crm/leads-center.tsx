@@ -142,11 +142,18 @@ export function LeadsCenter() {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
-        <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:inline-flex">
+        <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:inline-flex sm:grid-cols-4">
           <TabsTrigger value="active">{t("crm.tabs.active")}</TabsTrigger>
+          <TabsTrigger value="followup" className="gap-1">
+            {t("crm.tabs.followUp")}
+            {kpis.follow > 0 && (
+              <span className="rounded-full bg-amber-500/15 px-1.5 text-[10px] font-semibold text-amber-600">{kpis.follow}</span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="won">{t("crm.tabs.won")}</TabsTrigger>
           <TabsTrigger value="lost">{t("crm.tabs.lost")}</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value={tab} className="mt-4">
           {loading ? (
