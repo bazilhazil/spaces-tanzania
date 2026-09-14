@@ -78,6 +78,20 @@
       "when": 1789387709912,
       "tag": "0010_admins_read_user_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1789397560085,
+      "tag": "0011_guard_profile_verification_and_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1789397664036,
+      "tag": "0012_align_data_api_grants_with_policies",
+      "breakpoints": true
     }
   ]
 }
