@@ -57,6 +57,7 @@ import { Route as AuthenticatedDashboardAgentPerformanceRouteImport } from './ro
 import { Route as AuthenticatedDashboardSectionRouteImport } from './routes/_authenticated/dashboard.$section'
 import { Route as AuthenticatedBillingHistoryRouteImport } from './routes/_authenticated/billing.history'
 import { Route as AuthenticatedAdminSectionRouteImport } from './routes/_authenticated/admin.$section'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as ApiPublicOgPropertyIdRouteImport } from './routes/api/public/og.property.$id'
 import { Route as AuthenticatedDashboardPropertiesIdManageRouteImport } from './routes/_authenticated/dashboard.properties.$id.manage'
 
@@ -313,6 +314,12 @@ const AuthenticatedAdminSectionRoute =
     path: '/$section',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicOgPropertyIdRoute = ApiPublicOgPropertyIdRouteImport.update({
   id: '/api/public/og/property/$id',
   path: '/api/public/og/property/$id',
@@ -373,6 +380,7 @@ export interface FileRoutesByFullPath {
   '/property/$id': typeof AuthenticatedPropertyIdRoute
   '/api/public/selcom-webhook': typeof ApiPublicSelcomWebhookRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
   '/api/public/og/property/$id': typeof ApiPublicOgPropertyIdRoute
 }
@@ -423,6 +431,7 @@ export interface FileRoutesByTo {
   '/property/$id': typeof AuthenticatedPropertyIdRoute
   '/api/public/selcom-webhook': typeof ApiPublicSelcomWebhookRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
   '/api/public/og/property/$id': typeof ApiPublicOgPropertyIdRoute
 }
@@ -476,6 +485,7 @@ export interface FileRoutesById {
   '/_authenticated/property/$id': typeof AuthenticatedPropertyIdRoute
   '/api/public/selcom-webhook': typeof ApiPublicSelcomWebhookRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/_authenticated/dashboard/properties/$id/manage': typeof AuthenticatedDashboardPropertiesIdManageRoute
   '/api/public/og/property/$id': typeof ApiPublicOgPropertyIdRoute
 }
@@ -529,6 +539,7 @@ export interface FileRouteTypes {
     | '/property/$id'
     | '/api/public/selcom-webhook'
     | '/admin/'
+    | '/lovable/email/transactional/preview'
     | '/dashboard/properties/$id/manage'
     | '/api/public/og/property/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -579,6 +590,7 @@ export interface FileRouteTypes {
     | '/property/$id'
     | '/api/public/selcom-webhook'
     | '/admin'
+    | '/lovable/email/transactional/preview'
     | '/dashboard/properties/$id/manage'
     | '/api/public/og/property/$id'
   id:
@@ -631,6 +643,7 @@ export interface FileRouteTypes {
     | '/_authenticated/property/$id'
     | '/api/public/selcom-webhook'
     | '/_authenticated/admin/'
+    | '/lovable/email/transactional/preview'
     | '/_authenticated/dashboard/properties/$id/manage'
     | '/api/public/og/property/$id'
   fileRoutesById: FileRoutesById
@@ -656,6 +669,7 @@ export interface RootRouteChildren {
   SpacesLocationRoute: typeof SpacesLocationRoute
   PropertiesIndexRoute: typeof PropertiesIndexRoute
   ApiPublicSelcomWebhookRoute: typeof ApiPublicSelcomWebhookRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   ApiPublicOgPropertyIdRoute: typeof ApiPublicOgPropertyIdRoute
 }
 
@@ -997,6 +1011,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSectionRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/og/property/$id': {
       id: '/api/public/og/property/$id'
       path: '/api/public/og/property/$id'
@@ -1149,6 +1170,7 @@ const rootRouteChildren: RootRouteChildren = {
   SpacesLocationRoute: SpacesLocationRoute,
   PropertiesIndexRoute: PropertiesIndexRoute,
   ApiPublicSelcomWebhookRoute: ApiPublicSelcomWebhookRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   ApiPublicOgPropertyIdRoute: ApiPublicOgPropertyIdRoute,
 }
 export const routeTree = rootRouteImport
