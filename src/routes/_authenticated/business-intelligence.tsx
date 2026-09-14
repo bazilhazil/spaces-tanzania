@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Home, Users, UserPlus, Contact, Calendar, Handshake, CheckCircle2, TrendingUp,
   DollarSign, PlusSquare, FileSpreadsheet, FileText, RefreshCw, AlertTriangle,
-  ArrowUpRight, ArrowDownRight, MapPin, Eye, MessageSquare, Building2, Clock,
+  ArrowUpRight, ArrowDownRight, MapPin, Eye, MessageSquare, Building2, Clock, Heart,
 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,8 @@ import { friendlyError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
-  ANALYTICS_RANGES, conversionRate, fetchAnalytics, fetchResponseMinutes, growth,
-  type AnalyticsRange, type AnalyticsReport,
+  ANALYTICS_RANGES, conversionRate, fetchAnalytics, fetchResponseMinutes, fetchSavesInsights, growth,
+  type AnalyticsRange, type AnalyticsReport, type SavesInsights,
 } from "@/lib/analytics-db";
 
 export const Route = createFileRoute("/_authenticated/business-intelligence")({
@@ -42,6 +42,7 @@ function BIPage() {
   const [range, setRange] = useState<AnalyticsRange>("30d");
   const [report, setReport] = useState<AnalyticsReport | null>(null);
   const [responseMin, setResponseMin] = useState<number | null>(null);
+  const [saves, setSaves] = useState<SavesInsights | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,8 +50,12 @@ function BIPage() {
     let alive = true;
     setLoading(true);
     setError(null);
-    Promise.all([fetchAnalytics(range), fetchResponseMinutes(range).catch(() => null)])
-      .then(([r, m]) => { if (!alive) return; setReport(r); setResponseMin(m); })
+    Promise.all([
+      fetchAnalytics(range),
+      fetchResponseMinutes(range).catch(() => null),
+      fetchSavesInsights().catch(() => null),
+    ])
+      .then(([r, m, sv]) => { if (!alive) return; setReport(r); setResponseMin(m); setSaves(sv); })
       .catch((e) => { if (alive) setError(friendlyError(e)); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
@@ -382,6 +387,37 @@ function BIPage() {
                 </p>
               </div>
             </section>
+
+            {/* Saved spaces (shortlists) — aggregate only */}
+            {saves && (
+              <section className="space-y-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h2 className="ds-h-sm flex items-center gap-2"><Heart className="h-4 w-4 text-muted-foreground" />{t("bi.saves.title")}</h2>
+                  <p className="text-xs text-muted-foreground">{t("bi.saves.note")}</p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  <div className="ds-card p-4">
+                    <h3 className="ds-h-sm">{t("bi.saves.total")}</h3>
+                    <p className="mt-3 font-display text-3xl font-semibold">{nf.format(saves.total)}</p>
+                  </div>
+                  <RankList
+                    title={t("bi.saves.top")} icon={Heart}
+                    items={saves.topProperties.map((p) => ({ key: p.id, label: p.title, value: nf.format(p.count), to: `/property/${p.id}` }))}
+                    empty={t("bi.empty.body")}
+                  />
+                  <RankList
+                    title={t("bi.saves.types")} icon={Building2}
+                    items={saves.byType.map((x) => ({ key: x.name, label: x.name.replace(/_/g, " "), value: nf.format(x.count) }))}
+                    empty={t("bi.empty.body")}
+                  />
+                  <RankList
+                    title={t("bi.saves.locations")} icon={MapPin}
+                    items={saves.byLocation.map((x) => ({ key: x.name, label: x.name, value: nf.format(x.count) }))}
+                    empty={t("bi.empty.body")}
+                  />
+                </div>
+              </section>
+            )}
 
             {/* People performance */}
             <section className="grid gap-4 lg:grid-cols-2">
