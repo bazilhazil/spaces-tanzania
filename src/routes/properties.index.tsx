@@ -306,8 +306,8 @@ function PropertiesPage() {
                     <SheetHeader className="text-left">
                       <SheetTitle>{t("discovery.filters")}</SheetTitle>
                     </SheetHeader>
-                    <div className="mt-4">{filterPanel}</div>
-                    <div className="sticky bottom-0 mt-4 flex gap-2 border-t border-border bg-background pt-3">
+                    <div className="mt-4 pb-28">{filterPanel}</div>
+                    <div className="sticky bottom-0 flex gap-2 border-t border-border bg-background pt-3 pb-4">
                       <Button variant="outline" className="flex-1" onClick={clearAll}>
                         {t("discovery.clear")}
                       </Button>
@@ -679,11 +679,12 @@ function FilterPanel({
         </div>
       </div>
 
-      <div className="space-y-3 rounded-xl border border-border p-3">
+      <div className="space-y-4 rounded-xl border border-border p-4">
         <ToggleRow label={t("discovery.furnished")} checked={!!search.furnished} onChange={(v) => patch({ furnished: v || undefined })} />
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-sm">{t("discovery.parking")}</span>
-          <div className="flex gap-1">
+
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">{t("discovery.parking")}</Label>
+          <div className="space-y-2">
             {([
               { v: undefined as boolean | undefined, label: t("discovery.parkingAny") },
               { v: true, label: t("card.parkingAvailable") },
@@ -693,15 +694,19 @@ function FilterPanel({
                 key={String(o.v)}
                 type="button"
                 onClick={() => patch({ parking: o.v })}
-                className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition ${
-                  search.parking === o.v ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"
-                }`}
+                className={cn(
+                  "w-full justify-start rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition",
+                  search.parking === o.v
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/40",
+                )}
               >
                 {o.label}
               </button>
             ))}
           </div>
         </div>
+
         <ToggleRow label={t("discovery.verifiedOnly")} checked={!!search.verified} onChange={(v) => patch({ verified: v || undefined })} />
       </div>
 
