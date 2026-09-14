@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
 import { findDuplicateGroups } from "@/lib/listing-quality";
+import { notifyByEmail } from "./email-notify";
 
 /**
  * Admin Control Center data layer.
@@ -335,6 +336,8 @@ export async function moderateProperty(id: string, action: ModerationAction, rea
   }
   const { error } = await supabase.from("properties").update(patch as never).eq("id", id);
   if (error) throw error;
+  if (action === "approve" || action === "restore") notifyByEmail("property_approved", id);
+  if (action === "reject" || action === "request_changes") notifyByEmail("property_changes", id);
 }
 
 
