@@ -64,6 +64,13 @@
       "when": 1789387580607,
       "tag": "0008_route_new_leads_to_assigned_agents",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789387601162,
+      "tag": "0009_agents_access_assigned_leads",
+      "breakpoints": true
     }
   ]
 }
