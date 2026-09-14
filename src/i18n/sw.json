@@ -686,12 +686,15 @@
       "today": "Mpya leo",
       "active": "Maulizo hai",
       "deals": "Katika mchakato",
-      "won": "Zilizokamilika"
+      "won": "Zilizokamilika",
+      "new": "Mpya",
+      "followUp": "Yanahitaji ufuatiliaji"
     },
     "tabs": {
       "active": "Hai",
       "won": "Zilizokamilika",
-      "lost": "Zilizofungwa"
+      "lost": "Zilizofungwa",
+      "followUp": "Ufuatiliaji"
     },
     "searchPlaceholder": "Tafuta jina, simu, mali…",
     "allStatuses": "Hali zote",
@@ -704,7 +707,9 @@
       "negotiating": "Mazungumzo",
       "offer_made": "Ofa imetolewa",
       "won": "Imekamilika",
-      "lost": "Imefungwa"
+      "lost": "Imefungwa",
+      "interested": "Ana nia",
+      "closed": "Imefungwa"
     },
     "field": {
       "phone": "Simu",
@@ -712,7 +717,8 @@
       "property": "Mali",
       "owner": "Mmiliki / Wakala",
       "viewing": "Hali ya ziara",
-      "deal": "Hali ya mkataba"
+      "deal": "Hali ya mkataba",
+      "created": "Mawasiliano ya kwanza"
     },
     "none": "Hakuna",
     "lastActivity": "Shughuli ya mwisho",
@@ -759,10 +765,28 @@
       "changed_mind": "Mteja amebadili mawazo",
       "unavailable": "Mali haipatikani",
       "chose_other": "Amechagua mali nyingine",
-      "other": "Nyingine"
+      "other": "Nyingine",
+      "no_response": "Hakuna majibu"
     },
     "lostReasonNotes": "Ongeza maelezo zaidi (hiari)",
-    "confirmLost": "Weka kama imefungwa"
+    "confirmLost": "Weka kama imefungwa",
+    "priority": {
+      "high": "Kipaumbele cha juu",
+      "normal": "Kawaida",
+      "low": "Chini"
+    },
+    "next": {
+      "contact_buyer": "Wasiliana na mteja",
+      "schedule_viewing": "Panga ziara",
+      "confirm_viewing": "Thibitisha ziara",
+      "follow_up": "Fuatilia",
+      "update_deal": "Sasisha mkataba",
+      "mark_won": "Weka kama imekamilika",
+      "mark_lost": "Funga ulizo hili"
+    },
+    "needsFollowUp": "Inahitaji ufuatiliaji",
+    "responded": "Amejibiwa",
+    "markLost": "Funga ulizo"
   },
   "spaces": {
     "title": "Nafasi Zangu",
@@ -1873,6 +1897,12 @@
       "types": "Kuhifadhi kwa aina",
       "locations": "Kuhifadhi kwa eneo",
       "note": "Takwimu za jumla — hakuna mtumiaji anayetambuliwa."
+    },
+    "leads": {
+      "title": "Ufuatiliaji wa maulizo",
+      "note": "Jumla tu — hakuna mteja anayetambulishwa.",
+      "responseTime": "Muda wa kujibu (wastani)",
+      "responseRate": "Yaliyojibiwa"
     }
   },
   "removeSpace": {

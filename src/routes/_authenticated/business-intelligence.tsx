@@ -14,8 +14,9 @@ import { friendlyError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
-  ANALYTICS_RANGES, conversionRate, fetchAnalytics, fetchResponseMinutes, fetchSavesInsights, growth,
-  type AnalyticsRange, type AnalyticsReport, type SavesInsights,
+  ANALYTICS_RANGES, conversionRate, fetchAnalytics, fetchResponseMinutes, fetchSavesInsights, fetchLeadInsights, growth,
+  type AnalyticsRange, type AnalyticsReport, type SavesInsights, type LeadInsights,
+
 } from "@/lib/analytics-db";
 
 export const Route = createFileRoute("/_authenticated/business-intelligence")({
@@ -43,6 +44,7 @@ function BIPage() {
   const [report, setReport] = useState<AnalyticsReport | null>(null);
   const [responseMin, setResponseMin] = useState<number | null>(null);
   const [saves, setSaves] = useState<SavesInsights | null>(null);
+  const [leadInsights, setLeadInsights] = useState<LeadInsights | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,8 +56,10 @@ function BIPage() {
       fetchAnalytics(range),
       fetchResponseMinutes(range).catch(() => null),
       fetchSavesInsights().catch(() => null),
+      fetchLeadInsights().catch(() => null),
     ])
-      .then(([r, m, sv]) => { if (!alive) return; setReport(r); setResponseMin(m); setSaves(sv); })
+      .then(([r, m, sv, li]) => { if (!alive) return; setReport(r); setResponseMin(m); setSaves(sv); setLeadInsights(li); })
+
       .catch((e) => { if (alive) setError(friendlyError(e)); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
@@ -418,6 +422,31 @@ function BIPage() {
                 </div>
               </section>
             )}
+
+            {/* Inquiry follow-up — aggregate only */}
+            {leadInsights && (
+              <section className="space-y-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h2 className="ds-h-sm flex items-center gap-2"><MessageSquare className="h-4 w-4 text-muted-foreground" />{t("bi.leads.title")}</h2>
+                  <p className="text-xs text-muted-foreground">{t("bi.leads.note")}</p>
+                </div>
+                <div className="ds-card grid grid-cols-2 gap-4 p-4 sm:grid-cols-3 lg:grid-cols-5">
+                  <Metric label={t("crm.status.new")} value={nf.format(leadInsights.newLeads)} />
+                  <Metric label={t("crm.status.contacted")} value={nf.format(leadInsights.contacted)} />
+                  <Metric label={t("crm.status.viewing_scheduled")} value={nf.format(leadInsights.viewingRequested)} />
+                  <Metric label={t("crm.status.viewing_completed")} value={nf.format(leadInsights.viewingCompleted)} />
+                  <Metric label={t("crm.status.won")} value={nf.format(leadInsights.won)} />
+                  <Metric label={t("crm.status.lost")} value={nf.format(leadInsights.lost)} />
+                  <Metric
+                    label={t("bi.leads.responseTime")}
+                    value={leadInsights.medianResponseHours === null ? "—" : `${leadInsights.medianResponseHours}h`}
+                  />
+                  <Metric label={t("bi.leads.responseRate")} value={`${leadInsights.responseRate}%`} />
+                  <Metric label={t("bi.kpi.conversion")} value={`${leadInsights.conversionRate}%`} />
+                </div>
+              </section>
+            )}
+
 
             {/* People performance */}
             <section className="grid gap-4 lg:grid-cols-2">

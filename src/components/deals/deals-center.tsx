@@ -8,7 +8,9 @@ const LOST_REASON_LABEL: Record<LostReason, string> = {
   changed_mind: "Customer changed mind",
   unavailable: "Property unavailable",
   chose_other: "Chose another property",
+  no_response: "No response",
   other: "Other",
+
 };
 
 

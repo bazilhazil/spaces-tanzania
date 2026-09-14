@@ -6,34 +6,46 @@ import type { DealStage } from "@/lib/deals-db";
 export const LEAD_STATUSES = [
   "new",
   "contacted",
+  "interested",
   "viewing_scheduled",
   "viewing_completed",
   "negotiating",
   "offer_made",
   "won",
   "lost",
+  "closed",
 ] as const;
 export type LeadStatus = (typeof LEAD_STATUSES)[number];
+
+/** Statuses that end the follow-up cycle. */
+export const TERMINAL_LEAD_STATUSES: LeadStatus[] = ["won", "lost", "closed"];
+export const isTerminalLead = (s: LeadStatus) => TERMINAL_LEAD_STATUSES.includes(s);
 
 /** i18n key suffix per status (crm.status.<key>) */
 export const LEAD_STATUS_TONE: Record<LeadStatus, string> = {
   new: "border-sky-500/30 bg-sky-500/10 text-sky-600",
   contacted: "border-indigo-500/30 bg-indigo-500/10 text-indigo-600",
+  interested: "border-teal-500/30 bg-teal-500/10 text-teal-600",
   viewing_scheduled: "border-violet-500/30 bg-violet-500/10 text-violet-600",
   viewing_completed: "border-purple-500/30 bg-purple-500/10 text-purple-600",
   negotiating: "border-amber-500/30 bg-amber-500/10 text-amber-600",
   offer_made: "border-orange-500/30 bg-orange-500/10 text-orange-600",
   won: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
   lost: "border-rose-500/30 bg-rose-500/10 text-rose-600",
+  closed: "border-slate-500/30 bg-slate-500/10 text-slate-600",
 };
 
 export function normalizeLeadStatus(raw: string | null | undefined): LeadStatus {
   const v = (raw ?? "new").toLowerCase();
   if ((LEAD_STATUSES as readonly string[]).includes(v)) return v as LeadStatus;
   if (v === "new_inquiry" || v === "open") return "new";
-  if (v === "closed" || v === "converted") return "won";
+  if (v === "negotiation") return "negotiating";
+  if (v === "offer_accepted" || v === "agreement_signed") return "offer_made";
+  if (v === "converted" || v === "completed") return "won";
+  if (v === "cancelled") return "lost";
   return "new";
 }
+
 
 export const LOST_REASONS = [
   "price",
@@ -41,7 +53,9 @@ export const LOST_REASONS = [
   "changed_mind",
   "unavailable",
   "chose_other",
+  "no_response",
   "other",
+
 ] as const;
 export type LostReason = (typeof LOST_REASONS)[number];
 
@@ -72,6 +86,9 @@ export interface CrmLead {
   viewingAt: string | null;
   /** The message conversation this inquiry came from (when there is one). */
   conversationId: string | null;
+  /** When the owner/agent first moved this inquiry out of "New". */
+  firstRespondedAt: string | null;
+  lostReason: string | null;
 }
 
 export interface TimelineEntry {
@@ -81,6 +98,72 @@ export interface TimelineEntry {
   label: string;
   detail?: string | null;
 }
+
+/* ----------------------- Priority / next action ----------------------- */
+
+export type LeadPriority = "high" | "normal" | "low";
+
+/** Simple, explainable priority — no scoring model. */
+export function leadPriority(lead: CrmLead): LeadPriority {
+  if (isTerminalLead(lead.status)) return "low";
+  if (
+    lead.viewingStatus === "pending" ||
+    lead.viewingStatus === "approved" ||
+    lead.status === "viewing_scheduled" ||
+    lead.status === "negotiating" ||
+    lead.status === "offer_made" ||
+    lead.status === "interested" ||
+    (lead.dealId !== null && lead.status !== "new")
+  ) {
+    return "high";
+  }
+  if (lead.status === "new") return "normal";
+  return "normal";
+}
+
+export type NextAction =
+  | "contact_buyer"
+  | "schedule_viewing"
+  | "confirm_viewing"
+  | "follow_up"
+  | "update_deal"
+  | "mark_won"
+  | "mark_lost"
+  | "none";
+
+/** The single most useful next step for an active inquiry. */
+export function nextAction(lead: CrmLead): NextAction {
+  if (isTerminalLead(lead.status)) return "none";
+  if (lead.viewingStatus === "pending") return "confirm_viewing";
+  switch (lead.status) {
+    case "new":
+      return "contact_buyer";
+    case "contacted":
+      return needsFollowUp(lead) ? "follow_up" : "schedule_viewing";
+    case "interested":
+      return "schedule_viewing";
+    case "viewing_scheduled":
+      return "confirm_viewing";
+    case "viewing_completed":
+      return lead.dealId ? "update_deal" : "follow_up";
+    case "negotiating":
+      return "update_deal";
+    case "offer_made":
+      return "mark_won";
+    default:
+      return "follow_up";
+  }
+}
+
+/** New/Contacted inquiries with no activity for 2+ days need chasing. */
+export const FOLLOW_UP_AFTER_HOURS = 48;
+
+export function needsFollowUp(lead: CrmLead): boolean {
+  if (lead.status !== "new" && lead.status !== "contacted") return false;
+  const last = new Date(lead.lastActivityAt || lead.createdAt).getTime();
+  return Date.now() - last > FOLLOW_UP_AFTER_HOURS * 3600_000;
+}
+
 
 /* --------------------------------- Fetch --------------------------------- */
 
@@ -163,7 +246,10 @@ export async function fetchCrmLeads(opts?: { all?: boolean }): Promise<CrmLead[]
       viewingAt: b?.scheduled_at ?? null,
       conversationId:
         r.conversation_id ?? convByPair.get(`${r.property_id}:${r.visitor_id ?? ""}`) ?? null,
+      firstRespondedAt: r.first_responded_at ?? null,
+      lostReason: r.lost_reason ?? null,
     };
+
   });
 }
 
@@ -226,6 +312,20 @@ export async function updateLeadStatus(id: string, status: LeadStatus) {
     .eq("id", id);
   if (error) throw error;
 }
+
+/** Close an inquiry with a simple reason. The record is kept for analytics. */
+export async function markLeadLost(id: string, reason: LostReason, note?: string) {
+  const { error } = await supabase
+    .from("leads")
+    .update({
+      status: "lost",
+      lost_reason: note?.trim() ? `${reason}: ${note.trim().slice(0, 300)}` : reason,
+      last_activity_at: new Date().toISOString(),
+    } as never)
+    .eq("id", id);
+  if (error) throw error;
+}
+
 
 export async function saveLeadNotes(id: string, notes: string) {
   const { error } = await supabase

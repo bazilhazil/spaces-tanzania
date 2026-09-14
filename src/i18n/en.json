@@ -686,12 +686,15 @@
       "today": "New today",
       "active": "Active inquiries",
       "deals": "In pipeline",
-      "won": "Completed"
+      "won": "Completed",
+      "new": "New",
+      "followUp": "Needs follow-up"
     },
     "tabs": {
       "active": "Active",
       "won": "Completed",
-      "lost": "Closed"
+      "lost": "Closed",
+      "followUp": "Needs follow-up"
     },
     "searchPlaceholder": "Search name, phone or property…",
     "allStatuses": "All statuses",
@@ -704,7 +707,9 @@
       "negotiating": "Negotiating",
       "offer_made": "Offer made",
       "won": "Completed",
-      "lost": "Closed"
+      "lost": "Closed",
+      "interested": "Interested",
+      "closed": "Closed"
     },
     "field": {
       "phone": "Phone",
@@ -712,7 +717,8 @@
       "property": "Property",
       "owner": "Owner / Agent",
       "viewing": "Viewing status",
-      "deal": "Deal status"
+      "deal": "Deal status",
+      "created": "First contact"
     },
     "none": "None",
     "lastActivity": "Last activity",
@@ -759,10 +765,28 @@
       "changed_mind": "Customer changed mind",
       "unavailable": "Property unavailable",
       "chose_other": "Chose another property",
-      "other": "Other"
+      "other": "Other",
+      "no_response": "No response"
     },
     "lostReasonNotes": "Add more detail (optional)",
-    "confirmLost": "Mark as closed"
+    "confirmLost": "Mark as closed",
+    "priority": {
+      "high": "High priority",
+      "normal": "Normal",
+      "low": "Low"
+    },
+    "next": {
+      "contact_buyer": "Contact this person",
+      "schedule_viewing": "Schedule a viewing",
+      "confirm_viewing": "Confirm the viewing",
+      "follow_up": "Follow up",
+      "update_deal": "Update the deal",
+      "mark_won": "Mark as completed",
+      "mark_lost": "Close this inquiry"
+    },
+    "needsFollowUp": "Needs follow-up",
+    "responded": "Responded",
+    "markLost": "Close inquiry"
   },
   "spaces": {
     "title": "My Spaces",
@@ -1873,6 +1897,12 @@
       "types": "Saves by space type",
       "locations": "Saves by location",
       "note": "Aggregate only — individual buyers are never identified."
+    },
+    "leads": {
+      "title": "Inquiry follow-up",
+      "note": "Aggregate only — no buyer is identified.",
+      "responseTime": "Median response time",
+      "responseRate": "Responded"
     }
   },
   "removeSpace": {

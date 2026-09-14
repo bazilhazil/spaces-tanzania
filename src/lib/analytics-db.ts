@@ -205,3 +205,54 @@ export async function fetchSavesInsights(): Promise<SavesInsights> {
     byLocation: rank(byLocation),
   };
 }
+
+/* ------------------------------------------------------------------ *
+ * Inquiry follow-up insights — admin only, aggregate counts.
+ * No buyer identity is read or returned.
+ * ------------------------------------------------------------------ */
+
+export interface LeadInsights {
+  total: number;
+  newLeads: number;
+  contacted: number;
+  viewingRequested: number;
+  viewingCompleted: number;
+  won: number;
+  lost: number;
+  /** Median hours between an inquiry arriving and the first response. */
+  medianResponseHours: number | null;
+  responseRate: number;
+  conversionRate: number;
+}
+
+export async function fetchLeadInsights(): Promise<LeadInsights> {
+  const { data, error } = await supabase
+    .from("leads")
+    .select("status,created_at,first_responded_at")
+    .limit(5000);
+  if (error) throw error;
+  const rows = (data ?? []) as { status: string; created_at: string; first_responded_at: string | null }[];
+
+  const count = (...s: string[]) => rows.filter((r) => s.includes(r.status)).length;
+  const gaps = rows
+    .filter((r) => r.first_responded_at)
+    .map((r) => (+new Date(r.first_responded_at!) - +new Date(r.created_at)) / 3_600_000)
+    .filter((h) => h >= 0)
+    .sort((a, b) => a - b);
+  const median = gaps.length ? Math.round(gaps[Math.floor(gaps.length / 2)] * 10) / 10 : null;
+  const won = count("won");
+
+  return {
+    total: rows.length,
+    newLeads: count("new"),
+    contacted: count("contacted", "interested"),
+    viewingRequested: count("viewing_scheduled"),
+    viewingCompleted: count("viewing_completed"),
+    won,
+    lost: count("lost", "closed"),
+    medianResponseHours: median,
+    responseRate: rows.length ? Math.round((gaps.length / rows.length) * 100) : 0,
+    conversionRate: rows.length ? Math.round((won / rows.length) * 100) : 0,
+  };
+}
+
