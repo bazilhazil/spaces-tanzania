@@ -5,7 +5,7 @@ import {
   TrendingUp, Sparkles, CheckCircle2, XCircle,
   AlertTriangle, Search, MoreHorizontal, Crown,
   RefreshCw, Plus, Zap, Database, KeyRound, Power, FileClock,
-  Activity, DollarSign, MapPin, Clock, BarChart3,
+  Activity, DollarSign, MapPin, Clock, BarChart3, EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
