@@ -100,6 +100,7 @@ function SectionPage() {
 import { FavoritesPanel } from "@/components/favorites/favorites-panel";
 import { SavedSearchesPanel } from "@/components/favorites/saved-searches-panel";
 import { RecentlyViewedPanel } from "@/components/favorites/recently-viewed-panel";
+import { avatarInitials, publicEmail } from "@/lib/display-name";
 
 
 /* Viewings and Messages are handled by the real /viewings and /messages pages. */
@@ -216,9 +217,9 @@ function SubscriptionPanel() {
 
 function ProfilePanel() {
   const { profile, user } = useAuth();
-  const initials = (profile?.full_name || user?.email || "S").split(" ").map((s) => s[0]).slice(0,2).join("").toUpperCase();
+  const initials = avatarInitials(profile);
   const items = [
-    { icon: Mail,     label: "Email (Optional)", value: profile?.email || user?.email || "Add email address" },
+    { icon: Mail,     label: "Email (Optional)", value: publicEmail(profile?.email) || publicEmail(user?.email) || "Add email address" },
     { icon: Phone,    label: "Phone Number",     value: profile?.phone || "—" },
     { icon: MapPin,   label: "Location",         value: profile?.location || "—" },
   ];

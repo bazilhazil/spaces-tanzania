@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { publicEmail } from "@/lib/display-name";
 
 /**
  * Admin Operations Center data layer.
@@ -617,14 +618,14 @@ async function fetchPeopleWithRole(role: "owner" | "agent"): Promise<PersonOptio
   if (!ids.length) return [];
   const { data } = await supabase
     .from("profiles")
-    .select("id,full_name,email,agency_name,account_status")
+    .select("id,full_name,email,phone,agency_name,account_status")
     .in("id", ids);
   return ((data ?? []) as any[])
     .filter((p) => p.account_status === "active")
     .map((p) => ({
       id: p.id,
-      name: p.full_name || p.email || "Unnamed member",
-      email: p.email ?? null,
+      name: p.full_name || publicEmail(p.email) || p.phone || "Unnamed member",
+      email: publicEmail(p.email),
       agency: p.agency_name ?? null,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -658,12 +659,12 @@ export async function fetchPropertyAssignment(propertyId: string): Promise<Prope
   return {
     propertyId,
     ownerId,
-    ownerName: owner ? (owner.full_name || owner.email || "Unnamed member") : null,
+    ownerName: owner ? (owner.full_name || publicEmail(owner.email) || "Unnamed member") : null,
     ownerStatus: owner?.account_status ?? null,
     agents: agentRows.map((a) => ({
       id: a.id,
       agentId: a.agent_id,
-      name: byId.get(a.agent_id)?.full_name || byId.get(a.agent_id)?.email || "Assigned agent",
+      name: byId.get(a.agent_id)?.full_name || publicEmail(byId.get(a.agent_id)?.email) || "Assigned agent",
       permission: a.permission,
     })),
     needsAssignment: !owner || owner.account_status !== "active",

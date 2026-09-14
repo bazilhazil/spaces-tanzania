@@ -16,6 +16,7 @@ import { useI18n } from "@/hooks/use-i18n";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { avatarInitials } from "@/lib/display-name";
 
 type Item = { label: string; to: string; icon: React.ComponentType<{ className?: string }> };
 
@@ -119,8 +120,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   }
 
 
-  const initials = (profile?.full_name || user?.email || "S")
-    .split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
+  const initials = avatarInitials(profile);
 
   return (
     <div className="min-h-screen bg-secondary/30">

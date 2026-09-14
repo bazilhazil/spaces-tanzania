@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
+import { firstName } from "@/lib/display-name";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
@@ -23,7 +24,7 @@ function DashboardPage() {
   const { mode, ready } = useMode();
   const { t } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const name = (profile?.full_name || user?.email || t("common.welcome")).split(" ")[0];
+  const name = firstName(profile);
 
   // This route is a layout parent for /dashboard/properties, /dashboard/properties/:id/manage, etc.
   if (pathname !== "/dashboard" && pathname !== "/dashboard/") {
@@ -41,7 +42,7 @@ function DashboardPage() {
       <div className="mx-auto max-w-6xl space-y-6 md:space-y-8">
         <header className="animate-fade-in">
           <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-            {t(greetingKey())}, {name} <span className="inline-block">👋</span>
+            {t(greetingKey())}{name ? `, ${name}` : ""} <span className="inline-block">👋</span>
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {t(`dashboard.roleTagline.${activeMode}`)}
