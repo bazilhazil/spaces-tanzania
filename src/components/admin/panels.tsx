@@ -280,29 +280,40 @@ export function DashboardPanel() {
 
 // ---------- Property Moderation ----------
 
-const QUEUE_FILTERS: { id: QueueFilter; labelKey: string }[] = [
+const QUEUE_FILTERS: { id: QueueFilter; labelKey?: string; label?: string }[] = [
+  { id: "attention", label: "Needs attention" },
   { id: "review", labelKey: "admin.kpi.awaiting" },
   { id: "live", labelKey: "admin.filter.live" },
+  { id: "reported", label: "Reported" },
+  { id: "unavailable", label: "Unavailable" },
   { id: "rejected", labelKey: "admin.filter.rejected" },
   { id: "duplicates", labelKey: "admin.filter.duplicates" },
   { id: "all", labelKey: "admin.filter.all" },
 ];
 
+const PROPERTY_TYPES = ["all", "house", "apartment", "office", "shop", "warehouse", "land", "commercial"];
+
 export function PropertiesPanel() {
   const { t } = useI18n();
-  const [filter, setFilter] = useState<QueueFilter>("review");
+  const [filter, setFilter] = useState<QueueFilter>("attention");
+  const [q, setQ] = useState("");
+  const [propertyType, setPropertyType] = useState("all");
+  const [region, setRegion] = useState("all");
+  const [verified, setVerified] = useState<"all" | "verified" | "unverified">("all");
+  const [availability, setAvailability] = useState<"all" | "available" | "unavailable">("all");
   const { data: items, loading, reload } = useLive<AdminQueueItem[]>(
-    () => fetchModerationQueue(filter),
+    () => fetchModerationQueue(filter, { q, propertyType, region, verified, availability }),
     [],
-    [filter],
+    [filter, q, propertyType, region, verified, availability],
   );
+  const { data: regionMix } = useLive<{ name: string; count: number; pct: number }[]>(fetchRegionMix, []);
   const [selected, setSelected] = useState<string | null>(null);
   const item = items.find((m) => m.id === selected) ?? items[0] ?? null;
-  const [reasonFor, setReasonFor] = useState<null | "reject" | "request_changes">(null);
+  const [reasonFor, setReasonFor] = useState<null | ModerationAction>(null);
 
   const act = async (
     id: string,
-    action: Parameters<typeof moderateProperty>[1],
+    action: ModerationAction,
     label: string,
     reason?: string,
   ) => {
@@ -322,23 +333,56 @@ export function PropertiesPanel() {
     }
   };
 
+  const ACTION_LABEL: Partial<Record<ModerationAction, { title: string; body: string; confirm: string; done: string }>> = {
+    reject: { title: "Reject this space?", body: "The owner is told it needs changes and it stays hidden from the marketplace.", confirm: "Reject space", done: t("admin.toast.rejected") },
+    request_changes: { title: "Request changes?", body: "The owner is asked to update the listing before it can be published.", confirm: "Request changes", done: t("admin.toast.changes") },
+    take_offline: { title: "Take this space offline?", body: "It stops appearing publicly straight away. Inquiries, viewings, deals and billing records are all kept.", confirm: "Take offline", done: "Space taken offline" },
+    unverify: { title: "Remove the verified badge?", body: "The space stays listed but no longer shows as verified by SPACES.", confirm: "Remove badge", done: "Verification removed" },
+  };
 
   return (
     <>
       <PageHeader kicker={t("admin.kicker.moderation")} title={t("admin.queue.title")} subtitle={t("admin.queue.sub")}
         actions={<Button size="sm" variant="outline" className="gap-2" onClick={reload}><RefreshCw className="h-4 w-4" /> {t("admin.action.refresh")}</Button>} />
 
-      <div className="mb-5 flex flex-wrap gap-2">
+      <div className="mb-4 -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
         {QUEUE_FILTERS.map((f) => (
-          <Button key={f.id} size="sm" variant={filter === f.id ? "default" : "outline"} onClick={() => { setFilter(f.id); setSelected(null); }}>
-            {t(f.labelKey)}
+          <Button key={f.id} size="sm" className="shrink-0" variant={filter === f.id ? "default" : "outline"} onClick={() => { setFilter(f.id); setSelected(null); }}>
+            {f.label ?? t(f.labelKey!)}
           </Button>
         ))}
       </div>
 
-      {loading ? (
-        <p className="text-sm text-muted-foreground">{t("admin.loading.listings")}</p>
-      ) : items.length === 0 ? (
+      <div className="mb-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="relative sm:col-span-2 lg:col-span-2">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder="Search title, location or owner…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+        </div>
+        <select value={propertyType} onChange={(e) => setPropertyType(e.target.value)}
+          className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm capitalize">
+          {PROPERTY_TYPES.map((p) => <option key={p} value={p}>{p === "all" ? "All types" : titleCase(p)}</option>)}
+        </select>
+        <select value={region} onChange={(e) => setRegion(e.target.value)}
+          className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm">
+          <option value="all">All locations</option>
+          {regionMix.map((r) => <option key={r.name} value={r.name}>{r.name}</option>)}
+        </select>
+        <div className="grid grid-cols-2 gap-2">
+          <select value={verified} onChange={(e) => setVerified(e.target.value as typeof verified)}
+            className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm">
+            <option value="all">Any verification</option>
+            <option value="verified">Verified</option>
+            <option value="unverified">Unverified</option>
+          </select>
+          <select value={availability} onChange={(e) => setAvailability(e.target.value as typeof availability)}
+            className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm">
+            <option value="all">Any availability</option>
+            <option value="available">Available</option>
+            <option value="unavailable">Unavailable</option>
+          </select>
+        </div>
+      </div>
+
         <EmptyState icon={Home} title={t("admin.queue.emptyTitle")} description={t("admin.queue.emptyBody")} />
       ) : (
         <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
