@@ -1897,6 +1897,12 @@
       "types": "Saves by space type",
       "locations": "Saves by location",
       "note": "Aggregate only — individual buyers are never identified."
+    },
+    "leads": {
+      "title": "Inquiry follow-up",
+      "note": "Aggregate only — no buyer is identified.",
+      "responseTime": "Median response time",
+      "responseRate": "Responded"
     }
   },
   "removeSpace": {

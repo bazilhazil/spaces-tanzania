@@ -1897,6 +1897,12 @@
       "types": "Kuhifadhi kwa aina",
       "locations": "Kuhifadhi kwa eneo",
       "note": "Takwimu za jumla — hakuna mtumiaji anayetambuliwa."
+    },
+    "leads": {
+      "title": "Ufuatiliaji wa maulizo",
+      "note": "Jumla tu — hakuna mteja anayetambulishwa.",
+      "responseTime": "Muda wa kujibu (wastani)",
+      "responseRate": "Yaliyojibiwa"
     }
   },
   "removeSpace": {
