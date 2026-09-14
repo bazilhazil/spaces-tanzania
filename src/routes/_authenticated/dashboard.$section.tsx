@@ -216,14 +216,35 @@ function SubscriptionPanel() {
 /* ============================ PROFILE ============================ */
 
 function ProfilePanel() {
-  const { profile, user } = useAuth();
+  const { profile, user, refresh } = useAuth();
   const initials = avatarInitials(profile);
+  const photoRef = useRef<HTMLInputElement | null>(null);
+  const [photoBusy, setPhotoBusy] = useState(false);
   const items = [
     { icon: Mail,     label: "Email (Optional)", value: publicEmail(profile?.email) || publicEmail(user?.email) || "Add email address" },
     { icon: Phone,    label: "Phone Number",     value: profile?.phone || "—" },
     { icon: MapPin,   label: "Location",         value: profile?.location || "—" },
   ];
   const verified = false;
+
+  async function changePhoto(file: File) {
+    if (!user) return;
+    const problem = validateAvatarFile(file);
+    if (problem) return toast.error(problem === "tooLarge" ? "Photo must be smaller than 5 MB." : "Please choose a JPG, PNG or WEBP image.");
+    setPhotoBusy(true);
+    try {
+      const url = await uploadAvatar(user.id, file);
+      const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+      if (error) throw error;
+      await refresh();
+      toast.success("Photo updated");
+    } catch (e) {
+      toast.error(friendlyError(e));
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-5">
       <div className="rounded-2xl border border-border/60 bg-background p-6 shadow-[var(--shadow-soft)]">
@@ -233,8 +254,22 @@ function ProfilePanel() {
               <AvatarImage src={profile?.avatar_url ?? undefined} />
               <AvatarFallback className="bg-primary/10 text-2xl font-semibold text-primary">{initials}</AvatarFallback>
             </Avatar>
-            <button onClick={() => toast.info("Photo upload coming soon")}
-              className="absolute -bottom-1 -right-1 rounded-full bg-primary p-2 text-primary-foreground shadow-[var(--shadow-soft)] hover:bg-primary/90">
+            <input
+              ref={photoRef}
+              type="file"
+              accept={AVATAR_TYPES.join(",")}
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) void changePhoto(file);
+              }}
+            />
+            <button
+              onClick={() => photoRef.current?.click()}
+              disabled={photoBusy}
+              aria-label={profile?.avatar_url ? "Change photo" : "Upload photo"}
+              className="absolute -bottom-1 -right-1 rounded-full bg-primary p-2 text-primary-foreground shadow-[var(--shadow-soft)] hover:bg-primary/90 disabled:opacity-60">
               <Edit3 className="h-3.5 w-3.5" />
             </button>
           </div>
