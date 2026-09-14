@@ -15,6 +15,7 @@ import { StatCard } from "@/components/ds/stat-card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import { fetchMyAssignments } from "@/lib/property-agents";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard/agent-performance")({
