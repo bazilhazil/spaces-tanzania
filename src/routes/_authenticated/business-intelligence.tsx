@@ -14,8 +14,9 @@ import { friendlyError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
-  ANALYTICS_RANGES, conversionRate, fetchAnalytics, fetchResponseMinutes, fetchSavesInsights, growth,
-  type AnalyticsRange, type AnalyticsReport, type SavesInsights,
+  ANALYTICS_RANGES, conversionRate, fetchAnalytics, fetchResponseMinutes, fetchSavesInsights, fetchLeadInsights, growth,
+  type AnalyticsRange, type AnalyticsReport, type SavesInsights, type LeadInsights,
+
 } from "@/lib/analytics-db";
 
 export const Route = createFileRoute("/_authenticated/business-intelligence")({
