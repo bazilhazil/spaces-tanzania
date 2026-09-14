@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
 import { findDuplicateGroups } from "@/lib/listing-quality";
 import { notifyByEmail } from "./email-notify";
+import { publicEmail } from "@/lib/display-name";
 
 /**
  * Admin Control Center data layer.
@@ -380,7 +381,7 @@ export async function fetchAdminUsers(): Promise<AdminUser[]> {
   return ((profiles ?? []) as any[]).map((p) => ({
     id: p.id,
     name: p.full_name || "Unnamed user",
-    email: p.email ?? null,
+    email: publicEmail(p.email),
     phone: p.phone ?? null,
     roles: roleMap.get(p.id) ?? [],
     verified: !!(p.verified_identity || p.verified_owner || p.verified_agent || p.verified_business),
