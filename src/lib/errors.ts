@@ -83,6 +83,7 @@ function classify(raw: string): Key {
   if (m.includes("invalid login credentials") || m.includes("invalid credentials")) return "credentials";
   if (m.includes("token has expired") || (m.includes("expired") && (m.includes("otp") || m.includes("token") || m.includes("code")))) return "otpExpired";
   if (m.includes("otp") || m.includes("invalid token") || m.includes("token is invalid")) return "otpWrong";
+  if (m.includes("owner_change_not_allowed") || m.includes("account_restricted")) return "permission";
   if (m.includes("jwt") || m.includes("session") || m.includes("token") || m.includes("401")) return "session";
   if (m.includes("row-level security") || m.includes("permission denied") || m.includes("not authorized") || m.includes("403")) return "permission";
   if (m.includes("already registered") || m.includes("email address is already")) return "emailTaken";
