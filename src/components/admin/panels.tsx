@@ -30,7 +30,10 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { logAdminAction } from "@/lib/admin-ops";
+import {
+  logAdminAction, setUserAccountStatus, fetchUserOperations, fetchMarketplaceOverview,
+  type UserOperations, type MarketplaceOverview,
+} from "@/lib/admin-ops";
 import { friendlyError } from "@/lib/errors";
 import { adminSetPaymentStatus } from "@/lib/monetization-db";
 import { useI18n } from "@/hooks/use-i18n";
