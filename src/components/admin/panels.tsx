@@ -383,7 +383,11 @@ export function PropertiesPanel() {
         </div>
       </div>
 
+      {loading ? (
+        <p className="text-sm text-muted-foreground">{t("admin.loading.listings")}</p>
+      ) : items.length === 0 ? (
         <EmptyState icon={Home} title={t("admin.queue.emptyTitle")} description={t("admin.queue.emptyBody")} />
+
       ) : (
         <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
           <div className="space-y-3">
