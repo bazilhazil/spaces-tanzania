@@ -555,7 +555,12 @@
     "emptyTitle": "You haven't saved any spaces yet.",
     "emptyBody": "Tap the heart on any listing to save it here.",
     "browse": "Find a Space",
-    "loading": "Loading your favorites…"
+    "loading": "Loading your favorites…",
+    "unavailable": "Currently unavailable",
+    "notListed": "This space is no longer listed on SPACES.",
+    "available": "Available",
+    "unverified": "Not yet verified",
+    "authGate": "Create an account to save properties and come back to them later."
   },
   "share": {
     "title": "Share this space",
@@ -1860,6 +1865,14 @@
       "value": "Value",
       "period": "Period",
       "popupBlocked": "Allow pop-ups to export the PDF report."
+    },
+    "saves": {
+      "title": "Saved spaces",
+      "total": "Total saves",
+      "top": "Most saved spaces",
+      "types": "Saves by space type",
+      "locations": "Saves by location",
+      "note": "Aggregate only — individual buyers are never identified."
     }
   },
   "removeSpace": {

@@ -466,10 +466,9 @@ function PropertyDetailPage() {
               <InfoBlock label={t("properties.detail.propertyType")} value={t(`search.types.${property.category}`)} icon={<Building2 className="h-4 w-4" />} />
               <InfoBlock label={t("properties.detail.propertyId")} value={publicId} icon={<BadgeCheck className="h-4 w-4" />} />
               <InfoBlock label="Land size" value={`${property.size} m²`} icon={<Ruler className="h-4 w-4" />} />
-              <InfoBlock label="Availability" value="Available now" icon={<CheckCircle2 className="h-4 w-4" />} />
+              <InfoBlock label="Availability" value={unavailable ? t("favoritesPage.unavailable") : "Available now"} icon={<CheckCircle2 className="h-4 w-4" />} />
               <InfoBlock label="Listing date" value={new Date(property.createdAt).toLocaleDateString()} icon={<Calendar className="h-4 w-4" />} />
               <InfoBlock label="Views" value={property.views.toLocaleString()} icon={<Eye className="h-4 w-4" />} />
-              <InfoBlock label="Saves" value={Math.max(3, Math.round(property.views / 40)).toString()} icon={<Heart className="h-4 w-4" />} />
             </div>
 
 
@@ -712,7 +711,7 @@ function PropertyDetailPage() {
         url={canonicalPropertyUrl(propertySlug({ ...property, id: property.id }))}
       />
 
-      <AuthGateDialog open={authGate} onOpenChange={setAuthGate} />
+      <AuthGateDialog open={authGate} onOpenChange={setAuthGate} description={t("favoritesPage.authGate")} />
     </div>
   );
 }

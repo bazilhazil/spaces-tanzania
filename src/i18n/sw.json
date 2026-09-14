@@ -555,7 +555,12 @@
     "emptyTitle": "Bado hujahifadhi nafasi yoyote.",
     "emptyBody": "Bofya moyo kwenye tangazo lolote kuihifadhi hapa.",
     "browse": "Tafuta Nafasi",
-    "loading": "Inapakia vipendwa vyako…"
+    "loading": "Inapakia vipendwa vyako…",
+    "unavailable": "Haipatikani kwa sasa",
+    "notListed": "Nafasi hii haipo tena kwenye SPACES.",
+    "available": "Inapatikana",
+    "unverified": "Bado haijathibitishwa",
+    "authGate": "Fungua akaunti ili kuhifadhi nafasi na kurudi kuziangalia baadaye."
   },
   "share": {
     "title": "Shiriki nafasi hii",
@@ -1860,6 +1865,14 @@
       "value": "Thamani",
       "period": "Kipindi",
       "popupBlocked": "Ruhusu madirisha ibukizi ili kupakua ripoti ya PDF."
+    },
+    "saves": {
+      "title": "Nafasi zilizohifadhiwa",
+      "total": "Jumla ya kuhifadhi",
+      "top": "Nafasi zilizohifadhiwa zaidi",
+      "types": "Kuhifadhi kwa aina",
+      "locations": "Kuhifadhi kwa eneo",
+      "note": "Takwimu za jumla — hakuna mtumiaji anayetambuliwa."
     }
   },
   "removeSpace": {
