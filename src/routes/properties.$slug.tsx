@@ -558,6 +558,17 @@ function PropertyDetailPage() {
                     {ownerProfile?.agency && (
                       <p className="truncate text-xs text-muted-foreground">{ownerProfile.agency}</p>
                     )}
+                    {ownerProfile && (
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {ownerProfile.verifiedAgent
+                          ? t("properties.detail.roleAgent")
+                          : t("properties.detail.roleOwner")}
+                        {" · "}
+                        {ownerProfile.verifiedAgent || ownerProfile.verifiedOwner || ownerProfile.verifiedIdentity
+                          ? t("properties.detail.verifiedBySpaces")
+                          : t("properties.detail.notVerified")}
+                      </p>
+                    )}
                     {ownerProfile?.rating != null && (
                       <p className="mt-1 inline-flex items-center gap-1 text-xs text-gold">
                         <Star className="h-3.5 w-3.5 fill-current" /> {ownerProfile.rating.toFixed(1)}
