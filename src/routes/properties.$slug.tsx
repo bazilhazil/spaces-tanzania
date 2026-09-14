@@ -123,7 +123,7 @@ function PropertyDetailPage() {
   const { slug } = Route.useParams();
   const { t } = useI18n();
   const { user } = useAuth();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite, trackView } = useFavorites();
   const [property, setProperty] = useState<Property | null>(null);
   const [agent, setAgent] = useState<Agent | null>(null);
   const [status, setStatus] = useState<string>("live");
@@ -148,6 +148,8 @@ function PropertyDetailPage() {
         const oid = ((res.row as unknown as { owner_id?: string })?.owner_id) ?? null;
         setOwnerId(oid);
         track("property_viewed", { property_id: res.property.id, category: res.property.category });
+        // Count the visit itself, not only clicks from a card (shared and search links land here).
+        trackView(res.property.id);
         if (oid) {
           void fetchOwnerPublicProfile(oid).then((p) => { if (alive) setOwnerProfile(p); });
         }
@@ -426,7 +428,7 @@ function PropertyDetailPage() {
                     }}
 
                   >
-                    <Heart className={cn("h-4 w-4", favorited && "fill-current")} /> {t("common.save")}
+                    <Heart className={cn("h-4 w-4", favorited && "fill-current")} /> {favorited ? t("common.saved") : t("common.save")}
                   </Button>
                   <Button variant="outline" size="sm" className="gap-1.5" onClick={share}>
                     <Share2 className="h-4 w-4" /> {t("common.share")}

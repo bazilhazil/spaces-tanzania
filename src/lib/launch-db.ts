@@ -206,7 +206,7 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
       id: "email",
       label: "Email delivery",
       state: "pending",
-      detail: "Transactional email provider not verified yet",
+      detail: "Sender domain notify.spacestz.com is verified — a real delivery test has not been run yet",
       section: "settings",
     },
     {

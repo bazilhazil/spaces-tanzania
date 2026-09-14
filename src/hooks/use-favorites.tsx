@@ -250,10 +250,11 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         setState((s) => ({ ...s, compare: s.compare.filter((c) => c !== id) })),
       trackView: (id) => {
         // Fire-and-forget analytics row; RLS allows anon + authenticated inserts.
-        void supabase.from("property_views").insert({
-          property_id: id,
-          viewer_id: user?.id ?? null,
-        });
+        // The query only runs once it is awaited, so keep the explicit .then().
+        void supabase
+          .from("property_views")
+          .insert({ property_id: id, viewer_id: user?.id ?? null })
+          .then(() => undefined, () => undefined);
         setState((s) => {
           const filtered = s.recentlyViewed.filter((r) => r.propertyId !== id);
           return {

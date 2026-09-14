@@ -29,6 +29,27 @@
       "when": 1789382783086,
       "tag": "0003_tighten_storage_ownership_and_definer_exposure",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789386117129,
+      "tag": "0004_fix_is_blocked_with_definer",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789386434407,
+      "tag": "0005_revoke_anon_read_admin_actions",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789386556983,
+      "tag": "0006_increment_property_view_count",
+      "breakpoints": true
     }
   ]
 }

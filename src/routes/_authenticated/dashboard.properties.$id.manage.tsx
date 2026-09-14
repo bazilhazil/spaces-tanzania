@@ -616,14 +616,13 @@ function PhotosSection({
     const { error } = await supabase.from("property_media").delete().eq("id", m.id);
     if (error) { toast.error(friendlyError(error)); return; }
     await supabase.storage.from("property-media").remove([m.storage_path]);
-    setMedia((prev) => {
-      const next = prev.filter((x) => x.id !== m.id);
-      if (m.is_cover && next.length && !next.some((x) => x.is_cover)) {
-        void supabase.from("property_media").update({ is_cover: true } as never).eq("id", next[0].id);
-        next[0] = { ...next[0], is_cover: true };
-      }
-      return next;
-    });
+    const remaining = media.filter((x) => x.id !== m.id);
+    if (m.is_cover && remaining.length && !remaining.some((x) => x.is_cover)) {
+      // Promote the next photo so the listing never loses its cover image.
+      await supabase.from("property_media").update({ is_cover: true } as never).eq("id", remaining[0].id);
+      remaining[0] = { ...remaining[0], is_cover: true };
+    }
+    setMedia(remaining);
     toast.success("Photo removed");
   }
 
