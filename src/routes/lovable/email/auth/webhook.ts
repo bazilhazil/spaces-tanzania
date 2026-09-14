@@ -9,7 +9,7 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
-const SITE_NAME = "Spaces Tanzania"
+const SITE_NAME = "SPACES"
 const SENDER_DOMAIN = "notify.spacestz.com"
 const ROOT_DOMAIN = "spacestz.com"
 const FROM_DOMAIN = "spacestz.com"
