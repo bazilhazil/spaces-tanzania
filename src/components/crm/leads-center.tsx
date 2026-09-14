@@ -4,6 +4,7 @@ import {
   Search, Phone, MessageCircle, Mail, Calendar as CalendarIcon, Clock, MapPin,
   Home, User, Loader2, ArrowUpRight, Handshake, StickyNote, Activity as ActivityIcon,
   CheckCircle2, ChevronRight, Users, TrendingUp, Sparkles, MessagesSquare,
+  AlertTriangle, MessageSquare, Flame, ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -19,10 +23,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { STAGE_LABEL } from "@/lib/deals-db";
 import {
-  LEAD_STATUSES, LEAD_STATUS_TONE, fetchCrmLeads, fetchLeadTimeline, updateLeadStatus,
-  saveLeadNotes, createDealFromLead, timeAgo,
-  type CrmLead, type LeadStatus, type TimelineEntry,
+  LEAD_STATUSES, LEAD_STATUS_TONE, LOST_REASONS, fetchCrmLeads, fetchLeadTimeline, updateLeadStatus,
+  saveLeadNotes, createDealFromLead, markLeadLost, timeAgo, leadPriority, nextAction, needsFollowUp,
+  isTerminalLead,
+  type CrmLead, type LeadStatus, type LeadPriority, type LostReason, type TimelineEntry,
 } from "@/lib/crm-workflow";
+
 
 /* ================================ ROOT ================================ */
 
