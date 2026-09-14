@@ -150,6 +150,20 @@ export function useDashboardHome(mode: "owner" | "agent"): DashboardHome {
       });
     }
 
+    // Inquiries that have gone quiet, and high-priority ones, also need attention.
+    for (const l of leads
+      .filter((x) => x.status !== "new" && (needsFollowUp(x) || leadPriority(x) === "high"))
+      .slice(0, 3)) {
+      attention.push({
+        id: `lead-followup-${l.id}`,
+        kind: "lead",
+        title: l.name || l.propertyTitle || "Inquiry",
+        detail: l.propertyTitle ?? "",
+        to: "/leads",
+      });
+    }
+
+
     for (const v of viewings.filter((x) => x.status === "pending").slice(0, 4)) {
       attention.push({
         id: `viewing-${v.id}`,
