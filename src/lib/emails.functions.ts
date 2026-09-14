@@ -67,14 +67,15 @@ export const emailDeliveryHealth = createServerFn({ method: "GET" }).handler(asy
   try {
     const { listEmailLogs } = await import("@lovable.dev/email-js");
     const logs = await listEmailLogs({ limit: 20 }, { apiKey });
-    const events = (logs as { events?: { event_type: string; created_at?: string }[] })?.events ?? [];
+    const events = logs?.data ?? [];
     const sent = events.find((e) => e.event_type === "sent");
     if (sent) {
       return {
         state: "ready" as const,
-        detail: "Real delivery confirmed from notify.spacestz.com",
+        detail: `Real delivery confirmed from notify.spacestz.com — last send ${new Date(sent.timestamp).toLocaleString()}`,
       };
     }
+
     return {
       state: "pending" as const,
       detail: "Sender domain notify.spacestz.com is verified — no delivery recorded yet",
