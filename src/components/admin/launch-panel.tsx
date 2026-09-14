@@ -3,14 +3,17 @@ import { Link } from "@tanstack/react-router";
 import {
   Users, Home, MessageSquare, Calendar, Briefcase, ShieldCheck, Star, Bell,
   CreditCard, BarChart3, Settings, RefreshCw, ArrowRight, CheckCircle2,
-  AlertTriangle, Clock, Activity,
+  AlertTriangle, Clock, Activity, Mail,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ds/empty-state";
 import { PageHeader } from "@/components/admin/panels";
 import { cn } from "@/lib/utils";
+import { sendAdminTestEmail } from "@/lib/emails.functions";
 import { fetchLaunchReport, type LaunchReport, type ReadyState, type HealthState } from "@/lib/launch-db";
+
 
 const STATE_LABEL: Record<ReadyState, string> = {
   ready: "READY",
@@ -94,6 +97,28 @@ export function LaunchPanel() {
 
   const reload = useCallback(() => setNonce((n) => n + 1), []);
 
+  const [testing, setTesting] = useState(false);
+  const sendTest = useCallback(async () => {
+    setTesting(true);
+    try {
+      const result = await sendAdminTestEmail();
+      if (result?.ok) {
+        toast.success(`Test email sent to ${result.to}. Check your inbox.`);
+        setNonce((n) => n + 1);
+      } else if (result?.reason === "not_allowed") {
+        toast.error("You don't have permission to do this.");
+      } else if (result?.reason === "no_recipient") {
+        toast.error("Add an email address to your admin profile first.");
+      } else {
+        toast.error("The test email could not be sent. Please try again.");
+      }
+    } catch {
+      toast.error("The test email could not be sent. Please try again.");
+    } finally {
+      setTesting(false);
+    }
+  }, []);
+
   const ready = report?.checklist.filter((c) => c.state === "ready").length ?? 0;
   const total = report?.checklist.length ?? 0;
 
@@ -104,11 +129,17 @@ export function LaunchPanel() {
         title="Launch & Operations Center"
         subtitle="Live readiness, platform health and the work waiting for your attention."
         actions={
-          <Button size="sm" className="gap-2" onClick={reload}>
-            <RefreshCw className="h-4 w-4" /> Refresh
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" className="gap-2" onClick={sendTest} disabled={testing}>
+              <Mail className="h-4 w-4" /> {testing ? "Sending…" : "Send test email"}
+            </Button>
+            <Button size="sm" className="gap-2" onClick={reload}>
+              <RefreshCw className="h-4 w-4" /> Refresh
+            </Button>
+          </div>
         }
       />
+
 
       {loading && !report ? (
         <p className="text-sm text-muted-foreground">Loading live status…</p>

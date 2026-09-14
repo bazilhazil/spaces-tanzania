@@ -3,6 +3,7 @@ import { COMPANY } from "@/lib/company";
 import { fetchBackupConfig } from "@/lib/backup-db";
 import { phoneCodeAvailable } from "@/lib/phone-otp.functions";
 import { onlinePaymentsAvailable, bankTransferDetails } from "@/lib/selcom.functions";
+import { emailDeliveryHealth } from "@/lib/emails.functions";
 
 /**
  * Admin Operations Center — launch readiness, platform health, pending work and
@@ -117,6 +118,7 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
     authProbe,
     bankProbe,
     rlsProbe,
+    emailProbe,
   ] = await Promise.all([
 
     count("properties"),
@@ -160,6 +162,10 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
         .limit(1);
       return Boolean(error) || (data?.length ?? 0) === 0;
     }, false),
+    safe(
+      async () => (await emailDeliveryHealth()) as { state: ReadyState; detail: string },
+      { state: "pending" as ReadyState, detail: "Email delivery could not be checked" },
+    ),
   ]);
 
 
@@ -205,8 +211,8 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
     {
       id: "email",
       label: "Email delivery",
-      state: "pending",
-      detail: "Sender domain notify.spacestz.com is verified — a real delivery test has not been run yet",
+      state: emailProbe?.state ?? "pending",
+      detail: emailProbe?.detail ?? "Email delivery has not been confirmed yet",
       section: "settings",
     },
     {
@@ -318,7 +324,12 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
       state: yes(notifications) ? "green" : "yellow",
       detail: yes(notifications) ? "Delivering in-app notifications" : "No notifications delivered yet",
     },
-    { id: "email", label: "Email", state: "yellow", detail: "Provider not verified" },
+    {
+      id: "email",
+      label: "Email",
+      state: emailProbe?.state === "ready" ? "green" : emailProbe?.state === "action" ? "red" : "yellow",
+      detail: emailProbe?.detail ?? "Delivery not confirmed",
+    },
     { id: "sms", label: "SMS", state: smsReady ? "green" : "yellow", detail: smsReady ? "Provider configured" : "Provider credentials required" },
     {
       id: "payments",

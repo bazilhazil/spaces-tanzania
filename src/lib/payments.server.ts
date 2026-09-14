@@ -52,5 +52,10 @@ export async function reconcilePayment(reference: string): Promise<ReconcileResu
     .select("id, status")
     .maybeSingle();
 
+  if (updated && next === "paid") {
+    const { sendPaymentConfirmation } = await import("./emails.server");
+    await sendPaymentConfirmation((row as { id: string }).id);
+  }
+
   return { status: updated ? next : current, changed: Boolean(updated) };
 }

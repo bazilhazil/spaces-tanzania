@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { notifyByEmail } from "./email-notify";
 
 export const DEAL_STAGES = [
   "new_inquiry",
@@ -190,6 +191,7 @@ export async function fetchDeals(): Promise<Deal[]> {
 
 export async function moveDealStage(id: string, stage: DealStage) {
   const { error } = await supabase.from("deals").update({ stage }).eq("id", id);
+  if (!error) notifyByEmail("deal_updated", id);
   if (error) throw error;
 }
 

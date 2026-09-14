@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { signedUrl } from "@/lib/property-media";
+import { notifyByEmail } from "./email-notify";
 
 export type ViewingStatusDb =
   | "pending"
@@ -193,7 +194,7 @@ export async function createViewingRequest(
     return { ok: true, updated: true };
   }
 
-  const { error } = await supabase.from("bookings").insert(payload as never);
+  const { data: created, error } = await supabase.from("bookings").insert(payload as never).select("id").maybeSingle();
 
   if (error) {
     const code = (error as { code?: string }).code ?? "";
@@ -221,6 +222,7 @@ export async function createViewingRequest(
     if (code === "23503") return { ok: false, error: "property_missing", detail: error.message };
     return { ok: false, error: "failed", detail: error.message };
   }
+  notifyByEmail("viewing_requested", (created as { id?: string } | null)?.id);
   return { ok: true };
 }
 
@@ -335,6 +337,7 @@ export async function setViewingStatus(
     .from("bookings")
     .update({ status } as never)
     .eq("id", id);
+  if (!error) notifyByEmail("viewing_updated", id);
   return !error;
 }
 
@@ -344,6 +347,7 @@ export async function suggestNewTime(id: string, isoDate: string): Promise<boole
     .from("bookings")
     .update({ suggested_at: isoDate, status: "rescheduled" } as never)
     .eq("id", id);
+  if (!error) notifyByEmail("viewing_updated", id);
   return !error;
 }
 
