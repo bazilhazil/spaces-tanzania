@@ -163,6 +163,9 @@ export function AdminHomePanel() {
         </div>
       )}
 
+      <MarketplaceOverviewSection />
+
+
       <Section
         title={t("admin.ops.todayTasks")}
         right={attention.length > 0 ? <Badge variant="warning">{attention.length}</Badge> : undefined}
