@@ -708,6 +708,9 @@ function PropertyDetailPage() {
         open={shareOpen}
         onOpenChange={setShareOpen}
         title={property.title}
+        location={[property.ward, property.district, property.city].filter(Boolean).join(", ")}
+        price={formatPrice(property.price, property.currency, property.listingType)}
+        propertyId={property.id}
         url={canonicalPropertyUrl(propertySlug({ ...property, id: property.id }))}
       />
 
