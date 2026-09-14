@@ -421,9 +421,17 @@ export function PropertiesPanel() {
                       : p.quality >= 60 ? "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)]"
                       : "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]")}>
                       <Zap className="h-3 w-3" /> Complete {p.quality}%
-                    </span>
+                    {p.openReports > 0 && <Badge variant="destructive">{p.openReports} report{p.openReports > 1 ? "s" : ""}</Badge>}
                     <span className="ml-auto text-muted-foreground">{relative(p.createdAt)}</span>
                   </div>
+                  {p.attention.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {p.attention.slice(0, 3).map((a) => (
+                        <Badge key={a} variant="muted" className="text-[10px]">{a}</Badge>
+                      ))}
+                    </div>
+                  )}
+
                 </div>
               </button>
             ))}
