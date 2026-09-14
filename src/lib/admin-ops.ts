@@ -739,3 +739,46 @@ export async function fetchPropertiesNeedingAssignment(): Promise<{ id: string; 
       at: r.created_at,
     }));
 }
+
+// ------------------------------------------------- owners & agents snapshot
+
+export interface TeamSnapshot {
+  owners: number;
+  agents: number;
+  activeAgents: number;
+  unverifiedUsers: number;
+  suspendedUsers: number;
+  propertiesWithoutAssignment: number;
+  assignedProperties: number;
+}
+
+/**
+ * Real counts for the "Owners & Agents" admin attention card.
+ * Never invents people: an empty agent roster is reported as zero.
+ */
+export async function fetchTeamSnapshot(): Promise<TeamSnapshot> {
+  const [{ data: roleRows }, { data: people }, needing, { data: links }] = await Promise.all([
+    supabase.from("user_roles").select("user_id,role").in("role", ["owner", "agent"]).limit(1000),
+    supabase.from("profiles").select("id,account_status,verified_identity,verified_owner,verified_agent,verified_business").limit(1000),
+    fetchPropertiesNeedingAssignment(),
+    supabase.from("property_agents").select("property_id").limit(1000),
+  ]);
+
+  const rows = (roleRows ?? []) as any[];
+  const profs = (people ?? []) as any[];
+  const byId = new Map(profs.map((p) => [p.id, p]));
+  const ownerIds = new Set(rows.filter((r) => r.role === "owner").map((r) => r.user_id));
+  const agentIds = new Set(rows.filter((r) => r.role === "agent").map((r) => r.user_id));
+
+  return {
+    owners: ownerIds.size,
+    agents: agentIds.size,
+    activeAgents: [...agentIds].filter((id) => byId.get(id)?.account_status === "active").length,
+    unverifiedUsers: profs.filter(
+      (p) => !(p.verified_identity || p.verified_owner || p.verified_agent || p.verified_business),
+    ).length,
+    suspendedUsers: profs.filter((p) => p.account_status !== "active").length,
+    propertiesWithoutAssignment: needing.length,
+    assignedProperties: new Set(((links ?? []) as any[]).map((l) => l.property_id)).size,
+  };
+}
