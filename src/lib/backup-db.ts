@@ -19,6 +19,14 @@ export interface BackupConfig {
   lastSuccessAt: string | null;     // reported by the provider, never invented
   nextScheduledAt: string | null;
   notes: string | null;
+  // File storage (uploaded photos, videos and private documents)
+  storageProvider: string | null;
+  storageConfigured: boolean;
+  storageLastSuccessAt: string | null;
+  // Recovery / restore capability
+  restoreVerified: boolean;         // an admin actually tested a restore
+  restoreVerifiedAt: string | null;
+  restoreNotes: string | null;
 }
 
 export interface RecoveryContacts {
@@ -30,7 +38,10 @@ export interface RecoveryContacts {
 export const EMPTY_BACKUP: BackupConfig = {
   provider: null, configured: false, frequency: null, retentionPoints: null,
   lastSuccessAt: null, nextScheduledAt: null, notes: null,
+  storageProvider: null, storageConfigured: false, storageLastSuccessAt: null,
+  restoreVerified: false, restoreVerifiedAt: null, restoreNotes: null,
 };
+
 
 export const EMPTY_CONTACTS: RecoveryContacts = {
   primaryEmail: null, backupEmail: null, backupPhone: null,
