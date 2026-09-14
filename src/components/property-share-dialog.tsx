@@ -1,4 +1,5 @@
-import { Copy, Facebook, Mail, MessageCircle, Share2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Copy, Facebook, Mail, MessageCircle, Share2, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -9,24 +10,52 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/use-i18n";
+import { track } from "@/lib/analytics";
 
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   title: string;
   url: string;
+  /** Public location line, e.g. "Masaki, Dar es Salaam". */
+  location?: string;
+  /** Already formatted, public price text, e.g. "TZS 2,500,000/month". */
+  price?: string;
+  propertyId?: string;
 };
 
-export function PropertyShareDialog({ open, onOpenChange, title, url }: Props) {
+export function PropertyShareDialog({
+  open,
+  onOpenChange,
+  title,
+  url,
+  location,
+  price,
+  propertyId,
+}: Props) {
   const { t } = useI18n();
-  const text = `${title} — SPACES`;
+  const [canNativeShare, setCanNativeShare] = useState(false);
+
+  useEffect(() => {
+    setCanNativeShare(typeof navigator !== "undefined" && typeof navigator.share === "function");
+  }, []);
+
+  // Only public listing information is ever included — never owner contacts.
+  const summary = [title, location, price].filter(Boolean).join("\n");
+  const whatsappText = `Check out this space on SPACES:\n${summary}\n\nView it here:\n${url}`;
+  const shortText = `${title} — SPACES`;
+
+  function logShare(channel: string) {
+    track("property_shared", { property_id: propertyId ?? "", channel });
+    if (channel === "whatsapp") track("whatsapp_clicked", { property_id: propertyId ?? "" });
+  }
 
   const links = [
     {
       key: "whatsapp",
       label: t("share.whatsapp"),
       icon: MessageCircle,
-      href: `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`,
+      href: `https://wa.me/?text=${encodeURIComponent(whatsappText)}`,
     },
     {
       key: "facebook",
@@ -38,13 +67,13 @@ export function PropertyShareDialog({ open, onOpenChange, title, url }: Props) {
       key: "x",
       label: t("share.x"),
       icon: Share2,
-      href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+      href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shortText)}&url=${encodeURIComponent(url)}`,
     },
     {
       key: "email",
       label: t("share.email"),
       icon: Mail,
-      href: `mailto:?subject=${encodeURIComponent(text)}&body=${encodeURIComponent(`${text}\n${url}`)}`,
+      href: `mailto:?subject=${encodeURIComponent(shortText)}&body=${encodeURIComponent(`${summary}\n\n${url}`)}`,
     },
   ];
 
@@ -53,22 +82,45 @@ export function PropertyShareDialog({ open, onOpenChange, title, url }: Props) {
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>{t("share.title")}</DialogTitle>
-          <DialogDescription className="line-clamp-2">{title}</DialogDescription>
+          <DialogDescription className="line-clamp-2">
+            {[title, location, price].filter(Boolean).join(" · ")}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-2">
           {links.map((l) => (
-            <a key={l.key} href={l.href} target="_blank" rel="noopener noreferrer">
+            <a
+              key={l.key}
+              href={l.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => logShare(l.key)}
+            >
               <Button variant="outline" className="w-full justify-start gap-2">
                 <l.icon className="h-4 w-4" /> {l.label}
               </Button>
             </a>
           ))}
         </div>
+        {canNativeShare && (
+          <Button
+            variant="outline"
+            className="w-full gap-2"
+            onClick={() => {
+              logShare("native");
+              void navigator
+                .share({ title, text: summary, url })
+                .catch(() => undefined);
+            }}
+          >
+            <Smartphone className="h-4 w-4" /> {t("share.native")}
+          </Button>
+        )}
         <Button
           className="w-full gap-2"
           onClick={() => {
             if (typeof navigator !== "undefined" && navigator.clipboard) {
               void navigator.clipboard.writeText(url);
+              logShare("copy_link");
               toast.success(t("share.copied"));
             }
           }}
