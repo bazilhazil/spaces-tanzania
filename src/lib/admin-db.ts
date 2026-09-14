@@ -349,11 +349,19 @@ export interface AdminUser {
   status: string;
   joined: string;
   listings: number;
+  /** True only when the existing verification workflow actually completed. */
+  verified: boolean;
+  suspensionReason: string | null;
+  lastActivityAt: string | null;
 }
 
 export async function fetchAdminUsers(): Promise<AdminUser[]> {
   const [{ data: profiles }, { data: roles }, { data: props }] = await Promise.all([
-    supabase.from("profiles").select("id,full_name,email,phone,account_status,created_at").order("created_at", { ascending: false }).limit(500),
+    supabase
+      .from("profiles")
+      .select("id,full_name,email,phone,account_status,suspension_reason,created_at,updated_at,verified_identity,verified_owner,verified_agent,verified_business")
+      .order("created_at", { ascending: false })
+      .limit(500),
     supabase.from("user_roles").select("user_id,role").limit(5000),
     supabase.from("properties").select("owner_id").limit(10000),
   ]);
@@ -372,7 +380,11 @@ export async function fetchAdminUsers(): Promise<AdminUser[]> {
     email: p.email ?? null,
     phone: p.phone ?? null,
     roles: roleMap.get(p.id) ?? [],
+    verified: !!(p.verified_identity || p.verified_owner || p.verified_agent || p.verified_business),
+    suspensionReason: p.suspension_reason ?? null,
+    lastActivityAt: p.updated_at ?? null,
     status: p.account_status ?? "active",
+
     joined: p.created_at,
     listings: counts.get(p.id) ?? 0,
   }));
