@@ -504,6 +504,9 @@ export function PropertiesPanel() {
               )}
 
 
+              <PropertyAssignmentCard propertyId={item.id} propertyTitle={item.title} />
+
+
               <div className="flex flex-wrap gap-2 border-t border-border/60 bg-secondary/30 p-4">
                 <Button variant="success" size="sm" className="gap-2" onClick={() => act(item.id, "approve", t("admin.toast.approved"))}><CheckCircle2 className="h-4 w-4" /> {t("admin.action.approve")}</Button>
                 <Button variant="outline" size="sm" className="gap-2" onClick={() => setReasonFor("request_changes")}><RefreshCw className="h-4 w-4" /> {t("admin.action.requestChanges")}</Button>
