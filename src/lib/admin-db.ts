@@ -100,6 +100,7 @@ export interface AdminQueueItem {
   id: string;
   title: string;
   location: string;
+  region: string | null;
   price: number;
   currency: string;
   listingType: string;
@@ -114,9 +115,14 @@ export interface AdminQueueItem {
   createdAt: string;
   cover: string | null;
   quality: number;
+  /** Open safety reports filed against this listing. */
+  openReports: number;
   /** Ids of listings that look like the same space — for admin review only. */
   possibleDuplicates: string[];
+  /** Why this listing appears in the attention queue (most important first). */
+  attention: string[];
 }
+
 
 /** Simple, deterministic completeness score from the record itself. */
 function completeness(row: any, hasImage: boolean): number {
@@ -135,22 +141,38 @@ function completeness(row: any, hasImage: boolean): number {
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
-export type QueueFilter = "review" | "live" | "rejected" | "duplicates" | "all";
+export type QueueFilter =
+  | "review" | "live" | "rejected" | "duplicates" | "attention" | "reported" | "unavailable" | "all";
 
-export async function fetchModerationQueue(filter: QueueFilter = "review"): Promise<AdminQueueItem[]> {
+export interface QueueFilters {
+  /** Free text over title, location and owner name. */
+  q?: string;
+  propertyType?: string;
+  region?: string;
+  verified?: "all" | "verified" | "unverified";
+  availability?: "all" | "available" | "unavailable";
+  reported?: boolean;
+}
+
+export async function fetchModerationQueue(
+  filter: QueueFilter = "review",
+  filters: QueueFilters = {},
+): Promise<AdminQueueItem[]> {
   let query = supabase.from("properties").select("*").order("created_at", { ascending: false }).limit(200);
   if (filter === "review") query = query.in("status", ["pending", "draft"]);
   else if (filter === "live") query = query.eq("status", "live");
   else if (filter === "rejected") query = query.eq("status", "rejected");
+  else if (filter === "unavailable") query = query.in("status", ["paused", "archived"]);
 
   const { data, error } = await query;
   if (error || !data) return [];
   const rows = data as any[];
   if (!rows.length) return [];
 
-  const [{ data: media }, { data: owners }] = await Promise.all([
+  const [{ data: media }, { data: owners }, { data: reports }] = await Promise.all([
     supabase.from("property_media").select("property_id,storage_path,is_cover,position").in("property_id", rows.map((r) => r.id)),
     supabase.from("profiles").select("id,full_name").in("id", Array.from(new Set(rows.map((r) => r.owner_id).filter(Boolean)))),
+    supabase.from("safety_reports").select("property_id,status").in("property_id", rows.map((r) => r.id)),
   ]);
 
   const coverPath = new Map<string, string>();
@@ -166,6 +188,13 @@ export async function fetchModerationQueue(filter: QueueFilter = "review"): Prom
   );
   const ownerNames = new Map(((owners ?? []) as any[]).map((o) => [o.id, o.full_name]));
 
+  const reportCounts = new Map<string, number>();
+  for (const r of ((reports ?? []) as any[])) {
+    if (!r.property_id) continue;
+    if (!["new", "under_review", "more_info"].includes(r.status)) continue;
+    reportCounts.set(r.property_id, (reportCounts.get(r.property_id) ?? 0) + 1);
+  }
+
   const dupes = findDuplicateGroups(
     rows.map((r) => ({
       id: r.id,
@@ -177,12 +206,24 @@ export async function fetchModerationQueue(filter: QueueFilter = "review"): Prom
     })),
   );
 
-  const items = rows.map((r) => {
+  let items: AdminQueueItem[] = rows.map((r) => {
     const cover = covers.get(r.id) ?? null;
+    const quality = completeness(r, !!cover);
+    const openReports = reportCounts.get(r.id) ?? 0;
+    const duplicates = dupes.get(r.id) ?? [];
+    const attention: string[] = [];
+    if (openReports > 0) attention.push("Reported");
+    if (r.status === "pending") attention.push("Awaiting approval");
+    if (r.status === "live" && r.verified !== true) attention.push("Awaiting verification");
+    if (quality < 60) attention.push("Missing information");
+    if (duplicates.length > 0) attention.push("Possible duplicate");
+    if (r.status === "paused") attention.push("Unavailable");
+    if (r.status === "rejected") attention.push("Rejected");
     return {
       id: r.id,
       title: r.title ?? "Untitled listing",
       location: [r.ward, r.district, r.region].filter(Boolean).join(", ") || "—",
+      region: r.region ?? null,
       price: Number(r.price ?? 0),
       currency: r.currency ?? "TZS",
       listingType: r.listing_type,
@@ -196,15 +237,49 @@ export async function fetchModerationQueue(filter: QueueFilter = "review"): Prom
       ownerName: ownerNames.get(r.owner_id) || "Unknown owner",
       createdAt: r.created_at,
       cover,
-      quality: completeness(r, !!cover),
-      possibleDuplicates: dupes.get(r.id) ?? [],
-    };
+      quality,
+      openReports,
+      possibleDuplicates: duplicates,
+      attention,
+    } satisfies AdminQueueItem;
   });
+
   // Possible duplicates are only ever surfaced for review — nothing is removed automatically.
-  return filter === "duplicates" ? items.filter((i) => i.possibleDuplicates.length > 0) : items;
+  if (filter === "duplicates") items = items.filter((i) => i.possibleDuplicates.length > 0);
+  else if (filter === "reported") items = items.filter((i) => i.openReports > 0);
+  else if (filter === "attention") {
+    const rank = (i: AdminQueueItem) =>
+      i.openReports > 0 ? 0
+      : i.status === "pending" ? 1
+      : i.quality < 60 ? 2
+      : i.possibleDuplicates.length > 0 ? 3
+      : i.status === "live" && !i.verified ? 4
+      : i.status === "paused" ? 5
+      : i.status === "rejected" ? 6
+      : 99;
+    items = items.filter((i) => i.attention.length > 0).sort((a, b) => rank(a) - rank(b));
+  }
+
+  const q = (filters.q ?? "").trim().toLowerCase();
+  if (q) items = items.filter((i) => `${i.title} ${i.location} ${i.ownerName}`.toLowerCase().includes(q));
+  if (filters.propertyType && filters.propertyType !== "all") items = items.filter((i) => i.propertyType === filters.propertyType);
+  if (filters.region && filters.region !== "all") items = items.filter((i) => i.region === filters.region);
+  if (filters.verified === "verified") items = items.filter((i) => i.verified);
+  else if (filters.verified === "unverified") items = items.filter((i) => !i.verified);
+  if (filters.availability === "available") items = items.filter((i) => i.status === "live");
+  else if (filters.availability === "unavailable") items = items.filter((i) => ["paused", "archived", "sold", "rented"].includes(i.status));
+  if (filters.reported) items = items.filter((i) => i.openReports > 0);
+
+  return items;
 }
 
-export type ModerationAction = "approve" | "request_changes" | "reject" | "suspend" | "archive" | "feature";
+
+export type ModerationAction =
+  | "approve" | "request_changes" | "reject" | "suspend" | "archive" | "feature"
+  | "verify" | "unverify" | "take_offline" | "unavailable" | "restore";
+
+/** High-impact actions always require an administrator to state a reason. */
+export const REASON_REQUIRED: ModerationAction[] = ["reject", "request_changes", "take_offline", "unverify"];
 
 /** Writes the moderation decision to the real property record. */
 export async function moderateProperty(id: string, action: ModerationAction, reason?: string) {
@@ -234,10 +309,34 @@ export async function moderateProperty(id: string, action: ModerationAction, rea
     case "feature":
       patch.featured = true;
       break;
+    case "verify":
+      patch.verified = true;
+      break;
+    case "unverify":
+      patch.verified = false;
+      patch.under_review_reason = reason ?? null;
+      break;
+    // Emergency takedown: the listing stops appearing publicly at once, but the
+    // record, its inquiries, viewings and deals are all preserved.
+    case "take_offline":
+      patch.status = "paused";
+      patch.under_review = true;
+      patch.under_review_reason = reason ?? "Taken offline by SPACES moderation";
+      break;
+    case "unavailable":
+      patch.status = "paused";
+      patch.under_review = false;
+      break;
+    case "restore":
+      patch.status = "live";
+      patch.under_review = false;
+      patch.under_review_reason = null;
+      break;
   }
   const { error } = await supabase.from("properties").update(patch as never).eq("id", id);
   if (error) throw error;
 }
+
 
 // --------------------------------------------------------------- users
 
@@ -250,11 +349,19 @@ export interface AdminUser {
   status: string;
   joined: string;
   listings: number;
+  /** True only when the existing verification workflow actually completed. */
+  verified: boolean;
+  suspensionReason: string | null;
+  lastActivityAt: string | null;
 }
 
 export async function fetchAdminUsers(): Promise<AdminUser[]> {
   const [{ data: profiles }, { data: roles }, { data: props }] = await Promise.all([
-    supabase.from("profiles").select("id,full_name,email,phone,account_status,created_at").order("created_at", { ascending: false }).limit(500),
+    supabase
+      .from("profiles")
+      .select("id,full_name,email,phone,account_status,suspension_reason,created_at,updated_at,verified_identity,verified_owner,verified_agent,verified_business")
+      .order("created_at", { ascending: false })
+      .limit(500),
     supabase.from("user_roles").select("user_id,role").limit(5000),
     supabase.from("properties").select("owner_id").limit(10000),
   ]);
@@ -273,7 +380,11 @@ export async function fetchAdminUsers(): Promise<AdminUser[]> {
     email: p.email ?? null,
     phone: p.phone ?? null,
     roles: roleMap.get(p.id) ?? [],
+    verified: !!(p.verified_identity || p.verified_owner || p.verified_agent || p.verified_business),
+    suspensionReason: p.suspension_reason ?? null,
+    lastActivityAt: p.updated_at ?? null,
     status: p.account_status ?? "active",
+
     joined: p.created_at,
     listings: counts.get(p.id) ?? 0,
   }));

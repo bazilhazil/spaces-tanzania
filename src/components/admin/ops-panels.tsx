@@ -25,6 +25,7 @@ import {
   type AdminToday, type AttentionItem, type AttentionGroup, type AdminLead, type AdminViewing, type AdminDeal,
   type RevenueBreakdown, type AdminActionLog, type AgentOption,
   type LeadOpsFilter, type ViewingOpsFilter, type DealOpsFilter,
+  fetchMarketplaceOverview, type MarketplaceOverview,
 } from "@/lib/admin-ops";
 import { fetchSupportStats, type SupportStats } from "@/lib/support-db";
 
@@ -115,6 +116,45 @@ const GROUP_LABEL: Record<AttentionGroup, string> = {
 };
 
 
+/** Live marketplace counters. Detailed analysis stays in Business Intelligence. */
+function MarketplaceOverviewSection() {
+  const { data, loading } = useLive<MarketplaceOverview | null>(fetchMarketplaceOverview, null);
+  if (loading && !data) return null;
+  if (!data) return null;
+  const rows: { label: string; value: number; tone?: "danger" | "gold" }[] = [
+    { label: "Members", value: data.totalUsers },
+    { label: "Owners", value: data.owners },
+    { label: "Agents", value: data.agents },
+    { label: "Active spaces", value: data.activeProperties },
+    { label: "Awaiting approval", value: data.pendingProperties, tone: "gold" },
+    { label: "Verified spaces", value: data.verifiedProperties },
+    { label: "Reported spaces", value: data.reportedProperties, tone: "danger" },
+    { label: "New inquiries", value: data.newLeads, tone: "gold" },
+    { label: "Pending viewings", value: data.pendingViewings, tone: "gold" },
+    { label: "Active deals", value: data.activeDeals },
+    { label: "Pending payments", value: data.pendingPayments, tone: "gold" },
+    { label: "Failed payments", value: data.failedPayments, tone: "danger" },
+  ];
+  return (
+    <Section title="Marketplace overview">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {rows.map((r) => (
+          <div key={r.label} className="ds-card p-3">
+            <div className="ds-caption truncate">{r.label}</div>
+            <div className={cn(
+              "mt-1 text-xl font-semibold tabular-nums",
+              r.value > 0 && r.tone === "danger" && "text-[color:var(--color-danger-600)]",
+              r.value > 0 && r.tone === "gold" && "text-[color:var(--color-warning-700)]",
+            )}>
+              {nf.format(r.value)}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 export function AdminHomePanel() {
   const { t } = useI18n();
   const { data: today, loading, reload } = useLive<AdminToday | null>(fetchAdminToday, null);
@@ -162,6 +202,9 @@ export function AdminHomePanel() {
           {cards.map((c) => <StatCard key={c.label} label={c.label} value={c.value} tone={c.tone} icon={c.icon} />)}
         </div>
       )}
+
+      <MarketplaceOverviewSection />
+
 
       <Section
         title={t("admin.ops.todayTasks")}

@@ -503,3 +503,95 @@ export async function setUserAccountStatus(userId: string, status: "active" | "s
     reason: reason ?? null,
   });
 }
+
+// ------------------------------------------- marketplace overview
+
+export interface MarketplaceOverview {
+  totalUsers: number;
+  owners: number;
+  agents: number;
+  activeProperties: number;
+  pendingProperties: number;
+  verifiedProperties: number;
+  reportedProperties: number;
+  newLeads: number;
+  pendingViewings: number;
+  activeDeals: number;
+  pendingPayments: number;
+  failedPayments: number;
+}
+
+/** Summary counters only — detailed analysis stays in Business Intelligence. */
+export async function fetchMarketplaceOverview(): Promise<MarketplaceOverview> {
+  const [
+    totalUsers, owners, agents, activeProperties, pendingProperties, verifiedProperties,
+    newLeads, pendingViewings, activeDeals, pendingPayments, failedPayments, reports,
+  ] = await Promise.all([
+    count("profiles", (q: any) => q),
+    count("user_roles", (q: any) => q.eq("role", "owner")),
+    count("user_roles", (q: any) => q.eq("role", "agent")),
+    count("properties", (q: any) => q.eq("status", "live")),
+    count("properties", (q: any) => q.eq("status", "pending")),
+    count("properties", (q: any) => q.eq("verified", true)),
+    count("leads", (q: any) => q.eq("status", "new")),
+    count("bookings", (q: any) => q.eq("status", "pending")),
+    count("deals", (q: any) => q.not("stage", "in", "(completed,cancelled)")),
+    count("payments", (q: any) => q.eq("status", "pending")),
+    count("payments", (q: any) => q.eq("status", "failed")),
+    supabase.from("safety_reports").select("property_id").eq("target_type", "property")
+      .in("status", ["new", "under_review", "more_info"]).limit(1000),
+  ]);
+
+  const reported = new Set(((reports.data ?? []) as any[]).map((r) => r.property_id).filter(Boolean));
+
+  return {
+    totalUsers, owners, agents, activeProperties, pendingProperties, verifiedProperties,
+    reportedProperties: reported.size,
+    newLeads, pendingViewings, activeDeals, pendingPayments, failedPayments,
+  };
+}
+
+// ------------------------------------------ owner / agent operations
+
+export interface UserOperations {
+  properties: { id: string; title: string; status: string; verified: boolean }[];
+  leads: number;
+  newLeads: number;
+  viewings: number;
+  pendingViewings: number;
+  deals: number;
+  activeDeals: number;
+  openReports: number;
+}
+
+/**
+ * Operational summary for one owner or agent. Only the records an administrator
+ * is already authorised to read — no private messages, documents or payment details.
+ */
+export async function fetchUserOperations(userId: string): Promise<UserOperations> {
+  const [props, leads, viewings, deals, reports] = await Promise.all([
+    supabase.from("properties").select("id,title,status,verified").eq("owner_id", userId).order("created_at", { ascending: false }).limit(50),
+    supabase.from("leads").select("id,status").eq("owner_id", userId).limit(1000),
+    supabase.from("bookings").select("id,status").or(`owner_id.eq.${userId},agent_id.eq.${userId}`).limit(1000),
+    supabase.from("deals").select("id,stage").or(`owner_id.eq.${userId},agent_id.eq.${userId}`).limit(1000),
+    supabase.from("safety_reports").select("id,status").eq("reported_user_id", userId).limit(500),
+  ]);
+
+  const leadRows = (leads.data ?? []) as any[];
+  const viewRows = (viewings.data ?? []) as any[];
+  const dealRows = (deals.data ?? []) as any[];
+
+  return {
+    properties: ((props.data ?? []) as any[]).map((p) => ({
+      id: p.id, title: p.title ?? "Untitled space", status: p.status, verified: p.verified === true,
+    })),
+    leads: leadRows.length,
+    newLeads: leadRows.filter((l) => l.status === "new").length,
+    viewings: viewRows.length,
+    pendingViewings: viewRows.filter((v) => v.status === "pending").length,
+    deals: dealRows.length,
+    activeDeals: dealRows.filter((d) => !["completed", "cancelled"].includes(d.stage)).length,
+    openReports: ((reports.data ?? []) as any[]).filter((r) => ["new", "under_review", "more_info"].includes(r.status)).length,
+  };
+}
+

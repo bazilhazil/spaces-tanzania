@@ -5,7 +5,7 @@ import {
   TrendingUp, Sparkles, CheckCircle2, XCircle,
   AlertTriangle, Search, MoreHorizontal, Crown,
   RefreshCw, Plus, Zap, Database, KeyRound, Power, FileClock,
-  Activity, DollarSign, MapPin, Clock, BarChart3,
+  Activity, DollarSign, MapPin, Clock, BarChart3, EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,13 +24,16 @@ import {
   fetchAdminSubscriptions, fetchPropertyTypeMix, fetchRegionMix, moderateProperty,
   type AdminOverview, type AdminActivityItem, type AdminSeries, type AdminQueueItem,
   type AdminUser, type AdminReport, type AdminBooking, type AdminPayment,
-  type AdminSubscription, type MonthPoint, type QueueFilter,
+  type AdminSubscription, type MonthPoint, type QueueFilter, type ModerationAction,
 } from "@/lib/admin-db";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { logAdminAction } from "@/lib/admin-ops";
+import {
+  logAdminAction, setUserAccountStatus, fetchUserOperations,
+  type UserOperations,
+} from "@/lib/admin-ops";
 import { friendlyError } from "@/lib/errors";
 import { adminSetPaymentStatus } from "@/lib/monetization-db";
 import { useI18n } from "@/hooks/use-i18n";
@@ -277,29 +280,40 @@ export function DashboardPanel() {
 
 // ---------- Property Moderation ----------
 
-const QUEUE_FILTERS: { id: QueueFilter; labelKey: string }[] = [
+const QUEUE_FILTERS: { id: QueueFilter; labelKey?: string; label?: string }[] = [
+  { id: "attention", label: "Needs attention" },
   { id: "review", labelKey: "admin.kpi.awaiting" },
   { id: "live", labelKey: "admin.filter.live" },
+  { id: "reported", label: "Reported" },
+  { id: "unavailable", label: "Unavailable" },
   { id: "rejected", labelKey: "admin.filter.rejected" },
   { id: "duplicates", labelKey: "admin.filter.duplicates" },
   { id: "all", labelKey: "admin.filter.all" },
 ];
 
+const PROPERTY_TYPES = ["all", "house", "apartment", "office", "shop", "warehouse", "land", "commercial"];
+
 export function PropertiesPanel() {
   const { t } = useI18n();
-  const [filter, setFilter] = useState<QueueFilter>("review");
+  const [filter, setFilter] = useState<QueueFilter>("attention");
+  const [q, setQ] = useState("");
+  const [propertyType, setPropertyType] = useState("all");
+  const [region, setRegion] = useState("all");
+  const [verified, setVerified] = useState<"all" | "verified" | "unverified">("all");
+  const [availability, setAvailability] = useState<"all" | "available" | "unavailable">("all");
   const { data: items, loading, reload } = useLive<AdminQueueItem[]>(
-    () => fetchModerationQueue(filter),
+    () => fetchModerationQueue(filter, { q, propertyType, region, verified, availability }),
     [],
-    [filter],
+    [filter, q, propertyType, region, verified, availability],
   );
+  const { data: regionMix } = useLive<{ name: string; count: number; pct: number }[]>(fetchRegionMix, []);
   const [selected, setSelected] = useState<string | null>(null);
   const item = items.find((m) => m.id === selected) ?? items[0] ?? null;
-  const [reasonFor, setReasonFor] = useState<null | "reject" | "request_changes">(null);
+  const [reasonFor, setReasonFor] = useState<null | ModerationAction>(null);
 
   const act = async (
     id: string,
-    action: Parameters<typeof moderateProperty>[1],
+    action: ModerationAction,
     label: string,
     reason?: string,
   ) => {
@@ -319,24 +333,61 @@ export function PropertiesPanel() {
     }
   };
 
+  const ACTION_LABEL: Partial<Record<ModerationAction, { title: string; body: string; confirm: string; done: string }>> = {
+    reject: { title: "Reject this space?", body: "The owner is told it needs changes and it stays hidden from the marketplace.", confirm: "Reject space", done: t("admin.toast.rejected") },
+    request_changes: { title: "Request changes?", body: "The owner is asked to update the listing before it can be published.", confirm: "Request changes", done: t("admin.toast.changes") },
+    take_offline: { title: "Take this space offline?", body: "It stops appearing publicly straight away. Inquiries, viewings, deals and billing records are all kept.", confirm: "Take offline", done: "Space taken offline" },
+    unverify: { title: "Remove the verified badge?", body: "The space stays listed but no longer shows as verified by SPACES.", confirm: "Remove badge", done: "Verification removed" },
+  };
 
   return (
     <>
       <PageHeader kicker={t("admin.kicker.moderation")} title={t("admin.queue.title")} subtitle={t("admin.queue.sub")}
         actions={<Button size="sm" variant="outline" className="gap-2" onClick={reload}><RefreshCw className="h-4 w-4" /> {t("admin.action.refresh")}</Button>} />
 
-      <div className="mb-5 flex flex-wrap gap-2">
+      <div className="mb-4 -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
         {QUEUE_FILTERS.map((f) => (
-          <Button key={f.id} size="sm" variant={filter === f.id ? "default" : "outline"} onClick={() => { setFilter(f.id); setSelected(null); }}>
-            {t(f.labelKey)}
+          <Button key={f.id} size="sm" className="shrink-0" variant={filter === f.id ? "default" : "outline"} onClick={() => { setFilter(f.id); setSelected(null); }}>
+            {f.label ?? t(f.labelKey!)}
           </Button>
         ))}
+      </div>
+
+      <div className="mb-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="relative sm:col-span-2 lg:col-span-2">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder="Search title, location or owner…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+        </div>
+        <select value={propertyType} onChange={(e) => setPropertyType(e.target.value)}
+          className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm capitalize">
+          {PROPERTY_TYPES.map((p) => <option key={p} value={p}>{p === "all" ? "All types" : titleCase(p)}</option>)}
+        </select>
+        <select value={region} onChange={(e) => setRegion(e.target.value)}
+          className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm">
+          <option value="all">All locations</option>
+          {regionMix.map((r) => <option key={r.name} value={r.name}>{r.name}</option>)}
+        </select>
+        <div className="grid grid-cols-2 gap-2">
+          <select value={verified} onChange={(e) => setVerified(e.target.value as typeof verified)}
+            className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm">
+            <option value="all">Any verification</option>
+            <option value="verified">Verified</option>
+            <option value="unverified">Unverified</option>
+          </select>
+          <select value={availability} onChange={(e) => setAvailability(e.target.value as typeof availability)}
+            className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm">
+            <option value="all">Any availability</option>
+            <option value="available">Available</option>
+            <option value="unavailable">Unavailable</option>
+          </select>
+        </div>
       </div>
 
       {loading ? (
         <p className="text-sm text-muted-foreground">{t("admin.loading.listings")}</p>
       ) : items.length === 0 ? (
         <EmptyState icon={Home} title={t("admin.queue.emptyTitle")} description={t("admin.queue.emptyBody")} />
+
       ) : (
         <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
           <div className="space-y-3">
@@ -371,8 +422,17 @@ export function PropertiesPanel() {
                       : "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]")}>
                       <Zap className="h-3 w-3" /> Complete {p.quality}%
                     </span>
+                    {p.openReports > 0 && <Badge variant="destructive">{p.openReports} report{p.openReports > 1 ? "s" : ""}</Badge>}
                     <span className="ml-auto text-muted-foreground">{relative(p.createdAt)}</span>
                   </div>
+                  {p.attention.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {p.attention.slice(0, 3).map((a) => (
+                        <Badge key={a} variant="muted" className="text-[10px]">{a}</Badge>
+                      ))}
+                    </div>
+                  )}
+
                 </div>
               </button>
             ))}
@@ -448,81 +508,117 @@ export function PropertiesPanel() {
                 <Button variant="destructive" size="sm" className="gap-2" onClick={() => setReasonFor("reject")}><XCircle className="h-4 w-4" /> {t("admin.action.reject")}</Button>
 
                 <div className="mx-2 h-6 w-px bg-border" />
+                {item.verified
+                  ? <Button variant="outline" size="sm" className="gap-2" onClick={() => setReasonFor("unverify")}><ShieldAlert className="h-4 w-4" /> Remove verified badge</Button>
+                  : <Button variant="outline" size="sm" className="gap-2" onClick={() => act(item.id, "verify", "Space verified")}><ShieldCheck className="h-4 w-4" /> Verify</Button>}
                 <Button variant="gold" size="sm" className="gap-2" onClick={() => act(item.id, "feature", t("admin.toast.featured"))}><Sparkles className="h-4 w-4" /> {t("admin.action.feature")}</Button>
-                <Button variant="ghost" size="sm" className="gap-2 ml-auto" onClick={() => act(item.id, "suspend", t("admin.toast.paused"))}><Power className="h-4 w-4" /> {t("admin.action.pause")}</Button>
-                <Button variant="ghost" size="sm" className="gap-2" onClick={() => act(item.id, "archive", t("admin.toast.archived"))}><Database className="h-4 w-4" /> {t("admin.action.archive")}</Button>
+
+                <div className="mx-2 h-6 w-px bg-border" />
+                <Button variant="destructive" size="sm" className="gap-2" onClick={() => setReasonFor("take_offline")}><EyeOff className="h-4 w-4" /> Take offline</Button>
+                <Button variant="ghost" size="sm" className="gap-2" onClick={() => act(item.id, "unavailable", "Marked unavailable")}><Power className="h-4 w-4" /> Mark unavailable</Button>
+                {item.status !== "live" && (
+                  <Button variant="ghost" size="sm" className="gap-2" onClick={() => act(item.id, "restore", "Space restored")}><RefreshCw className="h-4 w-4" /> Restore</Button>
+                )}
+                <Button variant="ghost" size="sm" className="gap-2 ml-auto" onClick={() => act(item.id, "archive", t("admin.toast.archived"))}><Database className="h-4 w-4" /> {t("admin.action.archive")}</Button>
               </div>
             </div>
           ) : <EmptyState icon={Home} title={t("admin.queue.nothingSelected")} description={t("admin.queue.pick")} />}
         </div>
       )}
 
-      <ModerationReasonDialog
+      <ConfirmWithReasonDialog
         open={!!reasonFor && !!item}
-        mode={reasonFor}
+        title={reasonFor ? (ACTION_LABEL[reasonFor]?.title ?? "Confirm this action?") : ""}
+        description={reasonFor ? ACTION_LABEL[reasonFor]?.body : undefined}
+        confirmLabel={reasonFor ? (ACTION_LABEL[reasonFor]?.confirm ?? t("common.confirm")) : t("common.confirm")}
         onCancel={() => setReasonFor(null)}
         onConfirm={async (reason) => {
-          if (!item || !reasonFor) return;
-          const label = reasonFor === "reject" ? t("admin.toast.rejected") : t("admin.toast.changes");
+          const a = reasonFor;
           setReasonFor(null);
-          await act(item.id, reasonFor, label, reason);
+          if (!item || !a) return;
+          await act(item.id, a, ACTION_LABEL[a]?.done ?? "Done", reason);
         }}
       />
     </>
   );
 }
 
-function ModerationReasonDialog({
-  open, mode, onCancel, onConfirm,
-}: {
-  open: boolean;
-  mode: "reject" | "request_changes" | null;
-  onCancel: () => void;
-  onConfirm: (reason: string) => void;
-}) {
-  const { t } = useI18n();
-  const [reason, setReason] = useState("");
-  useEffect(() => { if (open) setReason(""); }, [open]);
-  return (
-    <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === "reject" ? t("admin.action.reject") : t("admin.action.requestChanges")}
-          </DialogTitle>
-          <DialogDescription>{t("admin.ops.reasonRequired")}</DialogDescription>
-        </DialogHeader>
-        <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={4} placeholder={t("admin.ops.reasonPlaceholder")} />
-        <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>{t("common.cancel")}</Button>
-          <Button disabled={reason.trim().length < 5} onClick={() => onConfirm(reason.trim())}>
-            {t("common.confirm")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 
 // ---------- Users ----------
 
+const ROLE_FILTERS = [
+  { id: "all", label: "All roles" },
+  { id: "buyer", label: "Buyer / Tenant" },
+  { id: "owner", label: "Owner" },
+  { id: "agent", label: "Agent" },
+  { id: "admin", label: "Admin" },
+] as const;
+
+const STATUS_FILTERS = [
+  { id: "all", label: "All statuses" },
+  { id: "active", label: "Active" },
+  { id: "suspended", label: "Suspended" },
+] as const;
+
 export function UsersPanel() {
   const { t } = useI18n();
-  const { data: users, loading } = useLive<AdminUser[]>(fetchAdminUsers, []);
+  const { data: users, loading, reload } = useLive<AdminUser[]>(fetchAdminUsers, []);
   const [q, setQ] = useState("");
+  const [role, setRole] = useState<(typeof ROLE_FILTERS)[number]["id"]>("all");
+  const [status, setStatus] = useState<(typeof STATUS_FILTERS)[number]["id"]>("all");
+  const [detail, setDetail] = useState<AdminUser | null>(null);
+  const [confirm, setConfirm] = useState<{ user: AdminUser; next: "suspended" | "active" } | null>(null);
+
   const rows = useMemo(
-    () => users.filter((u) => (u.name + (u.email ?? "")).toLowerCase().includes(q.toLowerCase())),
-    [users, q],
+    () =>
+      users.filter((u) => {
+        const text = `${u.name} ${u.email ?? ""} ${u.phone ?? ""}`.toLowerCase();
+        if (q && !text.includes(q.toLowerCase())) return false;
+        if (role === "buyer" && u.roles.some((r) => r !== "buyer")) return false;
+        if (role === "owner" && !u.roles.includes("owner")) return false;
+        if (role === "agent" && !u.roles.includes("agent")) return false;
+        if (role === "admin" && !u.roles.some((r) => r === "admin" || r === "super_admin")) return false;
+        if (status === "active" && u.status !== "active") return false;
+        if (status === "suspended" && u.status === "active") return false;
+        return true;
+      }),
+    [users, q, role, status],
   );
+
+  async function applyStatus(user: AdminUser, next: "suspended" | "active", reason: string) {
+    try {
+      await setUserAccountStatus(user.id, next, reason || undefined, user.name);
+      toast.success(next === "suspended" ? "Account suspended" : "Account reactivated");
+      reload();
+    } catch (e) {
+      toast.error(friendlyError(e));
+    }
+  }
+
   return (
     <>
-      <PageHeader kicker={t("admin.kicker.community")} title={t("admin.users.title")} subtitle={t("admin.users.sub")} />
+      <PageHeader kicker={t("admin.kicker.community")} title={t("admin.users.title")} subtitle={t("admin.users.sub")}
+        actions={<Button size="sm" variant="outline" className="gap-2" onClick={reload}><RefreshCw className="h-4 w-4" /> {t("admin.action.refresh")}</Button>} />
       <Panel>
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <div className="relative w-full sm:flex-1 sm:min-w-[240px]">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="relative w-full sm:flex-1 sm:min-w-[220px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search users by name or email…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+            <Input placeholder="Search by name, email or phone…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+          </div>
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+            {ROLE_FILTERS.map((f) => (
+              <Button key={f.id} size="sm" className="shrink-0" variant={role === f.id ? "default" : "outline"} onClick={() => setRole(f.id)}>
+                {f.label}
+              </Button>
+            ))}
+          </div>
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+            {STATUS_FILTERS.map((f) => (
+              <Button key={f.id} size="sm" className="shrink-0" variant={status === f.id ? "default" : "outline"} onClick={() => setStatus(f.id)}>
+                {f.label}
+              </Button>
+            ))}
           </div>
         </div>
 
@@ -531,13 +627,14 @@ export function UsersPanel() {
         ) : rows.length === 0 ? (
           <EmptyState icon={Users} title={t("admin.users.emptyTitle")} description={t("admin.users.emptyBody")} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="-mx-5 overflow-x-auto px-5">
+            <table className="w-full min-w-[760px] text-sm">
               <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
                 <tr className="border-b border-border/60">
                   <th className="py-3 pr-4 font-medium">{t("admin.th.user")}</th>
                   <th className="py-3 pr-4 font-medium">{t("admin.th.roles")}</th>
                   <th className="py-3 pr-4 font-medium">{t("admin.th.status")}</th>
+                  <th className="py-3 pr-4 font-medium">Verification</th>
                   <th className="py-3 pr-4 font-medium">{t("admin.th.joined")}</th>
                   <th className="py-3 pr-4 font-medium">{t("admin.th.listings")}</th>
                   <th className="py-3 pr-4 font-medium text-right">{t("admin.th.actions")}</th>
@@ -555,7 +652,7 @@ export function UsersPanel() {
                     <td className="py-3 pr-4">
                       <div className="flex flex-wrap gap-1">
                         {u.roles.length === 0
-                          ? <Badge variant="muted">buyer</Badge>
+                          ? <Badge variant="muted">Buyer</Badge>
                           : u.roles.map((r) => <Badge key={r} variant="muted" className="capitalize">{titleCase(r)}</Badge>)}
                       </div>
                     </td>
@@ -564,12 +661,20 @@ export function UsersPanel() {
                         : u.status === "suspended" ? <Badge variant="warning">{t("admin.status.suspended")}</Badge>
                         : <Badge variant="destructive">{t("admin.status.banned")}</Badge>}
                     </td>
+                    <td className="py-3 pr-4">
+                      {u.verified ? <Badge variant="success">Verified</Badge> : <Badge variant="muted">Not verified</Badge>}
+                    </td>
                     <td className="py-3 pr-4 text-muted-foreground">{new Date(u.joined).toLocaleDateString()}</td>
                     <td className="py-3 pr-4 font-medium">{u.listings}</td>
-                    <td className="py-3 pr-4 text-right">
-                      <Button variant="ghost" size="icon" asChild>
-                        <a href={`/profile/${u.id}`} aria-label={`Open profile for ${u.name}`}><MoreHorizontal className="h-4 w-4" /></a>
-                      </Button>
+                    <td className="py-3 pr-4">
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Button size="sm" variant="outline" onClick={() => setDetail(u)}>View</Button>
+                        {u.status === "active" ? (
+                          <Button size="sm" variant="destructive" onClick={() => setConfirm({ user: u, next: "suspended" })}>Suspend</Button>
+                        ) : (
+                          <Button size="sm" variant="success" onClick={() => setConfirm({ user: u, next: "active" })}>Reactivate</Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -578,9 +683,140 @@ export function UsersPanel() {
           </div>
         )}
       </Panel>
+
+      <UserOperationsDialog user={detail} onClose={() => setDetail(null)} />
+
+      <ConfirmWithReasonDialog
+        open={!!confirm}
+        title={confirm?.next === "suspended" ? "Suspend this account?" : "Reactivate this account?"}
+        description={
+          confirm?.next === "suspended"
+            ? "The member keeps all their history, listings, inquiries, viewings and deals, but cannot post or contact anyone while suspended."
+            : "The member regains normal access to SPACES."
+        }
+        confirmLabel={confirm?.next === "suspended" ? "Suspend account" : "Reactivate"}
+        requireReason={confirm?.next === "suspended"}
+        onCancel={() => setConfirm(null)}
+        onConfirm={async (reason) => {
+          const c = confirm;
+          setConfirm(null);
+          if (c) await applyStatus(c.user, c.next, reason);
+        }}
+      />
     </>
   );
 }
+
+/** Confirmation used for every high-impact admin action. */
+export function ConfirmWithReasonDialog({
+  open, title, description, confirmLabel, requireReason = true, onCancel, onConfirm,
+}: {
+  open: boolean;
+  title: string;
+  description?: string;
+  confirmLabel: string;
+  requireReason?: boolean;
+  onCancel: () => void;
+  onConfirm: (reason: string) => void | Promise<void>;
+}) {
+  const [reason, setReason] = useState("");
+  useEffect(() => { if (open) setReason(""); }, [open]);
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
+      <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          {description && <DialogDescription>{description}</DialogDescription>}
+        </DialogHeader>
+        <div>
+          <label className="mb-1 block text-xs uppercase tracking-wider text-muted-foreground">
+            Reason{requireReason ? "" : " (optional)"}
+          </label>
+          <Textarea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Explain why, for the audit log" />
+        </div>
+        <DialogFooter className="flex-col gap-2 sm:flex-row">
+          <Button variant="outline" className="w-full sm:w-auto" onClick={onCancel}>Cancel</Button>
+          <Button className="w-full sm:w-auto" disabled={requireReason && reason.trim().length < 5} onClick={() => void onConfirm(reason.trim())}>
+            {confirmLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function UserOperationsDialog({ user, onClose }: { user: AdminUser | null; onClose: () => void }) {
+  const [ops, setOps] = useState<UserOperations | null>(null);
+  useEffect(() => {
+    setOps(null);
+    if (!user) return;
+    let alive = true;
+    void fetchUserOperations(user.id).then((d) => { if (alive) setOps(d); });
+    return () => { alive = false; };
+  }, [user]);
+
+  if (!user) return null;
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{user.name}</DialogTitle>
+          <DialogDescription>
+            {user.roles.length ? user.roles.map(titleCase).join(", ") : "Buyer"} · {titleCase(user.status)}
+          </DialogDescription>
+        </DialogHeader>
+
+        {user.status !== "active" && user.suspensionReason && (
+          <p className="rounded-xl bg-[color:var(--color-warning-50)] p-3 text-sm text-[color:var(--color-warning-800)]">
+            Reason on file: {user.suspensionReason}
+          </p>
+        )}
+
+        {!ops ? (
+          <p className="text-sm text-muted-foreground">Loading activity…</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[
+                { label: "Inquiries", value: `${ops.newLeads} new / ${ops.leads}` },
+                { label: "Viewings", value: `${ops.pendingViewings} pending / ${ops.viewings}` },
+                { label: "Deals", value: `${ops.activeDeals} active / ${ops.deals}` },
+                { label: "Open reports", value: String(ops.openReports) },
+              ].map((s) => (
+                <div key={s.label} className="ds-card p-3">
+                  <div className="ds-caption">{s.label}</div>
+                  <div className="mt-1 text-sm font-semibold">{s.value}</div>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <div className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Spaces</div>
+              {ops.properties.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No spaces listed.</p>
+              ) : (
+                <ul className="divide-y divide-border/50 rounded-xl border border-border/50">
+                  {ops.properties.map((p) => (
+                    <li key={p.id} className="flex flex-wrap items-center gap-2 p-3 text-sm">
+                      <span className="min-w-0 flex-1 truncate font-medium">{p.title}</span>
+                      {p.verified && <Badge variant="success">Verified</Badge>}
+                      <Badge variant="muted" className="capitalize">{titleCase(p.status)}</Badge>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </>
+        )}
+
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>Close</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 // ---------- Agents ----------
 
