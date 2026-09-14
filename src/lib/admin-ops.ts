@@ -158,6 +158,11 @@ export async function fetchNeedsAttention(): Promise<AttentionItem[]> {
       items.push({ id: `l-${l.id}`, kind: "lead_waiting", group: "leads", urgency: l.status === "new" ? 2 : 4, title: l.visitor_name || "New inquiry", detail: l.status === "new" ? "Waiting for first response" : "No recent activity", at: l.created_at, section: "leads" });
     }
   }
+  for (const p of await fetchPropertiesNeedingAssignment()) {
+    items.push({ id: `oa-${p.id}`, kind: "property_suspended", group: "spaces", urgency: 1, title: p.title, detail: `Owner/Agent assignment required · ${p.reason}`, at: p.at, section: "properties" });
+  }
+
+
 
   return items
     .sort((a, b) => (a.urgency - b.urgency) || (a.at < b.at ? 1 : -1))
