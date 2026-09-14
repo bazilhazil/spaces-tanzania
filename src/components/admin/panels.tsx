@@ -32,7 +32,9 @@ import {
 } from "@/components/ui/dialog";
 import {
   logAdminAction, setUserAccountStatus, fetchUserOperations,
-  type UserOperations,
+  fetchOwnerCandidates, fetchAgentCandidates, fetchPropertyAssignment,
+  assignPropertyOwner, assignPropertyAgent, removePropertyAgent,
+  type UserOperations, type PersonOption, type PropertyAssignment,
 } from "@/lib/admin-ops";
 import { friendlyError } from "@/lib/errors";
 import { adminSetPaymentStatus } from "@/lib/monetization-db";
