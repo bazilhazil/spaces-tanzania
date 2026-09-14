@@ -413,21 +413,56 @@ export async function fetchLaunchReadiness(): Promise<LaunchReadiness> {
     },
     {
       id: "backups",
-      label: "Backups",
-      status: backupReady ? "ready" : "action",
+      label: "Database backup",
+      status: dbBackupReady ? "ready" : "action",
       section: "data",
-      summary: backupReady
+      summary: dbBackupReady
         ? backup?.lastSuccessAt
           ? `Last successful backup ${new Date(backup.lastSuccessAt).toLocaleDateString()}`
-          : "Configured, awaiting the first reported run."
-        : "Backup configuration required — nothing is confirmed yet.",
+          : "Verified configuration recorded, awaiting the first reported run."
+        : "Backup configuration required before launch.",
       checks: [
-        { label: "Backup provider recorded", ok: backupReady, detail: backup?.provider ?? "Not recorded" },
+        { label: "Backup provider recorded and verified", ok: dbBackupReady, detail: backup?.provider ?? "Not recorded" },
         { label: "Schedule", ok: Boolean(backup?.frequency), detail: backup?.frequency ?? "Not set" },
+        { label: "Recovery points retained", ok: Boolean(backup?.retentionPoints), detail: backup?.retentionPoints ? `${backup.retentionPoints} points` : "Not set" },
         { label: "Last successful run", ok: Boolean(backup?.lastSuccessAt), detail: backup?.lastSuccessAt ? new Date(backup.lastSuccessAt).toLocaleString() : "Never reported" },
-        { label: "Data export available", ok: true, detail: "Admins can export business records at any time" },
+        { label: "Next scheduled run", ok: Boolean(backup?.nextScheduledAt), detail: backup?.nextScheduledAt ? new Date(backup.nextScheduledAt).toLocaleString() : "Not reported" },
+        { label: "Manual data export", ok: true, detail: "Admins can export users, spaces, leads, deals, viewings and revenue at any time" },
       ],
     },
+    {
+      id: "storage-backup",
+      label: "Storage backup",
+      status: storageBackupReady ? "ready" : "action",
+      section: "data",
+      summary: storageBackupReady
+        ? "Uploaded files are covered by a recorded, verified backup arrangement."
+        : "No verified backup arrangement recorded for uploaded files.",
+      checks: [
+        { label: "File backup arrangement recorded", ok: storageBackupReady, detail: backup?.storageProvider ?? "Not recorded" },
+        { label: "Last reported file backup", ok: Boolean(backup?.storageLastSuccessAt), detail: backup?.storageLastSuccessAt ? new Date(backup.storageLastSuccessAt).toLocaleString() : "Never reported" },
+        { label: "File areas reachable", ok: storageProbe, detail: `${n(media)} property files stored` },
+        { label: "Private areas stay private", ok: true, detail: "Verification, deal, support and evidence files remain private" },
+      ],
+    },
+    {
+      id: "recovery",
+      label: "Recovery capability",
+      status: recoveryReady ? "ready" : dbBackupReady ? "action" : "not_configured",
+      section: "data",
+      summary: recoveryReady
+        ? `Restore verified ${backup?.restoreVerifiedAt ? new Date(backup.restoreVerifiedAt).toLocaleDateString() : ""}`.trim()
+        : dbBackupReady
+          ? "Restore has not been tested yet."
+          : "No backup to restore from — configure backups first.",
+      checks: [
+        { label: "Restore tested by an administrator", ok: recoveryReady, detail: backup?.restoreVerifiedAt ? new Date(backup.restoreVerifiedAt).toLocaleString() : "Not tested" },
+        { label: "Recovery contacts recorded", ok: null, detail: "Managed in Data & Backup" },
+        { label: "No one-click destructive restore", ok: true, detail: "Restores follow an approved, audited process" },
+        { label: "Historical records kept", ok: true, detail: "Leads, deals, payments, reports and audit records are never auto-deleted" },
+      ],
+    },
+
     {
       id: "seo",
       label: "SEO",
