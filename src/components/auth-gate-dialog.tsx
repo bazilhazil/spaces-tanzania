@@ -5,7 +5,7 @@ import { lovable } from "@/integrations/lovable";
 import { useI18n } from "@/hooks/use-i18n";
 import { Sparkles, Mail, Phone } from "lucide-react";
 
-export function AuthGateDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function AuthGateDialog({ open, onOpenChange, description }: { open: boolean; onOpenChange: (v: boolean) => void; description?: string }) {
   const { t } = useI18n();
 
   async function google() {
@@ -25,7 +25,7 @@ export function AuthGateDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                 {t("auth.gate.title")}
               </DialogTitle>
               <DialogDescription className="text-primary-foreground/85">
-                {t("auth.gate.sub")}
+                {description ?? t("auth.gate.sub")}
               </DialogDescription>
             </DialogHeader>
           </div>

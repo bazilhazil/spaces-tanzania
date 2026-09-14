@@ -163,7 +163,7 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
           {t("card.viewSpace")}
         </span>
       </div>
-      <AuthGateDialog open={authGate} onOpenChange={setAuthGate} />
+      <AuthGateDialog open={authGate} onOpenChange={setAuthGate} description={t("favoritesPage.authGate")} />
     </Link>
   );
 }
