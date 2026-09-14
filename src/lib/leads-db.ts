@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { notifyByEmail } from "./email-notify";
 
 export type LeadContactMethod = "call" | "whatsapp" | "message" | "viewing" | "email";
 
@@ -68,7 +69,7 @@ export async function createLead(input: CreateLeadInput): Promise<boolean> {
     }
 
 
-    const { error } = await supabase.from("leads" as never).insert({
+    const { data: created, error } = await supabase.from("leads" as never).insert({
       property_id: input.propertyId,
       owner_id: input.ownerId,
       visitor_id: user.id,
@@ -81,7 +82,8 @@ export async function createLead(input: CreateLeadInput): Promise<boolean> {
       notes: appendTimeline(null, input.contactMethod, input.message),
       conversation_id: input.conversationId ?? null,
 
-    } as never);
+    } as never).select("id").maybeSingle();
+    if (!error) notifyByEmail("lead_created", (created as { id?: string } | null)?.id);
     return !error;
   } catch {
     return false;
