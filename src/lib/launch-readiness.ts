@@ -173,7 +173,10 @@ export async function fetchLaunchReadiness(): Promise<LaunchReadiness> {
   const payReady = Boolean(payProbe?.available);
   const bankReady = Boolean(bankProbe);
   const emailReady = emailProbe?.state === "ready";
-  const backupReady = Boolean(backup?.configured);
+  const dbBackupReady = Boolean(backup?.configured && backup?.provider);
+  const storageBackupReady = Boolean(backup?.storageConfigured && backup?.storageProvider);
+  const recoveryReady = Boolean(backup?.restoreVerified && dbBackupReady);
+
 
   const categories: LaunchCategory[] = [
     {
