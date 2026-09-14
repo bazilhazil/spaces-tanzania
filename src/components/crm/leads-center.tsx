@@ -342,6 +342,20 @@ function LeadDrawer({
     } finally { setBusy(false); }
   }
 
+  async function confirmLost() {
+    setBusy(true);
+    try {
+      await markLeadLost(lead!.id, lostReason, lostNote);
+      toast.success(t("crm.statusUpdated"));
+      setLostOpen(false);
+      setLostNote("");
+      onChanged();
+    } catch { toast.error(t("crm.actionFailed")); }
+    finally { setBusy(false); }
+  }
+
+
+
   return (
     <Sheet open={!!lead} onOpenChange={(v) => !v && onClose()}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
