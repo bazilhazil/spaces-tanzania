@@ -45,18 +45,26 @@ const META: Record<string, { title: string; desc: string }> = {
   payments:     { title: "Payments",        desc: "Payments overview." },
 };
 
+// These sections have full, live pages of their own — send people there
+// instead of showing a second, weaker copy.
+const REDIRECTS: Record<string, string> = {
+  properties: "/dashboard/properties",
+  viewings: "/viewings",
+  messages: "/messages",
+};
+
 function SectionPage() {
   const { section } = Route.useParams();
   const navigate = useNavigate();
   const meta = META[section] ?? { title: section, desc: "" };
 
+
   useEffect(() => {
-    if (section === "properties") {
-      navigate({ to: "/dashboard/properties", replace: true });
-    }
+    const to = REDIRECTS[section];
+    if (to) navigate({ to, replace: true });
   }, [section, navigate]);
 
-  if (section === "properties") return null;
+  if (REDIRECTS[section]) return null;
 
   return (
     <DashboardShell>
@@ -69,8 +77,7 @@ function SectionPage() {
           <p className="mt-1 text-muted-foreground">{meta.desc}</p>
         </header>
 
-        {section === "viewings"     ? <ViewingsPanel /> :
-         section === "messages"     ? <MessagesPanel /> :
+        {
          section === "drafts"       ? <DraftsPanel /> :
          section === "analytics"    ? <AnalyticsPanel /> :
          section === "subscription" ? <SubscriptionPanel /> :
@@ -95,163 +102,8 @@ import { SavedSearchesPanel } from "@/components/favorites/saved-searches-panel"
 import { RecentlyViewedPanel } from "@/components/favorites/recently-viewed-panel";
 
 
-/* ============================ VIEWINGS ============================ */
+/* Viewings and Messages are handled by the real /viewings and /messages pages. */
 
-type Viewing = { id: string; property: string; buyer: string; date: string; time: string; status: "pending" | "approved" | "rejected" };
-const SAMPLE_VIEWINGS: Viewing[] = [
-  { id: "1", property: "Modern 3BR Villa • Masaki", buyer: "Amina Hassan", date: "2026-07-10", time: "10:00", status: "pending" },
-  { id: "2", property: "Ocean-view Apartment • Oyster Bay", buyer: "James Mwakalinga", date: "2026-07-11", time: "14:30", status: "approved" },
-  { id: "3", property: "Family Home • Mikocheni", buyer: "Grace Kimario", date: "2026-07-12", time: "09:00", status: "pending" },
-];
-
-function ViewingsPanel() {
-  const [view, setView] = useState<"list" | "calendar">("list");
-  return (
-    <div className="space-y-5">
-      <div className="inline-flex rounded-xl border border-border bg-background p-1">
-        {(["list", "calendar"] as const).map((v) => (
-          <button key={v} onClick={() => setView(v)}
-            className={cn("rounded-lg px-4 py-1.5 text-sm font-medium capitalize transition-colors",
-              view === v ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:text-foreground")}>
-            {v === "list" ? "List View" : "Calendar View"}
-          </button>
-        ))}
-      </div>
-
-      {view === "list" ? (
-        <div className="overflow-hidden rounded-2xl border border-border/60 bg-background shadow-[var(--shadow-soft)]">
-          {SAMPLE_VIEWINGS.map((v, i) => (
-            <div key={v.id} className={cn("flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between", i > 0 && "border-t border-border/50")}>
-              <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <p className="text-[10px] font-medium uppercase">{new Date(v.date).toLocaleString("en", { month: "short" })}</p>
-                  <p className="font-display text-sm font-bold leading-none">{new Date(v.date).getDate()}</p>
-                </div>
-                <div>
-                  <p className="font-display text-sm font-semibold text-foreground">{v.property}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    <Clock className="mr-1 inline h-3 w-3" />{v.time} · with {v.buyer}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {v.status === "approved" && <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 ring-1 ring-emerald-500/20">Approved</span>}
-                {v.status === "pending" && <>
-                  <Button size="sm" className="h-8 gap-1 rounded-lg" onClick={() => toast.success("Approved")}><CheckCircle2 className="h-3.5 w-3.5" /> Approve</Button>
-                  <Button size="sm" variant="outline" className="h-8 gap-1 rounded-lg" onClick={() => toast.info("Rescheduling…")}><CalendarIcon className="h-3.5 w-3.5" /> Reschedule</Button>
-                  <Button size="sm" variant="ghost" className="h-8 gap-1 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => toast.info("Rejected")}><XCircle className="h-3.5 w-3.5" /> Reject</Button>
-                </>}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <CalendarGrid viewings={SAMPLE_VIEWINGS} />
-      )}
-    </div>
-  );
-}
-
-function CalendarGrid({ viewings }: { viewings: Viewing[] }) {
-  const today = new Date();
-  const year = today.getFullYear(), month = today.getMonth();
-  const first = new Date(year, month, 1).getDay();
-  const days = new Date(year, month + 1, 0).getDate();
-  const byDay: Record<number, number> = {};
-  for (const v of viewings) {
-    const d = new Date(v.date);
-    if (d.getMonth() === month && d.getFullYear() === year) byDay[d.getDate()] = (byDay[d.getDate()] ?? 0) + 1;
-  }
-  const cells = Array.from({ length: first + days }, (_, i) => i < first ? null : i - first + 1);
-  return (
-    <div className="rounded-2xl border border-border/60 bg-background p-5 shadow-[var(--shadow-soft)]">
-      <p className="mb-4 font-display text-lg font-semibold text-foreground">
-        {today.toLocaleString("en", { month: "long", year: "numeric" })}
-      </p>
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground">
-        {["S","M","T","W","T","F","S"].map((d, i) => <div key={i} className="py-2">{d}</div>)}
-      </div>
-      <div className="grid grid-cols-7 gap-1">
-        {cells.map((c, i) => (
-          <div key={i} className={cn(
-            "relative aspect-square rounded-lg p-1.5 text-sm",
-            c === null ? "" : c === today.getDate() ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-accent"
-          )}>
-            {c}
-            {c !== null && byDay[c] && (
-              <span className="absolute bottom-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white">{byDay[c]}</span>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ============================ MESSAGES ============================ */
-
-type Msg = { id: string; name: string; property: string; preview: string; time: string; unread: boolean; avatar?: string };
-const SAMPLE_MSGS: Msg[] = [
-  { id: "1", name: "Amina Hassan", property: "Modern 3BR Villa • Masaki", preview: "Hi! Is this still available for viewing this weekend?", time: "2m", unread: true },
-  { id: "2", name: "James Mwakalinga", property: "Ocean-view Apartment", preview: "Thank you, I'll transfer the deposit today.", time: "1h", unread: true },
-  { id: "3", name: "Grace Kimario", property: "Family Home • Mikocheni", preview: "Can you share more photos of the kitchen?", time: "Yesterday", unread: false },
-  { id: "4", name: "Peter Ndosi", property: "Studio • Kariakoo", preview: "Great, see you Saturday.", time: "2d", unread: false },
-];
-
-function MessagesPanel() {
-  const [tab, setTab] = useState<"inbox" | "unread" | "archive">("inbox");
-  const [q, setQ] = useState("");
-  const list = SAMPLE_MSGS.filter((m) => {
-    if (tab === "unread" && !m.unread) return false;
-    if (tab === "archive") return false;
-    if (q && !`${m.name} ${m.property} ${m.preview}`.toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
-  });
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="inline-flex rounded-xl border border-border bg-background p-1">
-          {(["inbox","unread","archive"] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-              className={cn("rounded-lg px-4 py-1.5 text-sm font-medium capitalize", tab === t ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:text-foreground")}>
-              {t}
-            </button>
-          ))}
-        </div>
-        <div className="relative sm:w-80">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search messages" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9 rounded-xl" />
-        </div>
-      </div>
-
-      <div className="overflow-hidden rounded-2xl border border-border/60 bg-background shadow-[var(--shadow-soft)]">
-        {list.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No messages here.</div>
-        ) : list.map((m, i) => (
-          <button key={m.id} onClick={() => toast.info("Opening chat…")}
-            className={cn("flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-accent/50", i > 0 && "border-t border-border/50")}>
-            <Avatar className="h-11 w-11 ring-2 ring-primary/10">
-              <AvatarImage src={m.avatar} />
-              <AvatarFallback className="bg-primary/10 text-primary font-semibold">{m.name.split(" ").map((s) => s[0]).slice(0,2).join("")}</AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-2">
-                <p className={cn("truncate font-display text-sm", m.unread ? "font-semibold text-foreground" : "font-medium text-foreground/80")}>{m.name}</p>
-                <span className="shrink-0 text-xs text-muted-foreground">{m.time}</span>
-              </div>
-              <p className="mt-0.5 truncate text-xs text-primary">{m.property}</p>
-              <p className={cn("mt-1 line-clamp-1 text-sm", m.unread ? "text-foreground" : "text-muted-foreground")}>{m.preview}</p>
-            </div>
-            {m.unread && <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary" />}
-            <button onClick={(e) => { e.stopPropagation(); toast.success("Archived"); }} className="ml-2 rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground">
-              <Archive className="h-4 w-4" />
-            </button>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 /* ============================ DRAFTS ============================ */
 

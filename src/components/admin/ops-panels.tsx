@@ -26,6 +26,7 @@ import {
   type RevenueBreakdown, type AdminActionLog, type AgentOption,
   type LeadOpsFilter, type ViewingOpsFilter, type DealOpsFilter,
   fetchMarketplaceOverview, type MarketplaceOverview,
+  fetchTeamSnapshot, type TeamSnapshot,
 } from "@/lib/admin-ops";
 import { fetchSupportStats, type SupportStats } from "@/lib/support-db";
 
@@ -155,6 +156,43 @@ function MarketplaceOverviewSection() {
   );
 }
 
+/** Owners & Agents — real roster counts, never padded with invented accounts. */
+function TeamSnapshotSection() {
+  const { data, loading } = useLive<TeamSnapshot | null>(fetchTeamSnapshot, null);
+  if (loading || !data) return null;
+  const rows: { label: string; value: number; tone?: "danger" | "gold" }[] = [
+    { label: "Owners", value: data.owners },
+    { label: "Agents", value: data.agents, tone: data.agents === 0 ? "gold" : undefined },
+    { label: "Active agents", value: data.activeAgents },
+    { label: "Unverified members", value: data.unverifiedUsers, tone: "gold" },
+    { label: "Suspended members", value: data.suspendedUsers, tone: "danger" },
+    { label: "Spaces needing assignment", value: data.propertiesWithoutAssignment, tone: "danger" },
+  ];
+  return (
+    <Section title="Owners & Agents">
+      {data.agents === 0 && (
+        <p className="mb-3 rounded-lg bg-[color:var(--color-gold-100)] px-3 py-2 text-sm text-[color:var(--color-gold-800)]">
+          No active Agent account yet — owners handle their own inquiries and viewings until an agent joins.
+        </p>
+      )}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {rows.map((r) => (
+          <div key={r.label} className="ds-card p-3">
+            <div className="ds-caption truncate">{r.label}</div>
+            <div className={cn(
+              "mt-1 text-xl font-semibold tabular-nums",
+              r.value > 0 && r.tone === "danger" && "text-[color:var(--color-danger-600)]",
+              r.tone === "gold" && "text-[color:var(--color-warning-700)]",
+            )}>
+              {nf.format(r.value)}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 export function AdminHomePanel() {
   const { t } = useI18n();
   const { data: today, loading, reload } = useLive<AdminToday | null>(fetchAdminToday, null);
@@ -204,6 +242,8 @@ export function AdminHomePanel() {
       )}
 
       <MarketplaceOverviewSection />
+
+      <TeamSnapshotSection />
 
 
       <Section

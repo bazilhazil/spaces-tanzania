@@ -15,6 +15,7 @@ import { StatCard } from "@/components/ds/stat-card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import { fetchMyAssignments } from "@/lib/property-agents";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard/agent-performance")({
@@ -89,12 +90,27 @@ function AgentPerformancePage() {
         .order("last_activity_at", { ascending: false, nullsFirst: false });
       const dList = (dealRows ?? []) as Deal[];
 
-      const [propRes, bookRes, convRes, notifRes] = await Promise.all([
+      // Listings I own plus listings an administrator assigned to me as agent.
+      const assignments = await fetchMyAssignments(user.id);
+      const assignedIds = Object.keys(assignments);
+
+      const [ownedRes, assignedRes, bookRes, convRes, notifRes] = await Promise.all([
         supabase.from("properties").select("id,title,region,district,price,currency,status,owner_id").eq("owner_id", user.id),
-        supabase.from("bookings").select("id,property_id,buyer_id,scheduled_at,status,created_at").eq("owner_id", user.id),
+        assignedIds.length
+          ? supabase.from("properties").select("id,title,region,district,price,currency,status,owner_id").in("id", assignedIds)
+          : Promise.resolve({ data: [] as Prop[] }),
+        supabase.from("bookings").select("id,property_id,buyer_id,scheduled_at,status,created_at").or(`owner_id.eq.${user.id},agent_id.eq.${user.id}`),
         supabase.from("conversations").select("id,property_id,buyer_id,last_message_at").eq("owner_id", user.id),
         supabase.from("notifications").select("id,kind,title,body,created_at,read_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(15),
       ]);
+      const propRes = {
+        data: [
+          ...((ownedRes.data ?? []) as Prop[]),
+          ...((assignedRes.data ?? []) as Prop[]).filter(
+            (p) => !((ownedRes.data ?? []) as Prop[]).some((o) => o.id === p.id),
+          ),
+        ],
+      };
       const convIds = (convRes.data ?? []).map((c) => c.id);
       const buyerIds = Array.from(new Set(dList.map((d) => d.buyer_id).filter(Boolean))) as string[];
       const [msgRes, profRes] = await Promise.all([
@@ -132,7 +148,7 @@ function AgentPerformancePage() {
   const active = deals.filter((d) => activeStages.includes(d.stage));
   const assignedLeads = deals.length;
   const activeClients = new Set(active.map((d) => d.buyer_id).filter(Boolean)).size;
-  const activeListings = props.filter((p) => p.status === "published" || p.status === "active").length;
+  const activeListings = props.filter((p) => p.status === "live").length;
   const scheduledViewings = bookings.filter((b) => new Date(b.scheduled_at) >= now && (b.status === "confirmed" || b.status === "pending")).length;
   const dealsInProgress = active.length;
   const dealsClosed = closed.length;
@@ -195,10 +211,9 @@ function AgentPerformancePage() {
     return calEvents.filter((e) => e.at >= start && e.at < end);
   }, [calEvents, calView]);
 
-  // Commissions
+  // Commission estimate — SPACES does not record settled commission payments,
+  // so no paid/pending split is shown rather than inventing one.
   const totalCommission = closed.reduce((a, d) => a + (Number(d.value) || 0) * commissionRate, 0);
-  const paidCommission = closed.filter((d) => (Date.now() - new Date(d.created_at).getTime()) > 30 * 86400000).reduce((a, d) => a + (Number(d.value) || 0) * commissionRate, 0);
-  const pendingCommission = totalCommission - paidCommission;
   const conversionRate = deals.length ? Math.round((closed.length / deals.length) * 100) : 0;
 
   // Agent score
@@ -422,12 +437,14 @@ function AgentPerformancePage() {
 
         {/* Commissions + charts */}
         <section className="ds-card p-5">
-          <h2 className="ds-h-sm mb-4">Commissions</h2>
-          <div className="grid gap-3 md:grid-cols-4">
-            <StatCard label="Monthly"  value={fmtMoney(monthCommission)}   icon={DollarSign} tone="gold" />
-            <StatCard label="Total"    value={fmtMoney(totalCommission)}   icon={TrendingUp} tone="brand" />
-            <StatCard label="Pending"  value={fmtMoney(pendingCommission)} icon={Clock}      tone="muted" />
-            <StatCard label="Paid"     value={fmtMoney(paidCommission)}    icon={CheckCircle2} tone="success" />
+          <h2 className="ds-h-sm mb-1">Commission estimate</h2>
+          <p className="mb-4 text-xs text-muted-foreground">
+            Estimated at 2.5% of the value of your own completed deals. SPACES does not process commission payments, and only you, the space owner and administrators can see these figures.
+          </p>
+          <div className="grid gap-3 md:grid-cols-3">
+            <StatCard label="This month" value={fmtMoney(monthCommission)} icon={DollarSign} tone="gold" />
+            <StatCard label="This year"  value={fmtMoney(yearCommission)}  icon={Clock}      tone="muted" />
+            <StatCard label="All time"   value={fmtMoney(totalCommission)} icon={TrendingUp} tone="brand" />
           </div>
           <div className="mt-6 grid gap-6 lg:grid-cols-3">
             <div>
@@ -468,28 +485,27 @@ function AgentPerformancePage() {
 
           <section className="ds-card p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="ds-h-sm">Leaderboard</h2>
+              <h2 className="ds-h-sm">Your record</h2>
               <Trophy className="h-4 w-4 text-amber-500" />
             </div>
             <ul className="space-y-2 text-sm">
-              {[
-                { name: profile?.full_name ?? "You", deals: dealsClosed, revenue: totalCommission, you: true },
-                { name: "Amina Hassan", deals: Math.max(0, dealsClosed - 1), revenue: totalCommission * 0.9, you: false },
-                { name: "David Mwangi", deals: Math.max(0, dealsClosed - 2), revenue: totalCommission * 0.75, you: false },
-                { name: "Grace Kimaro", deals: Math.max(0, dealsClosed - 3), revenue: totalCommission * 0.6, you: false },
-              ].sort((a,b) => b.deals - a.deals || b.revenue - a.revenue).map((r, i) => (
-                <li key={i} className={cn("flex items-center justify-between rounded-xl px-3 py-2", r.you ? "bg-primary/10 ring-1 ring-primary/20" : "bg-secondary/40")}>
-                  <div className="flex items-center gap-3">
-                    <span className={cn("grid h-7 w-7 place-items-center rounded-full text-xs font-bold", i === 0 ? "bg-amber-500 text-white" : "bg-white ring-1 ring-border")}>{i + 1}</span>
-                    <div>
-                      <div className="text-sm font-semibold">{r.name}{r.you && <span className="ml-1 text-[10px] text-primary">(you)</span>}</div>
-                      <div className="text-[11px] text-muted-foreground">{r.deals} deals · {fmtMoney(r.revenue)}</div>
-                    </div>
-                  </div>
-                  {i === 0 && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
-                </li>
-              ))}
+              <li className="flex items-center justify-between rounded-xl bg-primary/10 px-3 py-2 ring-1 ring-primary/20">
+                <div>
+                  <div className="text-sm font-semibold">{profile?.full_name ?? "You"}</div>
+                  <div className="text-[11px] text-muted-foreground">{dealsClosed} deals closed · {conversionRate}% conversion</div>
+                </div>
+                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+              </li>
+              <li className="flex items-center justify-between rounded-xl bg-secondary/40 px-3 py-2">
+                <span className="text-muted-foreground">Listings you handle</span>
+                <span className="font-semibold tabular-nums">{props.length}</span>
+              </li>
+              <li className="flex items-center justify-between rounded-xl bg-secondary/40 px-3 py-2">
+                <span className="text-muted-foreground">Active clients</span>
+                <span className="font-semibold tabular-nums">{activeClients}</span>
+              </li>
             </ul>
+            <p className="mt-3 text-[11px] text-muted-foreground">Your own figures only — other members' performance stays private.</p>
           </section>
 
           <section className="ds-card p-5">
