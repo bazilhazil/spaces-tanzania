@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Building2, Home, Landmark, MapPin, Search, Store, Trees, Warehouse } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Building2, Home, Landmark, Search, Store, Trees, Warehouse } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { LocationSearchInput } from "@/components/location-search-input";
 import {
   Select,
   SelectContent,
@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/hooks/use-i18n";
-import { TZ_REGION_NAMES, searchLocations } from "@/lib/tz-locations";
-import { fetchLocationFacets, searchFacets, type RegionFacet } from "@/lib/location-facets";
+import { TZ_REGION_NAMES } from "@/lib/tz-locations";
+import { fetchLocationFacets, type RegionFacet } from "@/lib/location-facets";
 import { track } from "@/lib/analytics";
 
 type Tab = "rent" | "sale" | "commercial";
@@ -40,7 +40,6 @@ export function HeroSearch() {
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [q, setQ] = useState("");
-  const [showHits, setShowHits] = useState(false);
   const [district, setDistrict] = useState<string | undefined>();
   const [area, setArea] = useState<string | undefined>();
   const [facets, setFacets] = useState<RegionFacet[]>([]);
@@ -55,16 +54,6 @@ export function HeroSearch() {
     return () => { alive = false; };
   }, []);
 
-  const hits = useMemo(() => {
-    if (facets.length) {
-      return searchFacets(facets, q, 6).map((h) => ({
-        label: h.label, kind: h.kind, region: h.region, district: h.district, ward: h.ward,
-      }));
-    }
-    return searchLocations(q, 6).map((h) => ({
-      label: h.label, kind: h.kind, region: h.region, district: h.district, ward: h.ward,
-    }));
-  }, [facets, q]);
 
   const regionOptions = facets.length ? facets.map((f) => f.name) : TZ_REGION_NAMES;
 
