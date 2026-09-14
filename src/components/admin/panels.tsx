@@ -507,22 +507,78 @@ function ModerationReasonDialog({
 
 // ---------- Users ----------
 
+const ROLE_FILTERS = [
+  { id: "all", label: "All roles" },
+  { id: "buyer", label: "Buyer / Tenant" },
+  { id: "owner", label: "Owner" },
+  { id: "agent", label: "Agent" },
+  { id: "admin", label: "Admin" },
+] as const;
+
+const STATUS_FILTERS = [
+  { id: "all", label: "All statuses" },
+  { id: "active", label: "Active" },
+  { id: "suspended", label: "Suspended" },
+] as const;
+
 export function UsersPanel() {
   const { t } = useI18n();
-  const { data: users, loading } = useLive<AdminUser[]>(fetchAdminUsers, []);
+  const { data: users, loading, reload } = useLive<AdminUser[]>(fetchAdminUsers, []);
   const [q, setQ] = useState("");
+  const [role, setRole] = useState<(typeof ROLE_FILTERS)[number]["id"]>("all");
+  const [status, setStatus] = useState<(typeof STATUS_FILTERS)[number]["id"]>("all");
+  const [detail, setDetail] = useState<AdminUser | null>(null);
+  const [confirm, setConfirm] = useState<{ user: AdminUser; next: "suspended" | "active" } | null>(null);
+
   const rows = useMemo(
-    () => users.filter((u) => (u.name + (u.email ?? "")).toLowerCase().includes(q.toLowerCase())),
-    [users, q],
+    () =>
+      users.filter((u) => {
+        const text = `${u.name} ${u.email ?? ""} ${u.phone ?? ""}`.toLowerCase();
+        if (q && !text.includes(q.toLowerCase())) return false;
+        if (role === "buyer" && u.roles.some((r) => r !== "buyer")) return false;
+        if (role === "owner" && !u.roles.includes("owner")) return false;
+        if (role === "agent" && !u.roles.includes("agent")) return false;
+        if (role === "admin" && !u.roles.some((r) => r === "admin" || r === "super_admin")) return false;
+        if (status === "active" && u.status !== "active") return false;
+        if (status === "suspended" && u.status === "active") return false;
+        return true;
+      }),
+    [users, q, role, status],
   );
+
+  async function applyStatus(user: AdminUser, next: "suspended" | "active", reason: string) {
+    try {
+      await setUserAccountStatus(user.id, next, reason || undefined, user.name);
+      toast.success(next === "suspended" ? "Account suspended" : "Account reactivated");
+      reload();
+    } catch (e) {
+      toast.error(friendlyError(e));
+    }
+  }
+
   return (
     <>
-      <PageHeader kicker={t("admin.kicker.community")} title={t("admin.users.title")} subtitle={t("admin.users.sub")} />
+      <PageHeader kicker={t("admin.kicker.community")} title={t("admin.users.title")} subtitle={t("admin.users.sub")}
+        actions={<Button size="sm" variant="outline" className="gap-2" onClick={reload}><RefreshCw className="h-4 w-4" /> {t("admin.action.refresh")}</Button>} />
       <Panel>
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <div className="relative w-full sm:flex-1 sm:min-w-[240px]">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="relative w-full sm:flex-1 sm:min-w-[220px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search users by name or email…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+            <Input placeholder="Search by name, email or phone…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+          </div>
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+            {ROLE_FILTERS.map((f) => (
+              <Button key={f.id} size="sm" className="shrink-0" variant={role === f.id ? "default" : "outline"} onClick={() => setRole(f.id)}>
+                {f.label}
+              </Button>
+            ))}
+          </div>
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+            {STATUS_FILTERS.map((f) => (
+              <Button key={f.id} size="sm" className="shrink-0" variant={status === f.id ? "default" : "outline"} onClick={() => setStatus(f.id)}>
+                {f.label}
+              </Button>
+            ))}
           </div>
         </div>
 
@@ -531,13 +587,14 @@ export function UsersPanel() {
         ) : rows.length === 0 ? (
           <EmptyState icon={Users} title={t("admin.users.emptyTitle")} description={t("admin.users.emptyBody")} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="-mx-5 overflow-x-auto px-5">
+            <table className="w-full min-w-[760px] text-sm">
               <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
                 <tr className="border-b border-border/60">
                   <th className="py-3 pr-4 font-medium">{t("admin.th.user")}</th>
                   <th className="py-3 pr-4 font-medium">{t("admin.th.roles")}</th>
                   <th className="py-3 pr-4 font-medium">{t("admin.th.status")}</th>
+                  <th className="py-3 pr-4 font-medium">Verification</th>
                   <th className="py-3 pr-4 font-medium">{t("admin.th.joined")}</th>
                   <th className="py-3 pr-4 font-medium">{t("admin.th.listings")}</th>
                   <th className="py-3 pr-4 font-medium text-right">{t("admin.th.actions")}</th>
@@ -555,7 +612,7 @@ export function UsersPanel() {
                     <td className="py-3 pr-4">
                       <div className="flex flex-wrap gap-1">
                         {u.roles.length === 0
-                          ? <Badge variant="muted">buyer</Badge>
+                          ? <Badge variant="muted">Buyer</Badge>
                           : u.roles.map((r) => <Badge key={r} variant="muted" className="capitalize">{titleCase(r)}</Badge>)}
                       </div>
                     </td>
@@ -564,12 +621,20 @@ export function UsersPanel() {
                         : u.status === "suspended" ? <Badge variant="warning">{t("admin.status.suspended")}</Badge>
                         : <Badge variant="destructive">{t("admin.status.banned")}</Badge>}
                     </td>
+                    <td className="py-3 pr-4">
+                      {u.verified ? <Badge variant="success">Verified</Badge> : <Badge variant="muted">Not verified</Badge>}
+                    </td>
                     <td className="py-3 pr-4 text-muted-foreground">{new Date(u.joined).toLocaleDateString()}</td>
                     <td className="py-3 pr-4 font-medium">{u.listings}</td>
-                    <td className="py-3 pr-4 text-right">
-                      <Button variant="ghost" size="icon" asChild>
-                        <a href={`/profile/${u.id}`} aria-label={`Open profile for ${u.name}`}><MoreHorizontal className="h-4 w-4" /></a>
-                      </Button>
+                    <td className="py-3 pr-4">
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Button size="sm" variant="outline" onClick={() => setDetail(u)}>View</Button>
+                        {u.status === "active" ? (
+                          <Button size="sm" variant="destructive" onClick={() => setConfirm({ user: u, next: "suspended" })}>Suspend</Button>
+                        ) : (
+                          <Button size="sm" variant="success" onClick={() => setConfirm({ user: u, next: "active" })}>Reactivate</Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -578,9 +643,140 @@ export function UsersPanel() {
           </div>
         )}
       </Panel>
+
+      <UserOperationsDialog user={detail} onClose={() => setDetail(null)} />
+
+      <ConfirmWithReasonDialog
+        open={!!confirm}
+        title={confirm?.next === "suspended" ? "Suspend this account?" : "Reactivate this account?"}
+        description={
+          confirm?.next === "suspended"
+            ? "The member keeps all their history, listings, inquiries, viewings and deals, but cannot post or contact anyone while suspended."
+            : "The member regains normal access to SPACES."
+        }
+        confirmLabel={confirm?.next === "suspended" ? "Suspend account" : "Reactivate"}
+        requireReason={confirm?.next === "suspended"}
+        onCancel={() => setConfirm(null)}
+        onConfirm={async (reason) => {
+          const c = confirm;
+          setConfirm(null);
+          if (c) await applyStatus(c.user, c.next, reason);
+        }}
+      />
     </>
   );
 }
+
+/** Confirmation used for every high-impact admin action. */
+export function ConfirmWithReasonDialog({
+  open, title, description, confirmLabel, requireReason = true, onCancel, onConfirm,
+}: {
+  open: boolean;
+  title: string;
+  description?: string;
+  confirmLabel: string;
+  requireReason?: boolean;
+  onCancel: () => void;
+  onConfirm: (reason: string) => void | Promise<void>;
+}) {
+  const [reason, setReason] = useState("");
+  useEffect(() => { if (open) setReason(""); }, [open]);
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
+      <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          {description && <DialogDescription>{description}</DialogDescription>}
+        </DialogHeader>
+        <div>
+          <label className="mb-1 block text-xs uppercase tracking-wider text-muted-foreground">
+            Reason{requireReason ? "" : " (optional)"}
+          </label>
+          <Textarea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Explain why, for the audit log" />
+        </div>
+        <DialogFooter className="flex-col gap-2 sm:flex-row">
+          <Button variant="outline" className="w-full sm:w-auto" onClick={onCancel}>Cancel</Button>
+          <Button className="w-full sm:w-auto" disabled={requireReason && reason.trim().length < 5} onClick={() => void onConfirm(reason.trim())}>
+            {confirmLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function UserOperationsDialog({ user, onClose }: { user: AdminUser | null; onClose: () => void }) {
+  const [ops, setOps] = useState<UserOperations | null>(null);
+  useEffect(() => {
+    setOps(null);
+    if (!user) return;
+    let alive = true;
+    void fetchUserOperations(user.id).then((d) => { if (alive) setOps(d); });
+    return () => { alive = false; };
+  }, [user]);
+
+  if (!user) return null;
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{user.name}</DialogTitle>
+          <DialogDescription>
+            {user.roles.length ? user.roles.map(titleCase).join(", ") : "Buyer"} · {titleCase(user.status)}
+          </DialogDescription>
+        </DialogHeader>
+
+        {user.status !== "active" && user.suspensionReason && (
+          <p className="rounded-xl bg-[color:var(--color-warning-50)] p-3 text-sm text-[color:var(--color-warning-800)]">
+            Reason on file: {user.suspensionReason}
+          </p>
+        )}
+
+        {!ops ? (
+          <p className="text-sm text-muted-foreground">Loading activity…</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[
+                { label: "Inquiries", value: `${ops.newLeads} new / ${ops.leads}` },
+                { label: "Viewings", value: `${ops.pendingViewings} pending / ${ops.viewings}` },
+                { label: "Deals", value: `${ops.activeDeals} active / ${ops.deals}` },
+                { label: "Open reports", value: String(ops.openReports) },
+              ].map((s) => (
+                <div key={s.label} className="ds-card p-3">
+                  <div className="ds-caption">{s.label}</div>
+                  <div className="mt-1 text-sm font-semibold">{s.value}</div>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <div className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Spaces</div>
+              {ops.properties.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No spaces listed.</p>
+              ) : (
+                <ul className="divide-y divide-border/50 rounded-xl border border-border/50">
+                  {ops.properties.map((p) => (
+                    <li key={p.id} className="flex flex-wrap items-center gap-2 p-3 text-sm">
+                      <span className="min-w-0 flex-1 truncate font-medium">{p.title}</span>
+                      {p.verified && <Badge variant="success">Verified</Badge>}
+                      <Badge variant="muted" className="capitalize">{titleCase(p.status)}</Badge>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </>
+        )}
+
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>Close</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 // ---------- Agents ----------
 
