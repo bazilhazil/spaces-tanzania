@@ -274,7 +274,12 @@ export async function fetchModerationQueue(
 }
 
 
-export type ModerationAction = "approve" | "request_changes" | "reject" | "suspend" | "archive" | "feature";
+export type ModerationAction =
+  | "approve" | "request_changes" | "reject" | "suspend" | "archive" | "feature"
+  | "verify" | "unverify" | "take_offline" | "unavailable" | "restore";
+
+/** High-impact actions always require an administrator to state a reason. */
+export const REASON_REQUIRED: ModerationAction[] = ["reject", "request_changes", "take_offline", "unverify"];
 
 /** Writes the moderation decision to the real property record. */
 export async function moderateProperty(id: string, action: ModerationAction, reason?: string) {
@@ -304,10 +309,34 @@ export async function moderateProperty(id: string, action: ModerationAction, rea
     case "feature":
       patch.featured = true;
       break;
+    case "verify":
+      patch.verified = true;
+      break;
+    case "unverify":
+      patch.verified = false;
+      patch.under_review_reason = reason ?? null;
+      break;
+    // Emergency takedown: the listing stops appearing publicly at once, but the
+    // record, its inquiries, viewings and deals are all preserved.
+    case "take_offline":
+      patch.status = "paused";
+      patch.under_review = true;
+      patch.under_review_reason = reason ?? "Taken offline by SPACES moderation";
+      break;
+    case "unavailable":
+      patch.status = "paused";
+      patch.under_review = false;
+      break;
+    case "restore":
+      patch.status = "live";
+      patch.under_review = false;
+      patch.under_review_reason = null;
+      break;
   }
   const { error } = await supabase.from("properties").update(patch as never).eq("id", id);
   if (error) throw error;
 }
+
 
 // --------------------------------------------------------------- users
 
