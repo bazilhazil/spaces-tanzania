@@ -13,6 +13,12 @@ import { PageHeader } from "@/components/admin/panels";
 import { cn } from "@/lib/utils";
 import { sendAdminTestEmail } from "@/lib/emails.functions";
 import { fetchLaunchReport, type LaunchReport, type ReadyState, type HealthState } from "@/lib/launch-db";
+import {
+  fetchLaunchReadiness,
+  LAUNCH_STATUS_LABEL,
+  type LaunchReadiness,
+  type LaunchStatus,
+} from "@/lib/launch-readiness";
 
 
 const STATE_LABEL: Record<ReadyState, string> = {
@@ -80,14 +86,77 @@ function Section({ title, subtitle, right, children }: { title: string; subtitle
   );
 }
 
+const LAUNCH_TONE: Record<LaunchStatus, string> = {
+  ready: "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)]",
+  warning: "bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]",
+  action: "bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]",
+  blocked: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]",
+  not_configured: "bg-muted text-muted-foreground",
+};
+
+function ReadinessCard({ c }: { c: LaunchReadiness["categories"][number] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <li className="rounded-xl border border-border/50 p-3">
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{c.label}</p>
+          <p className="break-words text-xs text-muted-foreground">{c.summary}</p>
+        </div>
+        <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide", LAUNCH_TONE[c.status])}>
+          {LAUNCH_STATUS_LABEL[c.status]}
+        </span>
+      </div>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setOpen((o) => !o)}>
+          {open ? "Hide details" : "View details"}
+        </Button>
+        {c.section && (
+          <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" asChild>
+            <Link to="/admin/$section" params={{ section: c.section }}>
+              Go to configuration <ArrowRight className="h-3 w-3" />
+            </Link>
+          </Button>
+        )}
+      </div>
+      {open && (
+        <ul className="mt-2 space-y-1.5 border-t border-border/50 pt-2">
+          {c.checks.map((chk) => (
+            <li key={chk.label} className="flex items-start gap-2 text-xs">
+              <span
+                className={cn(
+                  "mt-1 h-2 w-2 shrink-0 rounded-full",
+                  chk.ok === true
+                    ? "bg-[color:var(--color-success-500)]"
+                    : chk.ok === false
+                      ? "bg-[color:var(--color-danger-500)]"
+                      : "bg-[color:var(--color-gold-500)]",
+                )}
+              />
+              <span className="min-w-0">
+                <span className="font-medium">{chk.label}</span>
+                <span className="text-muted-foreground"> — {chk.detail}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
 export function LaunchPanel() {
   const [report, setReport] = useState<LaunchReport | null>(null);
+  const [readiness, setReadiness] = useState<LaunchReadiness | null>(null);
   const [loading, setLoading] = useState(true);
   const [nonce, setNonce] = useState(0);
 
   useEffect(() => {
     let alive = true;
     setLoading(true);
+    fetchLaunchReadiness()
+      .then((r) => { if (alive) setReadiness(r); })
+      .catch(() => { if (alive) setReadiness(null); });
     fetchLaunchReport()
       .then((r) => { if (alive) setReport(r); })
       .catch(() => { if (alive) setReport(null); })
@@ -140,6 +209,41 @@ export function LaunchPanel() {
         }
       />
 
+
+      {readiness && (
+        <Section
+          title="SPACES launch readiness"
+          subtitle="Every status below comes from a real check of the live system."
+          right={
+            <div className="flex items-center gap-2">
+              <span className={cn("rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide", LAUNCH_TONE[readiness.overall])}>
+                {LAUNCH_STATUS_LABEL[readiness.overall]}
+              </span>
+              <Button size="sm" variant="outline" className="gap-2" onClick={reload}>
+                <RefreshCw className="h-4 w-4" /> Recheck
+              </Button>
+            </div>
+          }
+        >
+          <div className="mb-4 rounded-xl border border-border/50 p-3">
+            <p className="text-sm font-semibold">Launch blockers</p>
+            {readiness.blockers.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Nothing currently prevents safe public operation.</p>
+            ) : (
+              <ul className="mt-1 space-y-1">
+                {readiness.blockers.map((b) => (
+                  <li key={b} className="text-xs text-[color:var(--color-danger-700)]">{b}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {readiness.categories.map((c) => (
+              <ReadinessCard key={c.id} c={c} />
+            ))}
+          </ul>
+        </Section>
+      )}
 
       {loading && !report ? (
         <p className="text-sm text-muted-foreground">Loading live status…</p>
