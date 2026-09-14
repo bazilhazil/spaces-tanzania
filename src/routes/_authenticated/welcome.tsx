@@ -8,6 +8,7 @@ import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
 import { Brand } from "@/components/brand";
 import { toast } from "sonner";
+import { firstName as profileFirstName } from "@/lib/display-name";
 
 export const Route = createFileRoute("/_authenticated/welcome")({
   component: WelcomePage,
@@ -65,7 +66,7 @@ function WelcomePage() {
   const { profile, user } = useAuth();
   const { t } = useI18n();
   const [selected, setSelected] = useState<SpacesMode | null>(null);
-  const firstName = (profile?.full_name || user?.email || "").split(" ")[0] || t("common.welcome");
+  const firstName = profileFirstName(profile) ?? t("common.welcome");
 
   function choose(m: SpacesMode) {
     setSelected(m);

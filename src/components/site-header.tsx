@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { AuthGateDialog } from "@/components/auth-gate-dialog";
 import { toast } from "sonner";
+import { avatarInitials, displayNameOr } from "@/lib/display-name";
 
 
 export function SiteHeader() {
@@ -54,8 +55,7 @@ export function SiteHeader() {
     toast.success(t("common.signedOut"), { duration: 1500 });
   }
 
-  const initials = (profile?.full_name || user?.email || "S")
-    .split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
+  const initials = avatarInitials(profile);
 
   return (
     <header
@@ -106,7 +106,7 @@ export function SiteHeader() {
                     <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">{initials}</AvatarFallback>
                   </Avatar>
                   <span className="hidden max-w-[110px] truncate text-sm font-medium text-foreground md:inline">
-                    {profile?.full_name || user.email?.split("@")[0]}
+                    {displayNameOr(profile, t("nav.account"))}
                   </span>
                 </button>
               </DropdownMenuTrigger>

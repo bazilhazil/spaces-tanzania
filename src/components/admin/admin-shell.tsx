@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminSearchDialog } from "@/components/admin/admin-search-dialog";
+import { avatarInitials, displayNameOr, publicEmail } from "@/lib/display-name";
 
 type Item = {
   label: string;
@@ -119,8 +120,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     toast.success("Signed out", { duration: 1500 });
   }
 
-  const initials = (profile?.full_name || user?.email || "SA")
-    .split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
+  const initials = avatarInitials(profile, "SA");
 
 
   return (
@@ -153,9 +153,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 <AvatarFallback className="bg-primary text-primary-foreground font-semibold">{initials}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{profile?.full_name || user?.email || "Administrator"}</p>
-                {user?.email && profile?.full_name && (
-                  <p className="truncate text-[11px] text-muted-foreground">{user.email}</p>
+                <p className="truncate text-sm font-semibold">{displayNameOr(profile, "Administrator")}</p>
+                {publicEmail(user?.email) && profile?.full_name && (
+                  <p className="truncate text-[11px] text-muted-foreground">{publicEmail(user?.email)}</p>
                 )}
                 <div className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-[color:var(--color-gold-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[color:var(--color-gold-800)]">
                   <ShieldAlert className="h-3 w-3" /> {roleLabel}
