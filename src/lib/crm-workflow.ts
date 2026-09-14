@@ -311,6 +311,20 @@ export async function updateLeadStatus(id: string, status: LeadStatus) {
   if (error) throw error;
 }
 
+/** Close an inquiry with a simple reason. The record is kept for analytics. */
+export async function markLeadLost(id: string, reason: LostReason, note?: string) {
+  const { error } = await supabase
+    .from("leads")
+    .update({
+      status: "lost",
+      lost_reason: note?.trim() ? `${reason}: ${note.trim().slice(0, 300)}` : reason,
+      last_activity_at: new Date().toISOString(),
+    } as never)
+    .eq("id", id);
+  if (error) throw error;
+}
+
+
 export async function saveLeadNotes(id: string, notes: string) {
   const { error } = await supabase
     .from("leads")
