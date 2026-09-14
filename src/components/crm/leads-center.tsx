@@ -363,8 +363,15 @@ function LeadDrawer({
           <SheetTitle className="line-clamp-2">{lead.name}</SheetTitle>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <StatusPill status={lead.status} />
+            {!isTerminalLead(lead.status) && <PriorityPill priority={leadPriority(lead)} />}
+            {needsFollowUp(lead) && (
+              <Badge variant="outline" className="gap-1 border-amber-500/30 bg-amber-500/10 text-[11px] text-amber-600">
+                <AlertTriangle className="h-3 w-3" /> {t("crm.needsFollowUp")}
+              </Badge>
+            )}
             <span className="text-xs text-muted-foreground">{t("crm.lastActivity")}: {timeAgo(lead.lastActivityAt)}</span>
           </div>
+          <NextActionLine lead={lead} />
         </SheetHeader>
 
         {/* Profile */}
@@ -373,6 +380,16 @@ function LeadDrawer({
           <Row icon={<Mail className="h-3.5 w-3.5" />} label={t("crm.field.email")} value={lead.email ?? "—"} />
           <Row icon={<Home className="h-3.5 w-3.5" />} label={t("crm.field.property")} value={lead.propertyTitle} />
           <Row icon={<User className="h-3.5 w-3.5" />} label={t("crm.field.owner")} value={lead.ownerName} />
+          <Row
+            icon={<Clock className="h-3.5 w-3.5" />}
+            label={t("crm.field.created")}
+            value={new Date(lead.createdAt).toLocaleString()}
+          />
+          <Row
+            icon={<CheckCircle2 className="h-3.5 w-3.5" />}
+            label={t("crm.responded")}
+            value={lead.firstRespondedAt ? new Date(lead.firstRespondedAt).toLocaleString() : t("crm.none")}
+          />
           <Row
             icon={<CalendarIcon className="h-3.5 w-3.5" />}
             label={t("crm.field.viewing")}
@@ -383,7 +400,11 @@ function LeadDrawer({
             label={t("crm.field.deal")}
             value={lead.dealStage ? STAGE_LABEL[lead.dealStage] : t("crm.none")}
           />
+          {lead.lostReason && (
+            <Row icon={<AlertTriangle className="h-3.5 w-3.5" />} label={t("crm.lostReasonTitle")} value={lead.lostReason} />
+          )}
         </div>
+
 
         {/* Actions */}
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
