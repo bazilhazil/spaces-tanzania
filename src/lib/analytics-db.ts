@@ -156,3 +156,52 @@ export function conversionRate(report: AnalyticsReport): number {
   if (!new_leads) return 0;
   return Math.round((completed_deals / new_leads) * 100);
 }
+
+/* ------------------------------------------------------------------ *
+ * Saved-property (shortlist) insights — admin only.
+ * Aggregate counts only: no buyer identity is ever read or returned.
+ * ------------------------------------------------------------------ */
+
+export interface SavesInsights {
+  total: number;
+  topProperties: { id: string; title: string; count: number }[];
+  byType: { name: string; count: number }[];
+  byLocation: { name: string; count: number }[];
+}
+
+export async function fetchSavesInsights(): Promise<SavesInsights> {
+  // `favorites` is readable in bulk only by admins (RLS), and we deliberately
+  // never select user_id so buyer behaviour stays private.
+  const { data: favs, error } = await supabase.from("favorites").select("property_id");
+  if (error) throw error;
+  const rows = (favs ?? []) as { property_id: string }[];
+  const counts = new Map<string, number>();
+  for (const r of rows) counts.set(r.property_id, (counts.get(r.property_id) ?? 0) + 1);
+  const ids = [...counts.keys()];
+  if (!ids.length) return { total: 0, topProperties: [], byType: [], byLocation: [] };
+
+  const { data: props } = await supabase
+    .from("properties")
+    .select("id,title,property_type,region,district")
+    .in("id", ids);
+
+  const byType = new Map<string, number>();
+  const byLocation = new Map<string, number>();
+  const top: { id: string; title: string; count: number }[] = [];
+  for (const p of (props ?? []) as any[]) {
+    const c = counts.get(p.id) ?? 0;
+    top.push({ id: p.id, title: p.title ?? "Untitled", count: c });
+    if (p.property_type) byType.set(p.property_type, (byType.get(p.property_type) ?? 0) + c);
+    const loc = [p.district, p.region].filter(Boolean).join(", ");
+    if (loc) byLocation.set(loc, (byLocation.get(loc) ?? 0) + c);
+  }
+  const rank = (m: Map<string, number>) =>
+    [...m.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 5);
+
+  return {
+    total: rows.length,
+    topProperties: top.sort((a, b) => b.count - a.count).slice(0, 5),
+    byType: rank(byType),
+    byLocation: rank(byLocation),
+  };
+}
