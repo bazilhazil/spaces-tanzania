@@ -75,28 +75,38 @@ export function LeadsCenter() {
     if (search.lead) setSelectedId(search.lead);
   }, [search.lead]);
 
+  const PRIORITY_ORDER: Record<LeadPriority, number> = { high: 0, normal: 1, low: 2 };
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return leads.filter((l) => {
-      if (tab === "won" && l.status !== "won") return false;
-      if (tab === "lost" && l.status !== "lost") return false;
-      if (tab === "active" && (l.status === "won" || l.status === "lost")) return false;
-      if (statusFilter !== "all" && l.status !== statusFilter) return false;
-      if (!q) return true;
-      return [l.name, l.phone ?? "", l.email ?? "", l.propertyTitle, l.ownerName]
-        .some((s) => s.toLowerCase().includes(q));
-    });
+    return leads
+      .filter((l) => {
+        if (tab === "won" && l.status !== "won") return false;
+        if (tab === "lost" && l.status !== "lost" && l.status !== "closed") return false;
+        if (tab === "followup" && !needsFollowUp(l)) return false;
+        if (tab === "active" && isTerminalLead(l.status)) return false;
+        if (statusFilter !== "all" && l.status !== statusFilter) return false;
+        if (!q) return true;
+        return [l.name, l.phone ?? "", l.email ?? "", l.propertyTitle, l.ownerName]
+          .some((s) => s.toLowerCase().includes(q));
+      })
+      .sort((a, b) => {
+        const p = PRIORITY_ORDER[leadPriority(a)] - PRIORITY_ORDER[leadPriority(b)];
+        if (p !== 0) return p;
+        return +new Date(b.lastActivityAt) - +new Date(a.lastActivityAt);
+      });
   }, [leads, query, statusFilter, tab]);
 
   const selected = selectedId ? leads.find((l) => l.id === selectedId) ?? null : null;
 
   const kpis = useMemo(() => {
-    const active = leads.filter((l) => l.status !== "won" && l.status !== "lost").length;
-    const today = leads.filter((l) => Date.now() - new Date(l.createdAt).getTime() < 864e5).length;
+    const active = leads.filter((l) => !isTerminalLead(l.status)).length;
+    const fresh = leads.filter((l) => l.status === "new").length;
+    const follow = leads.filter((l) => needsFollowUp(l)).length;
     const won = leads.filter((l) => l.status === "won").length;
-    const withDeal = leads.filter((l) => l.dealId).length;
-    return { active, today, won, withDeal };
+    return { active, fresh, follow, won };
   }, [leads]);
+
 
   return (
     <div className="w-full min-w-0 max-w-full space-y-5">
