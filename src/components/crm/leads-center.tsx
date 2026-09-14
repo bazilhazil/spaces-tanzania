@@ -112,9 +112,10 @@ export function LeadsCenter() {
     <div className="w-full min-w-0 max-w-full space-y-5">
       {/* KPIs */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi icon={<Sparkles className="h-4 w-4" />} label={t("crm.kpi.today")} value={kpis.today} />
+        <Kpi icon={<Sparkles className="h-4 w-4" />} label={t("crm.kpi.new")} value={kpis.fresh} />
         <Kpi icon={<Users className="h-4 w-4" />} label={t("crm.kpi.active")} value={kpis.active} />
-        <Kpi icon={<Handshake className="h-4 w-4" />} label={t("crm.kpi.deals")} value={kpis.withDeal} />
+        <Kpi icon={<AlertTriangle className="h-4 w-4" />} label={t("crm.kpi.followUp")} value={kpis.follow} />
+
         <Kpi icon={<TrendingUp className="h-4 w-4" />} label={t("crm.kpi.won")} value={kpis.won} />
       </div>
 
