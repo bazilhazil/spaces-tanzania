@@ -1091,6 +1091,7 @@ export type Database = {
           under_review: boolean
           under_review_reason: string | null
           updated_at: string
+          verification_status: string
           verified: boolean
           view_count: number
           ward: string | null
@@ -1131,6 +1132,7 @@ export type Database = {
           under_review?: boolean
           under_review_reason?: string | null
           updated_at?: string
+          verification_status?: string
           verified?: boolean
           view_count?: number
           ward?: string | null
@@ -1171,6 +1173,7 @@ export type Database = {
           under_review?: boolean
           under_review_reason?: string | null
           updated_at?: string
+          verification_status?: string
           verified?: boolean
           view_count?: number
           ward?: string | null
@@ -2647,6 +2650,7 @@ export type Database = {
           total: number
         }[]
       }
+      publish_property: { Args: { _property_id: string }; Returns: Json }
       recompute_deal_health: { Args: { _deal_id: string }; Returns: undefined }
       respond_to_review: {
         Args: { _response: string; _review_id: string }

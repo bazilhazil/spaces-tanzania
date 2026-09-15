@@ -617,8 +617,9 @@ function PropertyManageCard({
           )}
         </div>
 
-        <div className="absolute bottom-3 left-3 max-md:bottom-2 max-md:left-2">
+        <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-1.5 max-md:bottom-2 max-md:left-2 max-md:gap-1">
           <StatusBadge kind={statusToKind(p.status)} label={statusLabel(p.status)} className="max-md:px-1.5 max-md:py-0 max-md:text-[10px]" />
+          {p.status === "live" && !p.verified && <VerifyingChip />}
         </div>
         <div className="absolute bottom-3 right-3 max-md:bottom-2 max-md:right-3 rounded-full bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur max-md:text-[10px]">
           <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" /> {p.view_count.toLocaleString()}</span>
@@ -827,7 +828,10 @@ function PropertyManageTable({
               <p className="text-[11px] text-muted-foreground">{p.public_id} • {[p.district, p.region].filter(Boolean).join(", ") || "TZ"}</p>
             </div>
           </div>
-          <StatusBadge kind={statusToKind(p.status)} label={statusLabel(p.status)} />
+          <div className="flex flex-wrap items-center gap-1.5">
+            <StatusBadge kind={statusToKind(p.status)} label={statusLabel(p.status)} />
+            {p.status === "live" && !p.verified && <VerifyingChip />}
+          </div>
           <span className="text-sm font-medium">{p.currency} {p.price.toLocaleString()}</span>
           <span className="text-right text-sm">{p.view_count}</span>
           <span className="text-right text-sm">{p.quality}</span>
@@ -974,6 +978,17 @@ function EmptyPropertiesIllustration() {
 
 /* ------------------------------ helpers ------------------------------ */
 
+/** Live listings whose SPACES verification has not finished yet. */
+function VerifyingChip() {
+  return (
+    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground ring-1 ring-inset ring-border max-md:px-1.5 max-md:text-[9px]">
+      <ShieldCheck className="h-3 w-3 max-md:h-2.5 max-md:w-2.5" />
+      <span className="max-sm:hidden">Verification in progress</span>
+      <span className="sm:hidden">Verifying</span>
+    </span>
+  );
+}
+
 function statusToKind(s: string): any {
   switch (s) {
     case "live": return "live";
@@ -989,8 +1004,8 @@ function statusToKind(s: string): any {
 }
 function statusLabel(s: string) {
   const map: Record<string, string> = {
-    live: "Published", draft: "Draft", archived: "Unavailable",
-    pending: "Pending Review", paused: "Paused", sold: "Sold",
+    live: "Live", draft: "Draft", archived: "Unavailable",
+    pending: "In review", paused: "Paused", sold: "Sold",
     rented: "Rented", rejected: "Rejected",
   };
   return map[s] ?? s;
@@ -1041,11 +1056,11 @@ async function handleCardAction(
       if (error) return toast.error(friendlyError(error));
       const applied = ((data as any)?.status as string) ?? next;
       setRows((r) => r.map((x) => (x.id === p.id ? { ...x, status: applied as never } : x)));
-      toast.success(
-        applied === "pending"
-          ? "Sent for review — it goes live once approved"
-          : a === "pause" ? "Paused" : "Resumed",
-      );
+      if (a === "resume" && applied !== "live") {
+        toast.error("This space can't go live yet — open it and complete the missing details.");
+      } else {
+        toast.success(a === "pause" ? "Paused" : "Resumed");
+      }
 
       break;
     }

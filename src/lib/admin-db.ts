@@ -25,6 +25,8 @@ export interface AdminOverview {
     sold: number;
     rented: number;
     verified: number;
+    /** Live listings whose SPACES verification has not completed yet. */
+    unverifiedLive: number;
     underReview: number;
   };
   users: { total: number; owners: number; agents: number; buyers: number; admins: number };
@@ -41,7 +43,7 @@ export interface AdminOverview {
 }
 
 const EMPTY_OVERVIEW: AdminOverview = {
-  properties: { total: 0, live: 0, pending: 0, draft: 0, rejected: 0, paused: 0, archived: 0, sold: 0, rented: 0, verified: 0, underReview: 0 },
+  properties: { total: 0, live: 0, pending: 0, draft: 0, rejected: 0, paused: 0, archived: 0, sold: 0, rented: 0, verified: 0, unverifiedLive: 0, underReview: 0 },
   users: { total: 0, owners: 0, agents: 0, buyers: 0, admins: 0 },
   activity: { leads: 0, bookings: 0, deals: 0, dealsCompleted: 0, reviews: 0, reportsOpen: 0, verificationsPending: 0 },
   revenue: { paidTotal: 0, currency: "TZS", payments: 0 },
@@ -68,6 +70,7 @@ export async function fetchAdminOverview(): Promise<AdminOverview> {
     const s = p.status as keyof AdminOverview["properties"];
     if (s in out.properties) (out.properties as any)[s] += 1;
     if (p.verified) out.properties.verified += 1;
+    if (p.status === "live" && !p.verified) out.properties.unverifiedLive += 1;
     if (p.under_review) out.properties.underReview += 1;
   }
 

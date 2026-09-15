@@ -203,6 +203,7 @@ export function DashboardPanel() {
           <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {[
               { label: t("admin.kpi.verifiedListings"), value: nf.format(overview.properties.verified) },
+              { label: "Live, verification in progress", value: nf.format(overview.properties.unverifiedLive) },
               { label: t("admin.kpi.owners"), value: nf.format(overview.users.owners) },
               { label: t("admin.kpi.agents"), value: nf.format(overview.users.agents) },
               { label: t("admin.kpi.dealsCompleted"), value: nf.format(overview.activity.dealsCompleted) },
