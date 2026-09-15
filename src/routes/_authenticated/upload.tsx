@@ -6,7 +6,7 @@ import {
   Loader2, Check, MapPin, Sparkles, Save,
   Zap, Droplet, ParkingCircle, Fence, Shield, Cctv, Waves, Trees,
   Sun, Fuel, Wind, PawPrint, Accessibility, Wifi, Phone, MessageCircle,
-  User, Pencil,
+  User, Pencil, ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,7 +95,7 @@ function UploadWizardPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [savedTick, setSavedTick] = useState<number>(0);
-  const [success, setSuccess] = useState<{ status: "pending" | "draft"; id?: string } | null>(null);
+  const [success, setSuccess] = useState<{ status: "live" | "draft"; id?: string } | null>(null);
   const [missingInfo, setMissingInfo] = useState<string[] | null>(null);
   const [limitReached, setLimitReached] = useState(false);
 
@@ -343,18 +343,6 @@ function UploadWizardPage() {
       let propertyId: string;
       if (isEdit && editId) {
         const updatePayload: any = { ...payload, updated_at: new Date().toISOString() };
-        if (mode === "publish") {
-          const { data: current } = await supabase
-            .from("properties")
-            .select("status")
-            .eq("id", editId)
-            .maybeSingle();
-          // Only listings that have never been approved need to go (back) for review.
-          // An already-approved listing stays visible when its details are edited.
-          if (!current || current.status === "draft" || current.status === "rejected") {
-            updatePayload.status = "pending";
-          }
-        }
         const { data: upd, error: uErr } = await supabase
           .from("properties")
           .update(updatePayload)
@@ -373,7 +361,9 @@ function UploadWizardPage() {
           .insert({
             ...payload,
             owner_id: user.id,
-            status: mode === "publish" ? "pending" : "draft",
+            // Listings always start private; they go live from the publish call
+            // below, once the automated requirements (photos included) pass.
+            status: "draft",
           } as any)
           .select("id")
           .single();
@@ -436,21 +426,39 @@ function UploadWizardPage() {
         } catch { /* thumbnail is best-effort */ }
       }
 
+      // Instant publication: the database re-checks every requirement and only
+      // then makes the space public. Verification continues separately.
+      let published = savedStatus === "live";
+      if (mode === "publish" && !published) {
+        const { data: res, error: pubErr } = await supabase.rpc(
+          "publish_property" as never,
+          { _property_id: propertyId } as never,
+        );
+        if (pubErr) throw pubErr;
+        const r = (res ?? {}) as { published?: boolean; paused?: boolean; missing?: string[] };
+        published = r.published === true;
+        if (!published) {
+          setSubmitting(false);
+          if (r.paused) {
+            toast.error("This listing is paused while SPACES reviews an issue.");
+            return;
+          }
+          setMissingInfo(r.missing?.length ? r.missing : ["Required listing details"]);
+          return;
+        }
+      }
+
       if (!isEdit) clearDraft();
       dirtyRef.current = false;
       if (isEdit) {
         toast.success(
-          mode !== "publish"
-            ? "Property updated"
-            : savedStatus === "pending"
-              ? "Sent for review"
-              : "Changes saved",
+          mode !== "publish" ? "Property updated" : published ? "Your space is live" : "Changes saved",
         );
 
         navigate({ to: "/dashboard/properties" });
       } else {
-        track("listing_published", { status: mode === "publish" ? "pending" : "draft" });
-        setSuccess({ status: mode === "publish" ? "pending" : "draft", id: propertyId });
+        track("listing_published", { status: published ? "live" : "draft" });
+        setSuccess({ status: published ? "live" : "draft", id: propertyId });
       }
     } catch (e: any) {
       console.error(e);
@@ -1128,14 +1136,14 @@ function StepPublish({
 // ============================================================
 // Success screen
 // ============================================================
-function SuccessScreen({ status }: { status: "pending" | "draft" }) {
+function SuccessScreen({ status }: { status: "live" | "draft" }) {
   const navigate = useNavigate();
   useEffect(() => {
-    const t = setTimeout(() => navigate({ to: "/dashboard/properties" }), 3400);
+    const t = setTimeout(() => navigate({ to: "/dashboard/properties" }), 4200);
     return () => clearTimeout(t);
   }, [navigate]);
 
-  const isLive = status === "pending";
+  const isLive = status === "live";
   return (
     <div className="grid min-h-screen place-items-center bg-gradient-to-br from-background via-background to-primary/5 px-4">
       <div className="max-w-md animate-fade-in text-center">
@@ -1150,16 +1158,26 @@ function SuccessScreen({ status }: { status: "pending" | "draft" }) {
           isLive ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700",
         )}>
           <span className={cn("h-1.5 w-1.5 rounded-full", isLive ? "bg-emerald-500" : "bg-amber-500")} />
-          {isLive ? "Pending review" : "Saved as draft"}
+          {isLive ? "Live" : "Saved as draft"}
         </div>
         <h1 className="mt-4 font-display text-3xl font-semibold">
-          {isLive ? "Sent for review 🎉" : "Draft saved 💾"}
+          {isLive ? "Your space is LIVE! 🎉" : "Draft saved 💾"}
         </h1>
-        <p className="mt-3 text-muted-foreground">
-          {isLive
-            ? "Our team is checking your space. You'll be notified as soon as it is approved and visible to buyers."
-            : "You can finish and publish it any time from My Properties."}
-        </p>
+        {isLive ? (
+          <>
+            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-sm font-medium text-foreground">
+              <ShieldCheck className="h-4 w-4" /> SPACES verification is in progress.
+            </p>
+            <p className="mt-3 text-muted-foreground">
+              Your listing is already visible to customers. Once verification is complete, it can
+              receive the Verified by SPACES badge.
+            </p>
+          </>
+        ) : (
+          <p className="mt-3 text-muted-foreground">
+            You can finish and publish it any time from My Properties.
+          </p>
+        )}
         <div className="mt-6 flex justify-center gap-3">
           <Button asChild variant="outline" className="rounded-full">
             <Link to="/dashboard/properties">My Properties</Link>
