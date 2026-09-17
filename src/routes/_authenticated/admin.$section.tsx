@@ -14,6 +14,7 @@ import { SupportPanel } from "@/components/admin/support-panel";
 import { DataBackupPanel } from "@/components/admin/data-backup-panel";
 import { SmsPanel } from "@/components/admin/sms-panel";
 import { LaunchPanel } from "@/components/admin/launch-panel";
+import { ProductionReviewPanel } from "@/components/admin/production-review-panel";
 
 const PANELS: Record<string, React.ComponentType> = {
   launch: LaunchPanel,
@@ -40,6 +41,7 @@ const PANELS: Record<string, React.ComponentType> = {
   notifications: NotificationsPanel,
   settings: SettingsPanel,
   data: DataBackupPanel,
+  production: ProductionReviewPanel,
   sms: SmsPanel,
   superadmin: SuperAdminPanel,
 };
