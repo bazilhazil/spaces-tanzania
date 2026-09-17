@@ -25,14 +25,22 @@ const CONFIRMED = ["paid", "succeeded"];
 
 export interface AdminToday {
   newUsers: number;
+  newOwners: number;
+  newAgents: number;
   newSpaces: number;
   newLeads: number;
   newViewings: number;
   activeDeals: number;
   pendingVerifications: number;
+  listingsAwaitingVerification: number;
   openReports: number;
+  openSupport: number;
+  failedNotifications: number;
+  paymentIssues: number;
   revenueToday: number;
   currency: string;
+  /** True when nothing new happened today (existing backlog is shown separately). */
+  quiet: boolean;
 }
 
 async function count(table: string, build: (q: any) => any): Promise<number> {
@@ -40,33 +48,62 @@ async function count(table: string, build: (q: any) => any): Promise<number> {
   return c ?? 0;
 }
 
+/** New role grants recorded today, e.g. the first owner or agent of the day. */
+async function newRolesToday(role: "owner" | "agent", since: string): Promise<number> {
+  const { count: c } = await supabase
+    .from("user_roles")
+    .select("id", { count: "exact", head: true })
+    .eq("role", role as never)
+    .gte("created_at", since);
+  return c ?? 0;
+}
+
 export async function fetchAdminToday(): Promise<AdminToday> {
   const since = startOfToday();
-  const [newUsers, newSpaces, newLeads, newViewings, activeDeals, pendingVerifications, openReports, pay] =
-    await Promise.all([
+  const [
+    newUsers, newOwners, newAgents, newSpaces, newLeads, newViewings, activeDeals,
+    pendingVerifications, listingsAwaitingVerification, openReports, openSupport,
+    failedNotifications, paymentIssues, pay,
+  ] = await Promise.all([
       count("profiles", (q) => q.gte("created_at", since)),
+      newRolesToday("owner", since).catch(() => 0),
+      newRolesToday("agent", since).catch(() => 0),
       count("properties", (q) => q.gte("created_at", since)),
       count("leads", (q) => q.gte("created_at", since)),
       count("bookings", (q) => q.gte("created_at", since)),
       count("deals", (q) => q.not("stage", "in", "(completed,cancelled)")),
       count("verification_requests", (q) => q.eq("status", "pending")),
+      count("properties", (q) => q.eq("verification_status", "in_progress").is("deleted_at", null)).catch(() => 0),
       count("safety_reports", (q) => q.in("status", ["new", "under_review", "more_info"])),
+      count("support_tickets", (q) => q.in("status", ["open", "in_progress"])).catch(() => 0),
+      count("sms_delivery_log", (q) => q.eq("success", false)).catch(() => 0),
+      count("payments", (q) => q.in("status", ["pending", "processing", "failed"])),
       supabase.from("payments").select("amount,currency,status,created_at").gte("created_at", since).limit(1000),
     ]);
 
   const rows = ((pay.data ?? []) as any[]).filter((p) => CONFIRMED.includes(p.status));
   return {
     newUsers,
+    newOwners,
+    newAgents,
     newSpaces,
     newLeads,
     newViewings,
     activeDeals,
     pendingVerifications,
+    listingsAwaitingVerification,
     openReports,
+    openSupport,
+    failedNotifications,
+    paymentIssues,
     revenueToday: rows.reduce((s, p) => s + Number(p.amount ?? 0), 0),
     currency: rows[0]?.currency ?? "TZS",
+    quiet:
+      newUsers + newOwners + newAgents + newSpaces + newLeads + newViewings === 0 &&
+      rows.length === 0,
   };
 }
+
 
 // ---------------------------------------------------- needs attention
 
