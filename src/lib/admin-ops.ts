@@ -204,9 +204,76 @@ export async function fetchNeedsAttention(): Promise<AttentionItem[]> {
       items.push({ id: `l-${l.id}`, kind: "lead_waiting", group: "leads", urgency: l.status === "new" ? 2 : 4, title: l.visitor_name || "New inquiry", detail: l.status === "new" ? "Waiting for first response" : "No recent activity", at: l.created_at, section: "leads" });
     }
   }
+  const listedSpaces = new Set(((props.data ?? []) as any[]).map((p) => p.id));
   for (const p of await fetchPropertiesNeedingAssignment()) {
     items.push({ id: `oa-${p.id}`, kind: "property_suspended", group: "spaces", urgency: 1, title: p.title, detail: `Owner/Agent assignment required · ${p.reason}`, at: p.at, section: "properties" });
   }
+
+  // Listings where SPACES asked the owner for more information, or flagged an issue.
+  const { data: incomplete } = await supabase
+    .from("properties")
+    .select("id,title,verification_status,updated_at")
+    .in("verification_status", ["more_info", "issue"])
+    .is("deleted_at", null)
+    .order("updated_at", { ascending: false })
+    .limit(20);
+  for (const p of ((incomplete ?? []) as any[])) {
+    if (listedSpaces.has(p.id)) continue;
+    items.push({
+      id: `li-${p.id}`,
+      kind: "listing_incomplete",
+      group: "verification",
+      urgency: p.verification_status === "issue" ? 1 : 3,
+      title: p.title ?? "Untitled space",
+      detail: p.verification_status === "issue" ? "Verification issue raised" : "Information requested from the owner",
+      at: p.updated_at,
+      section: "verification",
+    });
+  }
+
+  // Open support requests — reference and category only, never message contents.
+  const { data: tickets } = await supabase
+    .from("support_tickets" as never)
+    .select("id,reference,category,priority,status,last_message_at,created_at")
+    .in("status", ["open", "in_progress"])
+    .order("last_message_at", { ascending: false })
+    .limit(20);
+  for (const s of ((tickets ?? []) as any[])) {
+    items.push({
+      id: `st-${s.id}`,
+      kind: "support_ticket",
+      group: "support",
+      urgency: s.priority === "urgent" ? 0 : s.priority === "high" ? 1 : 2,
+      title: s.reference ?? "Support request",
+      detail: `${String(s.category ?? "general").replace(/_/g, " ")} · ${String(s.status).replace(/_/g, " ")}`,
+      at: s.last_message_at ?? s.created_at,
+      section: "support",
+    });
+  }
+
+  // Failed message delivery — masked recipient only, no message contents.
+  const weekAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+  const { data: smsFails } = await supabase
+    .from("sms_delivery_log" as never)
+    .select("id,masked_recipient,purpose,error_code,created_at")
+    .eq("success", false)
+    .gte("created_at", weekAgo)
+    .order("created_at", { ascending: false })
+    .limit(20);
+  for (const m of ((smsFails ?? []) as any[])) {
+    items.push({
+      id: `sf-${m.id}`,
+      kind: "notification_failed",
+      group: "communications",
+      urgency: 2,
+      title: `SMS not delivered · ${m.masked_recipient}`,
+      detail: `${String(m.purpose ?? "message").replace(/_/g, " ")}${m.error_code ? ` · ${m.error_code}` : ""}`,
+      at: m.created_at,
+      section: "sms",
+    });
+  }
+
+
 
 
 
