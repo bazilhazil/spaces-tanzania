@@ -286,7 +286,7 @@ export async function flagListingIssue(item: ListingVerificationItem, reason: st
 /** Clear an issue / resume a paused listing and put it back in the queue. */
 export async function resumeListingVerification(item: ListingVerificationItem, reason: string) {
   await update(item.id, {
-    status: item.state === "paused" ? "live" : undefined,
+    ...(item.state === "paused" ? { status: "live" } : {}),
     verification_status: "in_progress",
     under_review: false,
     under_review_reason: null,
@@ -325,7 +325,7 @@ export async function fetchListingVerificationHistory(propertyId: string): Promi
   const names = new Map(
     ((people ?? []) as Record<string, any>[]).map((p) => [
       p.id,
-      displayNameOr({ full_name: p.full_name }, "Member"),
+      displayNameOr({ full_name: p.full_name }, "Administrator"),
     ]),
   );
   return rows.map((r) => ({
