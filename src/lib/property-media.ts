@@ -99,7 +99,46 @@ export async function uploadMediaFile(
   return { path };
 }
 
+const publicUrlCache = new Map<string, string>();
+let pendingPaths: string[] = [];
+let pendingTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingResolvers: (() => void)[] = [];
+
+/** Batches public media requests so a gallery costs one server round-trip. */
+async function signPublicBatch(path: string): Promise<string | null> {
+  const { signPublicMediaFn } = await import("@/lib/public-media.functions");
+  if (!pendingPaths.includes(path)) pendingPaths.push(path);
+
+  await new Promise<void>((resolve) => {
+    pendingResolvers.push(resolve);
+    if (pendingTimer) return;
+    pendingTimer = setTimeout(async () => {
+      const paths = pendingPaths.slice(0, 100);
+      const resolvers = pendingResolvers;
+      pendingPaths = [];
+      pendingResolvers = [];
+      pendingTimer = null;
+      try {
+        const map = await signPublicMediaFn({ data: { paths } });
+        for (const [p, url] of Object.entries(map ?? {})) publicUrlCache.set(p, url);
+      } catch {
+        /* fall through — caller gets null */
+      }
+      resolvers.forEach((r) => r());
+    }, 20);
+  });
+
+  return publicUrlCache.get(path) ?? null;
+}
+
 export async function signedUrl(path: string, expiresIn = 3600): Promise<string | null> {
-  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, expiresIn);
-  return data?.signedUrl ?? null;
+  const cached = publicUrlCache.get(path);
+  if (cached) return cached;
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (sessionData.session) {
+    const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, expiresIn);
+    if (data?.signedUrl) return data.signedUrl;
+  }
+  return signPublicBatch(path);
 }
