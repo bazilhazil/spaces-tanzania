@@ -65,6 +65,8 @@ export type ManagedProperty = {
   conversion?: number;
   quality?: number;
   verified?: boolean;
+  verificationStatus?: string;
+  verificationNote?: string | null;
   featured?: boolean;
   premium?: boolean;
   /** Set when the listing is not owned by the signed-in user but assigned to them. */
@@ -116,7 +118,7 @@ export function PropertiesManager() {
       const assignments = await fetchMyAssignments(user.id);
       const assignedIds = Object.keys(assignments);
       const cols =
-        "id,owner_id,title,region,district,ward,price,currency,status,view_count,created_at,listing_type,property_type,verified,featured";
+        "id,owner_id,title,region,district,ward,price,currency,status,view_count,created_at,listing_type,property_type,verified,verification_status,under_review_reason,featured";
       const [ownedRes, assignedRes] = await Promise.all([
         supabase.from("properties").select(cols).eq("owner_id", user.id).is("deleted_at", null).order("created_at", { ascending: false }),
         assignedIds.length
@@ -166,6 +168,8 @@ export function PropertiesManager() {
           conversion: m ? conversionRate(m) : 0,
           quality: 55 + (mulberry(p.id, 11) % 45),
           verified: !!p.verified,
+          verificationStatus: (p.verification_status as string) ?? "not_submitted",
+          verificationNote: (p.under_review_reason as string) ?? null,
           featured: !!p.featured,
           premium: false,
           assignedPermission: p.owner_id === user.id ? undefined : assignments[p.id],
@@ -619,7 +623,7 @@ function PropertyManageCard({
 
         <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-1.5 max-md:bottom-2 max-md:left-2 max-md:gap-1">
           <StatusBadge kind={statusToKind(p.status)} label={statusLabel(p.status)} className="max-md:px-1.5 max-md:py-0 max-md:text-[10px]" />
-          {p.status === "live" && !p.verified && <VerifyingChip />}
+          {p.status === "live" && !p.verified && <VerifyingChip state={p.verificationStatus} />}
         </div>
         <div className="absolute bottom-3 right-3 max-md:bottom-2 max-md:right-3 rounded-full bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur max-md:text-[10px]">
           <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" /> {p.view_count.toLocaleString()}</span>
@@ -830,7 +834,7 @@ function PropertyManageTable({
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
             <StatusBadge kind={statusToKind(p.status)} label={statusLabel(p.status)} />
-            {p.status === "live" && !p.verified && <VerifyingChip />}
+            {p.status === "live" && !p.verified && <VerifyingChip state={p.verificationStatus} />}
           </div>
           <span className="text-sm font-medium">{p.currency} {p.price.toLocaleString()}</span>
           <span className="text-right text-sm">{p.view_count}</span>
@@ -979,12 +983,19 @@ function EmptyPropertiesIllustration() {
 /* ------------------------------ helpers ------------------------------ */
 
 /** Live listings whose SPACES verification has not finished yet. */
-function VerifyingChip() {
+function VerifyingChip({ state }: { state?: string }) {
+  const actionNeeded = state === "more_info" || state === "issue";
   return (
-    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground ring-1 ring-inset ring-border max-md:px-1.5 max-md:text-[9px]">
+    <span
+      className={
+        actionNeeded
+          ? "inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-[color:var(--color-warning-50)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[color:var(--color-warning-800)] ring-1 ring-inset ring-[color:var(--color-warning-200)] max-md:px-1.5 max-md:text-[9px]"
+          : "inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground ring-1 ring-inset ring-border max-md:px-1.5 max-md:text-[9px]"
+      }
+    >
       <ShieldCheck className="h-3 w-3 max-md:h-2.5 max-md:w-2.5" />
-      <span className="max-sm:hidden">Verification in progress</span>
-      <span className="sm:hidden">Verifying</span>
+      <span className="max-sm:hidden">{actionNeeded ? "Action required" : "Verification in progress"}</span>
+      <span className="sm:hidden">{actionNeeded ? "Action" : "Verifying"}</span>
     </span>
   );
 }

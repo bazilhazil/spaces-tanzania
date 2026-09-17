@@ -16,6 +16,7 @@ import { StatCard } from "@/components/ds/stat-card";
 import { StatusBadge } from "@/components/ds/status-badge";
 import { EmptyState } from "@/components/ds/empty-state";
 import { VerificationReviewQueue } from "@/components/verification/review-queue";
+import { ListingVerificationQueue } from "@/components/verification/listing-queue";
 import { cn } from "@/lib/utils";
 import { ROLE_LABELS, ROLE_MATRIX, type AdminRole } from "@/lib/admin-roles";
 import {
@@ -988,10 +989,25 @@ export function AgentsPanel() {
 
 export function VerificationPanel() {
   const { t } = useI18n();
+  const [view, setView] = useState<"listings" | "people">("listings");
   return (
     <>
       <PageHeader kicker={t("admin.kicker.trust")} title={t("admin.verification.title")} subtitle={t("admin.verification.sub")} />
-      <VerificationReviewQueue />
+      <div className="mb-6 flex gap-2 overflow-x-auto">
+        {([["listings", "Listings"], ["people", "Identity & documents"]] as const).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setView(key)}
+            className={cn(
+              "whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition",
+              view === key ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {view === "listings" ? <ListingVerificationQueue /> : <VerificationReviewQueue />}
     </>
   );
 }
