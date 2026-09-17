@@ -451,12 +451,12 @@ export async function fetchLaunchReadiness(): Promise<LaunchReadiness> {
     {
       id: "recovery",
       label: "Recovery capability",
-      status: recoveryReady ? "ready" : dbBackupReady ? "action" : "not_configured",
+      status: recoveryReady ? "ready" : dbBackupReady ? "warning" : "not_configured",
       section: "data",
       summary: recoveryReady
         ? `Restore verified ${backup?.restoreVerifiedAt ? new Date(backup.restoreVerifiedAt).toLocaleDateString() : ""}`.trim()
         : dbBackupReady
-          ? "Restore has not been tested yet."
+          ? "Restore points are available; a restore has not been tested on the live database."
           : "No backup to restore from — configure backups first.",
       checks: [
         { label: "Restore tested by an administrator", ok: recoveryReady, detail: backup?.restoreVerifiedAt ? new Date(backup.restoreVerifiedAt).toLocaleString() : "Not tested" },
