@@ -134,6 +134,13 @@
       "when": 1789665867836,
       "tag": "0018_tighten_storage_read_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1789670379835,
+      "tag": "0019_remove_unbound_public_property_media_read",
+      "breakpoints": true
     }
   ]
 }
