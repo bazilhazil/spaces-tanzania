@@ -120,6 +120,13 @@
       "when": 1789465449198,
       "tag": "0016_publish_guard_keep_resume_path",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1789664509038,
+      "tag": "0017_listing_verification_workflow",
+      "breakpoints": true
     }
   ]
 }
