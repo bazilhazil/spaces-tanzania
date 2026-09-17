@@ -98,12 +98,15 @@ const ATTENTION_META: Record<AttentionItem["kind"], { icon: React.ComponentType<
   property_pending: { icon: Home, tone: "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)]" },
   property_suspended: { icon: AlertTriangle, tone: "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)]" },
   verification_pending: { icon: ShieldCheck, tone: "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]" },
+  listing_incomplete: { icon: FileClock, tone: "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)]" },
   report_open: { icon: Flag, tone: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]" },
   payment_issue: { icon: DollarSign, tone: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]" },
   user_suspended: { icon: Users, tone: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]" },
   user_new: { icon: Users, tone: "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]" },
   viewing_pending: { icon: Calendar, tone: "bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]" },
   lead_waiting: { icon: MessageSquare, tone: "bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]" },
+  support_ticket: { icon: LifeBuoy, tone: "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]" },
+  notification_failed: { icon: AlertTriangle, tone: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]" },
 };
 
 const GROUP_LABEL: Record<AttentionGroup, string> = {
@@ -113,8 +116,11 @@ const GROUP_LABEL: Record<AttentionGroup, string> = {
   viewings: "admin.ops.group.viewings",
   verification: "admin.ops.group.verification",
   reports: "admin.ops.group.reports",
+  support: "admin.nav.support",
+  communications: "admin.ops.group.communications",
   payments: "admin.ops.group.payments",
 };
+
 
 
 /** Live marketplace counters. Detailed analysis stays in Business Intelligence. */
@@ -202,19 +208,23 @@ export function AdminHomePanel() {
   const cards = today
     ? [
         { label: t("admin.ops.newUsers"), value: nf.format(today.newUsers), icon: Users, tone: "brand" as const },
+        { label: t("admin.ops.newOwners"), value: nf.format(today.newOwners), icon: Users, tone: "brand" as const },
+        { label: t("admin.ops.newAgents"), value: nf.format(today.newAgents), icon: Users, tone: "brand" as const },
         { label: t("admin.ops.newSpaces"), value: nf.format(today.newSpaces), icon: Home, tone: "brand" as const },
+        { label: t("admin.ops.listingsAwaitingVerification"), value: nf.format(today.listingsAwaitingVerification), icon: ShieldCheck, tone: "gold" as const },
         { label: t("admin.ops.newLeads"), value: nf.format(today.newLeads), icon: MessageSquare, tone: "gold" as const },
         { label: t("admin.ops.newViewings"), value: nf.format(today.newViewings), icon: Calendar, tone: "gold" as const },
         { label: t("admin.ops.activeDeals"), value: nf.format(today.activeDeals), icon: Briefcase, tone: "brand" as const },
         { label: t("admin.ops.pendingVerifications"), value: nf.format(today.pendingVerifications), icon: ShieldCheck, tone: "gold" as const },
         { label: t("admin.ops.openReports"), value: nf.format(today.openReports), icon: Flag, tone: "danger" as const },
+        { label: t("admin.ops.openSupport"), value: nf.format(today.openSupport), icon: LifeBuoy, tone: "brand" as const },
+        { label: t("admin.ops.failedNotifications"), value: nf.format(today.failedNotifications), icon: AlertTriangle, tone: "danger" as const },
+        { label: t("admin.ops.paymentIssues"), value: nf.format(today.paymentIssues), icon: DollarSign, tone: "danger" as const },
         { label: t("admin.ops.revenueToday"), value: money(today.revenueToday, today.currency), icon: DollarSign, tone: "success" as const },
         ...(support
           ? [
-              { label: t("support.stats.open"), value: nf.format(support.open), icon: LifeBuoy, tone: "brand" as const },
               { label: t("support.stats.high"), value: nf.format(support.highPriority), icon: LifeBuoy, tone: "danger" as const },
               { label: t("support.stats.waiting"), value: nf.format(support.waitingUser), icon: LifeBuoy, tone: "gold" as const },
-              { label: t("support.stats.resolvedToday"), value: nf.format(support.resolvedToday), icon: LifeBuoy, tone: "success" as const },
             ]
           : []),
       ]
@@ -236,10 +246,18 @@ export function AdminHomePanel() {
       {loading && !today ? (
         <p className="mb-6 text-sm text-muted-foreground">{t("admin.loading.live")}</p>
       ) : (
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {cards.map((c) => <StatCard key={c.label} label={c.label} value={c.value} tone={c.tone} icon={c.icon} />)}
-        </div>
+        <>
+          {today?.quiet && (
+            <p className="mb-4 rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
+              {t("admin.ops.noActivity")}
+            </p>
+          )}
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            {cards.map((c) => <StatCard key={c.label} label={c.label} value={c.value} tone={c.tone} icon={c.icon} />)}
+          </div>
+        </>
       )}
+
 
       <MarketplaceOverviewSection />
 

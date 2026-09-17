@@ -1475,6 +1475,13 @@
       "activeDeals": "Active Deals",
       "pendingVerifications": "Pending Verification",
       "openReports": "Open Reports",
+      "newOwners": "New Owners",
+      "newAgents": "New Agents",
+      "listingsAwaitingVerification": "Awaiting Verification",
+      "openSupport": "Support Requests",
+      "failedNotifications": "Failed Messages",
+      "paymentIssues": "Payment Issues",
+      "noActivity": "No new activity",
       "revenueToday": "Today's Revenue",
       "revenueMonth": "This Month",
       "revenueTotal": "Total Revenue",
@@ -1542,7 +1549,9 @@
         "viewings": "Viewing Requests",
         "verification": "Pending Verification",
         "reports": "Reports",
-        "payments": "Payment Issues"
+        "payments": "Payment Issues",
+        "support": "Support Requests",
+        "communications": "Failed Messages"
       }
     }
   },

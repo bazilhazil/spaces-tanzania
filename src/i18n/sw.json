@@ -1475,6 +1475,13 @@
       "activeDeals": "Mikataba Hai",
       "pendingVerifications": "Uthibitisho Unaosubiri",
       "openReports": "Ripoti Zilizo Wazi",
+      "newOwners": "Wamiliki Wapya",
+      "newAgents": "Mawakala Wapya",
+      "listingsAwaitingVerification": "Zinasubiri Uthibitisho",
+      "openSupport": "Maombi ya Msaada",
+      "failedNotifications": "Ujumbe Ulioshindikana",
+      "paymentIssues": "Matatizo ya Malipo",
+      "noActivity": "Hakuna shughuli mpya",
       "revenueToday": "Mapato ya Leo",
       "revenueMonth": "Mwezi Huu",
       "revenueTotal": "Jumla ya Mapato",
@@ -1542,7 +1549,9 @@
         "viewings": "Maombi ya Kutembelea",
         "verification": "Uthibitisho Unaosubiri",
         "reports": "Ripoti",
-        "payments": "Matatizo ya Malipo"
+        "payments": "Matatizo ya Malipo",
+        "support": "Maombi ya Msaada",
+        "communications": "Ujumbe Ulioshindikana"
       }
     }
   },
