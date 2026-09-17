@@ -98,12 +98,15 @@ const ATTENTION_META: Record<AttentionItem["kind"], { icon: React.ComponentType<
   property_pending: { icon: Home, tone: "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)]" },
   property_suspended: { icon: AlertTriangle, tone: "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)]" },
   verification_pending: { icon: ShieldCheck, tone: "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]" },
+  listing_incomplete: { icon: FileClock, tone: "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)]" },
   report_open: { icon: Flag, tone: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]" },
   payment_issue: { icon: DollarSign, tone: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]" },
   user_suspended: { icon: Users, tone: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]" },
   user_new: { icon: Users, tone: "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]" },
   viewing_pending: { icon: Calendar, tone: "bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]" },
   lead_waiting: { icon: MessageSquare, tone: "bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]" },
+  support_ticket: { icon: LifeBuoy, tone: "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]" },
+  notification_failed: { icon: AlertTriangle, tone: "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]" },
 };
 
 const GROUP_LABEL: Record<AttentionGroup, string> = {
@@ -113,8 +116,11 @@ const GROUP_LABEL: Record<AttentionGroup, string> = {
   viewings: "admin.ops.group.viewings",
   verification: "admin.ops.group.verification",
   reports: "admin.ops.group.reports",
+  support: "admin.nav.support",
+  communications: "admin.ops.group.communications",
   payments: "admin.ops.group.payments",
 };
+
 
 
 /** Live marketplace counters. Detailed analysis stays in Business Intelligence. */
