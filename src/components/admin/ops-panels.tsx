@@ -208,19 +208,23 @@ export function AdminHomePanel() {
   const cards = today
     ? [
         { label: t("admin.ops.newUsers"), value: nf.format(today.newUsers), icon: Users, tone: "brand" as const },
+        { label: t("admin.ops.newOwners"), value: nf.format(today.newOwners), icon: Users, tone: "brand" as const },
+        { label: t("admin.ops.newAgents"), value: nf.format(today.newAgents), icon: Users, tone: "brand" as const },
         { label: t("admin.ops.newSpaces"), value: nf.format(today.newSpaces), icon: Home, tone: "brand" as const },
+        { label: t("admin.ops.listingsAwaitingVerification"), value: nf.format(today.listingsAwaitingVerification), icon: ShieldCheck, tone: "gold" as const },
         { label: t("admin.ops.newLeads"), value: nf.format(today.newLeads), icon: MessageSquare, tone: "gold" as const },
         { label: t("admin.ops.newViewings"), value: nf.format(today.newViewings), icon: Calendar, tone: "gold" as const },
         { label: t("admin.ops.activeDeals"), value: nf.format(today.activeDeals), icon: Briefcase, tone: "brand" as const },
         { label: t("admin.ops.pendingVerifications"), value: nf.format(today.pendingVerifications), icon: ShieldCheck, tone: "gold" as const },
         { label: t("admin.ops.openReports"), value: nf.format(today.openReports), icon: Flag, tone: "danger" as const },
+        { label: t("admin.ops.openSupport"), value: nf.format(today.openSupport), icon: LifeBuoy, tone: "brand" as const },
+        { label: t("admin.ops.failedNotifications"), value: nf.format(today.failedNotifications), icon: AlertTriangle, tone: "danger" as const },
+        { label: t("admin.ops.paymentIssues"), value: nf.format(today.paymentIssues), icon: DollarSign, tone: "danger" as const },
         { label: t("admin.ops.revenueToday"), value: money(today.revenueToday, today.currency), icon: DollarSign, tone: "success" as const },
         ...(support
           ? [
-              { label: t("support.stats.open"), value: nf.format(support.open), icon: LifeBuoy, tone: "brand" as const },
               { label: t("support.stats.high"), value: nf.format(support.highPriority), icon: LifeBuoy, tone: "danger" as const },
               { label: t("support.stats.waiting"), value: nf.format(support.waitingUser), icon: LifeBuoy, tone: "gold" as const },
-              { label: t("support.stats.resolvedToday"), value: nf.format(support.resolvedToday), icon: LifeBuoy, tone: "success" as const },
             ]
           : []),
       ]
@@ -242,10 +246,18 @@ export function AdminHomePanel() {
       {loading && !today ? (
         <p className="mb-6 text-sm text-muted-foreground">{t("admin.loading.live")}</p>
       ) : (
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {cards.map((c) => <StatCard key={c.label} label={c.label} value={c.value} tone={c.tone} icon={c.icon} />)}
-        </div>
+        <>
+          {today?.quiet && (
+            <p className="mb-4 rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
+              {t("admin.ops.noActivity")}
+            </p>
+          )}
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            {cards.map((c) => <StatCard key={c.label} label={c.label} value={c.value} tone={c.tone} icon={c.icon} />)}
+          </div>
+        </>
       )}
+
 
       <MarketplaceOverviewSection />
 
