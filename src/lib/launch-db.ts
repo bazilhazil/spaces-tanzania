@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { fetchProductionBaseline } from "@/lib/production-review";
 import { COMPANY } from "@/lib/company";
 import { fetchBackupConfig } from "@/lib/backup-db";
 import { phoneCodeAvailable } from "@/lib/phone-otp.functions";
@@ -119,6 +120,7 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
     bankProbe,
     rlsProbe,
     emailProbe,
+    productionBaseline,
   ] = await Promise.all([
 
     count("properties"),
@@ -166,6 +168,7 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
       async () => (await emailDeliveryHealth()) as { state: ReadyState; detail: string },
       { state: "pending" as ReadyState, detail: "Email delivery could not be checked" },
     ),
+    safe(fetchProductionBaseline, { confirmedAt: null, confirmedBy: null, note: null }),
   ]);
 
 
@@ -184,7 +187,18 @@ export async function fetchLaunchReport(): Promise<LaunchReport> {
 
   const yes = (n: number | null) => (n ?? 0) > 0;
 
+  const baselineAt = productionBaseline?.confirmedAt ?? null;
+
   const checklist: ChecklistItem[] = [
+    {
+      id: "production_data",
+      label: "Production data review",
+      state: baselineAt ? "ready" : "action",
+      detail: baselineAt
+        ? `Production data reviewed · baseline ${new Date(baselineAt).toLocaleString()}`
+        : "Production data review required before the business baseline is set",
+      section: "production",
+    },
     {
       id: "company",
       label: "Company information",
