@@ -248,7 +248,8 @@ export async function verifyListing(item: ListingVerificationItem, reason: strin
 
 export async function requestListingInfo(item: ListingVerificationItem, category: string, detail: string) {
   const message = detail.trim() ? `${category}: ${detail.trim()}` : category;
-  await update(item.id, { verification_status: "more_info", under_review: true, under_review_reason: message });
+  // The listing stays live: verification runs separately from moderation.
+  await update(item.id, { verification_status: "more_info", under_review: false, under_review_reason: message });
   await logAdminAction({
     action: "listing_info_requested",
     targetType: "property",
@@ -272,7 +273,7 @@ export async function pauseListing(item: ListingVerificationItem, reason: string
 }
 
 export async function flagListingIssue(item: ListingVerificationItem, reason: string) {
-  await update(item.id, { verified: false, verification_status: "issue", under_review: true, under_review_reason: reason });
+  await update(item.id, { verified: false, verification_status: "issue", under_review: false, under_review_reason: reason });
   await logAdminAction({
     action: "listing_verification_issue",
     targetType: "property",
