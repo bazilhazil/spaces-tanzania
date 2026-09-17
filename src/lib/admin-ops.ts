@@ -114,6 +114,8 @@ export type AttentionGroup =
   | "viewings"
   | "verification"
   | "reports"
+  | "support"
+  | "communications"
   | "payments";
 
 export interface AttentionItem {
@@ -121,13 +123,16 @@ export interface AttentionItem {
   kind:
     | "property_pending"
     | "verification_pending"
+    | "listing_incomplete"
     | "report_open"
     | "payment_issue"
     | "property_suspended"
     | "user_suspended"
     | "user_new"
     | "viewing_pending"
-    | "lead_waiting";
+    | "lead_waiting"
+    | "support_ticket"
+    | "notification_failed";
   group: AttentionGroup;
   /** 1 = most urgent. Used to sort Today's Tasks. */
   urgency: number;
@@ -140,13 +145,16 @@ export interface AttentionItem {
 /** Lower number = handled first. */
 export const GROUP_ORDER: AttentionGroup[] = [
   "reports",
+  "support",
   "payments",
   "verification",
   "spaces",
   "viewings",
   "leads",
+  "communications",
   "users",
 ];
+
 
 export async function fetchNeedsAttention(): Promise<AttentionItem[]> {
   const since = startOfToday();
