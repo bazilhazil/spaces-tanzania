@@ -127,6 +127,13 @@
       "when": 1789664509038,
       "tag": "0017_listing_verification_workflow",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1789665867836,
+      "tag": "0018_tighten_storage_read_policies",
+      "breakpoints": true
     }
   ]
 }
