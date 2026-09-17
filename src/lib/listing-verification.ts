@@ -6,7 +6,7 @@
 // verification system, no invented data.
 import { supabase } from "@/integrations/supabase/client";
 import { logAdminAction } from "@/lib/admin-ops";
-import { displayName } from "@/lib/display-name";
+import { displayNameOr } from "@/lib/display-name";
 
 export type ListingVerificationState =
   | "in_progress"
@@ -130,12 +130,12 @@ export async function fetchListingVerification(): Promise<ListingVerificationDat
   const peopleIds = Array.from(new Set([...ownerIds, ...agentRows.map((a) => a.agent_id)]));
 
   const { data: people } = peopleIds.length
-    ? await supabase.from("profiles").select("id,full_name,email,phone").in("id", peopleIds)
+    ? await supabase.from("profiles").select("id,full_name").in("id", peopleIds)
     : { data: [] as Record<string, any>[] };
   const nameOf = new Map(
     ((people ?? []) as Record<string, any>[]).map((p) => [
       p.id,
-      displayName({ fullName: p.full_name, email: p.email, phone: p.phone }),
+      displayNameOr({ full_name: p.full_name }, "Member"),
     ]),
   );
 
@@ -150,8 +150,8 @@ export async function fetchListingVerification(): Promise<ListingVerificationDat
 
   const OPEN = ["new", "open", "under_review", "more_info"];
   const allReportRows = [
-    ...(((reports.data ?? []) as { property_id: string; status: string }[]) ?? []),
-    ...(((safety.data ?? []) as { property_id: string; status: string }[]) ?? []),
+    ...((reports.data ?? []) as { property_id: string; status: string }[]),
+    ...((safety.data ?? []) as { property_id: string; status: string }[]),
   ];
   const reportCount = tally(allReportRows);
   const openReportCount = tally(allReportRows.filter((r) => OPEN.includes(r.status)));
@@ -321,11 +321,11 @@ export async function fetchListingVerificationHistory(propertyId: string): Promi
   const rows = (data ?? []) as Record<string, any>[];
   if (!rows.length) return [];
   const ids = Array.from(new Set(rows.map((r) => r.admin_id)));
-  const { data: people } = await supabase.from("profiles").select("id,full_name,email,phone").in("id", ids);
+  const { data: people } = await supabase.from("profiles").select("id,full_name").in("id", ids);
   const names = new Map(
     ((people ?? []) as Record<string, any>[]).map((p) => [
       p.id,
-      displayName({ fullName: p.full_name, email: p.email, phone: p.phone }),
+      displayNameOr({ full_name: p.full_name }, "Member"),
     ]),
   );
   return rows.map((r) => ({
