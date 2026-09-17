@@ -85,8 +85,8 @@ export function ListingVerificationQueue() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <StatCard label="Live listings" value={nf.format(m?.live ?? 0)} tone="brand" icon={MapPin} />
         <StatCard label="Verified" value={nf.format(m?.verified ?? 0)} tone="success" icon={ShieldCheck} />
-        <StatCard label="In progress" value={nf.format(m?.inProgress ?? 0)} tone="warning" icon={Clock} />
-        <StatCard label="Info requested" value={nf.format(m?.moreInfo ?? 0)} tone="warning" icon={MessageSquare} />
+        <StatCard label="In progress" value={nf.format(m?.inProgress ?? 0)} tone="gold" icon={Clock} />
+        <StatCard label="Info requested" value={nf.format(m?.moreInfo ?? 0)} tone="gold" icon={MessageSquare} />
         <StatCard label="Issues" value={nf.format(m?.issue ?? 0)} tone="danger" icon={AlertTriangle} />
         <StatCard
           label={`Average wait (${m?.slaDays ?? 7}-day target)`}
