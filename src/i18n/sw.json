@@ -1542,7 +1542,9 @@
         "viewings": "Maombi ya Kutembelea",
         "verification": "Uthibitisho Unaosubiri",
         "reports": "Ripoti",
-        "payments": "Matatizo ya Malipo"
+        "payments": "Matatizo ya Malipo",
+        "support": "Maombi ya Msaada",
+        "communications": "Ujumbe Ulioshindikana"
       }
     }
   },
