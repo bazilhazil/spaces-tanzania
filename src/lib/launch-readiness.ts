@@ -436,11 +436,11 @@ export async function fetchLaunchReadiness(): Promise<LaunchReadiness> {
     {
       id: "storage-backup",
       label: "Storage backup",
-      status: storageBackupReady ? "ready" : "action",
+      status: storageBackupReady ? "ready" : "warning",
       section: "data",
       summary: storageBackupReady
         ? "Uploaded files are covered by a recorded, verified backup arrangement."
-        : "No verified backup arrangement recorded for uploaded files.",
+        : "Known limitation: uploaded files are not included in the automatic database backups.",
       checks: [
         { label: "File backup arrangement recorded", ok: storageBackupReady, detail: backup?.storageProvider ?? "Not recorded" },
         { label: "Last reported file backup", ok: Boolean(backup?.storageLastSuccessAt), detail: backup?.storageLastSuccessAt ? new Date(backup.storageLastSuccessAt).toLocaleString() : "Never reported" },
