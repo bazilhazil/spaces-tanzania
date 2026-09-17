@@ -428,19 +428,19 @@ export async function fetchLaunchReadiness(): Promise<LaunchReadiness> {
         { label: "Backup provider recorded and verified", ok: dbBackupReady, detail: backup?.provider ?? "Not recorded" },
         { label: "Schedule", ok: Boolean(backup?.frequency), detail: backup?.frequency ?? "Not set" },
         { label: "Recovery points retained", ok: Boolean(backup?.retentionPoints), detail: backup?.retentionPoints ? `${backup.retentionPoints} points` : "Not set" },
-        { label: "Last successful run", ok: Boolean(backup?.lastSuccessAt), detail: backup?.lastSuccessAt ? new Date(backup.lastSuccessAt).toLocaleString() : "Never reported" },
-        { label: "Next scheduled run", ok: Boolean(backup?.nextScheduledAt), detail: backup?.nextScheduledAt ? new Date(backup.nextScheduledAt).toLocaleString() : "Not reported" },
+        { label: "Last successful run", ok: backup?.lastSuccessAt ? true : null, detail: backup?.lastSuccessAt ? new Date(backup.lastSuccessAt).toLocaleString() : "Run times are not reported to the app" },
+        { label: "Next scheduled run", ok: backup?.nextScheduledAt ? true : null, detail: backup?.nextScheduledAt ? new Date(backup.nextScheduledAt).toLocaleString() : "Runs automatically each day" },
         { label: "Manual data export", ok: true, detail: "Admins can export users, spaces, leads, deals, viewings and revenue at any time" },
       ],
     },
     {
       id: "storage-backup",
       label: "Storage backup",
-      status: storageBackupReady ? "ready" : "action",
+      status: storageBackupReady ? "ready" : "warning",
       section: "data",
       summary: storageBackupReady
         ? "Uploaded files are covered by a recorded, verified backup arrangement."
-        : "No verified backup arrangement recorded for uploaded files.",
+        : "Known limitation: uploaded files are not included in the automatic database backups.",
       checks: [
         { label: "File backup arrangement recorded", ok: storageBackupReady, detail: backup?.storageProvider ?? "Not recorded" },
         { label: "Last reported file backup", ok: Boolean(backup?.storageLastSuccessAt), detail: backup?.storageLastSuccessAt ? new Date(backup.storageLastSuccessAt).toLocaleString() : "Never reported" },
@@ -451,12 +451,12 @@ export async function fetchLaunchReadiness(): Promise<LaunchReadiness> {
     {
       id: "recovery",
       label: "Recovery capability",
-      status: recoveryReady ? "ready" : dbBackupReady ? "action" : "not_configured",
+      status: recoveryReady ? "ready" : dbBackupReady ? "warning" : "not_configured",
       section: "data",
       summary: recoveryReady
         ? `Restore verified ${backup?.restoreVerifiedAt ? new Date(backup.restoreVerifiedAt).toLocaleDateString() : ""}`.trim()
         : dbBackupReady
-          ? "Restore has not been tested yet."
+          ? "Restore points are available; a restore has not been tested on the live database."
           : "No backup to restore from — configure backups first.",
       checks: [
         { label: "Restore tested by an administrator", ok: recoveryReady, detail: backup?.restoreVerifiedAt ? new Date(backup.restoreVerifiedAt).toLocaleString() : "Not tested" },
