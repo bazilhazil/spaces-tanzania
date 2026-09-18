@@ -398,6 +398,8 @@ function UploadWizardPage() {
       const positionOffset = isEdit ? existingPhotoCount : 0;
       for (let i = 0; i < ordered.length; i++) {
         const m = ordered[i];
+        // On a retry the photos are already attached — never upload them twice.
+        if (uploadedMediaRef.current.has(m.id)) continue;
         const base = wantWatermark ? await watermarkImage(m.file, "SPACES") : m.file;
         const finalFile = await compressImageFile(base);
         const { path } = await uploadMediaFile(user.id, propertyId, finalFile);
@@ -408,9 +410,10 @@ function UploadWizardPage() {
           position: positionOffset + i,
           is_cover: isEdit ? false : m.isCover,
         });
+        uploadedMediaRef.current.add(m.id);
       }
 
-      if (video) {
+      if (video && !uploadedMediaRef.current.has(video.id)) {
         const { path } = await uploadMediaFile(user.id, propertyId, video.file);
         await supabase.from("property_media").insert({
           property_id: propertyId,
@@ -419,6 +422,7 @@ function UploadWizardPage() {
           position: positionOffset + ordered.length,
           is_cover: false,
         });
+        uploadedMediaRef.current.add(video.id);
         try {
           const thumb = await generateVideoThumbnail(video.file);
           const compressed = await compressImageFile(thumb);
@@ -432,6 +436,7 @@ function UploadWizardPage() {
           });
         } catch { /* thumbnail is best-effort */ }
       }
+
 
       // Instant publication: the database re-checks every requirement and only
       // then makes the space public. Verification continues separately.
