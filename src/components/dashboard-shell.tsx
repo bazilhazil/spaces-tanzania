@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
   Heart, Search, User as UserIcon, Users, Briefcase, GitCompare, Clock, Contact,
@@ -104,10 +104,21 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const NAV = useRoleNav();
   const isAdmin = roles.includes("admin") || roles.includes("super_admin");
-  const items: Item[] = isAdmin
-    ? [...NAV[activeMode], { label: t("dashboard.side.admin"), to: "/admin", icon: ShieldAlert }]
+  const [tenancy, setTenancy] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    if (!user) { setTenancy(false); return; }
+    void hasTenancy(user.id).then((v) => { if (alive) setTenancy(v); }).catch(() => {});
+    return () => { alive = false; };
+  }, [user?.id]);
+
+  const base: Item[] = tenancy
+    ? [NAV[activeMode][0], { label: "My Tenancy", to: "/my-tenancy", icon: KeyRound }, ...NAV[activeMode].slice(1)]
     : NAV[activeMode];
-  const primaryPaths = PRIMARY_PATHS[activeMode];
+  const items: Item[] = isAdmin
+    ? [...base, { label: t("dashboard.side.admin"), to: "/admin", icon: ShieldAlert }]
+    : base;
+  const primaryPaths = [...PRIMARY_PATHS[activeMode], ...(tenancy ? ["/my-tenancy"] : [])];
   const primaryItems = items.filter((i) => primaryPaths.includes(i.to));
   const moreItems = items.filter((i) => !primaryPaths.includes(i.to));
   const moreActive = moreItems.some((i) => i.to === pathname);
