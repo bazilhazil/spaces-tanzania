@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatCard, EmptyState, SkeletonCard } from "@/components/ds";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 import { FormDialog, TextField, AreaField, SelectField } from "./forms";
 import {
   buildMetrics, createCharge, createContractor, createLease, createPayment, createTenant, createTicket,
   createUnit, fetchCharges, fetchContractors, fetchLeases, fetchManagedProperties, fetchPayments,
-  fetchTenants, fetchTickets, fetchUnits, formatTzs, labelize, reviewPayment, updateTicket, updateUnit,
+  fetchTenants, fetchTickets, fetchUnits, fetchDocuments, signedDocumentUrl, formatTzs, labelize,
+  reviewPayment, updateTicket, updateUnit, type ManagementDocument,
   LEASE_STATUSES, OCCUPANCY_STATUSES, PAYMENT_METHODS, TICKET_CATEGORIES, TICKET_STATUSES,
   type Contractor, type Lease, type ManagedProperty, type MaintenanceTicket, type RentCharge,
   type RentPayment, type Tenant, type Unit,

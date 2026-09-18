@@ -157,6 +157,18 @@ export async function fetchCharges(propertyIds: string[]) { return rows<RentChar
 export async function fetchPayments(propertyIds: string[]) { return rows<RentPayment>("rent_payments", propertyIds); }
 export async function fetchTickets(propertyIds: string[]) { return rows<MaintenanceTicket>("maintenance_tickets", propertyIds); }
 
+export type ManagementDocument = {
+  id: string;
+  name: string;
+  doc_type: string;
+  storage_path: string;
+  property_id: string | null;
+  created_at: string;
+};
+export async function fetchDocuments(propertyIds: string[]) {
+  return rows<ManagementDocument>("management_documents", propertyIds);
+}
+
 export async function fetchContractors(userId: string): Promise<Contractor[]> {
   const { data, error } = await db.from("contractors").select("*").eq("owner_id", userId).order("name");
   if (error) throw error;
