@@ -87,25 +87,27 @@ export function ManagementCenter() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Properties" value={metrics.properties} icon={Building2} />
-        <StatCard label="Units" value={metrics.units} icon={Home} tone="muted" />
-        <StatCard label="Occupied" value={metrics.occupied} icon={Users} tone="success" />
-        <StatCard label="Vacant" value={metrics.vacant} icon={Home} tone="gold" />
-        <StatCard label="Expected rent" value={formatTzs(metrics.expectedRent)} icon={Wallet} />
-        <StatCard label="Collected rent" value={formatTzs(metrics.collectedRent)} icon={Wallet} tone="success" />
-        <StatCard label="Outstanding rent" value={formatTzs(metrics.outstandingRent)} icon={Wallet} tone="danger" />
-        <StatCard label="Open maintenance" value={metrics.openMaintenance} icon={Wrench} tone="muted" />
+        <StatCard label={tr("mgmt.properties")} value={metrics.properties} icon={Building2} />
+        <StatCard label={tr("mgmt.unitsShort")} value={metrics.units} icon={Home} tone="muted" />
+        <StatCard label={tr("mgmt.occupied")} value={metrics.occupied} icon={Users} tone="success" />
+        <StatCard label={tr("mgmt.vacant")} value={metrics.vacant} icon={Home} tone="gold" />
+        <StatCard label={tr("mgmt.expectedRent")} value={formatTzs(metrics.expectedRent)} icon={Wallet} />
+        <StatCard label={tr("mgmt.collectedRent")} value={formatTzs(metrics.collectedRent)} icon={Wallet} tone="success" />
+        <StatCard label={tr("mgmt.outstandingRent")} value={formatTzs(metrics.outstandingRent)} icon={Wallet} tone="danger" />
+        <StatCard label={tr("mgmt.openMaintenance")} value={metrics.openMaintenance} icon={Wrench} tone="muted" />
       </div>
 
       <Tabs defaultValue="units">
         <div className="-mx-1 overflow-x-auto px-1">
           <TabsList className="w-max">
-            <TabsTrigger value="units">Units</TabsTrigger>
-            <TabsTrigger value="tenants">Tenants</TabsTrigger>
-            <TabsTrigger value="leases">Leases</TabsTrigger>
-            <TabsTrigger value="rent">Rent</TabsTrigger>
-            <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
-            <TabsTrigger value="contractors">Contractors</TabsTrigger>
+            <TabsTrigger value="units">{tr("mgmt.unitsShort")}</TabsTrigger>
+            <TabsTrigger value="tenants">{tr("mgmt.tenants")}</TabsTrigger>
+            <TabsTrigger value="leases">{tr("mgmt.leases")}</TabsTrigger>
+            <TabsTrigger value="rent">{tr("mgmt.rent")}</TabsTrigger>
+            <TabsTrigger value="maintenance">{tr("mgmt.maintenance")}</TabsTrigger>
+            <TabsTrigger value="contractors">{tr("mgmt.contractors")}</TabsTrigger>
+            <TabsTrigger value="documents">{tr("mgmt.documents")}</TabsTrigger>
+            <TabsTrigger value="reports">{tr("mgmt.reports")}</TabsTrigger>
           </TabsList>
         </div>
 
