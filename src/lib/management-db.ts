@@ -315,6 +315,16 @@ export async function fetchMyTenancy(userId: string): Promise<MyTenancy | null> 
 }
 
 /** True when the signed-in user has a tenancy (drives the tenant navigation entry). */
+/** True when an agent has been explicitly assigned full management of a listing. */
+export async function hasManagementAssignment(userId: string): Promise<boolean> {
+  const { count } = await supabase
+    .from("property_agents")
+    .select("id", { count: "exact", head: true })
+    .eq("agent_id", userId)
+    .eq("permission", "full_management" as never);
+  return (count ?? 0) > 0;
+}
+
 export async function hasTenancy(userId: string): Promise<boolean> {
   const { count } = await db.from("tenants").select("id", { count: "exact", head: true }).eq("user_id", userId);
   return (count ?? 0) > 0;
