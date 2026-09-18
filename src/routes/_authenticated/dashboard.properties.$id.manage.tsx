@@ -246,7 +246,7 @@ function ManagePropertyPage() {
               {/* Opens the existing Property Management workspace (units, tenants, leases, rent, maintenance). */}
               <Link to="/management">
                 <Button variant="outline" size="sm" className="gap-1.5 rounded-xl">
-                  <Building2 className="h-4 w-4" /> Manage Property
+                  <Building2 className="h-4 w-4" /> {tr("mgmt.manageProperty")}
                 </Button>
               </Link>
             </div>
