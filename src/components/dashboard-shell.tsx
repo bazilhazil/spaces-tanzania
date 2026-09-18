@@ -4,9 +4,10 @@ import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
   Heart, Search, User as UserIcon, Users, Briefcase, GitCompare, Clock, Contact,
   Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles, Handshake, Trophy, Star, ShieldAlert, Bell,
-  MoreHorizontal, ChevronDown,
+  MoreHorizontal, ChevronDown, Building2, KeyRound,
 
 } from "lucide-react";
+import { hasTenancy } from "@/lib/management-db";
 import { Button } from "@/components/ui/button";
 import { Brand } from "@/components/brand";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,6 +28,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
       { label: t("dashboard.side.myProperties"), to: "/dashboard/properties", icon: Home },
       { label: t("dashboard.side.upload"), to: "/upload", icon: Upload },
+      { label: "Property Management", to: "/management", icon: Building2 },
       { label: t("dashboard.side.inquiries"), to: "/leads", icon: Contact },
       { label: t("dashboard.side.deals"), to: "/deals", icon: Handshake },
       { label: "Viewings", to: "/viewings", icon: Calendar },
@@ -64,6 +66,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.inquiries"), to: "/leads", icon: Contact },
       { label: t("dashboard.side.deals"), to: "/deals", icon: Handshake },
       { label: t("dashboard.side.properties"), to: "/dashboard/properties", icon: Briefcase },
+      { label: "Property Management", to: "/management", icon: Building2 },
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
       { label: t("dashboard.side.reviews"), to: "/reviews", icon: Star },
