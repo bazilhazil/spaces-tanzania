@@ -36,7 +36,9 @@ import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedTrustRouteImport } from './routes/_authenticated/trust'
 import { Route as AuthenticatedReviewsRouteImport } from './routes/_authenticated/reviews'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedMyTenancyRouteImport } from './routes/_authenticated/my-tenancy'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
+import { Route as AuthenticatedManagementRouteImport } from './routes/_authenticated/management'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as AuthenticatedDealsRouteImport } from './routes/_authenticated/deals'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -200,9 +202,19 @@ const AuthenticatedNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMyTenancyRoute = AuthenticatedMyTenancyRouteImport.update({
+  id: '/my-tenancy',
+  path: '/my-tenancy',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedManagementRoute = AuthenticatedManagementRouteImport.update({
+  id: '/management',
+  path: '/management',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
@@ -366,7 +378,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/deals': typeof AuthenticatedDealsRoute
   '/leads': typeof AuthenticatedLeadsRoute
+  '/management': typeof AuthenticatedManagementRoute
   '/messages': typeof AuthenticatedMessagesRoute
+  '/my-tenancy': typeof AuthenticatedMyTenancyRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/reviews': typeof AuthenticatedReviewsRoute
   '/trust': typeof AuthenticatedTrustRoute
@@ -419,7 +433,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/deals': typeof AuthenticatedDealsRoute
   '/leads': typeof AuthenticatedLeadsRoute
+  '/management': typeof AuthenticatedManagementRoute
   '/messages': typeof AuthenticatedMessagesRoute
+  '/my-tenancy': typeof AuthenticatedMyTenancyRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/reviews': typeof AuthenticatedReviewsRoute
   '/trust': typeof AuthenticatedTrustRoute
@@ -475,7 +491,9 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/deals': typeof AuthenticatedDealsRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
+  '/_authenticated/management': typeof AuthenticatedManagementRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
+  '/_authenticated/my-tenancy': typeof AuthenticatedMyTenancyRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/reviews': typeof AuthenticatedReviewsRoute
   '/_authenticated/trust': typeof AuthenticatedTrustRoute
@@ -531,7 +549,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/deals'
     | '/leads'
+    | '/management'
     | '/messages'
+    | '/my-tenancy'
     | '/notifications'
     | '/reviews'
     | '/trust'
@@ -584,7 +604,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/deals'
     | '/leads'
+    | '/management'
     | '/messages'
+    | '/my-tenancy'
     | '/notifications'
     | '/reviews'
     | '/trust'
@@ -639,7 +661,9 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/deals'
     | '/_authenticated/leads'
+    | '/_authenticated/management'
     | '/_authenticated/messages'
+    | '/_authenticated/my-tenancy'
     | '/_authenticated/notifications'
     | '/_authenticated/reviews'
     | '/_authenticated/trust'
@@ -890,11 +914,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/my-tenancy': {
+      id: '/_authenticated/my-tenancy'
+      path: '/my-tenancy'
+      fullPath: '/my-tenancy'
+      preLoaderRoute: typeof AuthenticatedMyTenancyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/messages': {
       id: '/_authenticated/messages'
       path: '/messages'
       fullPath: '/messages'
       preLoaderRoute: typeof AuthenticatedMessagesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/management': {
+      id: '/_authenticated/management'
+      path: '/management'
+      fullPath: '/management'
+      preLoaderRoute: typeof AuthenticatedManagementRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/leads': {
@@ -1153,7 +1191,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
   AuthenticatedDealsRoute: typeof AuthenticatedDealsRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
+  AuthenticatedManagementRoute: typeof AuthenticatedManagementRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
+  AuthenticatedMyTenancyRoute: typeof AuthenticatedMyTenancyRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedReviewsRoute: typeof AuthenticatedReviewsRoute
   AuthenticatedTrustRoute: typeof AuthenticatedTrustRoute
@@ -1174,7 +1214,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
   AuthenticatedDealsRoute: AuthenticatedDealsRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
+  AuthenticatedManagementRoute: AuthenticatedManagementRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
+  AuthenticatedMyTenancyRoute: AuthenticatedMyTenancyRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedReviewsRoute: AuthenticatedReviewsRoute,
   AuthenticatedTrustRoute: AuthenticatedTrustRoute,

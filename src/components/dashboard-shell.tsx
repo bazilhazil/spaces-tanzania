@@ -1,12 +1,13 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Home, Upload, MessageSquare, Calendar, BarChart3, CreditCard, Settings,
   Heart, Search, User as UserIcon, Users, Briefcase, GitCompare, Clock, Contact,
   Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles, Handshake, Trophy, Star, ShieldAlert, Bell,
-  MoreHorizontal, ChevronDown,
+  MoreHorizontal, ChevronDown, Building2, KeyRound,
 
 } from "lucide-react";
+import { hasTenancy } from "@/lib/management-db";
 import { Button } from "@/components/ui/button";
 import { Brand } from "@/components/brand";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,6 +28,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
       { label: t("dashboard.side.myProperties"), to: "/dashboard/properties", icon: Home },
       { label: t("dashboard.side.upload"), to: "/upload", icon: Upload },
+      { label: "Property Management", to: "/management", icon: Building2 },
       { label: t("dashboard.side.inquiries"), to: "/leads", icon: Contact },
       { label: t("dashboard.side.deals"), to: "/deals", icon: Handshake },
       { label: "Viewings", to: "/viewings", icon: Calendar },
@@ -64,6 +66,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.inquiries"), to: "/leads", icon: Contact },
       { label: t("dashboard.side.deals"), to: "/deals", icon: Handshake },
       { label: t("dashboard.side.properties"), to: "/dashboard/properties", icon: Briefcase },
+      { label: "Property Management", to: "/management", icon: Building2 },
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
       { label: t("dashboard.side.reviews"), to: "/reviews", icon: Star },
@@ -101,10 +104,21 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const NAV = useRoleNav();
   const isAdmin = roles.includes("admin") || roles.includes("super_admin");
-  const items: Item[] = isAdmin
-    ? [...NAV[activeMode], { label: t("dashboard.side.admin"), to: "/admin", icon: ShieldAlert }]
+  const [tenancy, setTenancy] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    if (!user) { setTenancy(false); return; }
+    void hasTenancy(user.id).then((v) => { if (alive) setTenancy(v); }).catch(() => {});
+    return () => { alive = false; };
+  }, [user?.id]);
+
+  const base: Item[] = tenancy
+    ? [NAV[activeMode][0], { label: "My Tenancy", to: "/my-tenancy", icon: KeyRound }, ...NAV[activeMode].slice(1)]
     : NAV[activeMode];
-  const primaryPaths = PRIMARY_PATHS[activeMode];
+  const items: Item[] = isAdmin
+    ? [...base, { label: t("dashboard.side.admin"), to: "/admin", icon: ShieldAlert }]
+    : base;
+  const primaryPaths = [...PRIMARY_PATHS[activeMode], ...(tenancy ? ["/my-tenancy"] : [])];
   const primaryItems = items.filter((i) => primaryPaths.includes(i.to));
   const moreItems = items.filter((i) => !primaryPaths.includes(i.to));
   const moreActive = moreItems.some((i) => i.to === pathname);

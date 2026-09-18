@@ -351,6 +351,51 @@ export type Database = {
         }
         Relationships: []
       }
+      contractors: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string | null
+          id: string
+          location: string | null
+          name: string
+          notes: string | null
+          owner_id: string
+          phone: string | null
+          service_category: string | null
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          notes?: string | null
+          owner_id: string
+          phone?: string | null
+          service_category?: string | null
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          notes?: string | null
+          owner_id?: string
+          phone?: string | null
+          service_category?: string | null
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           buyer_id: string
@@ -764,6 +809,363 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leases: {
+        Row: {
+          created_at: string
+          currency: string
+          deposit_amount: number | null
+          document_path: string | null
+          end_date: string | null
+          id: string
+          late_fee_grace_days: number | null
+          late_fee_type: string
+          late_fee_value: number | null
+          manager_id: string | null
+          monthly_rent: number
+          notice_period_days: number | null
+          owner_id: string
+          payment_frequency: string
+          property_id: string
+          renewal_date: string | null
+          service_charge: number | null
+          signed_document_path: string | null
+          special_terms: string | null
+          start_date: string
+          status: string
+          tenant_id: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          deposit_amount?: number | null
+          document_path?: string | null
+          end_date?: string | null
+          id?: string
+          late_fee_grace_days?: number | null
+          late_fee_type?: string
+          late_fee_value?: number | null
+          manager_id?: string | null
+          monthly_rent?: number
+          notice_period_days?: number | null
+          owner_id: string
+          payment_frequency?: string
+          property_id: string
+          renewal_date?: string | null
+          service_charge?: number | null
+          signed_document_path?: string | null
+          special_terms?: string | null
+          start_date: string
+          status?: string
+          tenant_id: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          deposit_amount?: number | null
+          document_path?: string | null
+          end_date?: string | null
+          id?: string
+          late_fee_grace_days?: number | null
+          late_fee_type?: string
+          late_fee_value?: number | null
+          manager_id?: string | null
+          monthly_rent?: number
+          notice_period_days?: number | null
+          owner_id?: string
+          payment_frequency?: string
+          property_id?: string
+          renewal_date?: string | null
+          service_charge?: number | null
+          signed_document_path?: string | null
+          special_terms?: string | null
+          start_date?: string
+          status?: string
+          tenant_id?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leases_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leases_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leases_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leases_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "property_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_tickets: {
+        Row: {
+          actual_cost: number | null
+          approved_cost: number | null
+          category: string
+          closed_at: string | null
+          contractor_id: string | null
+          created_at: string
+          currency: string
+          description: string
+          estimated_cost: number | null
+          id: string
+          lease_id: string | null
+          notes: string | null
+          owner_id: string
+          priority: string
+          property_id: string
+          reported_by: string | null
+          status: string
+          tenant_id: string | null
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_cost?: number | null
+          approved_cost?: number | null
+          category?: string
+          closed_at?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          currency?: string
+          description: string
+          estimated_cost?: number | null
+          id?: string
+          lease_id?: string | null
+          notes?: string | null
+          owner_id: string
+          priority?: string
+          property_id: string
+          reported_by?: string | null
+          status?: string
+          tenant_id?: string | null
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_cost?: number | null
+          approved_cost?: number | null
+          category?: string
+          closed_at?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          currency?: string
+          description?: string
+          estimated_cost?: number | null
+          id?: string
+          lease_id?: string | null
+          notes?: string | null
+          owner_id?: string
+          priority?: string
+          property_id?: string
+          reported_by?: string | null
+          status?: string
+          tenant_id?: string | null
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_tickets_contractor_id_fkey"
+            columns: ["contractor_id"]
+            isOneToOne: false
+            referencedRelation: "contractors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "leases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "property_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      management_documents: {
+        Row: {
+          charge_id: string | null
+          created_at: string
+          doc_type: string
+          id: string
+          lease_id: string | null
+          mime_type: string | null
+          name: string
+          owner_id: string
+          payment_id: string | null
+          property_id: string | null
+          size: number | null
+          storage_path: string
+          tenant_id: string | null
+          ticket_id: string | null
+          unit_id: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          charge_id?: string | null
+          created_at?: string
+          doc_type?: string
+          id?: string
+          lease_id?: string | null
+          mime_type?: string | null
+          name: string
+          owner_id: string
+          payment_id?: string | null
+          property_id?: string | null
+          size?: number | null
+          storage_path: string
+          tenant_id?: string | null
+          ticket_id?: string | null
+          unit_id?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          charge_id?: string | null
+          created_at?: string
+          doc_type?: string
+          id?: string
+          lease_id?: string | null
+          mime_type?: string | null
+          name?: string
+          owner_id?: string
+          payment_id?: string | null
+          property_id?: string | null
+          size?: number | null
+          storage_path?: string
+          tenant_id?: string | null
+          ticket_id?: string | null
+          unit_id?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "management_documents_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "rent_charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "management_documents_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "leases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "management_documents_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "rent_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "management_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "management_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "management_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "management_documents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "management_documents_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "management_documents_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "property_units"
             referencedColumns: ["id"]
           },
         ]
@@ -1473,6 +1875,82 @@ export type Database = {
           },
         ]
       }
+      property_units: {
+        Row: {
+          bathrooms: number | null
+          bedrooms: number | null
+          created_at: string
+          currency: string
+          deposit_amount: number | null
+          id: string
+          name: string
+          notes: string | null
+          occupancy_status: string
+          owner_id: string
+          property_id: string
+          rent_amount: number | null
+          service_charge: number | null
+          unit_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          currency?: string
+          deposit_amount?: number | null
+          id?: string
+          name: string
+          notes?: string | null
+          occupancy_status?: string
+          owner_id: string
+          property_id: string
+          rent_amount?: number | null
+          service_charge?: number | null
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          currency?: string
+          deposit_amount?: number | null
+          id?: string
+          name?: string
+          notes?: string | null
+          occupancy_status?: string
+          owner_id?: string
+          property_id?: string
+          rent_amount?: number | null
+          service_charge?: number | null
+          unit_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_views: {
         Row: {
           created_at: string
@@ -1515,6 +1993,218 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rent_charges: {
+        Row: {
+          amount_due: number
+          amount_paid: number
+          created_at: string
+          currency: string
+          due_date: string
+          id: string
+          lease_id: string
+          notes: string | null
+          owner_id: string
+          period_end: string | null
+          period_start: string | null
+          property_id: string
+          status: string
+          tenant_id: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_due?: number
+          amount_paid?: number
+          created_at?: string
+          currency?: string
+          due_date: string
+          id?: string
+          lease_id: string
+          notes?: string | null
+          owner_id: string
+          period_end?: string | null
+          period_start?: string | null
+          property_id: string
+          status?: string
+          tenant_id: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_due?: number
+          amount_paid?: number
+          created_at?: string
+          currency?: string
+          due_date?: string
+          id?: string
+          lease_id?: string
+          notes?: string | null
+          owner_id?: string
+          period_end?: string | null
+          period_start?: string | null
+          property_id?: string
+          status?: string
+          tenant_id?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rent_charges_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "leases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_charges_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_charges_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_charges_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_charges_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_charges_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "property_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rent_payments: {
+        Row: {
+          amount: number
+          charge_id: string
+          created_at: string
+          currency: string
+          id: string
+          lease_id: string
+          method: string
+          owner_id: string
+          paid_at: string | null
+          proof_path: string | null
+          property_id: string
+          receipt_path: string | null
+          recorded_by: string | null
+          reference: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          charge_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          lease_id: string
+          method?: string
+          owner_id: string
+          paid_at?: string | null
+          proof_path?: string | null
+          property_id: string
+          receipt_path?: string | null
+          recorded_by?: string | null
+          reference?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          charge_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          lease_id?: string
+          method?: string
+          owner_id?: string
+          paid_at?: string | null
+          proof_path?: string | null
+          property_id?: string
+          receipt_path?: string | null
+          recorded_by?: string | null
+          reference?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rent_payments_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "rent_charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_payments_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "leases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_payments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_payments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_payments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -2165,6 +2855,92 @@ export type Database = {
           },
         ]
       }
+      tenants: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          emergency_name: string | null
+          emergency_phone: string | null
+          full_name: string
+          id: string
+          id_document_ref: string | null
+          notes: string | null
+          owner_id: string
+          phone: string | null
+          property_id: string
+          status: string
+          unit_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          emergency_name?: string | null
+          emergency_phone?: string | null
+          full_name: string
+          id?: string
+          id_document_ref?: string | null
+          notes?: string | null
+          owner_id: string
+          phone?: string | null
+          property_id: string
+          status?: string
+          unit_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          emergency_name?: string | null
+          emergency_phone?: string | null
+          full_name?: string
+          id?: string
+          id_document_ref?: string | null
+          notes?: string | null
+          owner_id?: string
+          phone?: string | null
+          property_id?: string
+          status?: string
+          unit_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenants_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenants_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenants_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenants_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "property_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_blocks: {
         Row: {
           blocked_id: string
@@ -2565,6 +3341,7 @@ export type Database = {
         Args: { _property_id: string; _reason?: string }
         Returns: Json
       }
+      can_manage_property: { Args: { _property_id: string }; Returns: boolean }
       check_my_subscription_expiry: { Args: never; Returns: undefined }
       crm_lead_status_for_stage: {
         Args: { _stage: Database["public"]["Enums"]["deal_stage"] }
@@ -2602,6 +3379,7 @@ export type Database = {
         Returns: boolean
       }
       is_blocked_with: { Args: { _other: string }; Returns: boolean }
+      is_my_tenancy: { Args: { _tenant_id: string }; Returns: boolean }
       moderate_review: {
         Args: { _reason?: string; _review_id: string; _status: string }
         Returns: undefined
@@ -2642,6 +3420,7 @@ export type Database = {
           source_id: string
         }[]
       }
+      owner_of_property: { Args: { _property_id: string }; Returns: string }
       plan_id_for_user: { Args: { _user_id: string }; Returns: string }
       property_rating: {
         Args: { _property_id: string }
