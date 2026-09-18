@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft, Eye, Calendar, DollarSign, Ruler, Camera, MapPin, FileText,
-  Pause, Play, Trash2, Star, Upload as UploadIcon, X, Home, Loader2, Save, GripVertical, Check, ExternalLink,
+  Pause, Play, Trash2, Star, Upload as UploadIcon, X, Home, Loader2, Save, GripVertical, Check, ExternalLink, Building2,
 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { signedUrl, uploadMediaFile, compressImageFile } from "@/lib/property-media";
 import { RemoveSpaceDialog } from "@/components/property-management/remove-space-dialog";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PROPERTY_TYPES } from "@/components/property-management/constants";
@@ -75,6 +76,7 @@ type MediaRow = {
 function ManagePropertyPage() {
   const { id } = Route.useParams();
   const { user } = useAuth();
+  const { t: tr } = useI18n();
   const navigate = useNavigate();
   const [prop, setProp] = useState<Property | null>(null);
   const [media, setMedia] = useState<MediaRow[]>([]);
@@ -239,6 +241,14 @@ function ManagePropertyPage() {
               <span className="inline-flex items-center gap-1.5 font-display font-semibold text-primary">
                 {prop.currency} {Number(prop.price).toLocaleString()}
               </span>
+            </div>
+            <div>
+              {/* Opens the existing Property Management workspace (units, tenants, leases, rent, maintenance). */}
+              <Link to="/management">
+                <Button variant="outline" size="sm" className="gap-1.5 rounded-xl">
+                  <Building2 className="h-4 w-4" /> {tr("mgmt.manageProperty")}
+                </Button>
+              </Link>
             </div>
           </div>
         </header>

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { TenantPortal } from "@/components/management/tenant-portal";
+import { useI18n } from "@/hooks/use-i18n";
 
 export const Route = createFileRoute("/_authenticated/my-tenancy")({
   head: () => ({
@@ -17,11 +18,14 @@ export const Route = createFileRoute("/_authenticated/my-tenancy")({
 });
 
 function TenancyPage() {
+  const { t } = useI18n();
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-5xl space-y-6 animate-fade-in">
+      <div className="mx-auto w-full min-w-0 max-w-5xl space-y-6 overflow-x-hidden animate-fade-in">
         <header>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">My Tenancy</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+            {t("mgmt.myTenancy")}
+          </h1>
           <p className="mt-1 text-muted-foreground">Your home, rent, lease and maintenance requests.</p>
         </header>
         <TenantPortal />

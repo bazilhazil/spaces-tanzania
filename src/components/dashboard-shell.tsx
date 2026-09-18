@@ -7,7 +7,7 @@ import {
   MoreHorizontal, ChevronDown, Building2, KeyRound,
 
 } from "lucide-react";
-import { hasTenancy } from "@/lib/management-db";
+import { hasTenancy, hasManagementAssignment } from "@/lib/management-db";
 import { Button } from "@/components/ui/button";
 import { Brand } from "@/components/brand";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,7 +28,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
       { label: t("dashboard.side.myProperties"), to: "/dashboard/properties", icon: Home },
       { label: t("dashboard.side.upload"), to: "/upload", icon: Upload },
-      { label: "Property Management", to: "/management", icon: Building2 },
+      { label: t("mgmt.nav"), to: "/management", icon: Building2 },
       { label: t("dashboard.side.inquiries"), to: "/leads", icon: Contact },
       { label: t("dashboard.side.deals"), to: "/deals", icon: Handshake },
       { label: "Viewings", to: "/viewings", icon: Calendar },
@@ -66,7 +66,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.inquiries"), to: "/leads", icon: Contact },
       { label: t("dashboard.side.deals"), to: "/deals", icon: Handshake },
       { label: t("dashboard.side.properties"), to: "/dashboard/properties", icon: Briefcase },
-      { label: "Property Management", to: "/management", icon: Building2 },
+      { label: t("mgmt.nav"), to: "/management", icon: Building2 },
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
       { label: t("dashboard.side.reviews"), to: "/reviews", icon: Star },
@@ -88,9 +88,9 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
  * sidebar stays simple for ordinary owners.
  */
 const PRIMARY_PATHS: Record<SpacesMode, string[]> = {
-  owner: ["/dashboard", "/dashboard/properties", "/upload", "/leads", "/viewings", "/messages", "/notifications"],
+  owner: ["/dashboard", "/dashboard/properties", "/management", "/upload", "/leads", "/viewings", "/messages", "/notifications"],
   buyer: ["/dashboard", "/dashboard/favorites", "/dashboard/searches", "/viewings", "/messages", "/notifications"],
-  agent: ["/dashboard", "/leads", "/deals", "/dashboard/properties", "/viewings", "/messages", "/notifications"],
+  agent: ["/dashboard", "/leads", "/deals", "/dashboard/properties", "/management", "/viewings", "/messages", "/notifications"],
 };
 
 export function DashboardShell({ children }: { children: ReactNode }) {
@@ -105,16 +105,22 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const NAV = useRoleNav();
   const isAdmin = roles.includes("admin") || roles.includes("super_admin");
   const [tenancy, setTenancy] = useState(false);
+  const [agentManages, setAgentManages] = useState(false);
   useEffect(() => {
     let alive = true;
-    if (!user) { setTenancy(false); return; }
+    if (!user) { setTenancy(false); setAgentManages(false); return; }
     void hasTenancy(user.id).then((v) => { if (alive) setTenancy(v); }).catch(() => {});
+    void hasManagementAssignment(user.id).then((v) => { if (alive) setAgentManages(v); }).catch(() => {});
     return () => { alive = false; };
   }, [user?.id]);
 
+  // Agents only see Property Management for listings an owner explicitly assigned to them.
+  const modeNav = NAV[activeMode].filter(
+    (i) => i.to !== "/management" || activeMode !== "agent" || agentManages,
+  );
   const base: Item[] = tenancy
-    ? [NAV[activeMode][0], { label: "My Tenancy", to: "/my-tenancy", icon: KeyRound }, ...NAV[activeMode].slice(1)]
-    : NAV[activeMode];
+    ? [modeNav[0], { label: t("mgmt.myTenancy"), to: "/my-tenancy", icon: KeyRound }, ...modeNav.slice(1)]
+    : modeNav;
   const items: Item[] = isAdmin
     ? [...base, { label: t("dashboard.side.admin"), to: "/admin", icon: ShieldAlert }]
     : base;

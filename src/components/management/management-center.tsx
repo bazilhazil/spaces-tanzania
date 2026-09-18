@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatCard, EmptyState, SkeletonCard } from "@/components/ds";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 import { FormDialog, TextField, AreaField, SelectField } from "./forms";
 import {
   buildMetrics, createCharge, createContractor, createLease, createPayment, createTenant, createTicket,
   createUnit, fetchCharges, fetchContractors, fetchLeases, fetchManagedProperties, fetchPayments,
-  fetchTenants, fetchTickets, fetchUnits, formatTzs, labelize, reviewPayment, updateTicket, updateUnit,
+  fetchTenants, fetchTickets, fetchUnits, fetchDocuments, signedDocumentUrl, formatTzs, labelize,
+  reviewPayment, updateTicket, updateUnit, type ManagementDocument,
   LEASE_STATUSES, OCCUPANCY_STATUSES, PAYMENT_METHODS, TICKET_CATEGORIES, TICKET_STATUSES,
   type Contractor, type Lease, type ManagedProperty, type MaintenanceTicket, type RentCharge,
   type RentPayment, type Tenant, type Unit,
@@ -22,7 +24,9 @@ const opts = (values: readonly string[]) => values.map((v) => ({ value: v, label
 
 export function ManagementCenter() {
   const { user } = useAuth();
+  const { t: tr } = useI18n();
   const [loading, setLoading] = useState(true);
+  const [documents, setDocuments] = useState<ManagementDocument[]>([]);
   const [properties, setProperties] = useState<ManagedProperty[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
@@ -39,12 +43,12 @@ export function ManagementCenter() {
       const props = await fetchManagedProperties(user.id);
       setProperties(props);
       const ids = props.map((p) => p.id);
-      const [u, t, l, c, p, k, co] = await Promise.all([
+      const [u, t, l, c, p, k, co, docs] = await Promise.all([
         fetchUnits(ids), fetchTenants(ids), fetchLeases(ids), fetchCharges(ids),
-        fetchPayments(ids), fetchTickets(ids), fetchContractors(user.id),
+        fetchPayments(ids), fetchTickets(ids), fetchContractors(user.id), fetchDocuments(ids),
       ]);
       setUnits(u); setTenants(t); setLeases(l); setCharges(c);
-      setPayments(p); setTickets(k); setContractors(co);
+      setPayments(p); setTickets(k); setContractors(co); setDocuments(docs);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not load management records");
     } finally {
@@ -83,25 +87,27 @@ export function ManagementCenter() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Properties" value={metrics.properties} icon={Building2} />
-        <StatCard label="Units" value={metrics.units} icon={Home} tone="muted" />
-        <StatCard label="Occupied" value={metrics.occupied} icon={Users} tone="success" />
-        <StatCard label="Vacant" value={metrics.vacant} icon={Home} tone="gold" />
-        <StatCard label="Expected rent" value={formatTzs(metrics.expectedRent)} icon={Wallet} />
-        <StatCard label="Collected rent" value={formatTzs(metrics.collectedRent)} icon={Wallet} tone="success" />
-        <StatCard label="Outstanding rent" value={formatTzs(metrics.outstandingRent)} icon={Wallet} tone="danger" />
-        <StatCard label="Open maintenance" value={metrics.openMaintenance} icon={Wrench} tone="muted" />
+        <StatCard label={tr("mgmt.properties")} value={metrics.properties} icon={Building2} />
+        <StatCard label={tr("mgmt.unitsShort")} value={metrics.units} icon={Home} tone="muted" />
+        <StatCard label={tr("mgmt.occupied")} value={metrics.occupied} icon={Users} tone="success" />
+        <StatCard label={tr("mgmt.vacant")} value={metrics.vacant} icon={Home} tone="gold" />
+        <StatCard label={tr("mgmt.expectedRent")} value={formatTzs(metrics.expectedRent)} icon={Wallet} />
+        <StatCard label={tr("mgmt.collectedRent")} value={formatTzs(metrics.collectedRent)} icon={Wallet} tone="success" />
+        <StatCard label={tr("mgmt.outstandingRent")} value={formatTzs(metrics.outstandingRent)} icon={Wallet} tone="danger" />
+        <StatCard label={tr("mgmt.openMaintenance")} value={metrics.openMaintenance} icon={Wrench} tone="muted" />
       </div>
 
       <Tabs defaultValue="units">
         <div className="-mx-1 overflow-x-auto px-1">
           <TabsList className="w-max">
-            <TabsTrigger value="units">Units</TabsTrigger>
-            <TabsTrigger value="tenants">Tenants</TabsTrigger>
-            <TabsTrigger value="leases">Leases</TabsTrigger>
-            <TabsTrigger value="rent">Rent</TabsTrigger>
-            <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
-            <TabsTrigger value="contractors">Contractors</TabsTrigger>
+            <TabsTrigger value="units">{tr("mgmt.unitsShort")}</TabsTrigger>
+            <TabsTrigger value="tenants">{tr("mgmt.tenants")}</TabsTrigger>
+            <TabsTrigger value="leases">{tr("mgmt.leases")}</TabsTrigger>
+            <TabsTrigger value="rent">{tr("mgmt.rent")}</TabsTrigger>
+            <TabsTrigger value="maintenance">{tr("mgmt.maintenance")}</TabsTrigger>
+            <TabsTrigger value="contractors">{tr("mgmt.contractors")}</TabsTrigger>
+            <TabsTrigger value="documents">{tr("mgmt.documents")}</TabsTrigger>
+            <TabsTrigger value="reports">{tr("mgmt.reports")}</TabsTrigger>
           </TabsList>
         </div>
 
@@ -309,6 +315,50 @@ export function ManagementCenter() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* DOCUMENTS ------------------------------------------------------ */}
+        <TabsContent value="documents" className="mt-4 space-y-4">
+          {!documents.length ? (
+            <EmptyState icon={FileText} title={tr("mgmt.noDocuments")} description={tr("mgmt.noDocumentsBody")} />
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {documents.map((d) => (
+                <div key={d.id} className="ds-card space-y-2 p-4">
+                  <p className="truncate font-semibold">{d.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {[labelize(d.doc_type), propTitle(d.property_id ?? "")].filter(Boolean).join(" · ")}
+                  </p>
+                  <Button
+                    size="sm" variant="outline" className="rounded-lg"
+                    onClick={async () => {
+                      const url = await signedDocumentUrl(d.storage_path);
+                      if (url) window.open(url, "_blank", "noopener");
+                      else toast.error("Could not open this document");
+                    }}
+                  >
+                    {tr("mgmt.openDocument")}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* REPORTS -------------------------------------------------------- */}
+        <TabsContent value="reports" className="mt-4 space-y-4">
+          <p className="text-sm text-muted-foreground">{tr("mgmt.reportsNote")}</p>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard label={tr("mgmt.tenants")} value={metrics.tenants} icon={Users} />
+            <StatCard label={tr("mgmt.activeLeases")} value={leases.filter((l) => l.status === "active").length} icon={FileText} tone="muted" />
+            <StatCard
+              label={tr("mgmt.collectionRate")}
+              value={metrics.expectedRent > 0 ? `${Math.round((metrics.collectedRent / metrics.expectedRent) * 100)}%` : "—"}
+              icon={Wallet}
+              tone="success"
+            />
+            <StatCard label={tr("mgmt.openMaintenance")} value={metrics.openMaintenance} icon={Wrench} tone="danger" />
+          </div>
         </TabsContent>
       </Tabs>
     </div>
