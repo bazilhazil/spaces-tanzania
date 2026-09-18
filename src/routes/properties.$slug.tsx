@@ -415,16 +415,20 @@ function PropertyDetailPage() {
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Available
                       </span>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-foreground">
-                        <ShieldAlert className="h-3.5 w-3.5" /> Verification in progress
-                      </span>
+                      {(verificationState === "in_progress" || verificationState === "more_info") && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-foreground">
+                          <ShieldAlert className="h-3.5 w-3.5" /> Verification in progress
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      This property is currently being verified by SPACES. Please confirm property
-                      details and ownership before making any payment.
+                      {verificationState === "in_progress" || verificationState === "more_info"
+                        ? "This property is currently being verified by SPACES. Please confirm property details and ownership before making any payment."
+                        : "This property has not been verified by SPACES. Please confirm property details and ownership before making any payment."}
                     </p>
                   </div>
                 )}
+
               </div>
               <div className="text-right">
                 <p className="font-display text-3xl font-semibold text-primary md:text-4xl">
