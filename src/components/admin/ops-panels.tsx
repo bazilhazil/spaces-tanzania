@@ -116,7 +116,7 @@ const GROUP_LABEL: Record<AttentionGroup, string> = {
   viewings: "admin.ops.group.viewings",
   verification: "admin.ops.group.verification",
   reports: "admin.ops.group.reports",
-  support: "admin.nav.support",
+  support: "admin.ops.group.support",
   communications: "admin.ops.group.communications",
   payments: "admin.ops.group.payments",
 };

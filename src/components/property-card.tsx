@@ -24,7 +24,7 @@ interface PropertyCardProps {
 
 export function PropertyCard({ property, className, qualityScore }: PropertyCardProps) {
   const { t } = useI18n();
-  const { isFavorite, toggleFavorite, isComparing, toggleCompare, trackView } = useFavorites();
+  const { isFavorite, toggleFavorite, isComparing, toggleCompare } = useFavorites();
   const { user } = useAuth();
   const [authGate, setAuthGate] = useState(false);
   const favorited = isFavorite(property.id);
@@ -47,7 +47,7 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
     <Link
       to="/properties/$slug"
       params={{ slug: propertySlug(property) }}
-      onClick={() => trackView(property.id)}
+      // The space page records the visit, so the card must not count it again.
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-elevated)]",
         className,
