@@ -24,7 +24,9 @@ const opts = (values: readonly string[]) => values.map((v) => ({ value: v, label
 
 export function ManagementCenter() {
   const { user } = useAuth();
+  const { t: tr } = useI18n();
   const [loading, setLoading] = useState(true);
+  const [documents, setDocuments] = useState<ManagementDocument[]>([]);
   const [properties, setProperties] = useState<ManagedProperty[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
@@ -41,12 +43,12 @@ export function ManagementCenter() {
       const props = await fetchManagedProperties(user.id);
       setProperties(props);
       const ids = props.map((p) => p.id);
-      const [u, t, l, c, p, k, co] = await Promise.all([
+      const [u, t, l, c, p, k, co, docs] = await Promise.all([
         fetchUnits(ids), fetchTenants(ids), fetchLeases(ids), fetchCharges(ids),
-        fetchPayments(ids), fetchTickets(ids), fetchContractors(user.id),
+        fetchPayments(ids), fetchTickets(ids), fetchContractors(user.id), fetchDocuments(ids),
       ]);
       setUnits(u); setTenants(t); setLeases(l); setCharges(c);
-      setPayments(p); setTickets(k); setContractors(co);
+      setPayments(p); setTickets(k); setContractors(co); setDocuments(docs);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not load management records");
     } finally {
