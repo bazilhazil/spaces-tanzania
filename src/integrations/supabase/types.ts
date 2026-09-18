@@ -3134,6 +3134,7 @@ export type Database = {
           street: string | null
           title: string | null
           updated_at: string | null
+          verification_status: string | null
           verified: boolean | null
           view_count: number | null
           ward: string | null
@@ -3167,6 +3168,7 @@ export type Database = {
           street?: string | null
           title?: string | null
           updated_at?: string | null
+          verification_status?: string | null
           verified?: boolean | null
           view_count?: number | null
           ward?: string | null
@@ -3200,6 +3202,7 @@ export type Database = {
           street?: string | null
           title?: string | null
           updated_at?: string | null
+          verification_status?: string | null
           verified?: boolean | null
           view_count?: number | null
           ward?: string | null

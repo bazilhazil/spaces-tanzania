@@ -99,13 +99,36 @@ export async function uploadMediaFile(
   return { path };
 }
 
-const publicUrlCache = new Map<string, string>();
+/**
+ * Signed URLs are temporary, so the cache remembers when each one stops being
+ * usable and refreshes it before it expires. Without this, photos loaded at the
+ * start of a browsing session break after about an hour.
+ */
+type CachedUrl = { url: string; expiresAt: number };
+const publicUrlCache = new Map<string, CachedUrl>();
+/** Refresh a little before the real expiry so an in-flight load never fails. */
+const SAFETY_WINDOW_MS = 5 * 60 * 1000;
+
+function cacheUrl(path: string, url: string, expiresIn: number) {
+  publicUrlCache.set(path, { url, expiresAt: Date.now() + expiresIn * 1000 - SAFETY_WINDOW_MS });
+}
+
+function freshFromCache(path: string): string | null {
+  const hit = publicUrlCache.get(path);
+  if (!hit) return null;
+  if (hit.expiresAt <= Date.now()) {
+    publicUrlCache.delete(path);
+    return null;
+  }
+  return hit.url;
+}
+
 let pendingPaths: string[] = [];
 let pendingTimer: ReturnType<typeof setTimeout> | null = null;
 let pendingResolvers: (() => void)[] = [];
 
 /** Batches public media requests so a gallery costs one server round-trip. */
-async function signPublicBatch(path: string): Promise<string | null> {
+async function signPublicBatch(path: string, expiresIn: number): Promise<string | null> {
   const { signPublicMediaFn } = await import("@/lib/public-media.functions");
   if (!pendingPaths.includes(path)) pendingPaths.push(path);
 
@@ -119,8 +142,8 @@ async function signPublicBatch(path: string): Promise<string | null> {
       pendingResolvers = [];
       pendingTimer = null;
       try {
-        const map = await signPublicMediaFn({ data: { paths } });
-        for (const [p, url] of Object.entries(map ?? {})) publicUrlCache.set(p, url);
+        const map = await signPublicMediaFn({ data: { paths, expiresIn } });
+        for (const [p, url] of Object.entries(map ?? {})) cacheUrl(p, url, expiresIn);
       } catch {
         /* fall through — caller gets null */
       }
@@ -128,17 +151,26 @@ async function signPublicBatch(path: string): Promise<string | null> {
     }, 20);
   });
 
-  return publicUrlCache.get(path) ?? null;
+  return freshFromCache(path);
 }
 
 export async function signedUrl(path: string, expiresIn = 3600): Promise<string | null> {
-  const cached = publicUrlCache.get(path);
+  const cached = freshFromCache(path);
   if (cached) return cached;
 
   const { data: sessionData } = await supabase.auth.getSession();
   if (sessionData.session) {
     const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, expiresIn);
-    if (data?.signedUrl) return data.signedUrl;
+    if (data?.signedUrl) {
+      cacheUrl(path, data.signedUrl, expiresIn);
+      return data.signedUrl;
+    }
   }
-  return signPublicBatch(path);
+  return signPublicBatch(path, expiresIn);
 }
+
+/** Drop a cached link (used when a browser reports an expired image). */
+export function forgetSignedUrl(path: string) {
+  publicUrlCache.delete(path);
+}
+

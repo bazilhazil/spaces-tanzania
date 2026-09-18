@@ -112,6 +112,10 @@ function UploadWizardPage() {
   const dirtyRef = useRef(false);
   const draftRef = useRef(draft);
   const stepRef = useRef(step);
+  // A blocked publish must never leave a second draft behind: once a listing row
+  // exists for this form, every retry updates that same listing.
+  const createdIdRef = useRef<string | null>(null);
+  const uploadedMediaRef = useRef<Set<string>>(new Set());
   draftRef.current = draft;
   stepRef.current = step;
 
@@ -341,12 +345,13 @@ function UploadWizardPage() {
       };
 
       let propertyId: string;
-      if (isEdit && editId) {
+      const reuseId = isEdit && editId ? editId : createdIdRef.current;
+      if (reuseId) {
         const updatePayload: any = { ...payload, updated_at: new Date().toISOString() };
         const { data: upd, error: uErr } = await supabase
           .from("properties")
           .update(updatePayload)
-          .eq("id", editId)
+          .eq("id", reuseId)
           .eq("owner_id", user.id)
           .select("id, status")
           .single();
@@ -369,7 +374,9 @@ function UploadWizardPage() {
           .single();
         if (pErr) throw pErr;
         propertyId = prop.id as string;
+        createdIdRef.current = propertyId;
       }
+
 
       await supabase.from("property_contacts").upsert({
         property_id: propertyId,
@@ -391,6 +398,8 @@ function UploadWizardPage() {
       const positionOffset = isEdit ? existingPhotoCount : 0;
       for (let i = 0; i < ordered.length; i++) {
         const m = ordered[i];
+        // On a retry the photos are already attached — never upload them twice.
+        if (uploadedMediaRef.current.has(m.id)) continue;
         const base = wantWatermark ? await watermarkImage(m.file, "SPACES") : m.file;
         const finalFile = await compressImageFile(base);
         const { path } = await uploadMediaFile(user.id, propertyId, finalFile);
@@ -401,9 +410,10 @@ function UploadWizardPage() {
           position: positionOffset + i,
           is_cover: isEdit ? false : m.isCover,
         });
+        uploadedMediaRef.current.add(m.id);
       }
 
-      if (video) {
+      if (video && !uploadedMediaRef.current.has(video.id)) {
         const { path } = await uploadMediaFile(user.id, propertyId, video.file);
         await supabase.from("property_media").insert({
           property_id: propertyId,
@@ -412,6 +422,7 @@ function UploadWizardPage() {
           position: positionOffset + ordered.length,
           is_cover: false,
         });
+        uploadedMediaRef.current.add(video.id);
         try {
           const thumb = await generateVideoThumbnail(video.file);
           const compressed = await compressImageFile(thumb);
@@ -425,6 +436,7 @@ function UploadWizardPage() {
           });
         } catch { /* thumbnail is best-effort */ }
       }
+
 
       // Instant publication: the database re-checks every requirement and only
       // then makes the space public. Verification continues separately.

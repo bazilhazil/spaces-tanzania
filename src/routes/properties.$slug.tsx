@@ -131,6 +131,8 @@ function PropertyDetailPage() {
   const [similar, setSimilar] = useState<Property[]>([]);
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const [ownerProfile, setOwnerProfile] = useState<OwnerPublicProfile | null>(null);
+  // Only claim a check is under way when a real verification record exists.
+  const [verificationState, setVerificationState] = useState<string>("not_submitted");
 
   const propertyId = idFromSlug(slug);
 
@@ -145,6 +147,7 @@ function PropertyDetailPage() {
         setProperty(res.property);
         setAgent(contactAgentFromRow(res.row));
         setStatus((res.row?.status as string) ?? "live");
+        setVerificationState(((res.row as unknown as { verification_status?: string })?.verification_status) ?? "not_submitted");
         const oid = ((res.row as unknown as { owner_id?: string })?.owner_id) ?? null;
         setOwnerId(oid);
         track("property_viewed", { property_id: res.property.id, category: res.property.category });

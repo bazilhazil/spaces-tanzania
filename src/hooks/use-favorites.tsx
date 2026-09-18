@@ -249,12 +249,32 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       removeFromCompare: (id) =>
         setState((s) => ({ ...s, compare: s.compare.filter((c) => c !== id) })),
       trackView: (id) => {
-        // Fire-and-forget analytics row; RLS allows anon + authenticated inserts.
-        // The query only runs once it is awaited, so keep the explicit .then().
-        void supabase
-          .from("property_views")
-          .insert({ property_id: id, viewer_id: user?.id ?? null })
-          .then(() => undefined, () => undefined);
+        // One genuine visit counts once: the browser keeps a short-lived marker
+        // per space and the database also rejects repeats from the same visit.
+        let alreadyCounted = false;
+        let sessionId: string | null = null;
+        try {
+          const key = `spaces:view:${id}`;
+          const seen = Number(sessionStorage.getItem(key) ?? 0);
+          alreadyCounted = Date.now() - seen < 30 * 60 * 1000;
+          sessionStorage.setItem(key, String(Date.now()));
+          let sid = localStorage.getItem("spaces:visitor");
+          if (!sid) {
+            sid = crypto.randomUUID();
+            localStorage.setItem("spaces:visitor", sid);
+          }
+          sessionId = sid;
+        } catch {
+          /* storage unavailable — fall back to the database guard */
+        }
+        if (!alreadyCounted) {
+          // Fire-and-forget analytics row; RLS allows anon + authenticated inserts.
+          // The query only runs once it is awaited, so keep the explicit .then().
+          void supabase
+            .from("property_views")
+            .insert({ property_id: id, viewer_id: user?.id ?? null, session_id: sessionId })
+            .then(() => undefined, () => undefined);
+        }
         setState((s) => {
           const filtered = s.recentlyViewed.filter((r) => r.propertyId !== id);
           return {
@@ -263,6 +283,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
           };
         });
       },
+
       clearRecent: () => setState((s) => ({ ...s, recentlyViewed: [] })),
       saveSearch: (input) => {
         const s: SavedSearch = {
