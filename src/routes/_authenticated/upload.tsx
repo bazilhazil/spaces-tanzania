@@ -345,12 +345,13 @@ function UploadWizardPage() {
       };
 
       let propertyId: string;
-      if (isEdit && editId) {
+      const reuseId = isEdit && editId ? editId : createdIdRef.current;
+      if (reuseId) {
         const updatePayload: any = { ...payload, updated_at: new Date().toISOString() };
         const { data: upd, error: uErr } = await supabase
           .from("properties")
           .update(updatePayload)
-          .eq("id", editId)
+          .eq("id", reuseId)
           .eq("owner_id", user.id)
           .select("id, status")
           .single();
@@ -373,7 +374,9 @@ function UploadWizardPage() {
           .single();
         if (pErr) throw pErr;
         propertyId = prop.id as string;
+        createdIdRef.current = propertyId;
       }
+
 
       await supabase.from("property_contacts").upsert({
         property_id: propertyId,
