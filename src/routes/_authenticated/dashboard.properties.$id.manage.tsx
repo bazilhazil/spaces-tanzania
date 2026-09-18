@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft, Eye, Calendar, DollarSign, Ruler, Camera, MapPin, FileText,
-  Pause, Play, Trash2, Star, Upload as UploadIcon, X, Home, Loader2, Save, GripVertical, Check, ExternalLink,
+  Pause, Play, Trash2, Star, Upload as UploadIcon, X, Home, Loader2, Save, GripVertical, Check, ExternalLink, Building2,
 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Button } from "@/components/ui/button";
@@ -239,6 +239,14 @@ function ManagePropertyPage() {
               <span className="inline-flex items-center gap-1.5 font-display font-semibold text-primary">
                 {prop.currency} {Number(prop.price).toLocaleString()}
               </span>
+            </div>
+            <div>
+              {/* Opens the existing Property Management workspace (units, tenants, leases, rent, maintenance). */}
+              <Link to="/management">
+                <Button variant="outline" size="sm" className="gap-1.5 rounded-xl">
+                  <Building2 className="h-4 w-4" /> Manage Property
+                </Button>
+              </Link>
             </div>
           </div>
         </header>
