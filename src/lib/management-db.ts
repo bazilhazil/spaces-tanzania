@@ -102,8 +102,26 @@ export function labelize(value?: string | null): string {
   return value.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
 }
 
-const db = supabase as never as {
-  from: (t: string) => ReturnType<typeof supabase.from>;
+/**
+ * The generated types are regenerated from the schema; until they include the
+ * management tables everywhere, queries go through a small loose wrapper. The
+ * database still enforces every access rule.
+ */
+type QueryResult = { data: unknown; error: { message: string } | null; count?: number | null };
+interface Loose extends PromiseLike<QueryResult> {
+  select: (q?: string, o?: unknown) => Loose;
+  insert: (v: unknown) => Loose;
+  update: (v: unknown) => Loose;
+  delete: () => Loose;
+  eq: (c: string, v: unknown) => Loose;
+  in: (c: string, v: unknown) => Loose;
+  order: (c: string, o?: unknown) => Loose;
+  limit: (n: number) => Loose;
+  single: () => Promise<QueryResult>;
+  maybeSingle: () => Promise<QueryResult>;
+}
+const db = {
+  from: (t: string) => (supabase.from as unknown as (table: string) => Loose)(t),
 };
 
 /** Listings the signed-in user may manage: own listings plus full-management assignments. */
