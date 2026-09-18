@@ -112,6 +112,10 @@ function UploadWizardPage() {
   const dirtyRef = useRef(false);
   const draftRef = useRef(draft);
   const stepRef = useRef(step);
+  // A blocked publish must never leave a second draft behind: once a listing row
+  // exists for this form, every retry updates that same listing.
+  const createdIdRef = useRef<string | null>(null);
+  const uploadedMediaRef = useRef<Set<string>>(new Set());
   draftRef.current = draft;
   stepRef.current = step;
 
