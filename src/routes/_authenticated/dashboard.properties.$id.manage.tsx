@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { signedUrl, uploadMediaFile, compressImageFile } from "@/lib/property-media";
 import { RemoveSpaceDialog } from "@/components/property-management/remove-space-dialog";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PROPERTY_TYPES } from "@/components/property-management/constants";
@@ -75,6 +76,7 @@ type MediaRow = {
 function ManagePropertyPage() {
   const { id } = Route.useParams();
   const { user } = useAuth();
+  const { t: tr } = useI18n();
   const navigate = useNavigate();
   const [prop, setProp] = useState<Property | null>(null);
   const [media, setMedia] = useState<MediaRow[]>([]);
