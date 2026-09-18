@@ -316,6 +316,50 @@ export function ManagementCenter() {
             </div>
           )}
         </TabsContent>
+
+        {/* DOCUMENTS ------------------------------------------------------ */}
+        <TabsContent value="documents" className="mt-4 space-y-4">
+          {!documents.length ? (
+            <EmptyState icon={FileText} title={tr("mgmt.noDocuments")} description={tr("mgmt.noDocumentsBody")} />
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {documents.map((d) => (
+                <div key={d.id} className="ds-card space-y-2 p-4">
+                  <p className="truncate font-semibold">{d.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {[labelize(d.doc_type), propTitle(d.property_id ?? "")].filter(Boolean).join(" · ")}
+                  </p>
+                  <Button
+                    size="sm" variant="outline" className="rounded-lg"
+                    onClick={async () => {
+                      const url = await signedDocumentUrl(d.storage_path);
+                      if (url) window.open(url, "_blank", "noopener");
+                      else toast.error("Could not open this document");
+                    }}
+                  >
+                    {tr("mgmt.openDocument")}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* REPORTS -------------------------------------------------------- */}
+        <TabsContent value="reports" className="mt-4 space-y-4">
+          <p className="text-sm text-muted-foreground">{tr("mgmt.reportsNote")}</p>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard label={tr("mgmt.tenants")} value={metrics.tenants} icon={Users} />
+            <StatCard label={tr("mgmt.activeLeases")} value={leases.filter((l) => l.status === "active").length} icon={FileText} tone="muted" />
+            <StatCard
+              label={tr("mgmt.collectionRate")}
+              value={metrics.expectedRent > 0 ? `${Math.round((metrics.collectedRent / metrics.expectedRent) * 100)}%` : "—"}
+              icon={Wallet}
+              tone="success"
+            />
+            <StatCard label={tr("mgmt.openMaintenance")} value={metrics.openMaintenance} icon={Wrench} tone="danger" />
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
