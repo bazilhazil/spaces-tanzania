@@ -1,3 +1,4 @@
+import { NotificationBell } from "@/components/notification-bell";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
@@ -191,9 +192,12 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         <Link to="/" className="flex items-center">
           <Brand size="sm" />
         </Link>
-        <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} aria-label={t("nav.openMenu")}>
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} aria-label={t("nav.openMenu")}>
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
 
       <div className="flex w-full min-w-0 max-w-full">
@@ -204,9 +208,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             open ? "translate-x-0" : "-translate-x-full",
           )}
         >
-          <Link to="/" className="hidden items-center border-b border-border/60 px-6 py-5 lg:flex">
-            <Brand size="md" />
-          </Link>
+          <div className="hidden items-center justify-between border-b border-border/60 px-6 py-5 lg:flex">
+            <Link to="/" className="flex items-center"><Brand size="md" /></Link>
+            <NotificationBell />
+          </div>
 
           <div className="border-b border-border/60 p-4">
             <div className="flex items-center gap-3">
