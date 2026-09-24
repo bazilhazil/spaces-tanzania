@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ManagerOnboardingCard } from "@/components/management/manager-onboarding-card";
 import { useMode, type SpacesMode } from "@/hooks/use-mode";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
