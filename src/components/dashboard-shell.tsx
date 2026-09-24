@@ -218,30 +218,31 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   {profile?.full_name || t("common.welcome")}
                 </p>
                 <div className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                  {activeMode} mode
+                  {wsLabel(activeMode)}
                 </div>
               </div>
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-1 rounded-xl border border-border/60 bg-secondary/50 p-1">
-              {(["buyer", "owner", "agent"] as SpacesMode[]).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => {
+            {showSwitcher && (
+              <label className="mt-3 block">
+                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t("pm.workspace")}
+                </span>
+                <select
+                  value={workspaces.includes(activeMode) ? activeMode : workspaces[0]}
+                  onChange={(e) => {
+                    const m = e.target.value as SpacesMode;
                     setMode(m);
-                    toast.success(`Switched to ${m.charAt(0).toUpperCase() + m.slice(1)} mode`);
-                    navigate({ to: "/dashboard" });
+                    toast.success(wsLabel(m));
+                    navigate({ to: m === "manager" ? "/management" : "/dashboard" });
                   }}
-                  className={cn(
-                    "rounded-lg py-1.5 text-[11px] font-semibold capitalize transition-all",
-                    activeMode === m
-                      ? "bg-primary text-primary-foreground shadow-[var(--shadow-soft)]"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
+                  className="h-10 w-full rounded-xl border border-border/60 bg-secondary/50 px-3 text-sm font-medium text-foreground"
                 >
-                  {m}
-                </button>
-              ))}
-            </div>
+                  {workspaces.map((m) => (
+                    <option key={m} value={m}>{wsLabel(m)}</option>
+                  ))}
+                </select>
+              </label>
+            )}
           </div>
 
 
