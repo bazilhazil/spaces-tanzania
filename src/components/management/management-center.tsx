@@ -1,5 +1,5 @@
 import { ManagerInvitations } from "@/components/management/manager-invitations";
-import { useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import {
   Building2, Users, FileText, Wallet, Wrench, HardHat, Plus, CheckCircle2, XCircle, Home,
 } from "lucide-react";
@@ -10,12 +10,12 @@ import { StatCard, EmptyState, SkeletonCard } from "@/components/ds";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
-import { FormDialog, TextField, AreaField, SelectField } from "./forms";
+import { FormDialog, TextField, AreaField, SelectField, DetailsDialog, DetailRow } from "./forms";
 import {
   buildMetrics, createCharge, createContractor, createLease, createPayment, createTenant, createTicket,
   createUnit, fetchCharges, fetchContractors, fetchLeases, fetchManagedProperties, fetchPayments,
   fetchTenants, fetchTickets, fetchUnits, fetchDocuments, signedDocumentUrl, formatTzs, labelize,
-  reviewPayment, updateTicket, updateUnit, type ManagementDocument,
+  reviewPayment, updateTicket, updateUnit, updateTenant, updateLease, uploadManagementDocument, type ManagementDocument,
   LEASE_STATUSES, OCCUPANCY_STATUSES, PAYMENT_METHODS, TICKET_CATEGORIES, TICKET_STATUSES,
   type Contractor, type Lease, type ManagedProperty, type MaintenanceTicket, type RentCharge,
   type RentPayment, type Tenant, type Unit,
@@ -91,7 +91,7 @@ export function ManagementCenter() {
   return (
     <div className="space-y-6">
       <ManagerInvitations onChange={() => void load()} />
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <StatCard label={tr("mgmt.properties")} value={metrics.properties} icon={Building2} />
         <StatCard label={tr("mgmt.unitsShort")} value={metrics.units} icon={Home} tone="muted" />
         <StatCard label={tr("mgmt.occupied")} value={metrics.occupied} icon={Users} tone="success" />
@@ -147,6 +147,10 @@ export function ManagementCenter() {
                       } catch (e) { toast.error(e instanceof Error ? e.message : "Could not update"); }
                     }}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Tenant: {tenants.filter((t) => t.unit_id === u.id && t.status !== "past").map((t) => t.full_name).join(", ") || "None"}
+                  </p>
+                  <UnitEditForm unit={u} propTitle={propTitle(u.property_id)} onDone={load} />
                   {u.occupancy_status === "available" && (
                     <p className="text-xs text-muted-foreground">
                       Ready to re-list — publish it from your property page when you are ready.
@@ -173,6 +177,25 @@ export function ManagementCenter() {
                   </div>
                   <p className="truncate text-sm text-muted-foreground">{propTitle(t.property_id)} · {unitName(t.unit_id)}</p>
                   {t.phone && <p className="text-sm">{t.phone}</p>}
+                  <DetailsDialog title={t.full_name} triggerLabel="View details">
+                    <DetailRow label="Property" value={propTitle(t.property_id)} />
+                    <DetailRow label="Unit" value={unitName(t.unit_id)} />
+                    <DetailRow label="Phone" value={t.phone} />
+                    <DetailRow label="Email" value={t.email} />
+                    <DetailRow label="Emergency contact" value={[t.emergency_name, t.emergency_phone].filter(Boolean).join(" · ")} />
+                    <DetailRow label="Linked SPACES account" value={t.user_id ? "Yes — can use My Tenancy" : "Not linked"} />
+                    <DetailRow label="Notes" value={t.notes} />
+                    {(() => {
+                      const l = leases.find((x) => x.tenant_id === t.id);
+                      return <DetailRow label="Lease" value={l ? `${labelize(l.status)} · ${formatTzs(l.monthly_rent)} · ${l.start_date} → ${l.end_date ?? "open ended"}` : "No lease recorded yet — create one in the Leases tab"} />;
+                    })()}
+                    <SelectField label="Tenancy status" value={t.status}
+                      options={opts(["active", "notice", "past"])}
+                      onChange={async (v) => {
+                        try { await updateTenant(t.id, { status: v }); toast.success("Tenant updated"); void load(); }
+                        catch (e) { toast.error(e instanceof Error ? e.message : "Could not update"); }
+                      }} />
+                  </DetailsDialog>
                 </div>
               ))}
             </div>
@@ -182,6 +205,7 @@ export function ManagementCenter() {
         {/* LEASES --------------------------------------------------------- */}
         <TabsContent value="leases" className="mt-4 space-y-4">
           <LeaseForm properties={propOptions} units={units} tenants={tenants} ownerFor={ownerFor} onDone={load} />
+          {!tenants.length && <p className="text-sm text-muted-foreground">Add a tenant first (Tenants tab) — a lease is always linked to a tenant.</p>}
           {!leases.length ? (
             <EmptyState icon={FileText} title="No leases yet" description="Record a lease to track rent, renewal dates and late-payment terms." />
           ) : (
@@ -198,6 +222,22 @@ export function ManagementCenter() {
                     {l.start_date} → {l.end_date ?? "open ended"}
                     {l.late_fee_type !== "none" && ` · late fee ${l.late_fee_type === "percent" ? `${l.late_fee_value ?? 0}%` : formatTzs(l.late_fee_value)}`}
                   </p>
+                  <DetailsDialog title={`Lease · ${tenantName(l.tenant_id)}`} triggerLabel="View details">
+                    <DetailRow label="Tenant" value={tenantName(l.tenant_id)} />
+                    <DetailRow label="Property / unit" value={`${propTitle(l.property_id)} · ${unitName(l.unit_id)}`} />
+                    <DetailRow label="Start date" value={l.start_date} />
+                    <DetailRow label="End date" value={l.end_date ?? "Open ended"} />
+                    <DetailRow label="Rent" value={`${formatTzs(l.monthly_rent)} · ${labelize(l.payment_frequency)}`} />
+                    <DetailRow label="Deposit" value={l.deposit_amount != null ? formatTzs(l.deposit_amount) : null} />
+                    <DetailRow label="Late fee" value={l.late_fee_type === "none" ? "None" : `${l.late_fee_type === "percent" ? `${l.late_fee_value ?? 0}%` : formatTzs(l.late_fee_value)} after ${l.late_fee_grace_days ?? 0} days`} />
+                    <DetailRow label="Special terms" value={l.special_terms} />
+                    <DetailRow label="Rent charges" value={`${charges.filter((c) => c.lease_id === l.id).length} recorded`} />
+                    <SelectField label="Lease status" value={l.status} options={opts(LEASE_STATUSES)}
+                      onChange={async (v) => {
+                        try { await updateLease(l.id, { status: v }); toast.success("Lease updated"); void load(); }
+                        catch (e) { toast.error(e instanceof Error ? e.message : "Could not update"); }
+                      }} />
+                  </DetailsDialog>
                 </div>
               ))}
             </div>
@@ -210,6 +250,7 @@ export function ManagementCenter() {
             <ChargeForm leases={leases} tenants={tenants} onDone={load} />
             <PaymentForm charges={charges} leases={leases} onDone={load} />
           </div>
+          {!leases.length && <p className="text-sm text-muted-foreground">Rent is charged against a lease — create a lease first. Online rent payment is not connected yet; payments are recorded manually (Mobile Money, bank transfer or cash).</p>}
 
           {payments.some((p) => p.status === "pending_verification") && (
             <div className="space-y-3">
@@ -224,10 +265,10 @@ export function ManagementCenter() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Button size="sm" className="rounded-full" onClick={async () => {
-                      await reviewPayment(p.id, true); toast.success("Payment approved"); void load();
+                      try { await reviewPayment(p.id, true); toast.success("Payment approved"); void load(); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not update"); }
                     }}><CheckCircle2 className="mr-1 h-4 w-4" /> Approve</Button>
                     <Button size="sm" variant="outline" className="rounded-full" onClick={async () => {
-                      await reviewPayment(p.id, false); toast.success("Payment rejected"); void load();
+                      try { await reviewPayment(p.id, false); toast.success("Payment rejected"); void load(); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not update"); }
                     }}><XCircle className="mr-1 h-4 w-4" /> Reject</Button>
                   </div>
                 </div>
@@ -247,7 +288,7 @@ export function ManagementCenter() {
                   </div>
                   <p className="text-sm">{formatTzs(c.amount_due)} due {c.due_date}</p>
                   <p className="text-xs text-muted-foreground">
-                    Paid {formatTzs(c.amount_paid)} · Outstanding {formatTzs(Math.max(Number(c.amount_due) - Number(c.amount_paid), 0))}
+                    {propTitle(c.property_id)} · {unitName(c.unit_id)} · Paid {formatTzs(c.amount_paid)} · Outstanding {formatTzs(Math.max(Number(c.amount_due) - Number(c.amount_paid), 0))}
                   </p>
                 </div>
               ))}
@@ -269,6 +310,7 @@ export function ManagementCenter() {
                     <Badge variant="secondary">{labelize(k.status)}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{k.description}</p>
+                  <p className="text-xs text-muted-foreground">{unitName(k.unit_id)} · Tenant: {tenantName(k.tenant_id)} · Opened {k.created_at.slice(0, 10)}</p>
                   <p className="text-xs text-muted-foreground">
                     Priority {labelize(k.priority)} · Estimated {formatTzs(k.estimated_cost)} · Approved {formatTzs(k.approved_cost)} · Actual {formatTzs(k.actual_cost)}
                   </p>
@@ -279,8 +321,8 @@ export function ManagementCenter() {
                     <SelectField
                       label="Status" value={k.status} options={opts(TICKET_STATUSES)}
                       onChange={async (v) => {
-                        await updateTicket(k.id, { status: v, closed_at: v === "closed" ? new Date().toISOString() : null });
-                        toast.success("Ticket updated"); void load();
+                        try { await updateTicket(k.id, { status: v, closed_at: v === "closed" ? new Date().toISOString() : null });
+                        toast.success("Ticket updated"); void load(); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not update"); }
                       }}
                     />
                     <SelectField
@@ -316,6 +358,24 @@ export function ManagementCenter() {
                     {[c.company, c.service_category && labelize(c.service_category), c.location].filter(Boolean).join(" · ") || "—"}
                   </p>
                   {c.phone && <p className="text-sm">{c.phone}</p>}
+                  <DetailsDialog title={c.name} triggerLabel="View details">
+                    <DetailRow label="Company" value={c.company} />
+                    <DetailRow label="Service" value={c.service_category ? labelize(c.service_category) : null} />
+                    <DetailRow label="Phone" value={c.phone} />
+                    <DetailRow label="Email" value={c.email} />
+                    <DetailRow label="Location" value={c.location} />
+                    <DetailRow label="Notes" value={c.notes} />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Maintenance work</p>
+                      {tickets.filter((k) => k.contractor_id === c.id).length ? (
+                        <ul className="mt-1 space-y-1 text-sm">
+                          {tickets.filter((k) => k.contractor_id === c.id).map((k) => (
+                            <li key={k.id}>{labelize(k.category)} · {propTitle(k.property_id)} · {labelize(k.status)}</li>
+                          ))}
+                        </ul>
+                      ) : <p className="text-sm">No jobs assigned yet</p>}
+                    </div>
+                  </DetailsDialog>
                 </div>
               ))}
             </div>
@@ -324,6 +384,7 @@ export function ManagementCenter() {
 
         {/* DOCUMENTS ------------------------------------------------------ */}
         <TabsContent value="documents" className="mt-4 space-y-4">
+          <DocumentUploadForm properties={propOptions} ownerFor={ownerFor} leases={leases} tenantName={tenantName} onDone={load} />
           {!documents.length ? (
             <EmptyState icon={FileText} title={tr("mgmt.noDocuments")} description={tr("mgmt.noDocumentsBody")} />
           ) : (
@@ -332,7 +393,7 @@ export function ManagementCenter() {
                 <div key={d.id} className="ds-card space-y-2 p-4">
                   <p className="truncate font-semibold">{d.name}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {[labelize(d.doc_type), propTitle(d.property_id ?? "")].filter(Boolean).join(" · ")}
+                    {[labelize(d.doc_type), propTitle(d.property_id ?? ""), d.created_at.slice(0, 10)].filter(Boolean).join(" · ")}
                   </p>
                   <Button
                     size="sm" variant="outline" className="rounded-lg"
@@ -363,6 +424,34 @@ export function ManagementCenter() {
               tone="success"
             />
             <StatCard label={tr("mgmt.openMaintenance")} value={metrics.openMaintenance} icon={Wrench} tone="danger" />
+            <StatCard label="Occupancy" value={metrics.units ? `${Math.round((metrics.occupied / metrics.units) * 100)}%` : "—"} icon={Home} tone="muted" />
+            <StatCard label={tr("mgmt.outstandingRent")} value={formatTzs(metrics.outstandingRent)} icon={Wallet} tone="danger" />
+            <StatCard label="Pending payment checks" value={metrics.pendingPayments} icon={Wallet} tone="gold" />
+            <StatCard label="Maintenance cost (actual)" value={formatTzs(tickets.reduce((s, k) => s + Number(k.actual_cost || 0), 0))} icon={Wrench} tone="muted" />
+          </div>
+          <div className="ds-card overflow-x-auto p-4">
+            <h3 className="mb-3 font-semibold">Property overview</h3>
+            <table className="w-full min-w-[560px] text-sm">
+              <thead className="text-left text-xs text-muted-foreground">
+                <tr><th className="py-1">Property</th><th>Units</th><th>Occupied</th><th>Tenants</th><th>Expected</th><th>Collected</th><th>Open jobs</th></tr>
+              </thead>
+              <tbody>
+                {properties.map((p) => {
+                  const pc = charges.filter((c) => c.property_id === p.id);
+                  return (
+                    <tr key={p.id} className="border-t border-border/50">
+                      <td className="py-2 pr-2 font-medium">{p.title}</td>
+                      <td>{units.filter((u) => u.property_id === p.id).length}</td>
+                      <td>{units.filter((u) => u.property_id === p.id && u.occupancy_status === "occupied").length}</td>
+                      <td>{tenants.filter((t) => t.property_id === p.id && t.status === "active").length}</td>
+                      <td>{formatTzs(pc.reduce((s, c) => s + Number(c.amount_due || 0), 0))}</td>
+                      <td>{formatTzs(pc.reduce((s, c) => s + Number(c.amount_paid || 0), 0))}</td>
+                      <td>{tickets.filter((k) => k.property_id === p.id && !["closed", "completed", "rejected"].includes(k.status)).length}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </TabsContent>
       </Tabs>
@@ -374,9 +463,11 @@ export function ManagementCenter() {
 /* Forms                                                                   */
 /* --------------------------------------------------------------------- */
 
-function AddButton({ label }: { label: string }) {
-  return <Button className="w-full rounded-full sm:w-auto"><Plus className="mr-1 h-4 w-4" /> {label}</Button>;
-}
+const AddButton = forwardRef<HTMLButtonElement, { label: string } & React.ButtonHTMLAttributes<HTMLButtonElement>>(
+  function AddButton({ label, ...rest }, ref) {
+    return <Button ref={ref} {...rest} className="w-full rounded-full sm:w-auto"><Plus className="mr-1 h-4 w-4" /> {label}</Button>;
+  },
+);
 
 function UnitForm({ properties, ownerFor, onDone }: {
   properties: { value: string; label: string }[];
@@ -711,6 +802,81 @@ function ContractorForm({ onDone }: { onDone: () => void }) {
       <SelectField label="Service" value={category} onChange={setCategory} options={opts(TICKET_CATEGORIES)} />
       <TextField label="Location" value={location} onChange={setLocation} placeholder="Dar es Salaam" />
       <AreaField label="Notes" value={notes} onChange={setNotes} />
+    </FormDialog>
+  );
+}
+
+function UnitEditForm({ unit, propTitle, onDone }: { unit: Unit; propTitle: string; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(unit.name);
+  const [bedrooms, setBedrooms] = useState(unit.bedrooms?.toString() ?? "");
+  const [bathrooms, setBathrooms] = useState(unit.bathrooms?.toString() ?? "");
+  const [rent, setRent] = useState(unit.rent_amount?.toString() ?? "");
+  const [deposit, setDeposit] = useState(unit.deposit_amount?.toString() ?? "");
+  const [notes, setNotes] = useState(unit.notes ?? "");
+  return (
+    <FormDialog
+      open={open} onOpenChange={setOpen} title={`Edit unit · ${unit.name}`} description={propTitle}
+      trigger={<Button variant="outline" size="sm" className="w-full rounded-full">View / edit unit</Button>}
+      onSubmit={async () => {
+        if (!name.trim()) { toast.error("Unit name is required"); return; }
+        await updateUnit(unit.id, {
+          name: name.trim(), bedrooms: bedrooms ? Number(bedrooms) : null, bathrooms: bathrooms ? Number(bathrooms) : null,
+          rent_amount: rent ? Number(rent) : null, deposit_amount: deposit ? Number(deposit) : null, notes: notes.trim() || null,
+        });
+        toast.success("Unit updated"); setOpen(false); onDone();
+      }}
+    >
+      <TextField label="Unit name or number" value={name} onChange={setName} />
+      <div className="grid grid-cols-2 gap-3">
+        <TextField label="Bedrooms" value={bedrooms} onChange={setBedrooms} type="number" />
+        <TextField label="Bathrooms" value={bathrooms} onChange={setBathrooms} type="number" />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <TextField label="Rent per month (TZS)" value={rent} onChange={setRent} type="number" />
+        <TextField label="Deposit (TZS)" value={deposit} onChange={setDeposit} type="number" />
+      </div>
+      <AreaField label="Notes" value={notes} onChange={setNotes} />
+    </FormDialog>
+  );
+}
+
+function DocumentUploadForm({ properties, ownerFor, leases, tenantName, onDone }: {
+  properties: { value: string; label: string }[];
+  ownerFor: (id: string) => string;
+  leases: Lease[];
+  tenantName: (id?: string | null) => string;
+  onDone: () => void;
+}) {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [propertyId, setPropertyId] = useState(properties[0]?.value ?? "");
+  const [leaseId, setLeaseId] = useState("none");
+  const [docType, setDocType] = useState("other");
+  const [file, setFile] = useState<File | null>(null);
+  const leaseOptions = [{ value: "none", label: "Not linked to a lease" },
+    ...leases.filter((l) => l.property_id === propertyId).map((l) => ({ value: l.id, label: `${tenantName(l.tenant_id)} · ${l.start_date}` }))];
+  return (
+    <FormDialog
+      open={open} onOpenChange={setOpen} title="Upload document" description="Stored privately — only people allowed to manage this property can open it."
+      trigger={<AddButton label="Upload document" />} submitLabel="Upload"
+      onSubmit={async () => {
+        if (!user || !propertyId || !file) { toast.error("Choose a property and a file"); return; }
+        if (file.size > 20 * 1024 * 1024) { toast.error("File must be smaller than 20 MB"); return; }
+        const lease = leases.find((l) => l.id === leaseId);
+        await uploadManagementDocument({
+          file, userId: user.id, ownerId: ownerFor(propertyId), docType: docType as never,
+          propertyId, leaseId: lease?.id ?? null, tenantId: lease?.tenant_id ?? null,
+        });
+        toast.success("Document uploaded"); setOpen(false); setFile(null); onDone();
+      }}
+    >
+      <SelectField label="Property" value={propertyId} onChange={(v) => { setPropertyId(v); setLeaseId("none"); }} options={properties} />
+      <SelectField label="Lease" value={leaseId} onChange={setLeaseId} options={leaseOptions} />
+      <SelectField label="Document type" value={docType} onChange={setDocType}
+        options={opts(["lease", "receipt", "identification", "maintenance", "notice", "other"])} />
+      <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx" aria-label="File"
+        onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="block w-full text-sm" />
     </FormDialog>
   );
 }

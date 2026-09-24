@@ -21,6 +21,10 @@ import {
   ChevronLeft, Plus, CheckCircle2, XCircle, Sparkles, HelpCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { COMPANY } from "@/lib/company";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard/$section")({
@@ -37,6 +41,10 @@ const META: Record<string, { title: string; desc: string }> = {
   support:      { title: "Support",         desc: "We're here to help, 24/7." },
   settings:     { title: "Settings",        desc: "Preferences, language and privacy." },
   mode:         { title: "My Mode",          desc: "Switch between Buyer, Owner and Agent anytime." },
+  theme:        { title: "Theme",           desc: "Choose how SPACES looks on this device." },
+  notifications:{ title: "Notification preferences", desc: "Choose what appears in your notification list." },
+  privacy:      { title: "Privacy",         desc: "What others can see about you on SPACES." },
+  about:        { title: "About SPACES",    desc: "Version, company and legal information." },
   language:     { title: "Language",        desc: "Choose your preferred language." },
   favorites:    { title: "Favorites",       desc: "Homes you loved, organised in folders." },
   searches:     { title: "Saved Searches",  desc: "Get alerts when matching homes appear." },
@@ -54,6 +62,8 @@ const REDIRECTS: Record<string, string> = {
   properties: "/dashboard/properties",
   viewings: "/viewings",
   messages: "/messages",
+  analytics: "/dashboard/performance",
+  subscription: "/billing",
 };
 
 function SectionPage() {
@@ -89,6 +99,10 @@ function SectionPage() {
          section === "support"      ? <SupportPanel /> :
          section === "settings"     ? <SettingsIndex /> :
          section === "language"     ? <LanguagePanel /> :
+         section === "theme"        ? <ThemePanel /> :
+         section === "notifications"? <NotifPrefsPanel /> :
+         section === "privacy"      ? <PrivacyPanel /> :
+         section === "about"        ? <AboutPanel /> :
          section === "mode"         ? <ModePanel /> :
          section === "favorites"    ? <FavoritesPanel /> :
          section === "searches"     ? <SavedSearchesPanel /> :
@@ -229,7 +243,10 @@ function ProfilePanel() {
     { icon: Phone,    label: "Phone Number",     value: profile?.phone || "—" },
     { icon: MapPin,   label: "Location",         value: profile?.location || "—" },
   ];
-  const verified = false;
+  const { roles } = useAuth();
+  const verified = !!(profile as { verified_identity?: boolean } | null)?.verified_identity;
+  const [editing, setEditing] = useState(false);
+  const roleLabel = roles.includes("agent") ? "Agent / Dalali" : roles.includes("owner") ? "Property Owner" : "Member";
 
   async function changePhoto(file: File) {
     if (!user) return;
@@ -292,15 +309,17 @@ function ProfilePanel() {
                 </span>
               )}
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">Property Owner on SPACES</p>
+            <p className="mt-1 text-sm text-muted-foreground">{roleLabel} on SPACES</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button className="rounded-xl gap-2" onClick={() => toast.info("Edit form coming soon")}>
+              <Button className="rounded-xl gap-2" onClick={() => setEditing(true)}>
                 <Edit3 className="h-4 w-4" /> Edit Profile
               </Button>
               {!verified && (
-                <Button variant="outline" className="rounded-xl gap-2" onClick={() => toast.info("Verification flow coming soon")}>
-                  <ShieldCheck className="h-4 w-4" /> Verify Identity
-                </Button>
+                <Link to="/verification">
+                  <Button variant="outline" className="rounded-xl gap-2">
+                    <ShieldCheck className="h-4 w-4" /> Verify Identity
+                  </Button>
+                </Link>
               )}
             </div>
           </div>
@@ -319,10 +338,165 @@ function ProfilePanel() {
                 <p className="text-xs text-muted-foreground">{it.label}</p>
                 <p className="font-medium text-foreground">{it.value}</p>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </div>
           );
         })}
+      </div>
+      {profile?.bio && (
+        <div className="rounded-2xl border border-border/60 bg-background p-5 text-sm text-foreground/80">{profile.bio}</div>
+      )}
+      <EditProfileDialog open={editing} onOpenChange={setEditing} />
+    </div>
+  );
+}
+
+function EditProfileDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const { profile, user, refresh } = useAuth();
+  const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
+  const [bio, setBio] = useState("");
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    setName(profile?.full_name ?? ""); setLocation(profile?.location ?? ""); setBio(profile?.bio ?? "");
+    setEmail(publicEmail(profile?.email) || "");
+  }, [open, profile]);
+  async function save() {
+    if (!user) return;
+    if (!name.trim()) return toast.error("Please enter your name.");
+    setBusy(true);
+    const { error } = await supabase.from("profiles").update({
+      full_name: name.trim(), location: location.trim() || null, bio: bio.trim() || null,
+      email: email.trim() || null,
+    }).eq("id", user.id);
+    setBusy(false);
+    if (error) return toast.error(friendlyError(error));
+    await refresh(); toast.success("Profile updated"); onOpenChange(false);
+  }
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] w-[calc(100vw-2rem)] max-w-lg overflow-y-auto rounded-2xl">
+        <DialogHeader><DialogTitle>Edit profile</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <label className="block text-sm">Full name<Input className="mt-1" value={name} onChange={(e) => setName(e.target.value)} /></label>
+          <label className="block text-sm">Email (optional)<Input className="mt-1" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></label>
+          <label className="block text-sm">Location<Input className="mt-1" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Dar es Salaam" /></label>
+          <label className="block text-sm">About you<Textarea className="mt-1" value={bio} onChange={(e) => setBio(e.target.value)} rows={3} /></label>
+          <p className="text-xs text-muted-foreground">Your phone number is your sign-in and can't be changed here — contact Support to change it.</p>
+        </div>
+        <DialogFooter className="gap-2">
+          <Button variant="outline" className="rounded-full" onClick={() => onOpenChange(false)} disabled={busy}>Cancel</Button>
+          <Button className="rounded-full" onClick={save} disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ============================ THEME / NOTIFICATIONS / PRIVACY / ABOUT ============================ */
+
+function ThemePanel() {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  useEffect(() => { setTheme(localStorage.getItem("spaces.theme") === "dark" ? "dark" : "light"); }, []);
+  function choose(v: "light" | "dark") {
+    setTheme(v);
+    localStorage.setItem("spaces.theme", v);
+    document.documentElement.classList.toggle("dark", v === "dark");
+    toast.success(v === "dark" ? "Dark theme on" : "Light theme on");
+  }
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {([["light", "Light (default)"], ["dark", "Dark"]] as const).map(([v, label]) => (
+        <button key={v} onClick={() => choose(v)}
+          className={cn("flex items-center justify-between rounded-2xl border bg-background p-5 text-left shadow-[var(--shadow-soft)]",
+            theme === v ? "border-primary ring-1 ring-primary/30" : "border-border/60")}>
+          <span className="font-display font-semibold text-foreground">{label}</span>
+          {theme === v && <Check className="h-4 w-4 text-primary" />}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+const NOTIF_CATS: [string, string][] = [
+  ["properties", "Property activity (approvals, price changes, saved-search matches)"],
+  ["leads", "Inquiries and messages"],
+  ["viewings", "Viewing requests"],
+  ["verification", "Verification and management access"],
+  ["payments", "Payments and subscriptions"],
+  ["reports", "Safety reports"],
+];
+
+function NotifPrefsPanel() {
+  const [muted, setMuted] = useState<string[]>([]);
+  useEffect(() => { try { setMuted(JSON.parse(localStorage.getItem("spaces.notifMuted") ?? "[]")); } catch { /* ignore */ } }, []);
+  function toggle(c: string) {
+    const next = muted.includes(c) ? muted.filter((x) => x !== c) : [...muted, c];
+    setMuted(next); localStorage.setItem("spaces.notifMuted", JSON.stringify(next)); toast.success("Preference saved");
+  }
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Choose which notifications show in your main list on this device. Hidden types are still kept and can be seen in their own tab on the Notifications page. Important account and security messages are always delivered.
+      </p>
+      <div className="overflow-hidden rounded-2xl border border-border/60 bg-background">
+        {NOTIF_CATS.map(([c, label], i) => (
+          <label key={c} className={cn("flex cursor-pointer items-center justify-between gap-4 p-4", i > 0 && "border-t border-border/50")}>
+            <span className="text-sm font-medium text-foreground">{label}</span>
+            <Switch checked={!muted.includes(c)} onCheckedChange={() => toggle(c)} />
+          </label>
+        ))}
+      </div>
+      <Link to="/notifications"><Button variant="outline" className="rounded-xl">Open notifications</Button></Link>
+    </div>
+  );
+}
+
+function PrivacyPanel() {
+  const rows = [
+    ["Public profile", "Your name, photo, bio and verification badges can be seen by other SPACES users."],
+    ["Phone number", "Never shown on your profile. On a listing, only the contact number you entered for that listing is shown to signed-in visitors."],
+    ["Email", "Never shown publicly."],
+    ["Messages", "Only you and the person you are chatting with can read your conversations."],
+    ["Tenancy and rent records", "Only you, the property owner and their approved Property Manager can see them."],
+  ];
+  return (
+    <div className="space-y-4">
+      <div className="overflow-hidden rounded-2xl border border-border/60 bg-background">
+        {rows.map(([k, v], i) => (
+          <div key={k} className={cn("p-4", i > 0 && "border-t border-border/50")}>
+            <p className="font-medium text-foreground">{k}</p>
+            <p className="text-sm text-muted-foreground">{v}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Link to="/dashboard/safety"><Button variant="outline" className="rounded-xl">Blocked users & safety</Button></Link>
+        <Link to="/privacy"><Button variant="outline" className="rounded-xl">Privacy policy</Button></Link>
+        <Link to="/dashboard/support"><Button variant="outline" className="rounded-xl">Request my data / delete account</Button></Link>
+      </div>
+    </div>
+  );
+}
+
+function AboutPanel() {
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-border/60 bg-background p-6">
+        <p className="font-display text-2xl font-semibold text-foreground">SPACES</p>
+        <p className="text-sm text-muted-foreground">Version 1.0</p>
+        <p className="mt-3 text-sm text-foreground/80">
+          Tanzania's property marketplace — find, list, rent and manage homes, land and commercial spaces with verified owners and agents.
+        </p>
+        <p className="mt-3 text-sm text-muted-foreground">{COMPANY.legalName} · {COMPANY.address} · {COMPANY.email}</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Link to="/about"><Button variant="outline" className="rounded-xl">About us</Button></Link>
+        <Link to="/terms"><Button variant="outline" className="rounded-xl">Terms</Button></Link>
+        <Link to="/privacy"><Button variant="outline" className="rounded-xl">Privacy</Button></Link>
+        <Link to="/contact"><Button variant="outline" className="rounded-xl">Contact</Button></Link>
+        <Link to="/help"><Button variant="outline" className="rounded-xl">Help Center</Button></Link>
       </div>
     </div>
   );
@@ -415,11 +589,11 @@ function SettingsIndex() {
   const items: { icon: typeof Globe; label: string; section: string; value: string }[] = [
     { icon: Sparkles, label: t("modeUi.modeTitle"), section: "mode", value: t("modeUi.modeSwitchRole") },
     { icon: Globe, label: t("settings.language"), section: "language", value: `${current.flag} ${current.label}` },
-    { icon: Palette, label: t("settings.theme"), section: "settings", value: t("settings.themeDefault") },
-    { icon: Bell, label: t("settings.notifications"), section: "settings", value: t("settings.notificationsOn") },
-    { icon: Lock, label: t("settings.privacy"), section: "settings", value: "" },
+    { icon: Palette, label: t("settings.theme"), section: "theme", value: t("settings.themeDefault") },
+    { icon: Bell, label: t("settings.notifications"), section: "notifications", value: t("settings.notificationsOn") },
+    { icon: Lock, label: t("settings.privacy"), section: "privacy", value: "" },
     { icon: LifeBuoy, label: t("settings.support"), section: "support", value: "" },
-    { icon: Info, label: t("settings.about"), section: "settings", value: t("settings.aboutVersion") },
+    { icon: Info, label: t("settings.about"), section: "about", value: t("settings.aboutVersion") },
   ];
   return (
     <div className="grid gap-3 sm:grid-cols-2">

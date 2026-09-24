@@ -35,6 +35,10 @@ export function FormDialog({
         </DialogHeader>
         <div className="space-y-4">{children}</div>
         <DialogFooter className="gap-2 sm:gap-2">
+          <Button variant="outline" className="w-full rounded-full sm:w-auto" disabled={busy}
+            onClick={() => onOpenChange?.(false)}>
+            Cancel
+          </Button>
           <Button
             className="w-full rounded-full sm:w-auto"
             disabled={busy}
@@ -98,5 +102,29 @@ export function SelectField({
         </SelectContent>
       </Select>
     </Field>
+  );
+}
+
+/** Read-only details dialog with an optional set of inline controls. */
+export function DetailsDialog({ title, triggerLabel, children }: { title: string; triggerLabel: string; children: ReactNode }) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="w-full rounded-full">{triggerLabel}</Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] w-[calc(100vw-2rem)] max-w-lg overflow-y-auto rounded-2xl">
+        <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
+        <div className="space-y-3">{children}</div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function DetailRow({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-sm font-medium break-words">{value || "—"}</p>
+    </div>
   );
 }
