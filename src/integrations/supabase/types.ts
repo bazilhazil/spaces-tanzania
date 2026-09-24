@@ -158,8 +158,11 @@ export type Database = {
           active: boolean
           agent_limit: number | null
           badge: string | null
+          billing_frequency: string
           created_at: string
           currency: string
+          description: string | null
+          effective_from: string
           features: Json
           id: string
           listing_limit: number | null
@@ -168,14 +171,22 @@ export type Database = {
           price_monthly: number
           sort_order: number
           tagline: string
+          target_roles: string[]
+          tax_inclusive: boolean
+          tax_rate: number
+          team_limit: number | null
+          unit_limit: number | null
           updated_at: string
         }
         Insert: {
           active?: boolean
           agent_limit?: number | null
           badge?: string | null
+          billing_frequency?: string
           created_at?: string
           currency?: string
+          description?: string | null
+          effective_from?: string
           features?: Json
           id: string
           listing_limit?: number | null
@@ -184,14 +195,22 @@ export type Database = {
           price_monthly?: number
           sort_order?: number
           tagline?: string
+          target_roles?: string[]
+          tax_inclusive?: boolean
+          tax_rate?: number
+          team_limit?: number | null
+          unit_limit?: number | null
           updated_at?: string
         }
         Update: {
           active?: boolean
           agent_limit?: number | null
           badge?: string | null
+          billing_frequency?: string
           created_at?: string
           currency?: string
+          description?: string | null
+          effective_from?: string
           features?: Json
           id?: string
           listing_limit?: number | null
@@ -200,6 +219,11 @@ export type Database = {
           price_monthly?: number
           sort_order?: number
           tagline?: string
+          target_roles?: string[]
+          tax_inclusive?: boolean
+          tax_rate?: number
+          team_limit?: number | null
+          unit_limit?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -1376,6 +1400,108 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_change_log: {
+        Row: {
+          action: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string
+          table_name: string
+        }
+        Insert: {
+          action: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id: string
+          table_name: string
+        }
+        Update: {
+          action?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
+      pricing_rules: {
+        Row: {
+          active: boolean
+          applies_to: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          effective_from: string
+          effective_to: string | null
+          fixed_amount: number
+          id: string
+          max_amount: number | null
+          min_amount: number | null
+          name: string
+          payer: string
+          percentage: number
+          rule_type: string
+          sort_order: number
+          target_roles: string[]
+          tax_rate: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          applies_to?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          fixed_amount?: number
+          id?: string
+          max_amount?: number | null
+          min_amount?: number | null
+          name: string
+          payer?: string
+          percentage?: number
+          rule_type: string
+          sort_order?: number
+          target_roles?: string[]
+          tax_rate?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          applies_to?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          fixed_amount?: number
+          id?: string
+          max_amount?: number | null
+          min_amount?: number | null
+          name?: string
+          payer?: string
+          percentage?: number
+          rule_type?: string
+          sort_order?: number
+          target_roles?: string[]
+          tax_rate?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"]
@@ -1445,38 +1571,56 @@ export type Database = {
       promotion_products: {
         Row: {
           active: boolean
+          badge_label: string
           created_at: string
           currency: string
           description: string
           duration_days: number
+          effective_from: string
           id: string
           name: string
+          placement: string
           price: number
+          priority_score: number
           sort_order: number
+          target_roles: string[]
+          tax_rate: number
           updated_at: string
         }
         Insert: {
           active?: boolean
+          badge_label?: string
           created_at?: string
           currency?: string
           description?: string
           duration_days?: number
+          effective_from?: string
           id: string
           name: string
+          placement?: string
           price?: number
+          priority_score?: number
           sort_order?: number
+          target_roles?: string[]
+          tax_rate?: number
           updated_at?: string
         }
         Update: {
           active?: boolean
+          badge_label?: string
           created_at?: string
           currency?: string
           description?: string
           duration_days?: number
+          effective_from?: string
           id?: string
           name?: string
+          placement?: string
           price?: number
+          priority_score?: number
           sort_order?: number
+          target_roles?: string[]
+          tax_rate?: number
           updated_at?: string
         }
         Relationships: []
@@ -3539,6 +3683,15 @@ export type Database = {
           property_title: string
           scopes: Json
           status: string
+        }[]
+      }
+      my_monetization_summary: {
+        Args: never
+        Returns: {
+          commission_value: number
+          leads_count: number
+          open_deals: number
+          won_deals: number
         }[]
       }
       my_plan_usage: {
