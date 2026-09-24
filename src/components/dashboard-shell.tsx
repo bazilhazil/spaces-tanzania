@@ -51,7 +51,8 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
     ],
     buyer: [
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
-      { label: t("dashboard.side.favorites"), to: "/dashboard/favorites", icon: Heart },
+      { label: t("dashboard.side.deals"), to: "/deals", icon: Handshake },
+    { label: t("dashboard.side.favorites"), to: "/dashboard/favorites", icon: Heart },
       { label: t("dashboard.side.savedSearches"), to: "/dashboard/searches", icon: Search },
       { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
@@ -81,6 +82,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.verification"), to: "/verification", icon: ShieldCheck },
       { label: t("dashboard.side.trust"), to: "/trust", icon: Sparkles },
       { label: t("dashboard.side.billing"), to: "/billing", icon: CreditCard },
+      { label: t("agency.nav"), to: "/agency", icon: Users },
       { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
     ],
     manager: [
@@ -112,7 +114,7 @@ function useMarketplaceExtras(): Item[] {
  */
 const PRIMARY_PATHS: Record<SpacesMode, string[]> = {
   owner: ["/dashboard", "/dashboard/properties", "/management", "/upload", "/leads", "/viewings", "/messages", "/notifications"],
-  buyer: ["/dashboard", "/dashboard/favorites", "/dashboard/searches", "/viewings", "/messages", "/notifications"],
+  buyer: ["/dashboard", "/deals", "/dashboard/favorites", "/dashboard/searches", "/viewings", "/messages", "/notifications"],
   agent: ["/dashboard", "/leads", "/deals", "/dashboard/properties", "/management", "/viewings", "/messages", "/notifications"],
   manager: ["/management", "/messages", "/notifications"],
 };
