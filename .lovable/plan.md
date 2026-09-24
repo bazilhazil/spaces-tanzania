@@ -8,7 +8,11 @@ Sign-in, Sakura OTP, listings, search, leads, viewings, deals, verification, mes
 - **Owners:** everything as today, plus a "Management" card on their own property page showing the current Property Manager with Assign / Change / Remove.
 - **Property Managers:** a new "My Management" area (reusing the existing Property Management screen) that lists every property they have been accepted to manage, across different owners.
 - **Invitations:** manager sees "You have been invited to manage [property] — Owner: [name] — Permissions: …" with Accept / Decline (in notifications and at the top of My Management).
-- **Role switcher:** a small "Owner / Property Manager / Agent" dropdown in the dashboard menu, shown only when a person really has more than one of these. Picking one filters the menu to that context. Single-role users see no switcher.
+- **Workspace switcher:** a small contextual "Workspace" dropdown (Owner / Property Manager / Agent) in the dashboard menu, listing only workspaces that genuinely apply to the user and shown only when two or more apply. It changes which operational menu is in focus; it is not a strict role gate.
+  - Buyer/Renter only: normal SPACES experience, no switcher.
+  - Owner only / Property Manager only: that workspace, no switcher.
+  - Owner + Property Manager, Agent + Property Manager, etc.: simple switcher.
+  - Buying/renting (Home, Buy, Rent, Saved, Inquiries) and My Tenancy stay visible in every workspace wherever they apply — never hidden because the user also has Owner, Agent or Property Manager access.
 - **Tenants:** My Tenancy unchanged, still only their own tenancy.
 - **Property page buttons:** "Manage Property" for the owner and an accepted manager; "Manage Listing" for an assigned agent; nothing for anyone else.
 - All new labels in English and Kiswahili.
