@@ -176,6 +176,20 @@
       "when": 1790232642227,
       "tag": "0024_fix_deal_lead_sync_recursion",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1790239165164,
+      "tag": "0025_app_role_property_manager",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1790239228492,
+      "tag": "0026_property_manager_assignments",
+      "breakpoints": true
     }
   ]
 }

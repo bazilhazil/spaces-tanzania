@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { signedUrl, uploadMediaFile, compressImageFile } from "@/lib/property-media";
 import { RemoveSpaceDialog } from "@/components/property-management/remove-space-dialog";
 import { useAuth } from "@/hooks/use-auth";
+import { ManagerAssignmentCard } from "@/components/management/manager-assignment-card";
 import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -86,6 +87,7 @@ function ManagePropertyPage() {
   const [activeTab, setActiveTab] = useState<ManageTab>(tabParam ?? "overview");
   const [saving, setSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const isOwner = !!user && (prop as { owner_id?: string } | null)?.owner_id === user.id;
 
   // Deep links such as ?tab=photos open (and scroll to) that section directly.
   useEffect(() => {
@@ -246,10 +248,11 @@ function ManagePropertyPage() {
               {/* Opens the existing Property Management workspace (units, tenants, leases, rent, maintenance). */}
               <Link to="/management">
                 <Button variant="outline" size="sm" className="gap-1.5 rounded-xl">
-                  <Building2 className="h-4 w-4" /> {tr("mgmt.manageProperty")}
+                  <Building2 className="h-4 w-4" /> {isOwner ? tr("mgmt.manageProperty") : tr("pm.manageListing")}
                 </Button>
               </Link>
             </div>
+            {isOwner && <ManagerAssignmentCard propertyId={id} />}
           </div>
         </header>
 

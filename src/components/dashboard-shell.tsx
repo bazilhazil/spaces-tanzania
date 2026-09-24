@@ -8,6 +8,7 @@ import {
 
 } from "lucide-react";
 import { hasTenancy, hasManagementAssignment } from "@/lib/management-db";
+import { hasActiveManagement } from "@/lib/property-managers";
 import { Button } from "@/components/ui/button";
 import { Brand } from "@/components/brand";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -80,7 +81,27 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.billing"), to: "/billing", icon: CreditCard },
       { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
     ],
+    manager: [
+      { label: t("pm.myManagement"), to: "/management", icon: Building2 },
+      { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
+      { label: t("dashboard.side.notifications"), to: "/notifications", icon: Bell },
+      { label: t("dashboard.side.favorites"), to: "/dashboard/favorites", icon: Heart },
+      { label: t("dashboard.side.savedSearches"), to: "/dashboard/searches", icon: Search },
+      { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
+      { label: t("dashboard.side.profile"), to: "/dashboard/profile", icon: UserIcon },
+      { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
+      { label: t("dashboard.side.support"), to: "/dashboard/support", icon: LifeBuoy },
+    ],
   };
+}
+
+/** Buying/renting links stay reachable from every workspace (under "More"). */
+function useMarketplaceExtras(): Item[] {
+  const { t } = useI18n();
+  return [
+    { label: t("dashboard.side.favorites"), to: "/dashboard/favorites", icon: Heart },
+    { label: t("dashboard.side.savedSearches"), to: "/dashboard/searches", icon: Search },
+  ];
 }
 
 /**
@@ -91,36 +112,54 @@ const PRIMARY_PATHS: Record<SpacesMode, string[]> = {
   owner: ["/dashboard", "/dashboard/properties", "/management", "/upload", "/leads", "/viewings", "/messages", "/notifications"],
   buyer: ["/dashboard", "/dashboard/favorites", "/dashboard/searches", "/viewings", "/messages", "/notifications"],
   agent: ["/dashboard", "/leads", "/deals", "/dashboard/properties", "/management", "/viewings", "/messages", "/notifications"],
+  manager: ["/management", "/messages", "/notifications"],
 };
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const { profile, user, signOut, roles } = useAuth();
   const { mode, setMode } = useMode();
-  const activeMode: SpacesMode = mode ?? "buyer";
   const { t } = useI18n();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const NAV = useRoleNav();
+  const extras = useMarketplaceExtras();
   const isAdmin = roles.includes("admin") || roles.includes("super_admin");
   const [tenancy, setTenancy] = useState(false);
   const [agentManages, setAgentManages] = useState(false);
+  const [pmActive, setPmActive] = useState(false);
   useEffect(() => {
     let alive = true;
-    if (!user) { setTenancy(false); setAgentManages(false); return; }
+    if (!user) { setTenancy(false); setAgentManages(false); setPmActive(false); return; }
     void hasTenancy(user.id).then((v) => { if (alive) setTenancy(v); }).catch(() => {});
     void hasManagementAssignment(user.id).then((v) => { if (alive) setAgentManages(v); }).catch(() => {});
+    void hasActiveManagement(user.id).then((v) => { if (alive) setPmActive(v); }).catch(() => {});
     return () => { alive = false; };
   }, [user?.id]);
+
+  // Workspaces that genuinely apply to this person. Property Manager is only
+  // available with a real capability (accepted invitation or approved onboarding).
+  const hasManager = roles.includes("property_manager" as never) || pmActive;
+  const workspaces: SpacesMode[] = [];
+  if (roles.includes("owner") || mode === "owner") workspaces.push("owner");
+  if (roles.includes("agent") || mode === "agent") workspaces.push("agent");
+  if (hasManager) workspaces.push("manager");
+  const fallback: SpacesMode = workspaces[0] ?? "buyer";
+  const activeMode: SpacesMode =
+    mode && (mode === "buyer" || workspaces.includes(mode)) ? mode : fallback;
+  const showSwitcher = workspaces.length >= 2;
 
   // Agents only see Property Management for listings an owner explicitly assigned to them.
   const modeNav = NAV[activeMode].filter(
     (i) => i.to !== "/management" || activeMode !== "agent" || agentManages,
   );
+  const withExtras = activeMode === "buyer" || activeMode === "manager"
+    ? modeNav
+    : [...modeNav, ...extras.filter((e) => !modeNav.some((m) => m.to === e.to))];
   const base: Item[] = tenancy
-    ? [modeNav[0], { label: t("mgmt.myTenancy"), to: "/my-tenancy", icon: KeyRound }, ...modeNav.slice(1)]
-    : modeNav;
+    ? [withExtras[0], { label: t("mgmt.myTenancy"), to: "/my-tenancy", icon: KeyRound }, ...withExtras.slice(1)]
+    : withExtras;
   const items: Item[] = isAdmin
     ? [...base, { label: t("dashboard.side.admin"), to: "/admin", icon: ShieldAlert }]
     : base;
@@ -128,6 +167,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const primaryItems = items.filter((i) => primaryPaths.includes(i.to));
   const moreItems = items.filter((i) => !primaryPaths.includes(i.to));
   const moreActive = moreItems.some((i) => i.to === pathname);
+  const wsLabel = (m: SpacesMode) =>
+    t(m === "owner" ? "pm.wsOwner" : m === "agent" ? "pm.wsAgent" : m === "manager" ? "pm.wsManager" : "pm.wsBuyer");
 
 
 
@@ -177,30 +218,31 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   {profile?.full_name || t("common.welcome")}
                 </p>
                 <div className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                  {activeMode} mode
+                  {wsLabel(activeMode)}
                 </div>
               </div>
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-1 rounded-xl border border-border/60 bg-secondary/50 p-1">
-              {(["buyer", "owner", "agent"] as SpacesMode[]).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => {
+            {showSwitcher && (
+              <label className="mt-3 block">
+                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t("pm.workspace")}
+                </span>
+                <select
+                  value={workspaces.includes(activeMode) ? activeMode : workspaces[0]}
+                  onChange={(e) => {
+                    const m = e.target.value as SpacesMode;
                     setMode(m);
-                    toast.success(`Switched to ${m.charAt(0).toUpperCase() + m.slice(1)} mode`);
-                    navigate({ to: "/dashboard" });
+                    toast.success(wsLabel(m));
+                    navigate({ to: m === "manager" ? "/management" : "/dashboard" });
                   }}
-                  className={cn(
-                    "rounded-lg py-1.5 text-[11px] font-semibold capitalize transition-all",
-                    activeMode === m
-                      ? "bg-primary text-primary-foreground shadow-[var(--shadow-soft)]"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
+                  className="h-10 w-full rounded-xl border border-border/60 bg-secondary/50 px-3 text-sm font-medium text-foreground"
                 >
-                  {m}
-                </button>
-              ))}
-            </div>
+                  {workspaces.map((m) => (
+                    <option key={m} value={m}>{wsLabel(m)}</option>
+                  ))}
+                </select>
+              </label>
+            )}
           </div>
 
 
