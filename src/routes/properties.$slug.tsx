@@ -26,6 +26,9 @@ import { PropertyReviews } from "@/components/reviews/property-reviews";
 import { formatPrice, type Property, type Agent } from "@/lib/mock-data";
 import { fetchLiveProperties, fetchPropertyById, fetchPropertyContact, contactAgentFromRow, fetchOwnerPublicProfile, type OwnerPublicProfile } from "@/lib/properties-db";
 import { useAuth } from "@/hooks/use-auth";
+import { MakeOfferDialog } from "@/components/offers/make-offer-dialog";
+import { fetchMyOpenOffer } from "@/lib/offers-db";
+import { supabase as sbOffer } from "@/integrations/supabase/client";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useI18n } from "@/hooks/use-i18n";
 import { cn } from "@/lib/utils";
@@ -175,6 +178,9 @@ function PropertyDetailPage() {
   const [lightbox, setLightbox] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [inquiryOpen, setInquiryOpen] = useState(false);
+  const [offerOpen, setOfferOpen] = useState(false);
+  const [availability, setAvailability] = useState<string>("available");
+  const [myOffer, setMyOffer] = useState<{ deal_id: string } | null>(null);
   const [viewingOpen, setViewingOpen] = useState(false);
   const [authGate, setAuthGate] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -224,6 +230,19 @@ function PropertyDetailPage() {
     : t("card.forLease");
 
   const unavailable = ["sold", "rented", "archived", "paused"].includes(status);
+  useEffect(() => {
+    if (!property?.id) return;
+    void sbOffer.from("properties").select("availability").eq("id", property.id).maybeSingle()
+      .then(({ data }) => setAvailability(((data as any)?.availability as string) ?? "available"));
+    if (user) void fetchMyOpenOffer(property.id, user.id).then(setMyOffer);
+  }, [property?.id, user]);
+  const isRentOffer = property?.listingType === "rent";
+  const isMine = !!user && (user.id === ownerId || user.id === agent?.id);
+  const offerEligible = !!property && status === "live" && !isMine && !["reserved", "under_transaction", "sold", "rented"].includes(availability);
+  function openOffer() {
+    if (myOffer) { window.location.href = `/deals?deal=${myOffer.deal_id}`; return; }
+    requireAuth(() => setOfferOpen(true));
+  }
   const locationLine = [property.ward, property.district, property.city].filter(Boolean).join(", ");
   const whatsappText = t("properties.detail.whatsappMessageFull", {
     title: property.title,
@@ -618,6 +637,14 @@ function PropertyDetailPage() {
                     </div>
                   ) : (
                     <>
+                      {offerEligible && (
+                        <Button size="lg" className="h-12 w-full text-base font-semibold" onClick={openOffer}>
+                          {myOffer ? "View my offer" : isRentOffer ? "Apply / Make Rental Offer" : "Make Offer"}
+                        </Button>
+                      )}
+                      {["reserved", "under_transaction"].includes(availability) && (
+                        <p className="rounded-lg bg-warning/10 p-2 text-center text-sm font-medium text-warning">Reserved — an offer has been accepted</p>
+                      )}
                       <Button className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => requireAuth(() => setInquiryOpen(true))}>
                         <Send className="h-4 w-4" /> {t("inquiry.message")}
                       </Button>
@@ -693,6 +720,11 @@ function PropertyDetailPage() {
       {/* Mobile sticky actions — kept slim, content has matching bottom padding */}
       {!unavailable && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-3 py-2 backdrop-blur md:hidden">
+          {offerEligible && (
+            <Button className="mb-2 h-11 w-full font-semibold" onClick={openOffer}>
+              {myOffer ? "View my offer" : isRentOffer ? "Apply / Make Rental Offer" : "Make Offer"}
+            </Button>
+          )}
           <div className="grid grid-cols-3 gap-2">
             <Button size="sm" className="h-11 gap-1.5" onClick={() => requireAuth(() => setInquiryOpen(true))}>
               <Send className="h-4 w-4" /> {t("inquiry.message")}
@@ -705,6 +737,12 @@ function PropertyDetailPage() {
             </Button>
           </div>
         </div>
+      )}
+
+      {property && (
+        <MakeOfferDialog open={offerOpen} onOpenChange={setOfferOpen} isRent={isRentOffer}
+          defaultEmail={user?.email ?? ""}
+          property={{ id: property.id, title: property.title, location: [property.district, property.city].filter(Boolean).join(", "), price: property.price, currency: property.currency, availability }} />
       )}
 
       {/* Fullscreen lightbox */}
