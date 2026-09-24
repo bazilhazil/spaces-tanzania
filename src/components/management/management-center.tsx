@@ -1,5 +1,5 @@
 import { ManagerInvitations } from "@/components/management/manager-invitations";
-import { useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import {
   Building2, Users, FileText, Wallet, Wrench, HardHat, Plus, CheckCircle2, XCircle, Home,
 } from "lucide-react";
@@ -463,9 +463,11 @@ export function ManagementCenter() {
 /* Forms                                                                   */
 /* --------------------------------------------------------------------- */
 
-function AddButton({ label }: { label: string }) {
-  return <Button className="w-full rounded-full sm:w-auto"><Plus className="mr-1 h-4 w-4" /> {label}</Button>;
-}
+const AddButton = forwardRef<HTMLButtonElement, { label: string } & React.ButtonHTMLAttributes<HTMLButtonElement>>(
+  function AddButton({ label, ...rest }, ref) {
+    return <Button ref={ref} {...rest} className="w-full rounded-full sm:w-auto"><Plus className="mr-1 h-4 w-4" /> {label}</Button>;
+  },
+);
 
 function UnitForm({ properties, ownerFor, onDone }: {
   properties: { value: string; label: string }[];
