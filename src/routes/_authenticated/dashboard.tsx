@@ -35,7 +35,12 @@ function DashboardPage() {
     if (typeof window !== "undefined") window.location.replace("/welcome");
     return null;
   }
-  const activeMode: SpacesMode = mode ?? "buyer";
+  // The Property Manager workspace lives on the existing Management screen.
+  if (mode === "manager") {
+    if (typeof window !== "undefined") window.location.replace("/management");
+    return null;
+  }
+  const activeMode = (mode ?? "buyer") as Exclude<SpacesMode, "manager">;
 
   return (
     <DashboardShell>
