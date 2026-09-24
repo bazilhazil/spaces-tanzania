@@ -269,11 +269,45 @@ function SubscriptionStatusCard({ usage }: { usage: PlanUsage | null | undefined
         <div className="ds-caption">{t("billing.listingAllowance")}</div>
         <div className="mt-1 font-semibold">
           {used} / {limit == null ? "∞" : limit}
+          <span className="ml-2 text-xs font-normal text-muted-foreground">
+            {limit == null ? "Unlimited" : `${Math.max(0, limit - used)} remaining`}
+          </span>
         </div>
         <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
           <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
         </div>
+        {limit != null && used >= limit && (
+          <p className="mt-2 text-xs font-medium text-destructive">Limit reached — upgrade below to add more listings.</p>
+        )}
       </div>
+      <ActivitySummary />
+    </div>
+  );
+}
+
+function ActivitySummary() {
+  const { data } = useQuery({
+    queryKey: ["my-monetization-summary"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("my_monetization_summary");
+      if (error) throw error;
+      return data?.[0] ?? null;
+    },
+  });
+  const items = [
+    { label: "Leads", value: data?.leads_count ?? 0, to: "/leads" },
+    { label: "Open deals", value: data?.open_deals ?? 0, to: "/deals" },
+    { label: "Completed deals", value: data?.won_deals ?? 0, to: "/deals" },
+  ];
+  return (
+    <div className="grid grid-cols-3 gap-2 border-t border-border/60 pt-4 sm:col-span-3">
+      {items.map((i) => (
+        <Link key={i.label} to={i.to} className="rounded-xl bg-muted/50 p-3 hover:bg-accent">
+          <div className="ds-caption">{i.label}</div>
+          <div className="font-display text-xl font-semibold">{Number(i.value)}</div>
+        </Link>
+      ))}
+      <p className="col-span-3 text-xs text-muted-foreground">Commission tracking appears here once deals record an agreed commission.</p>
     </div>
   );
 }

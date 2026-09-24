@@ -56,6 +56,7 @@ const NAV: { group: string; items: Item[] }[] = [
   {
     group: "Revenue",
     items: [
+      { label: "Monetization & Deals", section: "monetization", icon: DollarSign },
       { label: "Revenue", section: "revenue", icon: DollarSign },
       { label: "Payments", section: "payments", icon: CreditCard },
       { label: "Subscriptions", section: "subscriptions", icon: Receipt },
