@@ -8,6 +8,7 @@ import {
 
 } from "lucide-react";
 import { hasTenancy, hasManagementAssignment } from "@/lib/management-db";
+import { hasActiveManagement } from "@/lib/property-managers";
 import { Button } from "@/components/ui/button";
 import { Brand } from "@/components/brand";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -117,31 +118,48 @@ const PRIMARY_PATHS: Record<SpacesMode, string[]> = {
 export function DashboardShell({ children }: { children: ReactNode }) {
   const { profile, user, signOut, roles } = useAuth();
   const { mode, setMode } = useMode();
-  const activeMode: SpacesMode = mode ?? "buyer";
   const { t } = useI18n();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const NAV = useRoleNav();
+  const extras = useMarketplaceExtras();
   const isAdmin = roles.includes("admin") || roles.includes("super_admin");
   const [tenancy, setTenancy] = useState(false);
   const [agentManages, setAgentManages] = useState(false);
+  const [pmActive, setPmActive] = useState(false);
   useEffect(() => {
     let alive = true;
-    if (!user) { setTenancy(false); setAgentManages(false); return; }
+    if (!user) { setTenancy(false); setAgentManages(false); setPmActive(false); return; }
     void hasTenancy(user.id).then((v) => { if (alive) setTenancy(v); }).catch(() => {});
     void hasManagementAssignment(user.id).then((v) => { if (alive) setAgentManages(v); }).catch(() => {});
+    void hasActiveManagement(user.id).then((v) => { if (alive) setPmActive(v); }).catch(() => {});
     return () => { alive = false; };
   }, [user?.id]);
+
+  // Workspaces that genuinely apply to this person. Property Manager is only
+  // available with a real capability (accepted invitation or approved onboarding).
+  const hasManager = roles.includes("property_manager" as never) || pmActive;
+  const workspaces: SpacesMode[] = [];
+  if (roles.includes("owner") || mode === "owner") workspaces.push("owner");
+  if (roles.includes("agent") || mode === "agent") workspaces.push("agent");
+  if (hasManager) workspaces.push("manager");
+  const fallback: SpacesMode = workspaces[0] ?? "buyer";
+  const activeMode: SpacesMode =
+    mode && (mode === "buyer" || workspaces.includes(mode)) ? mode : fallback;
+  const showSwitcher = workspaces.length >= 2;
 
   // Agents only see Property Management for listings an owner explicitly assigned to them.
   const modeNav = NAV[activeMode].filter(
     (i) => i.to !== "/management" || activeMode !== "agent" || agentManages,
   );
+  const withExtras = activeMode === "buyer" || activeMode === "manager"
+    ? modeNav
+    : [...modeNav, ...extras.filter((e) => !modeNav.some((m) => m.to === e.to))];
   const base: Item[] = tenancy
-    ? [modeNav[0], { label: t("mgmt.myTenancy"), to: "/my-tenancy", icon: KeyRound }, ...modeNav.slice(1)]
-    : modeNav;
+    ? [withExtras[0], { label: t("mgmt.myTenancy"), to: "/my-tenancy", icon: KeyRound }, ...withExtras.slice(1)]
+    : withExtras;
   const items: Item[] = isAdmin
     ? [...base, { label: t("dashboard.side.admin"), to: "/admin", icon: ShieldAlert }]
     : base;
@@ -149,6 +167,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const primaryItems = items.filter((i) => primaryPaths.includes(i.to));
   const moreItems = items.filter((i) => !primaryPaths.includes(i.to));
   const moreActive = moreItems.some((i) => i.to === pathname);
+  const wsLabel = (m: SpacesMode) =>
+    t(m === "owner" ? "pm.wsOwner" : m === "agent" ? "pm.wsAgent" : m === "manager" ? "pm.wsManager" : "pm.wsBuyer");
 
 
 
