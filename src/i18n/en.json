@@ -2143,5 +2143,19 @@
     "newPropBody": "A new property verification is awaiting review.",
     "pmApprovedBody": "Your Property Manager workspace is now available from your dashboard.",
     "update": "Update"
+  },
+  "notifLive": {
+    "summary": "You have {n} new notifications",
+    "view": "View",
+    "bell": "Notifications",
+    "bellUnread": "Notifications, {n} unread",
+    "inApp": "In-app notifications",
+    "inAppDesc": "Show notifications inside SPACES and live alerts.",
+    "email": "Email notifications",
+    "emailDesc": "Email me about viewings, inquiries, messages and deal changes.",
+    "critical": "Important security and account notifications are always delivered.",
+    "saved": "Preferences saved",
+    "saveFailed": "Couldn't save. Please try again.",
+    "emailProvider": "Emails are sent from notify@spacestz.com."
   }
 }

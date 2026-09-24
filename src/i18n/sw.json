@@ -2143,5 +2143,19 @@
     "newPropBody": "Uhakiki mpya wa mali unasubiri ukaguzi.",
     "pmApprovedBody": "Eneo lako la kazi la Msimamizi wa Mali sasa linapatikana kwenye dashibodi yako.",
     "update": "Taarifa"
+  },
+  "notifLive": {
+    "summary": "Una arifa mpya {n}",
+    "view": "Tazama",
+    "bell": "Arifa",
+    "bellUnread": "Arifa, {n} hazijasomwa",
+    "inApp": "Arifa ndani ya programu",
+    "inAppDesc": "Onyesha arifa ndani ya SPACES na tahadhari za papo hapo.",
+    "email": "Arifa kwa barua pepe",
+    "emailDesc": "Nitumie barua pepe kuhusu matembezi, maulizo, ujumbe na mabadiliko ya mikataba.",
+    "critical": "Arifa muhimu za usalama na akaunti hutumwa kila wakati.",
+    "saved": "Mapendeleo yamehifadhiwa",
+    "saveFailed": "Imeshindikana kuhifadhi. Tafadhali jaribu tena.",
+    "emailProvider": "Barua pepe hutumwa kutoka notify@spacestz.com."
   }
 }

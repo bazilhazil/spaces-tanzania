@@ -56,6 +56,9 @@ async function admin() {
 async function emailFor(userId?: string | null): Promise<string | null> {
   if (!userId) return null;
   const db = await admin();
+  // Respect the recipient's "Email notifications" preference.
+  const { data: pref } = await db.from("notification_preferences").select("email").eq("user_id", userId).maybeSingle();
+  if ((pref as { email?: boolean } | null)?.email === false) return null;
   const { data } = await db.from("profiles").select("email").eq("id", userId).maybeSingle();
   const email = (data as { email?: string | null } | null)?.email ?? null;
   return email && email.includes("@") ? email : null;
