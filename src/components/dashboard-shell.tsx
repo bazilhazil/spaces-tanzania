@@ -6,8 +6,6 @@ import {
   Heart, Search, User as UserIcon, Users, Briefcase, GitCompare, Clock, Contact,
   Menu, X, LogOut, FileEdit, LifeBuoy, ShieldCheck, Sparkles, Handshake, Trophy, Star, ShieldAlert, Bell,
   MoreHorizontal, ChevronDown, Building2, KeyRound,
-
-  Users,
 } from "lucide-react";
 import { hasTenancy, hasManagementAssignment } from "@/lib/management-db";
 import { hasActiveManagement } from "@/lib/property-managers";
