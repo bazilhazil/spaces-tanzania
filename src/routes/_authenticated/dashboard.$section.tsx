@@ -530,7 +530,11 @@ function ModePanel() {
           <button
             key={o.key}
             onClick={() => {
-              setMode(o.key);
+              if (!setMode(o.key)) {
+                toast.info(t("modeUi.agentNeedsApproval"));
+                navigate({ to: "/verification" });
+                return;
+              }
               toast.success(t("modeUi.modeSwitched", { mode: o.title }));
               navigate({ to: "/dashboard" });
             }}
