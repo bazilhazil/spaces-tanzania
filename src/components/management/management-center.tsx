@@ -1,3 +1,4 @@
+import { ManagerInvitations } from "@/components/management/manager-invitations";
 import { useEffect, useMemo, useState } from "react";
 import {
   Building2, Users, FileText, Wallet, Wrench, HardHat, Plus, CheckCircle2, XCircle, Home,
@@ -75,17 +76,21 @@ export function ManagementCenter() {
 
   if (!properties.length) {
     return (
+      <div className="space-y-6">
+      <ManagerInvitations onChange={() => void load()} />
       <EmptyState
         icon={Building2}
         title="No properties to manage yet"
         description="Add a property to Spaces first — then you can manage units, tenants, rent and maintenance here."
         action={{ label: "Add a property", href: "/upload" }}
       />
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      <ManagerInvitations onChange={() => void load()} />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label={tr("mgmt.properties")} value={metrics.properties} icon={Building2} />
         <StatCard label={tr("mgmt.unitsShort")} value={metrics.units} icon={Home} tone="muted" />

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "buyer" | "customer" | "owner" | "agent" | "admin" | "super_admin";
+export type AppRole = "buyer" | "customer" | "owner" | "agent" | "property_manager" | "admin" | "super_admin";
 
 export interface Profile {
   id: string;
@@ -33,7 +33,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 // Highest privilege first — the first match becomes primaryRole.
-const rolePriority: AppRole[] = ["super_admin", "admin", "agent", "owner", "customer", "buyer"];
+const rolePriority: AppRole[] = ["super_admin", "admin", "agent", "owner", "property_manager", "customer", "buyer"];
 
 export function redirectPathForRole(role?: AppRole): string {
   switch (role) {
