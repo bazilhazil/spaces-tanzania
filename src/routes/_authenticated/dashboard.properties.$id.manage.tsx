@@ -353,8 +353,8 @@ function StatusBadge({ status }: { status: string }) {
     live: "bg-emerald-500/90 text-white",
     draft: "bg-muted text-muted-foreground",
     pending: "bg-amber-500/90 text-white",
-    paused: "bg-slate-500/90 text-white",
-    archived: "bg-slate-500/90 text-white",
+    paused: "bg-muted text-muted-foreground",
+    archived: "bg-muted text-muted-foreground",
     sold: "bg-primary text-primary-foreground",
     rented: "bg-violet-500/90 text-white",
   };
@@ -712,7 +712,7 @@ function PhotosSection({
                 {!m.is_cover && (
                   <button
                     onClick={() => setCover(m)}
-                    className="flex-1 rounded-md bg-white/90 px-2 py-1 text-[11px] font-medium text-foreground hover:bg-white"
+                    className="flex-1 rounded-md bg-background/90 px-2 py-1 text-[11px] font-medium text-foreground hover:bg-background"
                   >
                     <Star className="mx-auto h-3 w-3" />
                   </button>

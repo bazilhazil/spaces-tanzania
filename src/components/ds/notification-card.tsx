@@ -14,10 +14,10 @@ type Props = {
 };
 
 const TONE: Record<NonNullable<Props["tone"]>, string> = {
-  brand:   "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]",
-  success: "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)]",
-  warning: "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)]",
-  danger:  "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]",
+  brand:   "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)] dark:bg-primary/18 dark:text-primary",
+  success: "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)] dark:bg-success/18 dark:text-success",
+  warning: "bg-[color:var(--color-warning-50)] text-[color:var(--color-warning-800)] dark:bg-warning/18 dark:text-warning",
+  danger:  "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)] dark:bg-destructive/18 dark:text-[color:var(--color-danger-300)]",
 };
 
 export function NotificationCard({

@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { StatCard, EmptyState, SkeletonCard } from "@/components/ds";
 import { useAuth } from "@/hooks/use-auth";
@@ -875,8 +876,8 @@ function DocumentUploadForm({ properties, ownerFor, leases, tenantName, onDone }
       <SelectField label="Lease" value={leaseId} onChange={setLeaseId} options={leaseOptions} />
       <SelectField label="Document type" value={docType} onChange={setDocType}
         options={opts(["lease", "receipt", "identification", "maintenance", "notice", "other"])} />
-      <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx" aria-label="File"
-        onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="block w-full text-sm" />
+      <Input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx" aria-label="File"
+        onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="h-auto min-h-11 py-1.5" />
     </FormDialog>
   );
 }

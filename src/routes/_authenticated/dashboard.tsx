@@ -267,8 +267,8 @@ function statusChip(status: string) {
     live:     { label: "Live",     cls: "bg-emerald-500/10 text-emerald-600 ring-emerald-500/20" },
     draft:    { label: "Draft",    cls: "bg-muted text-muted-foreground ring-border" },
     pending:  { label: "Pending",  cls: "bg-amber-500/10 text-amber-600 ring-amber-500/20" },
-    paused:   { label: "Paused",   cls: "bg-slate-500/10 text-slate-600 ring-slate-500/20" },
-    archived: { label: "Archived", cls: "bg-slate-500/10 text-slate-600 ring-slate-500/20" },
+    paused:   { label: "Paused",   cls: "bg-muted text-muted-foreground ring-border" },
+    archived: { label: "Archived", cls: "bg-muted text-muted-foreground ring-border" },
     sold:     { label: "Sold",     cls: "bg-primary/10 text-primary ring-primary/20" },
     rented:   { label: "Rented",   cls: "bg-violet-500/10 text-violet-600 ring-violet-500/20" },
   };

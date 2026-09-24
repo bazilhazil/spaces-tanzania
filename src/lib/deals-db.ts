@@ -69,7 +69,7 @@ export const HEALTH_DOT: Record<DealHealth, string> = {
   healthy: "bg-emerald-500",
   waiting: "bg-amber-500",
   at_risk: "bg-rose-500",
-  closed: "bg-neutral-500",
+  closed: "bg-muted-foreground",
 };
 
 export const HEALTH_LABEL: Record<DealHealth, string> = {

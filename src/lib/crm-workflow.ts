@@ -32,7 +32,7 @@ export const LEAD_STATUS_TONE: Record<LeadStatus, string> = {
   offer_made: "border-orange-500/30 bg-orange-500/10 text-orange-600",
   won: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
   lost: "border-rose-500/30 bg-rose-500/10 text-rose-600",
-  closed: "border-slate-500/30 bg-slate-500/10 text-slate-600",
+  closed: "border-border bg-muted text-muted-foreground",
 };
 
 export function normalizeLeadStatus(raw: string | null | undefined): LeadStatus {
