@@ -32,9 +32,9 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("mgmt.nav"), to: "/management", icon: Building2 },
       { label: t("dashboard.side.inquiries"), to: "/leads", icon: Contact },
       { label: t("dashboard.side.deals"), to: "/deals", icon: Handshake },
-      { label: "Viewings", to: "/viewings", icon: Calendar },
+      { label: t("modeUi.viewings"), to: "/viewings", icon: Calendar },
       { label: t("dashboard.side.reviews"), to: "/reviews", icon: Star },
-      { label: "Messages", to: "/messages", icon: MessageSquare },
+      { label: t("modeUi.messages"), to: "/messages", icon: MessageSquare },
       { label: t("dashboard.side.notifications"), to: "/notifications", icon: Bell },
       { label: t("dashboard.side.safety"), to: "/dashboard/safety", icon: ShieldCheck },
       { label: t("dashboard.side.drafts"), to: "/dashboard/drafts", icon: FileEdit },
@@ -279,7 +279,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   )}
                 >
                   <MoreHorizontal className="h-4 w-4" />
-                  More
+                  {t("modeUi.more")}
                   <ChevronDown className={cn("ml-auto h-4 w-4 transition-transform", (moreOpen || moreActive) && "rotate-180")} />
                 </button>
                 {(moreOpen || moreActive) && moreItems.map((item) => {

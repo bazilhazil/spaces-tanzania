@@ -994,7 +994,7 @@ export function VerificationPanel() {
     <>
       <PageHeader kicker={t("admin.kicker.trust")} title={t("admin.verification.title")} subtitle={t("admin.verification.sub")} />
       <div className="mb-6 flex gap-2 overflow-x-auto">
-        {([["listings", "Listings"], ["people", "Identity & documents"]] as const).map(([key, label]) => (
+        {([["listings", t("modeUi.vListings")], ["people", t("modeUi.vPeople")]] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setView(key)}

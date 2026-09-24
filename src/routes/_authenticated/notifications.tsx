@@ -1,3 +1,4 @@
+import { useI18n } from "@/hooks/use-i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
@@ -102,15 +103,29 @@ function money(value: number | null | undefined, currency: string | null | undef
 }
 
 
-function timeAgo(iso: string) {
+type T = (k: string, v?: Record<string, string | number>) => string;
+/** Known system notification texts (stored in English) shown in the reader's language. */
+const KNOWN_TEXT: Record<string, string> = {
+  "Property Manager request not approved": "notifUi.pmRejected",
+  "Property Manager access approved": "notifUi.pmApproved",
+  "Request submitted": "notifUi.pmSubmitted",
+  "New verification submission": "notifUi.newVer",
+  "A new Property Manager access request is awaiting review.": "notifUi.newPmBody",
+  "A new property verification is awaiting review.": "notifUi.newPropBody",
+  "Your Property Manager workspace is now available from your dashboard.": "notifUi.pmApprovedBody",
+  "We received your Property Manager access request and will review it shortly.": "notifUi.pmSubmittedBody",
+};
+function localText(t: T, s: string) { return KNOWN_TEXT[s] ? t(KNOWN_TEXT[s]) : s; }
+
+function timeAgo(iso: string, t: T) {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60_000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
+  if (m < 1) return t("notifUi.justNow");
+  if (m < 60) return t("notifUi.mAgo", { n: m });
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
+  if (h < 24) return t("notifUi.hAgo", { n: h });
   const d = Math.floor(h / 24);
-  return `${d}d ago`;
+  return t("notifUi.dAgo", { n: d });
 }
 
 function bucket(iso: string): "today" | "week" | "earlier" {
@@ -135,6 +150,7 @@ function useLive<T>(read: () => T, event: string): T {
 const CATEGORY_TABS = ["properties", "users", "leads", "viewings", "verification", "payments", "reports"] as const;
 
 function NotificationsPage() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [notifs, setNotifs] = useState<DbNotification[]>([]);
   const [q, setQ] = useState("");
@@ -181,24 +197,24 @@ function NotificationsPage() {
         <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Notifications
+              {t("notifUi.title")}
             </h1>
             <p className="mt-1 text-muted-foreground">
-              Stay on top of leads, deals, viewings, billing and verification updates — in one place.
+              {t("notifUi.sub")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="rounded-full">{unread} unread</Badge>
+            <Badge variant="outline" className="rounded-full">{t("notifUi.unread", { n: unread })}</Badge>
             <Button
               variant="outline"
               size="sm"
               onClick={async () => {
                 setNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
                 await markAllNotificationsRead();
-                toast.success("All notifications marked as read");
+                toast.success(t("notifUi.allMarked"));
               }}
             >
-              <Check className="mr-1.5 h-4 w-4" /> Mark all as read
+              <Check className="mr-1.5 h-4 w-4" /> {t("notifUi.markAll")}
             </Button>
           </div>
         </header>
@@ -209,18 +225,18 @@ function NotificationsPage() {
           <div className="flex items-center gap-2">
             <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <TabsList className="inline-flex w-max flex-nowrap justify-start gap-1 whitespace-nowrap">
-                <TabsTrigger value="all" className="shrink-0">All</TabsTrigger>
-                <TabsTrigger value="unread" className="shrink-0">Unread</TabsTrigger>
-                <TabsTrigger value="read" className="shrink-0">Read</TabsTrigger>
-                <TabsTrigger value="today" className="shrink-0">Today</TabsTrigger>
-                <TabsTrigger value="week" className="shrink-0">This week</TabsTrigger>
-                <TabsTrigger value="earlier" className="shrink-0">Earlier</TabsTrigger>
-                <TabsTrigger value="urgent" className="shrink-0">Urgent</TabsTrigger>
+                <TabsTrigger value="all" className="shrink-0">{t("notifUi.all")}</TabsTrigger>
+                <TabsTrigger value="unread" className="shrink-0">{t("notifUi.unreadTab")}</TabsTrigger>
+                <TabsTrigger value="read" className="shrink-0">{t("notifUi.read")}</TabsTrigger>
+                <TabsTrigger value="today" className="shrink-0">{t("notifUi.today")}</TabsTrigger>
+                <TabsTrigger value="week" className="shrink-0">{t("notifUi.week")}</TabsTrigger>
+                <TabsTrigger value="earlier" className="shrink-0">{t("notifUi.earlier")}</TabsTrigger>
+                <TabsTrigger value="urgent" className="shrink-0">{t("notifUi.urgent")}</TabsTrigger>
                 {CATEGORY_TABS.map((c) => (
-                  <TabsTrigger key={c} value={c} className="shrink-0 capitalize">{c}</TabsTrigger>
+                  <TabsTrigger key={c} value={c} className="shrink-0">{t(`notifUi.cat_${c}`)}</TabsTrigger>
                 ))}
                 <TabsTrigger value="settings" className="hidden shrink-0 md:inline-flex">
-                  <Settings2 className="mr-1.5 h-3.5 w-3.5" />Settings
+                  <Settings2 className="mr-1.5 h-3.5 w-3.5" />{t("notifUi.settings")}
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -239,12 +255,12 @@ function NotificationsPage() {
           {tab !== "settings" && (
             <div className="relative w-full">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search notifications" className="pl-9" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("notifUi.search")} className="pl-9" />
             </div>
           )}
 
-          {(["all", "unread", "read", "today", "week", "earlier", "urgent", ...CATEGORY_TABS] as const).map((t) => (
-            <TabsContent key={t} value={t} className="mt-0">
+          {(["all", "unread", "read", "today", "week", "earlier", "urgent", ...CATEGORY_TABS] as const).map((tb) => (
+            <TabsContent key={tb} value={tb} className="mt-0">
               <NotifList items={filtered} onRead={onRead} onDelete={onDelete} />
             </TabsContent>
           ))}
@@ -263,12 +279,13 @@ function NotifList({ items, onRead, onDelete }: {
   onRead: (id: string) => void | Promise<void>;
   onDelete: (id: string) => void | Promise<void>;
 }) {
+  const { t } = useI18n();
   if (items.length === 0) {
     return (
       <EmptyState
         icon={Bell}
-        title="No notifications"
-        description="You're all caught up. New activity will appear here."
+        title={t("notifUi.emptyTitle")}
+        description={t("notifUi.emptyBody")}
       />
     );
   }
@@ -293,12 +310,12 @@ function NotifList({ items, onRead, onDelete }: {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-semibold">{n.title}</span>
+                    <span className="truncate text-sm font-semibold">{localText(t, n.title)}</span>
                     {!n.read && <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}
                   </div>
-                  <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{n.body}</p>
+                  <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{localText(t, n.body)}</p>
                 </div>
-                <span className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground">{timeAgo(n.createdAt)}</span>
+                <span className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground">{timeAgo(n.createdAt, t)}</span>
               </div>
 
               {alert && (
@@ -329,23 +346,23 @@ function NotifList({ items, onRead, onDelete }: {
               )}
 
               <div className="mt-2 flex items-center justify-between gap-2">
-                <Badge variant="outline" className="rounded-full text-[10px]">{kindLabel(n.kind)}</Badge>
+                <Badge variant="outline" className="rounded-full text-[10px]">{kindLabel(n.kind) === "Update" ? t("notifUi.update") : kindLabel(n.kind)}</Badge>
 
                 {/* Desktop: inline action buttons */}
                 <div className="hidden flex-wrap items-center gap-1 md:flex">
                   {n.link && !alert && (
                     <Button asChild size="sm" variant="ghost" className="h-7 px-2 text-xs">
-                      <a href={n.link}>Open</a>
+                      <a href={n.link}>{t("notifUi.open")}</a>
                     </Button>
                   )}
                   {!n.read && (
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => void onRead(n.id)}>
-                      <Check className="mr-1 h-3.5 w-3.5" />Mark read
+                      <Check className="mr-1 h-3.5 w-3.5" />{t("notifUi.markRead")}
                     </Button>
                   )}
                   <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
                     onClick={() => void onDelete(n.id)}>
-                    <Trash2 className="mr-1 h-3.5 w-3.5" />Delete
+                    <Trash2 className="mr-1 h-3.5 w-3.5" />{t("notifUi.delete")}
                   </Button>
                 </div>
 
@@ -359,19 +376,19 @@ function NotifList({ items, onRead, onDelete }: {
                   <DropdownMenuContent align="end" className="w-44">
                     {n.link && (
                       <DropdownMenuItem asChild>
-                        <a href={n.link}>Open</a>
+                        <a href={n.link}>{t("notifUi.open")}</a>
                       </DropdownMenuItem>
                     )}
                     {!n.read && (
                       <DropdownMenuItem onClick={() => void onRead(n.id)}>
-                        <Check className="mr-2 h-4 w-4" />Mark as read
+                        <Check className="mr-2 h-4 w-4" />{t("notifUi.markAsRead")}
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem
                       className="text-destructive focus:text-destructive"
                       onClick={() => void onDelete(n.id)}
                     >
-                      <Trash2 className="mr-2 h-4 w-4" />Delete
+                      <Trash2 className="mr-2 h-4 w-4" />{t("notifUi.delete")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
