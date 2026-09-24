@@ -72,7 +72,7 @@ function AgencyPage() {
 
   useEffect(() => { void load(); }, [load]);
 
-  async function run(fn: () => Promise<{ error: any } | any>, ok: string) {
+  async function run(fn: () => PromiseLike<any>, ok: string) {
     setBusy(true);
     try { const r = await fn(); if (r?.error) throw r.error; toast.success(ok); await load(); }
     catch (e: any) { toast.error(e?.message || t("offer.failed")); }
