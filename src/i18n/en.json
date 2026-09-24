@@ -2069,6 +2069,9 @@
     "scope_rent": "Rent",
     "scope_maintenance": "Maintenance",
     "scope_documents": "Documents",
-    "scope_reports": "Reports"
+    "scope_reports": "Reports",
+    "requestType": "Property Manager",
+    "onboardRejected": "Your Property Manager request was not approved. You can send a new request with more details.",
+    "onboardApproved": "Property Manager access approved."
   }
 }

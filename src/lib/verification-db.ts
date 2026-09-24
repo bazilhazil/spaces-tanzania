@@ -43,6 +43,9 @@ export type VerificationRequest = {
   created_at: string;
   updated_at: string;
   property_title?: string | null;
+  applicant_name?: string | null;
+  applicant_phone?: string | null;
+  applicant_email?: string | null;
 };
 
 export type VerificationEvent = {
@@ -131,7 +134,17 @@ export async function fetchAllVerifications(status?: VerificationStatus | "all")
   if (status && status !== "all") q = q.eq("status", status);
   const { data, error } = await q;
   if (error) throw error;
-  const requests = ((data ?? []) as Record<string, unknown>[]).map(normalise);
+  let requests = ((data ?? []) as Record<string, unknown>[]).map(normalise);
+  // Applicant contact details for the admin queue (admins can read profiles).
+  const requesterIds = [...new Set(requests.map((r) => r.requester_id))];
+  if (requesterIds.length > 0) {
+    const { data: people } = await supabase.from("profiles").select("id,full_name,phone,email").in("id", requesterIds);
+    const byId = new Map(((people ?? []) as { id: string; full_name: string | null; phone: string | null; email: string | null }[]).map((p) => [p.id, p]));
+    requests = requests.map((r) => {
+      const p = byId.get(r.requester_id);
+      return { ...r, applicant_name: p?.full_name ?? null, applicant_phone: p?.phone ?? null, applicant_email: p?.email ?? null };
+    });
+  }
   const propertyIds = [...new Set(requests.map((request) => request.property_id).filter((id): id is string => Boolean(id)))];
   if (propertyIds.length === 0) return requests;
   const { data: properties, error: propertiesError } = await supabase

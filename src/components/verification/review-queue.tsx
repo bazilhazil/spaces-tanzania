@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ShieldCheck, Search, FileText, ExternalLink, Check, X, AlertCircle,
-  Loader2, StickyNote, Clock,
+  Loader2, StickyNote, Clock, Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,8 +20,19 @@ import {
   type VerificationRequest, type VerificationEvent, type VerificationStatus,
 } from "@/lib/verification-db";
 
-type SubjectFilter = Exclude<VerificationRequest["subject_type"], "business"> | "all";
-const SUBJECT_FILTERS: SubjectFilter[] = ["all", "user", "owner", "agent", "property"];
+type SubjectFilter = Exclude<VerificationRequest["subject_type"], "business"> | "property_manager" | "all";
+const SUBJECT_FILTERS: SubjectFilter[] = ["all", "user", "owner", "agent", "property", "property_manager"];
+const PM_META = { icon: Building2, titleKey: "pm.requestType" };
+/** Property Manager onboarding requests share this queue but have no verification form of their own. */
+function metaFor(subject: string): { icon: React.ComponentType<{ className?: string }>; titleKey: string } {
+  return (SUBJECT_META as Record<string, { icon: React.ComponentType<{ className?: string }>; titleKey: string }>)[subject] ?? PM_META;
+}
+function applicant(r: VerificationRequest) {
+  return r.applicant_name || r.details.full_name || r.details.business_name || r.details.ownership || r.requester_id;
+}
+function contact(r: VerificationRequest) {
+  return [r.applicant_phone, r.applicant_email && !/@(phone|users)\.spacestz\.com$/i.test(r.applicant_email) ? r.applicant_email : null].filter(Boolean).join(" · ");
+}
 
 export function VerificationReviewQueue() {
   const { t } = useI18n();
@@ -53,15 +64,15 @@ export function VerificationReviewQueue() {
   }, [load]);
 
   const counts = useMemo(() => SUBJECT_FILTERS.reduce<Record<SubjectFilter, number>>((result, item) => {
-    result[item] = item === "all" ? rows.length : rows.filter((row) => row.subject_type === item).length;
+    result[item] = item === "all" ? rows.length : rows.filter((row) => (row.subject_type as string) === item).length;
     return result;
-  }, { all: 0, user: 0, owner: 0, agent: 0, property: 0 }), [rows]);
+  }, { all: 0, user: 0, owner: 0, agent: 0, property: 0, property_manager: 0 }), [rows]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return rows
-      .filter((row) => subject === "all" || row.subject_type === subject)
-      .filter((row) => !q || `${row.subject_type} ${row.requester_id} ${row.property_title ?? ""} ${Object.values(row.details).join(" ")}`.toLowerCase().includes(q))
+      .filter((row) => subject === "all" || (row.subject_type as string) === subject)
+      .filter((row) => !q || `${row.subject_type} ${row.requester_id} ${row.applicant_name ?? ""} ${row.applicant_phone ?? ""} ${row.property_title ?? ""} ${Object.values(row.details).join(" ")}`.toLowerCase().includes(q))
       .sort((a, b) => {
         const pendingOrder = Number(b.status === "pending") - Number(a.status === "pending");
         return pendingOrder || new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -96,7 +107,7 @@ export function VerificationReviewQueue() {
         {SUBJECT_FILTERS.map((filter) => (
           <Button key={filter} type="button" size="sm" variant={subject === filter ? "default" : "outline"}
             className="shrink-0" onClick={() => setSubject(filter)}>
-            {filter === "all" ? t("common.all") : t(`verify.type.${filter}`).replace(" Verification", "").replace("Uhakiki wa ", "")}
+            {filter === "all" ? t("common.all") : filter === "property_manager" ? t("pm.requestType") : t(`verify.type.${filter}`).replace(" Verification", "").replace("Uhakiki wa ", "")}
             <span className="ml-1.5 text-xs opacity-70">{counts[filter]}</span>
           </Button>
         ))}
@@ -109,7 +120,7 @@ export function VerificationReviewQueue() {
       ) : (
         <div className="grid gap-3">
           {filtered.map((r) => {
-            const meta = SUBJECT_META[r.subject_type];
+            const meta = metaFor(r.subject_type);
             return (
               <article key={r.id} className="ds-card w-full min-w-0 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -120,8 +131,9 @@ export function VerificationReviewQueue() {
                   <StatusPill status={r.status} />
                 </div>
                 <div className="mt-1 truncate text-sm text-muted-foreground">
-                  {r.details.full_name || r.details.business_name || r.details.ownership || r.requester_id}
+                  {applicant(r)}
                 </div>
+                {contact(r) && <div className="mt-0.5 break-all text-xs text-muted-foreground">{contact(r)}</div>}
                 <div className="mt-1 break-all text-xs text-muted-foreground">ID: {r.id} · User: {r.requester_id}</div>
                 {r.property_id && <div className="mt-1 text-xs text-muted-foreground">Property: {r.property_title ?? r.property_id}</div>}
                 <div className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
@@ -151,7 +163,7 @@ function ReviewDialog({
   request, onClose, onDone,
 }: { request: VerificationRequest; onClose: () => void; onDone: () => void }) {
   const { t } = useI18n();
-  const meta = SUBJECT_META[request.subject_type];
+  const meta = metaFor(request.subject_type);
   const [events, setEvents] = useState<VerificationEvent[]>([]);
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
@@ -205,6 +217,8 @@ function ReviewDialog({
           ) : null)}
           {request.notes && <p className="mt-2 text-muted-foreground">{request.notes}</p>}
           <div className="mt-2 border-t border-border pt-2 text-xs text-muted-foreground">
+            <div className="font-medium text-foreground">{applicant(request)}</div>
+            {contact(request) && <div className="break-all">{contact(request)}</div>}
             <div className="break-all">User ID: {request.requester_id}</div>
             {request.property_id && <div>Property: {request.property_title ?? request.property_id}</div>}
             {request.reviewer_id && <div className="break-all">Reviewed by: {request.reviewer_id}</div>}

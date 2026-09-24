@@ -2069,6 +2069,9 @@
     "scope_rent": "Kodi",
     "scope_maintenance": "Matengenezo",
     "scope_documents": "Nyaraka",
-    "scope_reports": "Ripoti"
+    "scope_reports": "Ripoti",
+    "requestType": "Msimamizi wa Mali",
+    "onboardRejected": "Ombi lako la Msimamizi wa Mali halikukubaliwa. Unaweza kutuma ombi jipya lenye maelezo zaidi.",
+    "onboardApproved": "Ufikiaji wa Msimamizi wa Mali umeidhinishwa."
   }
 }
