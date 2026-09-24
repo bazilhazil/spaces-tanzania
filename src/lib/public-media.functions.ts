@@ -15,6 +15,7 @@ export const signPublicMediaFn = createServerFn({ method: "POST" })
       .object({
         paths: z.array(z.string().min(1).max(500)).min(1).max(100),
         expiresIn: z.number().int().min(60).max(86400).optional(),
+        width: z.number().int().min(64).max(2000).optional(),
       })
       .parse(data),
   )
@@ -44,7 +45,7 @@ export const signPublicMediaFn = createServerFn({ method: "POST" })
       allowed.map(async (path) => {
         const { data: signed } = await supabaseAdmin.storage
           .from("property-media")
-          .createSignedUrl(path, expiresIn);
+          .createSignedUrl(path, expiresIn, data.width ? { transform: { width: data.width, quality: 72, resize: "cover" } } : undefined);
         if (signed?.signedUrl) out[path] = signed.signedUrl;
       }),
     );
