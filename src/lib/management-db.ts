@@ -126,15 +126,20 @@ const db = {
 
 /** Listings the signed-in user may manage: own listings plus full-management assignments. */
 export async function fetchManagedProperties(userId: string): Promise<ManagedProperty[]> {
-  const [own, assigned] = await Promise.all([
+  const [own, assigned, managed] = await Promise.all([
     supabase.from("properties").select("id,title,owner_id,region,district")
       .eq("owner_id", userId).is("deleted_at", null).order("created_at", { ascending: false }),
     supabase.from("property_agents").select("property_id,permission").eq("agent_id", userId)
       .eq("permission", "full_management" as never),
+    // Active Property Manager assignments (any owner).
+    supabase.from("property_managers").select("property_id").eq("manager_id", userId).eq("status", "active"),
   ]);
   const list = (own.data ?? []) as ManagedProperty[];
-  const ids = ((assigned.data ?? []) as { property_id: string }[]).map((r) => r.property_id)
-    .filter((id) => !list.some((p) => p.id === id));
+  const ids = [
+    ...((assigned.data ?? []) as { property_id: string }[]),
+    ...((managed.data ?? []) as { property_id: string }[]),
+  ].map((r) => r.property_id)
+    .filter((id, i, arr) => arr.indexOf(id) === i && !list.some((p) => p.id === id));
   if (ids.length) {
     const { data } = await supabase.from("properties").select("id,title,owner_id,region,district")
       .in("id", ids).is("deleted_at", null);

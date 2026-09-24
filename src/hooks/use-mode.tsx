@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
 
-export type SpacesMode = "buyer" | "owner" | "agent";
+export type SpacesMode = "buyer" | "owner" | "agent" | "manager";
 
 interface ModeContextValue {
   mode: SpacesMode | null;
@@ -23,7 +23,7 @@ export function ModeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const v = window.localStorage.getItem(storageKey(user?.id));
-    setModeState(v === "buyer" || v === "owner" || v === "agent" ? v : null);
+    setModeState(v === "buyer" || v === "owner" || v === "agent" || v === "manager" ? v : null);
     setReady(true);
   }, [user?.id]);
 
