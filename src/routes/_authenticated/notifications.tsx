@@ -1,5 +1,5 @@
 import { useI18n } from "@/hooks/use-i18n";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Button } from "@/components/ui/button";
@@ -15,14 +15,11 @@ import {
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { KIND_META, type NotificationKind } from "@/lib/notifications-store";
+import { useNotifications, notificationLink } from "@/hooks/use-notifications";
+import { supabase } from "@/integrations/supabase/client";
 import {
-  KIND_META,
-  getPrefs, setPrefs,
-  type NotificationKind, type ChannelPrefs,
-} from "@/lib/notifications-store";
-import {
-  listNotificationsDb, markNotificationRead, markAllNotificationsRead,
-  deleteNotification, subscribeNotifications, isPropertyAlert, type DbNotification,
+  listNotificationsDb, deleteNotification, isPropertyAlert, type DbNotification,
 } from "@/lib/notifications-db";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -156,67 +153,59 @@ const CATEGORY_TABS = ["properties", "users", "leads", "viewings", "verification
 
 function NotificationsPage() {
   const { t } = useI18n();
-  const { user } = useAuth();
+  const live = useNotifications();
+  const navigate = useNavigate();
   const [notifs, setNotifs] = useState<DbNotification[]>([]);
-  const [q, setQ] = useState("");
+  const [loaded, setLoaded] = useState(false);
   const [tab, setTab] = useState("all");
 
-  const reload = () => { void listNotificationsDb().then(setNotifs); };
-
+  // Reuse the one shared realtime feed; reload whenever it changes.
   useEffect(() => {
-    reload();
-    if (!user) return;
-    return subscribeNotifications(user.id, reload);
-  }, [user?.id]);
+    void listNotificationsDb(60).then((rows) => { setNotifs(rows); setLoaded(true); });
+  }, [live.version]);
 
-  const filtered = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    return notifs.filter((n) => {
-      if (tab === "unread" && n.read) return false;
-      if (tab === "read" && !n.read) return false;
-      if (tab === "today" && bucket(n.createdAt) !== "today") return false;
-      if (tab === "week" && bucket(n.createdAt) === "earlier") return false;
-      if (tab === "earlier" && bucket(n.createdAt) !== "earlier") return false;
-      if (tab === "urgent" && !URGENT_KINDS.has(n.kind)) return false;
-      if (CATEGORY_TABS.some((c) => c === tab) && categoryOf(n.kind) !== tab) return false;
-      if (tab === "all" && mutedCategories().includes(categoryOf(n.kind))) return false;
-      if (!needle) return true;
-      return (n.title + " " + n.body + " " + kindLabel(n.kind)).toLowerCase().includes(needle);
-    });
-  }, [notifs, q, tab]);
-
+  const filtered = useMemo(
+    () => notifs.filter((n) => (tab === "unread" ? !n.read : true)),
+    [notifs, tab],
+  );
   const unread = notifs.filter((n) => !n.read).length;
 
   const onRead = async (id: string) => {
     setNotifs((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-    await markNotificationRead(id);
+    await live.markRead(id);
+  };
+  const onOpen = async (n: DbNotification) => {
+    if (!n.read) await onRead(n.id);
+    const href = notificationLink(n);
+    if (href.startsWith("/")) navigate({ href });
+    else window.location.assign(href);
   };
   const onDelete = async (id: string) => {
     setNotifs((prev) => prev.filter((n) => n.id !== id));
     await deleteNotification(id);
-    toast.success("Notification deleted");
+    void live.refresh();
+    toast.success(t("notifUi.delete"));
   };
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
+      <div className="mx-auto max-w-3xl space-y-6 animate-fade-in">
         <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
               {t("notifUi.title")}
             </h1>
-            <p className="mt-1 text-muted-foreground">
-              {t("notifUi.sub")}
-            </p>
+            <p className="mt-1 text-muted-foreground">{t("notifUi.sub")}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="rounded-full">{t("notifUi.unread", { n: unread })}</Badge>
             <Button
               variant="outline"
               size="sm"
+              disabled={unread === 0}
               onClick={async () => {
                 setNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
-                await markAllNotificationsRead();
+                await live.markAllRead();
                 toast.success(t("notifUi.allMarked"));
               }}
             >
@@ -225,49 +214,20 @@ function NotificationsPage() {
           </div>
         </header>
 
-
-
         <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <TabsList className="inline-flex w-max flex-nowrap justify-start gap-1 whitespace-nowrap">
-                <TabsTrigger value="all" className="shrink-0">{t("notifUi.all")}</TabsTrigger>
-                <TabsTrigger value="unread" className="shrink-0">{t("notifUi.unreadTab")}</TabsTrigger>
-                <TabsTrigger value="read" className="shrink-0">{t("notifUi.read")}</TabsTrigger>
-                <TabsTrigger value="today" className="shrink-0">{t("notifUi.today")}</TabsTrigger>
-                <TabsTrigger value="week" className="shrink-0">{t("notifUi.week")}</TabsTrigger>
-                <TabsTrigger value="earlier" className="shrink-0">{t("notifUi.earlier")}</TabsTrigger>
-                <TabsTrigger value="urgent" className="shrink-0">{t("notifUi.urgent")}</TabsTrigger>
-                {CATEGORY_TABS.map((c) => (
-                  <TabsTrigger key={c} value={c} className="shrink-0">{t(`notifUi.cat_${c}`)}</TabsTrigger>
-                ))}
-                <TabsTrigger value="settings" className="hidden shrink-0 md:inline-flex">
-                  <Settings2 className="mr-1.5 h-3.5 w-3.5" />{t("notifUi.settings")}
-                </TabsTrigger>
-              </TabsList>
-            </div>
-            <Button
-              variant={tab === "settings" ? "default" : "outline"}
-              size="icon"
-              className="shrink-0 md:hidden"
-              aria-label="Settings"
-              aria-pressed={tab === "settings"}
-              onClick={() => setTab(tab === "settings" ? "all" : "settings")}
-            >
-              <Settings2 className="h-4 w-4" />
-            </Button>
-          </div>
+          <TabsList>
+            <TabsTrigger value="all">{t("notifUi.all")}</TabsTrigger>
+            <TabsTrigger value="unread">{t("notifUi.unreadTab")}{unread > 0 ? ` (${unread})` : ""}</TabsTrigger>
+            <TabsTrigger value="settings"><Settings2 className="mr-1.5 h-3.5 w-3.5" />{t("notifUi.settings")}</TabsTrigger>
+          </TabsList>
 
-          {tab !== "settings" && (
-            <div className="relative w-full">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("notifUi.search")} className="pl-9" />
-            </div>
-          )}
-
-          {(["all", "unread", "read", "today", "week", "earlier", "urgent", ...CATEGORY_TABS] as const).map((tb) => (
+          {(["all", "unread"] as const).map((tb) => (
             <TabsContent key={tb} value={tb} className="mt-0">
-              <NotifList items={filtered} onRead={onRead} onDelete={onDelete} />
+              {!loaded ? (
+                <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-20 animate-pulse rounded-2xl bg-muted" />)}</div>
+              ) : (
+                <NotifList items={filtered} onRead={onRead} onOpen={onOpen} onDelete={onDelete} />
+              )}
             </TabsContent>
           ))}
 
@@ -280,9 +240,10 @@ function NotificationsPage() {
   );
 }
 
-function NotifList({ items, onRead, onDelete }: {
+function NotifList({ items, onRead, onOpen, onDelete }: {
   items: DbNotification[];
   onRead: (id: string) => void | Promise<void>;
+  onOpen: (n: DbNotification) => void | Promise<void>;
   onDelete: (id: string) => void | Promise<void>;
 }) {
   const { t } = useI18n();
@@ -313,7 +274,7 @@ function NotifList({ items, onRead, onDelete }: {
               <Icon className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-start justify-between gap-2">
+              <button type="button" onClick={() => void onOpen(n)} className="flex w-full items-start justify-between gap-2 text-left">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="truncate text-sm font-semibold">{localText(t, n.title)}</span>
@@ -322,7 +283,7 @@ function NotifList({ items, onRead, onDelete }: {
                   <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{localText(t, n.body)}</p>
                 </div>
                 <span className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground">{timeAgo(n.createdAt, t)}</span>
-              </div>
+              </button>
 
               {alert && (
                 <div className="mt-2 flex gap-3 rounded-xl border border-border/60 bg-secondary/30 p-2">
@@ -356,9 +317,9 @@ function NotifList({ items, onRead, onDelete }: {
 
                 {/* Desktop: inline action buttons */}
                 <div className="hidden flex-wrap items-center gap-1 md:flex">
-                  {n.link && !alert && (
+                  {!alert && (
                     <Button asChild size="sm" variant="ghost" className="h-7 px-2 text-xs">
-                      <a href={n.link}>{t("notifUi.open")}</a>
+                      <button type="button" onClick={() => void onOpen(n)}>{t("notifUi.open")}</button>
                     </Button>
                   )}
                   {!n.read && (
@@ -380,11 +341,7 @@ function NotifList({ items, onRead, onDelete }: {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-44">
-                    {n.link && (
-                      <DropdownMenuItem asChild>
-                        <a href={n.link}>{t("notifUi.open")}</a>
-                      </DropdownMenuItem>
-                    )}
+                    <DropdownMenuItem onClick={() => void onOpen(n)}>{t("notifUi.open")}</DropdownMenuItem>
                     {!n.read && (
                       <DropdownMenuItem onClick={() => void onRead(n.id)}>
                         <Check className="mr-2 h-4 w-4" />{t("notifUi.markAsRead")}
@@ -408,80 +365,51 @@ function NotifList({ items, onRead, onDelete }: {
 
 }
 
-const PROVIDER_META: { id: string; name: string; icon: React.ComponentType<{ className?: string }>; description: string }[] = [
-  { id: "sms", name: "SMS", icon: Smartphone, description: "OTP, viewing reminders, payment & deal alerts." },
-  { id: "email", name: "Email", icon: MailCheck, description: "Welcome, invoices, verification status, weekly reports." },
-  { id: "whatsapp", name: "WhatsApp", icon: MessageCircle, description: "Viewing confirmations, deal updates, messages, alerts." },
-  { id: "push", name: "Push", icon: BellRing, description: "Messages, leads, property updates, deal activity." },
-];
-
-const CHANNEL_TOGGLES: { id: keyof ChannelPrefs; label: string; description: string }[] = [
-  { id: "sms", label: "SMS", description: "Text alerts to your phone." },
-  { id: "email", label: "Email", description: "Rich email summaries and receipts." },
-  { id: "whatsapp", label: "WhatsApp", description: "Instant WhatsApp notifications." },
-  { id: "push", label: "Push notifications", description: "Real-time app & browser pushes." },
-  { id: "marketing", label: "Marketing messages", description: "Promotions, new features and offers." },
-  { id: "weeklyReports", label: "Weekly reports", description: "Digest of leads, deals and performance." },
-];
-
 function SettingsPanel() {
-  const prefs = useLive<ChannelPrefs>(getPrefs, "spaces:notif-prefs-changed");
+  const { t } = useI18n();
+  const { user } = useAuth();
+  const [prefs, setPrefsState] = useState<{ in_app: boolean; email: boolean }>({ in_app: true, email: true });
+  const [saving, setSaving] = useState(false);
 
-  function togglePref(id: keyof ChannelPrefs, v: boolean) {
-    setPrefs({ ...prefs, [id]: v });
+  useEffect(() => {
+    if (!user) return;
+    void supabase.from("notification_preferences").select("in_app,email").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => { if (data) setPrefsState(data as { in_app: boolean; email: boolean }); });
+  }, [user?.id]);
+
+  async function toggle(key: "in_app" | "email", v: boolean) {
+    if (!user) return;
+    const prev = prefs;
+    const next = { ...prefs, [key]: v };
+    setPrefsState(next);
+    setSaving(true);
+    const { error } = await supabase.from("notification_preferences")
+      .upsert({ user_id: user.id, ...next, updated_at: new Date().toISOString() });
+    setSaving(false);
+    if (error) { setPrefsState(prev); toast.error(t("notifLive.saveFailed")); }
+    else toast.success(t("notifLive.saved"));
   }
 
+  const rows = [
+    { id: "in_app" as const, label: t("notifLive.inApp"), desc: t("notifLive.inAppDesc") },
+    { id: "email" as const, label: t("notifLive.email"), desc: t("notifLive.emailDesc") },
+  ];
   return (
-    <div className="space-y-6">
-      <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-4">
-        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
-        <div>
-          <div className="font-semibold">In-app notifications only</div>
-          <p className="text-sm text-foreground/75">
-            SMS, email, WhatsApp and push delivery are not connected yet. Those channels need an external
-            provider and credentials before SPACES can send anything outside the app.
-          </p>
-        </div>
+    <section className="rounded-2xl border border-border/60 bg-card p-4 md:p-6">
+      <div className="divide-y divide-border/60">
+        {rows.map((r) => (
+          <div key={r.id} className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
+            <div className="min-w-0">
+              <div className="font-medium">{r.label}</div>
+              <p className="text-xs text-muted-foreground">{r.desc}</p>
+            </div>
+            <Switch checked={prefs[r.id]} disabled={saving} onCheckedChange={(v) => void toggle(r.id, v)} aria-label={r.label} />
+          </div>
+        ))}
       </div>
-
-      <section className="rounded-2xl border border-border/60 bg-background p-4 md:p-6">
-        <h2 className="font-display text-lg font-semibold">Delivery channels</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Current delivery status for this account.</p>
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
-          {PROVIDER_META.map(({ id, name, icon: Icon, description }) => (
-            <div key={id} className="flex items-start gap-3 rounded-xl border border-border/60 p-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground">
-                <Icon className="h-4 w-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="font-semibold">{name}</div>
-                  <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-                    Not connected
-                  </span>
-                </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-border/60 bg-background p-4 md:p-6">
-        <h2 className="font-display text-lg font-semibold">Your preferences</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Choose how you want to be notified. In-app notifications are always on.</p>
-        <div className="mt-4 divide-y divide-border/60">
-          {CHANNEL_TOGGLES.map((c) => (
-            <div key={c.id} className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
-              <div className="min-w-0">
-                <div className="font-medium">{c.label}</div>
-                <p className="text-xs text-muted-foreground">{c.description}</p>
-              </div>
-              <Switch checked={Boolean(prefs[c.id])} onCheckedChange={(v) => togglePref(c.id, v)} />
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
+      <p className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
+        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {t("notifLive.critical")} {t("notifLive.emailProvider")}
+      </p>
+    </section>
   );
 }
