@@ -58,6 +58,8 @@ export function localizeNotifText(t: T, s: string | null | undefined): string {
   if (m) return t("notifText.newMessageFrom", { name: m[1] });
   m = s.match(/^(\d+) new messages from (.+)$/);
   if (m) return t("notifText.nMessagesFrom", { n: m[1], name: m[2] });
+  m = s.match(/^(.*): someone requested to view your property\.?$/);
+  if (m) return t("notifText.someoneRequested", { property: m[1] });
   // "<Property> — <Title>"
   m = s.match(/^(.*) — (.+)$/);
   if (m && TITLES[m[2].trim()]) return `${m[1]} — ${t(TITLES[m[2].trim()])}`;

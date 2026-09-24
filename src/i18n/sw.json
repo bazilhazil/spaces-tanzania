@@ -2200,6 +2200,7 @@
     "actions": "Vitendo vya arifa",
     "kind_viewing": "Utazamaji",
     "kind_deal": "Mpango",
-    "kind_review": "Tathmini"
+    "kind_review": "Tathmini",
+    "someoneRequested": "{property}: mtu ameomba kutazama mali yako."
   }
 }

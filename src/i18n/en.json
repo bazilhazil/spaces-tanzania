@@ -2200,6 +2200,7 @@
     "actions": "Notification actions",
     "kind_viewing": "Viewing",
     "kind_deal": "Deal",
-    "kind_review": "Review"
+    "kind_review": "Review",
+    "someoneRequested": "{property}: someone requested to view your property."
   }
 }
