@@ -74,6 +74,83 @@ export type Database = {
         }
         Relationships: []
       }
+      agencies: {
+        Row: {
+          admin_id: string
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          region: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          region?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          region?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agency_members: {
+        Row: {
+          accepted_at: string | null
+          agency_id: string
+          created_at: string
+          id: string
+          invited_by: string | null
+          invited_email: string | null
+          role: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          agency_id: string
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          invited_email?: string | null
+          role?: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          agency_id?: string
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          invited_email?: string | null
+          role?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_members_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_clients: {
         Row: {
           agent_id: string
@@ -632,6 +709,7 @@ export type Database = {
           protected_at: string | null
           rate: number | null
           rule_id: string | null
+          rule_label: string | null
           status: string
           updated_at: string
         }
@@ -649,6 +727,7 @@ export type Database = {
           protected_at?: string | null
           rate?: number | null
           rule_id?: string | null
+          rule_label?: string | null
           status?: string
           updated_at?: string
         }
@@ -666,6 +745,7 @@ export type Database = {
           protected_at?: string | null
           rate?: number | null
           rule_id?: string | null
+          rule_label?: string | null
           status?: string
           updated_at?: string
         }
@@ -694,7 +774,9 @@ export type Database = {
           kind: Database["public"]["Enums"]["deal_document_kind"]
           mime_type: string | null
           name: string
+          offer_id: string | null
           size: number | null
+          status: string
           storage_path: string
           uploaded_by: string | null
         }
@@ -705,7 +787,9 @@ export type Database = {
           kind?: Database["public"]["Enums"]["deal_document_kind"]
           mime_type?: string | null
           name: string
+          offer_id?: string | null
           size?: number | null
+          status?: string
           storage_path: string
           uploaded_by?: string | null
         }
@@ -716,7 +800,9 @@ export type Database = {
           kind?: Database["public"]["Enums"]["deal_document_kind"]
           mime_type?: string | null
           name?: string
+          offer_id?: string | null
           size?: number | null
+          status?: string
           storage_path?: string
           uploaded_by?: string | null
         }
@@ -728,6 +814,13 @@ export type Database = {
             referencedRelation: "deals"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "deal_documents_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       deal_payment_items: {
@@ -737,6 +830,7 @@ export type Database = {
           currency: string
           deal_id: string
           id: string
+          is_test: boolean
           kind: string
           label: string
           paid_at: string | null
@@ -751,6 +845,7 @@ export type Database = {
           currency?: string
           deal_id: string
           id?: string
+          is_test?: boolean
           kind: string
           label: string
           paid_at?: string | null
@@ -765,6 +860,7 @@ export type Database = {
           currency?: string
           deal_id?: string
           id?: string
+          is_test?: boolean
           kind?: string
           label?: string
           paid_at?: string | null
@@ -806,6 +902,7 @@ export type Database = {
           cancel_reason: string | null
           commission_rate: number | null
           commission_rule_id: string | null
+          commission_rule_label: string | null
           completed_at: string | null
           conversation_id: string | null
           created_at: string
@@ -816,6 +913,9 @@ export type Database = {
           deleted_by: string | null
           estimated_spaces_fee: number | null
           expected_close_at: string | null
+          fee_fixed_used: number | null
+          fee_rate_used: number | null
+          fees_locked_at: string | null
           health: Database["public"]["Enums"]["deal_health"]
           id: string
           kanban_position: number
@@ -832,6 +932,7 @@ export type Database = {
           spaces_fee_rule_id: string | null
           spaces_fee_tax: number | null
           stage: Database["public"]["Enums"]["deal_stage"]
+          tax_rate_used: number | null
           transaction_type: string | null
           updated_at: string
           value: number | null
@@ -851,6 +952,7 @@ export type Database = {
           cancel_reason?: string | null
           commission_rate?: number | null
           commission_rule_id?: string | null
+          commission_rule_label?: string | null
           completed_at?: string | null
           conversation_id?: string | null
           created_at?: string
@@ -861,6 +963,9 @@ export type Database = {
           deleted_by?: string | null
           estimated_spaces_fee?: number | null
           expected_close_at?: string | null
+          fee_fixed_used?: number | null
+          fee_rate_used?: number | null
+          fees_locked_at?: string | null
           health?: Database["public"]["Enums"]["deal_health"]
           id?: string
           kanban_position?: number
@@ -877,6 +982,7 @@ export type Database = {
           spaces_fee_rule_id?: string | null
           spaces_fee_tax?: number | null
           stage?: Database["public"]["Enums"]["deal_stage"]
+          tax_rate_used?: number | null
           transaction_type?: string | null
           updated_at?: string
           value?: number | null
@@ -896,6 +1002,7 @@ export type Database = {
           cancel_reason?: string | null
           commission_rate?: number | null
           commission_rule_id?: string | null
+          commission_rule_label?: string | null
           completed_at?: string | null
           conversation_id?: string | null
           created_at?: string
@@ -906,6 +1013,9 @@ export type Database = {
           deleted_by?: string | null
           estimated_spaces_fee?: number | null
           expected_close_at?: string | null
+          fee_fixed_used?: number | null
+          fee_rate_used?: number | null
+          fees_locked_at?: string | null
           health?: Database["public"]["Enums"]["deal_health"]
           id?: string
           kanban_position?: number
@@ -922,6 +1032,7 @@ export type Database = {
           spaces_fee_rule_id?: string | null
           spaces_fee_tax?: number | null
           stage?: Database["public"]["Enums"]["deal_stage"]
+          tax_rate_used?: number | null
           transaction_type?: string | null
           updated_at?: string
           value?: number | null
@@ -4026,11 +4137,50 @@ export type Database = {
         Args: { _from?: string; _to?: string }
         Returns: Json
       }
+      admin_search_deals: {
+        Args: {
+          _agent: string
+          _avail: string
+          _buyer: string
+          _from: string
+          _owner: string
+          _pay: string
+          _ptype: string
+          _region: string
+          _stage: string
+          _to: string
+          _ttype: string
+        }
+        Returns: {
+          agent_commission: number
+          agent_id: string
+          agent_name: string
+          agreed_price: number
+          availability: string
+          buyer_id: string
+          buyer_name: string
+          created_at: string
+          district: string
+          estimated_spaces_fee: number
+          id: string
+          owner_id: string
+          owner_name: string
+          payment_status: string
+          property_title: string
+          property_type: string
+          reference: string
+          region: string
+          stage: string
+          transaction_type: string
+          value: number
+        }[]
+      }
       admin_set_payment_status: {
         Args: { _payment_id: string; _status: string }
         Returns: undefined
       }
       advance_deal: { Args: { _deal_id: string }; Returns: string }
+      agency_overview: { Args: { _agency: string }; Returns: Json }
       agent_permission_for: {
         Args: { _agent_id: string; _property_id: string }
         Returns: Database["public"]["Enums"]["agent_permission"]
@@ -4082,6 +4232,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      invite_agency_member: {
+        Args: { _agency: string; _email: string }
+        Returns: string
       }
       invite_property_manager: {
         Args: {
@@ -4176,6 +4330,7 @@ export type Database = {
       }
       notification_is_critical: { Args: { _kind: string }; Returns: boolean }
       owner_of_property: { Args: { _property_id: string }; Returns: string }
+      payment_test_mode_enabled: { Args: never; Returns: boolean }
       plan_id_for_user: { Args: { _user_id: string }; Returns: string }
       property_rating: {
         Args: { _property_id: string }
@@ -4186,6 +4341,11 @@ export type Database = {
       }
       publish_property: { Args: { _property_id: string }; Returns: Json }
       recompute_deal_health: { Args: { _deal_id: string }; Returns: undefined }
+      remove_agency_member: { Args: { _member_id: string }; Returns: undefined }
+      respond_agency_invite: {
+        Args: { _accept: boolean; _member_id: string }
+        Returns: undefined
+      }
       respond_management_invite: {
         Args: { _accept: boolean; _assignment_id: string }
         Returns: undefined
@@ -4252,6 +4412,7 @@ export type Database = {
         Args: { _force?: boolean; _lead_id: string; _status: string }
         Returns: undefined
       }
+      simulate_test_payment: { Args: { _deal_id: string }; Returns: number }
       submit_offer: {
         Args: {
           _amount: number
@@ -4318,6 +4479,9 @@ export type Database = {
         | "inspection_report"
         | "ownership_document"
         | "other"
+        | "proof_of_funds"
+        | "financing_document"
+        | "identification"
       deal_health: "healthy" | "waiting" | "at_risk" | "closed"
       deal_priority: "low" | "medium" | "high" | "urgent"
       deal_stage:
@@ -4537,6 +4701,9 @@ export const Constants = {
         "inspection_report",
         "ownership_document",
         "other",
+        "proof_of_funds",
+        "financing_document",
+        "identification",
       ],
       deal_health: ["healthy", "waiting", "at_risk", "closed"],
       deal_priority: ["low", "medium", "high", "urgent"],
