@@ -22,6 +22,7 @@ import {
   listNotificationsDb, deleteNotification, isPropertyAlert, type DbNotification,
 } from "@/lib/notifications-db";
 import { useAuth } from "@/hooks/use-auth";
+import { localizeNotifText } from "@/lib/notification-i18n";
 
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -90,6 +91,16 @@ function kindLabel(kind: string) {
   return EXTRA_META[kind]?.label ?? KIND_META[kind as NotificationKind]?.label ?? "Update";
 }
 
+const KIND_KEY: Record<string, string> = {
+  new_message: "notifText.newMessage", viewing_requested: "notifText.newViewing", viewing_request: "notifText.newViewing",
+  viewing_status: "notifText.kind_viewing", lead_created: "notifText.newInquiry", new_lead: "notifText.newInquiry", new_inquiry: "notifText.newInquiry",
+  deal_created: "notifText.dealCreated", deal_stage: "notifText.kind_deal", verification: "notifUi.cat_verification",
+  verification_status: "notifUi.cat_verification", verification_submitted: "notifUi.cat_verification", verification_queue: "notifUi.cat_verification",
+  user_queue: "notifText.newUser", report_received: "notifUi.cat_reports", report_queue: "notifUi.cat_reports", report_status: "notifUi.cat_reports",
+  review_invite: "notifText.kind_review", review_status: "notifText.kind_review", listing_moderation: "notifUi.cat_properties", listing_queue: "notifText.spaceAwaiting",
+};
+function kindText(t: T, kind: string) { return KIND_KEY[kind] ? t(KIND_KEY[kind]) : t("notifUi.update"); }
+
 function kindIcon(kind: string) {
   return EXTRA_META[kind]?.icon ?? KIND_ICON[kind as NotificationKind] ?? Bell;
 }
@@ -102,17 +113,7 @@ function money(value: number | null | undefined, currency: string | null | undef
 
 type T = (k: string, v?: Record<string, string | number>) => string;
 /** Known system notification texts (stored in English) shown in the reader's language. */
-const KNOWN_TEXT: Record<string, string> = {
-  "Property Manager request not approved": "notifUi.pmRejected",
-  "Property Manager access approved": "notifUi.pmApproved",
-  "Request submitted": "notifUi.pmSubmitted",
-  "New verification submission": "notifUi.newVer",
-  "A new Property Manager access request is awaiting review.": "notifUi.newPmBody",
-  "A new property verification is awaiting review.": "notifUi.newPropBody",
-  "Your Property Manager workspace is now available from your dashboard.": "notifUi.pmApprovedBody",
-  "We received your Property Manager access request and will review it shortly.": "notifUi.pmSubmittedBody",
-};
-function localText(t: T, s: string) { return KNOWN_TEXT[s] ? t(KNOWN_TEXT[s]) : s; }
+function localText(t: T, s: string) { return localizeNotifText(t, s); }
 
 function timeAgo(iso: string, t: T) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -307,13 +308,13 @@ function NotifList({ items, onRead, onOpen, onDelete }: {
                     )}
                   </div>
                   <Button asChild size="sm" className="h-8 shrink-0 self-center rounded-xl text-xs">
-                    <Link to="/properties/$slug" params={{ slug: alert.id }}>View Space</Link>
+                    <Link to="/properties/$slug" params={{ slug: alert.id }}>{t("notifText.viewSpace")}</Link>
                   </Button>
                 </div>
               )}
 
               <div className="mt-2 flex items-center justify-between gap-2">
-                <Badge variant="outline" className="rounded-full text-[10px]">{kindLabel(n.kind) === "Update" ? t("notifUi.update") : kindLabel(n.kind)}</Badge>
+                <Badge variant="outline" className="rounded-full text-[10px]">{kindText(t, n.kind)}</Badge>
 
                 {/* Desktop: inline action buttons */}
                 <div className="hidden flex-wrap items-center gap-1 md:flex">
@@ -336,7 +337,7 @@ function NotifList({ items, onRead, onOpen, onDelete }: {
                 {/* Mobile: dropdown menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0 md:hidden" aria-label="Notification actions">
+                    <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0 md:hidden" aria-label={t("notifText.actions")}>
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>

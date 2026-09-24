@@ -123,27 +123,29 @@ function freshFromCache(path: string): string | null {
   return hit.url;
 }
 
-let pendingPaths: string[] = [];
-let pendingTimer: ReturnType<typeof setTimeout> | null = null;
-let pendingResolvers: (() => void)[] = [];
+type Batch = { paths: string[]; timer: ReturnType<typeof setTimeout> | null; resolvers: (() => void)[] };
+const batches = new Map<number, Batch>();
+const keyOf = (path: string, width?: number) => (width ? `${path}@w${width}` : path);
 
 /** Batches public media requests so a gallery costs one server round-trip. */
-async function signPublicBatch(path: string, expiresIn: number): Promise<string | null> {
+async function signPublicBatch(path: string, expiresIn: number, width?: number): Promise<string | null> {
   const { signPublicMediaFn } = await import("@/lib/public-media.functions");
-  if (!pendingPaths.includes(path)) pendingPaths.push(path);
+  const bk = width ?? 0;
+  let b = batches.get(bk);
+  if (!b) { b = { paths: [], timer: null, resolvers: [] }; batches.set(bk, b); }
+  const batch = b;
+  if (!batch.paths.includes(path)) batch.paths.push(path);
 
   await new Promise<void>((resolve) => {
-    pendingResolvers.push(resolve);
-    if (pendingTimer) return;
-    pendingTimer = setTimeout(async () => {
-      const paths = pendingPaths.slice(0, 100);
-      const resolvers = pendingResolvers;
-      pendingPaths = [];
-      pendingResolvers = [];
-      pendingTimer = null;
+    batch.resolvers.push(resolve);
+    if (batch.timer) return;
+    batch.timer = setTimeout(async () => {
+      const paths = batch.paths.slice(0, 100);
+      const resolvers = batch.resolvers;
+      batches.delete(bk);
       try {
-        const map = await signPublicMediaFn({ data: { paths, expiresIn } });
-        for (const [p, url] of Object.entries(map ?? {})) cacheUrl(p, url, expiresIn);
+        const map = await signPublicMediaFn({ data: { paths, expiresIn, ...(width ? { width } : {}) } });
+        for (const [p, url] of Object.entries(map ?? {})) cacheUrl(keyOf(p, width), url, expiresIn);
       } catch {
         /* fall through — caller gets null */
       }
@@ -151,26 +153,30 @@ async function signPublicBatch(path: string, expiresIn: number): Promise<string 
     }, 20);
   });
 
-  return freshFromCache(path);
+  return freshFromCache(keyOf(path, width));
 }
 
-export async function signedUrl(path: string, expiresIn = 3600): Promise<string | null> {
-  const cached = freshFromCache(path);
+/** Pass `width` to get a small, compressed (WebP where supported) version for cards/thumbnails. */
+export async function signedUrl(path: string, expiresIn = 3600, width?: number): Promise<string | null> {
+  const key = keyOf(path, width);
+  const cached = freshFromCache(key);
   if (cached) return cached;
 
   const { data: sessionData } = await supabase.auth.getSession();
   if (sessionData.session) {
-    const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, expiresIn);
+    const { data } = await supabase.storage.from(BUCKET).createSignedUrl(
+      path, expiresIn, width ? { transform: { width, quality: 72, resize: "cover" } } : undefined,
+    );
     if (data?.signedUrl) {
-      cacheUrl(path, data.signedUrl, expiresIn);
+      cacheUrl(key, data.signedUrl, expiresIn);
       return data.signedUrl;
     }
   }
-  return signPublicBatch(path, expiresIn);
+  return signPublicBatch(path, expiresIn, width);
 }
 
 /** Drop a cached link (used when a browser reports an expired image). */
 export function forgetSignedUrl(path: string) {
-  publicUrlCache.delete(path);
+  for (const k of [...publicUrlCache.keys()]) if (k === path || k.startsWith(`${path}@w`)) publicUrlCache.delete(k);
 }
 

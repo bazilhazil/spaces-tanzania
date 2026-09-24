@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
+import { localizeNotifText } from "@/lib/notification-i18n";
 
 export type LiveNotification = {
   id: string;
@@ -122,8 +123,8 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
           void refresh();
           if (isNew && row) {
             seen.current.add(row.id + row.created_at);
-            toast(row.title, {
-              description: row.body,
+            toast(localizeNotifText(t, row.title), {
+              description: localizeNotifText(t, row.body),
               duration: 5000,
               action: {
                 label: t("notifLive.view"),
