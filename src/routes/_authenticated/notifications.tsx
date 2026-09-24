@@ -275,6 +275,7 @@ function NotifList({ items, onRead, onDelete }: {
   onRead: (id: string) => void | Promise<void>;
   onDelete: (id: string) => void | Promise<void>;
 }) {
+  const { t } = useI18n();
   if (items.length === 0) {
     return (
       <EmptyState
@@ -310,7 +311,7 @@ function NotifList({ items, onRead, onDelete }: {
                   </div>
                   <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{localText(t, n.body)}</p>
                 </div>
-                <span className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground">{timeAgo(n.createdAt)}</span>
+                <span className="shrink-0 whitespace-nowrap text-[11px] text-muted-foreground">{timeAgo(n.createdAt, t)}</span>
               </div>
 
               {alert && (
