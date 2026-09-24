@@ -147,7 +147,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   if (hasManager) workspaces.push("manager");
   const fallback: SpacesMode = workspaces[0] ?? "buyer";
   const activeMode: SpacesMode =
-    mode && (mode === "buyer" || workspaces.includes(mode)) ? mode : fallback;
+    mode && workspaces.includes(mode) ? mode : fallback;
   const showSwitcher = workspaces.length >= 2;
 
   // Agents only see Property Management for listings an owner explicitly assigned to them.
