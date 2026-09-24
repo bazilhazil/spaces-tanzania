@@ -513,6 +513,179 @@ export type Database = {
           },
         ]
       }
+      deal_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          amount: number | null
+          created_at: string
+          deal_id: string
+          id: string
+          label: string
+          new_value: Json | null
+          note: string | null
+          offer_id: string | null
+          old_value: Json | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          amount?: number | null
+          created_at?: string
+          deal_id: string
+          id?: string
+          label: string
+          new_value?: Json | null
+          note?: string | null
+          offer_id?: string | null
+          old_value?: Json | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          amount?: number | null
+          created_at?: string
+          deal_id?: string
+          id?: string
+          label?: string
+          new_value?: Json | null
+          note?: string | null
+          offer_id?: string | null
+          old_value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_audit_log_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_audit_log_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_checklist_items: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          deal_id: string
+          id: string
+          key: string
+          label: string
+          phase: string
+          required: boolean
+          sort_order: number
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          deal_id: string
+          id?: string
+          key: string
+          label: string
+          phase?: string
+          required?: boolean
+          sort_order?: number
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          deal_id?: string
+          id?: string
+          key?: string
+          label?: string
+          phase?: string
+          required?: boolean
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_checklist_items_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_commissions: {
+        Row: {
+          agent_id: string
+          amount: number
+          cancelled_at: string | null
+          completion_condition: string
+          created_at: string
+          currency: string
+          deal_id: string
+          id: string
+          paid_at: string | null
+          payable_at: string | null
+          protected_at: string | null
+          rate: number | null
+          rule_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          amount?: number
+          cancelled_at?: string | null
+          completion_condition?: string
+          created_at?: string
+          currency?: string
+          deal_id: string
+          id?: string
+          paid_at?: string | null
+          payable_at?: string | null
+          protected_at?: string | null
+          rate?: number | null
+          rule_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          amount?: number
+          cancelled_at?: string | null
+          completion_condition?: string
+          created_at?: string
+          currency?: string
+          deal_id?: string
+          id?: string
+          paid_at?: string | null
+          payable_at?: string | null
+          protected_at?: string | null
+          rate?: number | null
+          rule_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_commissions_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: true
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_commissions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_documents: {
         Row: {
           created_at: string
@@ -557,21 +730,91 @@ export type Database = {
           },
         ]
       }
+      deal_payment_items: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          deal_id: string
+          id: string
+          kind: string
+          label: string
+          paid_at: string | null
+          payer: string
+          payment_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          deal_id: string
+          id?: string
+          kind: string
+          label: string
+          paid_at?: string | null
+          payer?: string
+          payment_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          deal_id?: string
+          id?: string
+          kind?: string
+          label?: string
+          paid_at?: string | null
+          payer?: string
+          payment_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_payment_items_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_payment_items_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deals: {
         Row: {
+          agency_id: string | null
+          agent_commission: number | null
           agent_id: string | null
+          agreed_price: number | null
+          agreement_at: string | null
+          asking_price: number | null
+          buyer_confirmed_at: string | null
           buyer_email: string | null
           buyer_id: string | null
           buyer_name: string | null
           buyer_phone: string | null
           cancel_reason: string | null
+          commission_rate: number | null
+          commission_rule_id: string | null
           completed_at: string | null
           conversation_id: string | null
           created_at: string
           currency: string
+          current_offer_id: string | null
           delete_reason: string | null
           deleted_at: string | null
           deleted_by: string | null
+          estimated_spaces_fee: number | null
           expected_close_at: string | null
           health: Database["public"]["Enums"]["deal_health"]
           id: string
@@ -580,28 +823,43 @@ export type Database = {
           lead_id: string | null
           next_follow_up_at: string | null
           notes: string | null
+          other_charges: number
           owner_id: string | null
           priority: Database["public"]["Enums"]["deal_priority"]
           property_id: string | null
           reference: string
+          seller_confirmed_at: string | null
+          spaces_fee_rule_id: string | null
+          spaces_fee_tax: number | null
           stage: Database["public"]["Enums"]["deal_stage"]
+          transaction_type: string | null
           updated_at: string
           value: number | null
         }
         Insert: {
+          agency_id?: string | null
+          agent_commission?: number | null
           agent_id?: string | null
+          agreed_price?: number | null
+          agreement_at?: string | null
+          asking_price?: number | null
+          buyer_confirmed_at?: string | null
           buyer_email?: string | null
           buyer_id?: string | null
           buyer_name?: string | null
           buyer_phone?: string | null
           cancel_reason?: string | null
+          commission_rate?: number | null
+          commission_rule_id?: string | null
           completed_at?: string | null
           conversation_id?: string | null
           created_at?: string
           currency?: string
+          current_offer_id?: string | null
           delete_reason?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          estimated_spaces_fee?: number | null
           expected_close_at?: string | null
           health?: Database["public"]["Enums"]["deal_health"]
           id?: string
@@ -610,28 +868,43 @@ export type Database = {
           lead_id?: string | null
           next_follow_up_at?: string | null
           notes?: string | null
+          other_charges?: number
           owner_id?: string | null
           priority?: Database["public"]["Enums"]["deal_priority"]
           property_id?: string | null
           reference?: string
+          seller_confirmed_at?: string | null
+          spaces_fee_rule_id?: string | null
+          spaces_fee_tax?: number | null
           stage?: Database["public"]["Enums"]["deal_stage"]
+          transaction_type?: string | null
           updated_at?: string
           value?: number | null
         }
         Update: {
+          agency_id?: string | null
+          agent_commission?: number | null
           agent_id?: string | null
+          agreed_price?: number | null
+          agreement_at?: string | null
+          asking_price?: number | null
+          buyer_confirmed_at?: string | null
           buyer_email?: string | null
           buyer_id?: string | null
           buyer_name?: string | null
           buyer_phone?: string | null
           cancel_reason?: string | null
+          commission_rate?: number | null
+          commission_rule_id?: string | null
           completed_at?: string | null
           conversation_id?: string | null
           created_at?: string
           currency?: string
+          current_offer_id?: string | null
           delete_reason?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
+          estimated_spaces_fee?: number | null
           expected_close_at?: string | null
           health?: Database["public"]["Enums"]["deal_health"]
           id?: string
@@ -640,20 +913,39 @@ export type Database = {
           lead_id?: string | null
           next_follow_up_at?: string | null
           notes?: string | null
+          other_charges?: number
           owner_id?: string | null
           priority?: Database["public"]["Enums"]["deal_priority"]
           property_id?: string | null
           reference?: string
+          seller_confirmed_at?: string | null
+          spaces_fee_rule_id?: string | null
+          spaces_fee_tax?: number | null
           stage?: Database["public"]["Enums"]["deal_stage"]
+          transaction_type?: string | null
           updated_at?: string
           value?: number | null
         }
         Relationships: [
           {
+            foreignKeyName: "deals_commission_rule_id_fkey"
+            columns: ["commission_rule_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_rules"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "deals_conversation_id_fkey"
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_current_offer_fk"
+            columns: ["current_offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
             referencedColumns: ["id"]
           },
           {
@@ -682,6 +974,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_spaces_fee_rule_id_fkey"
+            columns: ["spaces_fee_rule_id"]
+            isOneToOne: false
+            referencedRelation: "pricing_rules"
             referencedColumns: ["id"]
           },
         ]
@@ -1289,6 +1588,147 @@ export type Database = {
         }
         Relationships: []
       }
+      offers: {
+        Row: {
+          accepted_at: string | null
+          agency_id: string | null
+          agent_id: string | null
+          amount: number
+          buyer_email: string | null
+          buyer_id: string
+          buyer_name: string | null
+          buyer_phone: string | null
+          completion_date: string | null
+          conditions: string | null
+          created_at: string
+          currency: string
+          deal_id: string
+          declined_at: string | null
+          deposit_amount: number | null
+          expired_at: string | null
+          expires_at: string | null
+          financing_method: string | null
+          id: string
+          made_by: string
+          made_by_side: string
+          message: string | null
+          owner_id: string | null
+          parent_offer_id: string | null
+          property_id: string
+          reference: string
+          responded_at: string | null
+          status: string
+          submitted_at: string
+          updated_at: string
+          viewed_at: string | null
+          withdrawn_at: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          agency_id?: string | null
+          agent_id?: string | null
+          amount: number
+          buyer_email?: string | null
+          buyer_id: string
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          completion_date?: string | null
+          conditions?: string | null
+          created_at?: string
+          currency?: string
+          deal_id: string
+          declined_at?: string | null
+          deposit_amount?: number | null
+          expired_at?: string | null
+          expires_at?: string | null
+          financing_method?: string | null
+          id?: string
+          made_by: string
+          made_by_side: string
+          message?: string | null
+          owner_id?: string | null
+          parent_offer_id?: string | null
+          property_id: string
+          reference?: string
+          responded_at?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          viewed_at?: string | null
+          withdrawn_at?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          agency_id?: string | null
+          agent_id?: string | null
+          amount?: number
+          buyer_email?: string | null
+          buyer_id?: string
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          completion_date?: string | null
+          conditions?: string | null
+          created_at?: string
+          currency?: string
+          deal_id?: string
+          declined_at?: string | null
+          deposit_amount?: number | null
+          expired_at?: string | null
+          expires_at?: string | null
+          financing_method?: string | null
+          id?: string
+          made_by?: string
+          made_by_side?: string
+          message?: string | null
+          owner_id?: string | null
+          parent_offer_id?: string | null
+          property_id?: string
+          reference?: string
+          responded_at?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          viewed_at?: string | null
+          withdrawn_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_parent_offer_id_fkey"
+            columns: ["parent_offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -1630,6 +2070,7 @@ export type Database = {
           address: string | null
           amenities: string[]
           area_sqm: number | null
+          availability: string
           bathrooms: number | null
           bedrooms: number | null
           created_at: string
@@ -1671,6 +2112,7 @@ export type Database = {
           address?: string | null
           amenities?: string[]
           area_sqm?: number | null
+          availability?: string
           bathrooms?: number | null
           bedrooms?: number | null
           created_at?: string
@@ -1712,6 +2154,7 @@ export type Database = {
           address?: string | null
           amenities?: string[]
           area_sqm?: number | null
+          availability?: string
           bathrooms?: number | null
           bedrooms?: number | null
           created_at?: string
@@ -3579,10 +4022,15 @@ export type Database = {
     }
     Functions: {
       admin_analytics: { Args: { _from: string; _to: string }; Returns: Json }
+      admin_deal_summary: {
+        Args: { _from?: string; _to?: string }
+        Returns: Json
+      }
       admin_set_payment_status: {
         Args: { _payment_id: string; _status: string }
         Returns: undefined
       }
+      advance_deal: { Args: { _deal_id: string }; Returns: string }
       agent_permission_for: {
         Args: { _agent_id: string; _property_id: string }
         Returns: Database["public"]["Enums"]["agent_permission"]
@@ -3591,8 +4039,10 @@ export type Database = {
         Args: { _property_id: string; _reason?: string }
         Returns: Json
       }
+      calc_deal_fees: { Args: { _deal_id: string }; Returns: Json }
       can_manage_property: { Args: { _property_id: string }; Returns: boolean }
       check_my_subscription_expiry: { Args: never; Returns: undefined }
+      confirm_deal_completion: { Args: { _deal_id: string }; Returns: string }
       crm_lead_status_for_stage: {
         Args: { _stage: Database["public"]["Enums"]["deal_stage"] }
         Returns: string
@@ -3606,6 +4056,7 @@ export type Database = {
         Args: { _assignment_id: string; _reason?: string }
         Returns: undefined
       }
+      expire_offers: { Args: never; Returns: number }
       get_conversation_peers: {
         Args: never
         Returns: {
@@ -3667,6 +4118,7 @@ export type Database = {
           until: string
         }[]
       }
+      my_commission_summary: { Args: never; Returns: Json }
       my_management_assignments: {
         Args: never
         Returns: {
@@ -3738,6 +4190,18 @@ export type Database = {
         Args: { _accept: boolean; _assignment_id: string }
         Returns: undefined
       }
+      respond_offer: {
+        Args: {
+          _action: string
+          _amount?: number
+          _completion?: string
+          _conditions?: string
+          _deposit?: number
+          _message?: string
+          _offer_id: string
+        }
+        Returns: Json
+      }
       respond_to_review: {
         Args: { _response: string; _review_id: string }
         Returns: undefined
@@ -3780,9 +4244,28 @@ export type Database = {
           is_manager: boolean
         }[]
       }
+      set_checklist_item: {
+        Args: { _done: boolean; _item_id: string }
+        Returns: string
+      }
       set_lead_status: {
         Args: { _force?: boolean; _lead_id: string; _status: string }
         Returns: undefined
+      }
+      submit_offer: {
+        Args: {
+          _amount: number
+          _completion: string
+          _conditions: string
+          _deposit: number
+          _email: string
+          _expires_at: string
+          _financing: string
+          _name: string
+          _phone: string
+          _property_id: string
+        }
+        Returns: Json
       }
       update_manager_permission: {
         Args: { _assignment_id: string; _permission: string; _scopes?: Json }
@@ -3848,6 +4331,8 @@ export type Database = {
         | "agreement_signed"
         | "completed"
         | "cancelled"
+        | "verification"
+        | "payment"
       listing_type: "rent" | "sale"
       media_type: "image" | "video"
       property_status:
@@ -4066,6 +4551,8 @@ export const Constants = {
         "agreement_signed",
         "completed",
         "cancelled",
+        "verification",
+        "payment",
       ],
       listing_type: ["rent", "sale"],
       media_type: ["image", "video"],
