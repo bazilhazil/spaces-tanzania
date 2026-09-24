@@ -279,7 +279,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   )}
                 >
                   <MoreHorizontal className="h-4 w-4" />
-                  More
+                  {t("modeUi.more")}
                   <ChevronDown className={cn("ml-auto h-4 w-4 transition-transform", (moreOpen || moreActive) && "rotate-180")} />
                 </button>
                 {(moreOpen || moreActive) && moreItems.map((item) => {

@@ -2090,6 +2090,9 @@
     "mOwnerU": "Upload Property|My Properties|Analytics|Bookings",
     "mAgent": "Agent / Dalali",
     "mAgentDesc": "Manage leads and listings.",
-    "mAgentU": "Active Leads|Listings|Commission|Performance"
+    "mAgentU": "Active Leads|Listings|Commission|Performance",
+    "more": "More",
+    "vListings": "Listings",
+    "vPeople": "Identity & documents"
   }
 }

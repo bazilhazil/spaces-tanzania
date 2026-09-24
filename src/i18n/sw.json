@@ -2090,6 +2090,9 @@
     "mOwnerU": "Pakia Mali|Mali Zangu|Takwimu|Miadi",
     "mAgent": "Wakala / Dalali",
     "mAgentDesc": "Simamia wateja na matangazo.",
-    "mAgentU": "Wateja Hai|Matangazo|Kamisheni|Utendaji"
+    "mAgentU": "Wateja Hai|Matangazo|Kamisheni|Utendaji",
+    "more": "Zaidi",
+    "vListings": "Matangazo",
+    "vPeople": "Utambulisho na nyaraka"
   }
 }
