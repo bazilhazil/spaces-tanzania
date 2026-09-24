@@ -967,10 +967,10 @@ function ViewingDialog({ open, onOpenChange, propertyTitle, propertyId, ownerId 
         : res.error === "permission" ? "You don't have permission to submit this request."
         : res.error === "duplicate" ? "You already have an active viewing request for this space."
         : "We couldn't send your request. Please try again.";
-      toast.error(msg);
+      toast.error(msg, res.detail ? { description: res.detail } : undefined);
       return;
     }
-    toast.success(res.updated ? "Viewing request updated." : "Viewing request sent successfully.", {
+    toast.success(res.updated ? "Viewing request updated" : "Viewing request sent", {
       description: "Waiting for the owner/agent to confirm.",
     });
     setNotes("");
@@ -999,7 +999,7 @@ function ViewingDialog({ open, onOpenChange, propertyTitle, propertyId, ownerId 
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={() => void submit()} disabled={sending} className="gap-1.5"><Calendar className="h-4 w-4" /> {sending ? "Sending request..." : "Request viewing"}</Button>
+          <Button onClick={() => void submit()} disabled={sending} className="gap-1.5"><Calendar className="h-4 w-4" /> {sending ? "Sending..." : "Request viewing"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
