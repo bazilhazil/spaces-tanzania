@@ -169,6 +169,13 @@
       "when": 1790232594355,
       "tag": "0023_viewing_request_link_lead_after_insert",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1790232642227,
+      "tag": "0024_fix_deal_lead_sync_recursion",
+      "breakpoints": true
     }
   ]
 }
