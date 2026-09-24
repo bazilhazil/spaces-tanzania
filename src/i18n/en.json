@@ -2099,7 +2099,8 @@
     "mgmtSub": "Units, tenants, leases, rent and maintenance for the properties you manage.",
     "noUnits": "No units yet",
     "noUnitsBody": "Add units for buildings with several rentable spaces. Single properties work without units.",
-    "addUnit": "Add unit"
+    "addUnit": "Add unit",
+    "agentNeedsApproval": "Agent/Dalali access requires an approved Agent verification. Submit your Agent request to continue."
   },
   "notifUi": {
     "title": "Notifications",

@@ -2099,7 +2099,8 @@
     "mgmtSub": "Vitengo, wapangaji, mikataba, kodi na matengenezo ya mali unazosimamia.",
     "noUnits": "Bado hakuna vitengo",
     "noUnitsBody": "Ongeza vitengo kwa majengo yenye nafasi kadhaa za kupangisha. Mali moja inafanya kazi bila vitengo.",
-    "addUnit": "Ongeza kitengo"
+    "addUnit": "Ongeza kitengo",
+    "agentNeedsApproval": "Ufikiaji wa Wakala/Dalali unahitaji uthibitisho wa Wakala ulioidhinishwa. Tuma ombi lako la Wakala kuendelea."
   },
   "notifUi": {
     "title": "Arifa",
