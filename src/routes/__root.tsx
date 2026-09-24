@@ -20,6 +20,7 @@ import { FavoritesProvider } from "@/hooks/use-favorites";
 import { LanguageWelcome } from "@/components/language-welcome";
 import { CompareTray } from "@/components/favorites/compare-tray";
 import { Toaster } from "@/components/ui/sonner";
+import { NotificationsProvider } from "@/hooks/use-notifications";
 
 function NotFoundComponent() {
   return <NotFoundView />;
@@ -160,6 +161,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <AuthProvider>
+          <NotificationsProvider>
           <ModeProvider>
             <FavoritesProvider>
               <Outlet />
@@ -176,6 +178,7 @@ function RootComponent() {
 
             </FavoritesProvider>
           </ModeProvider>
+          </NotificationsProvider>
         </AuthProvider>
       </I18nProvider>
     </QueryClientProvider>

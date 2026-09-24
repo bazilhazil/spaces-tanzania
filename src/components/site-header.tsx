@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NotificationBell } from "@/components/notification-bell";
 import { AuthGateDialog } from "@/components/auth-gate-dialog";
 import { toast } from "sonner";
 import { avatarInitials, displayNameOr } from "@/lib/display-name";
@@ -97,6 +98,7 @@ export function SiteHeader() {
           </Button>
 
 
+          {user && <NotificationBell />}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
