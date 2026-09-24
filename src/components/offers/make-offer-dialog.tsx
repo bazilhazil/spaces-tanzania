@@ -88,8 +88,8 @@ export function MakeOfferDialog({
         {step === "form" ? (
           <div className="space-y-3">
             <div>
-              <Label>{isRent ? t("offer.offeredRent") : t("offer.offerAmount")} ({property.currency})</Label>
-              <Input inputMode="numeric" className="h-12 text-lg font-semibold" value={amount}
+              <Label htmlFor="offer-amount">{isRent ? t("offer.offeredRent") : t("offer.offerAmount")} ({property.currency})</Label>
+              <Input id="offer-amount" inputMode="numeric" className="h-12 text-lg font-semibold" value={amount}
                 onChange={(e) => setAmount(e.target.value)} placeholder={String(property.price)} />
               {num > 0 && (
                 <p className={cn("mt-1 text-xs", diff < 0 ? "text-warning" : "text-success")}>
@@ -119,7 +119,7 @@ export function MakeOfferDialog({
               </select>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
-              <div><Label>{t("offer.yourName")}</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+              <div><Label htmlFor="offer-name">{t("offer.yourName")}</Label><Input id="offer-name" value={name} onChange={(e) => setName(e.target.value)} /></div>
               <div><Label>{t("offer.phone")}</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
               <div><Label>{t("offer.email")}</Label><Input value={email} onChange={(e) => setEmail(e.target.value)} /></div>
             </div>
