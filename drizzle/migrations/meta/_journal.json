@@ -162,6 +162,13 @@
       "when": 1790232570759,
       "tag": "0022_fix_viewing_request_lead_deal_chain",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1790232594355,
+      "tag": "0023_viewing_request_link_lead_after_insert",
+      "breakpoints": true
     }
   ]
 }
