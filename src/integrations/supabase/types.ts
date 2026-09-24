@@ -1205,11 +1205,33 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          email: boolean
+          in_app: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          email?: boolean
+          in_app?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          email?: boolean
+          in_app?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
           created_at: string
           data: Json
+          dedupe_key: string | null
           id: string
           kind: string
           link: string | null
@@ -1221,6 +1243,7 @@ export type Database = {
           body?: string | null
           created_at?: string
           data?: Json
+          dedupe_key?: string | null
           id?: string
           kind: string
           link?: string | null
@@ -1232,6 +1255,7 @@ export type Database = {
           body?: string | null
           created_at?: string
           data?: Json
+          dedupe_key?: string | null
           id?: string
           kind?: string
           link?: string | null
@@ -3545,6 +3569,7 @@ export type Database = {
           source_id: string
         }[]
       }
+      notification_is_critical: { Args: { _kind: string }; Returns: boolean }
       owner_of_property: { Args: { _property_id: string }; Returns: string }
       plan_id_for_user: { Args: { _user_id: string }; Returns: string }
       property_rating: {
