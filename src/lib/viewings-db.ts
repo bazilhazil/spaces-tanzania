@@ -138,6 +138,19 @@ export async function createViewingRequest(
     .maybeSingle();
 
   const recipient = agentId || ownerId;
+  if (import.meta.env.DEV) {
+    console.info("[viewings] submitting request", {
+      table: "bookings",
+      userId: user.id,
+      propertyId,
+      ownerId,
+      agentId,
+      recipientId: recipient,
+      requestedAt: when.toISOString(),
+      requestedLocal: input.scheduledAt,
+      notes: input.message ?? null,
+    });
+  }
   const payload = {
     property_id: propertyId,
     buyer_id: user.id,
