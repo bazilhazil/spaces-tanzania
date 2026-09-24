@@ -75,6 +75,9 @@ export type DealDocumentKind =
   | "sale_agreement"
   | "inspection_report"
   | "ownership_document"
+  | "proof_of_funds"
+  | "financing_document"
+  | "identification"
   | "other";
 
 export const DOC_LABEL: Record<DealDocumentKind, string> = {
@@ -83,6 +86,9 @@ export const DOC_LABEL: Record<DealDocumentKind, string> = {
   sale_agreement: "Sale Agreement",
   inspection_report: "Inspection Report",
   ownership_document: "Ownership Documents",
+  proof_of_funds: "Proof of funds",
+  financing_document: "Financing document",
+  identification: "Identification",
   other: "Other Attachment",
 };
 
@@ -249,6 +255,7 @@ export async function uploadDocument(
   file: File,
   kind: DealDocumentKind,
   actorId?: string | null,
+  offerId?: string | null,
 ) {
   // uploaded_by must match the signed-in user (RLS blocks uploader spoofing).
   const { data: auth } = await supabase.auth.getUser();
@@ -269,6 +276,7 @@ export async function uploadDocument(
     size: file.size,
     mime_type: file.type || null,
     uploaded_by: uploaderId,
+    offer_id: offerId ?? null,
   } as never);
   if (error) throw error;
   await supabase.from("deal_activities").insert({

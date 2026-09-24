@@ -2419,6 +2419,16 @@
     "card_accepted": "Ofa imekubaliwa — uhakiki unahitajika",
     "card_payment": "Malipo yanahitajika",
     "card_completed": "Muamala umekamilika",
-    "card_newOffer": "Ofa mpya imepokelewa"
+    "card_newOffer": "Ofa mpya imepokelewa",
+    "doc_proof_of_funds": "Uthibitisho wa fedha",
+    "doc_financing_document": "Nyaraka ya mkopo",
+    "doc_identification": "Kitambulisho",
+    "doc_other": "Nyaraka nyingine",
+    "doc_offer_letter": "Barua ya ofa",
+    "doc_lease_agreement": "Mkataba wa kupangisha",
+    "doc_sale_agreement": "Mkataba wa mauzo",
+    "doc_inspection_report": "Ripoti ya ukaguzi",
+    "doc_ownership_document": "Nyaraka za umiliki",
+    "docType": "Aina ya nyaraka"
   }
 }

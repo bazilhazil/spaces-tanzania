@@ -2419,6 +2419,16 @@
     "card_accepted": "Offer accepted — verification required",
     "card_payment": "Payment required",
     "card_completed": "Transaction completed",
-    "card_newOffer": "New offer received"
+    "card_newOffer": "New offer received",
+    "doc_proof_of_funds": "Proof of funds",
+    "doc_financing_document": "Financing document",
+    "doc_identification": "Identification",
+    "doc_other": "Other document",
+    "doc_offer_letter": "Offer letter",
+    "doc_lease_agreement": "Lease agreement",
+    "doc_sale_agreement": "Sale agreement",
+    "doc_inspection_report": "Inspection report",
+    "doc_ownership_document": "Ownership documents",
+    "docType": "Document type"
   }
 }
