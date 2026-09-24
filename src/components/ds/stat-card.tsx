@@ -12,10 +12,10 @@ type Props = {
 };
 
 const TONE: Record<NonNullable<Props["tone"]>, string> = {
-  brand:   "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]",
-  gold:    "bg-[color:var(--color-gold-50)] text-[color:var(--color-gold-800)]",
-  success: "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)]",
-  danger:  "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]",
+  brand:   "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)] dark:bg-primary/18 dark:text-primary",
+  gold:    "bg-[color:var(--color-gold-50)] text-[color:var(--color-gold-800)] dark:bg-gold/18 dark:text-gold",
+  success: "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)] dark:bg-success/18 dark:text-success",
+  danger:  "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)] dark:bg-destructive/18 dark:text-[color:var(--color-danger-300)]",
   muted:   "bg-muted text-foreground/70",
 };
 
@@ -38,8 +38,8 @@ export function StatCard({ label, value, delta, icon: Icon, tone = "brand", clas
         <div className={cn(
           "mt-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
           positive
-            ? "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)]"
-            : "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]",
+            ? "bg-[color:var(--color-success-50)] text-[color:var(--color-success-700)] dark:bg-success/18 dark:text-success"
+            : "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)] dark:bg-destructive/18 dark:text-[color:var(--color-danger-300)]",
         )}>
           {positive ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
           {Math.abs(delta)}% this week

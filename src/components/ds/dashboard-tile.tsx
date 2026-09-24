@@ -22,8 +22,8 @@ export function DashboardTile({ title, description, icon: Icon, onClick, href, a
       <div className={cn(
         "grid h-12 w-12 place-items-center rounded-2xl",
         accent === "gold"
-          ? "bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)]"
-          : "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)]",
+          ? "bg-[color:var(--color-gold-100)] text-[color:var(--color-gold-800)] dark:bg-gold/18 dark:text-gold"
+          : "bg-[color:var(--color-brand-50)] text-[color:var(--color-brand-700)] dark:bg-primary/18 dark:text-primary",
       )}>
         <Icon className="h-5 w-5" />
       </div>

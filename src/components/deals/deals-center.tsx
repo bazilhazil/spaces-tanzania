@@ -52,7 +52,7 @@ import {
 } from "@/lib/deals-db";
 
 const PRIORITY_TONE: Record<DealPriority, string> = {
-  low: "bg-neutral-500/10 text-neutral-700 ring-neutral-500/20",
+  low: "bg-muted text-muted-foreground ring-border",
   medium: "bg-sky-500/10 text-sky-700 ring-sky-500/20",
   high: "bg-orange-500/10 text-orange-700 ring-orange-500/20",
   urgent: "bg-rose-500/10 text-rose-700 ring-rose-500/20",

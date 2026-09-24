@@ -28,7 +28,7 @@ function AdminLayout() {
   if (!isAdmin) {
     return (
       <div className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-6 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)] dark:bg-destructive/18 dark:text-[color:var(--color-danger-300)]">
           <ShieldAlert className="h-8 w-8" />
         </div>
         <h1 className="mt-6 font-display text-2xl font-semibold">Access denied.</h1>

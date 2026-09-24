@@ -125,7 +125,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
 
   return (
-    <div className="min-h-screen bg-[color:var(--color-gray-50)] text-foreground">
+    <div className="min-h-screen bg-secondary/30 text-foreground">
       {/* Mobile top bar */}
       <div className="sticky top-0 z-40 flex items-center justify-between border-b border-border/60 bg-background/95 px-4 py-3 backdrop-blur lg:hidden">
         <Link to="/admin" className="flex items-center gap-2">
@@ -158,7 +158,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 {publicEmail(user?.email) && profile?.full_name && (
                   <p className="truncate text-[11px] text-muted-foreground">{publicEmail(user?.email)}</p>
                 )}
-                <div className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-[color:var(--color-gold-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[color:var(--color-gold-800)]">
+                <div className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-[color:var(--color-gold-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[color:var(--color-gold-800)] dark:bg-gold/18 dark:text-gold">
                   <ShieldAlert className="h-3 w-3" /> {roleLabel}
                 </div>
               </div>
@@ -212,7 +212,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                             "rounded-full px-2 py-0.5 text-[10px] font-semibold",
                             active
                               ? "bg-primary-foreground/20 text-primary-foreground"
-                              : "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)]",
+                              : "bg-[color:var(--color-danger-50)] text-[color:var(--color-danger-700)] dark:bg-destructive/18 dark:text-[color:var(--color-danger-300)]",
                           )}>{item.section === "verification" ? pendingVerifications : item.badge}</span>
                         )}
                       </Link>
