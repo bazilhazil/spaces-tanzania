@@ -14,6 +14,9 @@ const TYPE_TO_CATEGORY: Record<string, PropertyCategory> = {
 
 type Row = any;
 
+const THUMB_WIDTH = 640;
+const thumbs: Record<string, string> = {};
+
 async function mediaForProperties(ids: string[]): Promise<Record<string, string[]>> {
   if (!ids.length) return {};
   const { data } = await supabase
@@ -29,7 +32,11 @@ async function mediaForProperties(ids: string[]): Promise<Record<string, string[
   await Promise.all(
     Object.entries(grouped).map(async ([pid, items]) => {
       items.sort((a, b) => (b.cover ? 1 : 0) - (a.cover ? 1 : 0) || a.pos - b.pos);
-      const urls = await Promise.all(items.map((it) => signedUrl(it.path)));
+      const [thumb, ...urls] = await Promise.all([
+        items[0] ? signedUrl(items[0].path, 3600, THUMB_WIDTH) : Promise.resolve(null),
+        ...items.map((it) => signedUrl(it.path)),
+      ]);
+      if (thumb) thumbs[pid] = thumb;
       out[pid] = urls.filter((u): u is string => !!u);
     }),
   );
@@ -42,6 +49,7 @@ function mapRow(row: Row, images: string[]): Property {
   return {
     id: row.id,
     slug: row.id,
+    thumbnail: thumbs[row.id],
     title: row.title ?? "Untitled",
     description: row.description ?? "",
     category: TYPE_TO_CATEGORY[row.property_type] ?? "House",

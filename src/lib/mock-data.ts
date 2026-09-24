@@ -37,6 +37,8 @@ export interface Property {
   furnished: boolean;
   amenities: string[];
   images: string[];
+  /** Small compressed cover for cards (falls back to images[0]). */
+  thumbnail?: string;
   verified: boolean;
   featured: boolean;
   premium: boolean;
