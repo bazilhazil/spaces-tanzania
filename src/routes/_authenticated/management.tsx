@@ -27,7 +27,7 @@ function ManagementPage() {
             {t("mgmt.nav")}
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Units, tenants, leases, rent and maintenance for the properties you manage.
+            {t("modeUi.mgmtSub")}
           </p>
         </header>
         <ManagementCenter />

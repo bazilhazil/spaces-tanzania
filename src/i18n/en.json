@@ -2093,7 +2093,13 @@
     "mAgentU": "Active Leads|Listings|Commission|Performance",
     "more": "More",
     "vListings": "Listings",
-    "vPeople": "Identity & documents"
+    "vPeople": "Identity & documents",
+    "viewings": "Viewings",
+    "messages": "Messages",
+    "mgmtSub": "Units, tenants, leases, rent and maintenance for the properties you manage.",
+    "noUnits": "No units yet",
+    "noUnitsBody": "Add units for buildings with several rentable spaces. Single properties work without units.",
+    "addUnit": "Add unit"
   },
   "notifUi": {
     "title": "Notifications",
@@ -2130,6 +2136,11 @@
     "pmRejected": "Property Manager request not approved",
     "pmApproved": "Property Manager access approved",
     "pmSubmitted": "Request submitted",
-    "pmSubmittedBody": "We received your Property Manager access request and will review it shortly."
+    "pmSubmittedBody": "We received your Property Manager access request and will review it shortly.",
+    "newVer": "New verification submission",
+    "newPmBody": "A new Property Manager access request is awaiting review.",
+    "newPropBody": "A new property verification is awaiting review.",
+    "pmApprovedBody": "Your Property Manager workspace is now available from your dashboard.",
+    "update": "Update"
   }
 }

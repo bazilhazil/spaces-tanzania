@@ -109,6 +109,10 @@ const KNOWN_TEXT: Record<string, string> = {
   "Property Manager request not approved": "notifUi.pmRejected",
   "Property Manager access approved": "notifUi.pmApproved",
   "Request submitted": "notifUi.pmSubmitted",
+  "New verification submission": "notifUi.newVer",
+  "A new Property Manager access request is awaiting review.": "notifUi.newPmBody",
+  "A new property verification is awaiting review.": "notifUi.newPropBody",
+  "Your Property Manager workspace is now available from your dashboard.": "notifUi.pmApprovedBody",
   "We received your Property Manager access request and will review it shortly.": "notifUi.pmSubmittedBody",
 };
 function localText(t: T, s: string) { return KNOWN_TEXT[s] ? t(KNOWN_TEXT[s]) : s; }
@@ -342,7 +346,7 @@ function NotifList({ items, onRead, onDelete }: {
               )}
 
               <div className="mt-2 flex items-center justify-between gap-2">
-                <Badge variant="outline" className="rounded-full text-[10px]">{kindLabel(n.kind)}</Badge>
+                <Badge variant="outline" className="rounded-full text-[10px]">{kindLabel(n.kind) === "Update" ? t("notifUi.update") : kindLabel(n.kind)}</Badge>
 
                 {/* Desktop: inline action buttons */}
                 <div className="hidden flex-wrap items-center gap-1 md:flex">

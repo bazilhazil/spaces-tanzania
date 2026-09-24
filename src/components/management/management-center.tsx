@@ -120,7 +120,7 @@ export function ManagementCenter() {
         <TabsContent value="units" className="mt-4 space-y-4">
           <UnitForm properties={propOptions} ownerFor={ownerFor} onDone={load} />
           {!units.length ? (
-            <EmptyState icon={Home} title="No units yet" description="Add units for buildings with several rentable spaces. Single properties work without units." />
+            <EmptyState icon={Home} title={tr("modeUi.noUnits")} description={tr("modeUi.noUnitsBody")} />
           ) : (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {units.map((u) => (

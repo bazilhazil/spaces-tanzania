@@ -2093,7 +2093,13 @@
     "mAgentU": "Wateja Hai|Matangazo|Kamisheni|Utendaji",
     "more": "Zaidi",
     "vListings": "Matangazo",
-    "vPeople": "Utambulisho na nyaraka"
+    "vPeople": "Utambulisho na nyaraka",
+    "viewings": "Kutazama",
+    "messages": "Ujumbe",
+    "mgmtSub": "Vitengo, wapangaji, mikataba, kodi na matengenezo ya mali unazosimamia.",
+    "noUnits": "Bado hakuna vitengo",
+    "noUnitsBody": "Ongeza vitengo kwa majengo yenye nafasi kadhaa za kupangisha. Mali moja inafanya kazi bila vitengo.",
+    "addUnit": "Ongeza kitengo"
   },
   "notifUi": {
     "title": "Arifa",
@@ -2130,6 +2136,11 @@
     "pmRejected": "Ombi la Msimamizi wa Mali halikukubaliwa",
     "pmApproved": "Ufikiaji wa Msimamizi wa Mali umeidhinishwa",
     "pmSubmitted": "Ombi limetumwa",
-    "pmSubmittedBody": "Tumepokea ombi lako la kuwa Msimamizi wa Mali na tutalikagua hivi karibuni."
+    "pmSubmittedBody": "Tumepokea ombi lako la kuwa Msimamizi wa Mali na tutalikagua hivi karibuni.",
+    "newVer": "Ombi jipya la uhakiki",
+    "newPmBody": "Ombi jipya la kuwa Msimamizi wa Mali linasubiri ukaguzi.",
+    "newPropBody": "Uhakiki mpya wa mali unasubiri ukaguzi.",
+    "pmApprovedBody": "Eneo lako la kazi la Msimamizi wa Mali sasa linapatikana kwenye dashibodi yako.",
+    "update": "Taarifa"
   }
 }
