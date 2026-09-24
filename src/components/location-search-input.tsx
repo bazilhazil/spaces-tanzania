@@ -1,5 +1,5 @@
 import { MapPin, Search, X } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useDeferredValue, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { searchFacets, type LocationHitFacet, type RegionFacet } from "@/lib/location-facets";
 
@@ -56,9 +56,11 @@ export function LocationSearchInput({
   const label = picked ? formatLocation(selected) : "";
 
   // Suggestions are driven purely by what the user typed — never on bare focus.
+  // Deferred so fast typing never blocks the input while matches are computed.
+  const query = useDeferredValue(text);
   const hits = useMemo(
-    () => (picked || text.trim().length < 1 ? [] : searchFacets(facets, text, 6)),
-    [facets, text, picked],
+    () => (picked || query.trim().length < 1 ? [] : searchFacets(facets, query, 6)),
+    [facets, query, picked],
   );
 
   return (
