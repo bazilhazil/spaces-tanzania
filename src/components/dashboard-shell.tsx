@@ -143,7 +143,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const hasManager = roles.includes("property_manager" as never) || pmActive;
   const workspaces: SpacesMode[] = [];
   if (roles.includes("owner") || mode === "owner") workspaces.push("owner");
-  if (roles.includes("agent") || mode === "agent") workspaces.push("agent");
+  if (roles.includes("agent")) workspaces.push("agent");
   if (hasManager) workspaces.push("manager");
   const fallback: SpacesMode = workspaces[0] ?? "buyer";
   const activeMode: SpacesMode =

@@ -74,7 +74,12 @@ function WelcomePage() {
 
   function proceed() {
     if (!selected) return;
-    setMode(selected);
+    if (!setMode(selected)) {
+      setMode("buyer");
+      toast.info(t("modeUi.agentNeedsApproval"));
+      navigate({ to: "/verification" });
+      return;
+    }
     toast.success(`You're all set — ${selected.charAt(0).toUpperCase() + selected.slice(1)} mode is on.`);
     if (selected === "owner") navigate({ to: "/upload" });
     else navigate({ to: "/dashboard" });
