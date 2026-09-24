@@ -218,6 +218,13 @@
       "when": 1790284750198,
       "tag": "0030_monetization_phase1_pricing",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1790286871937,
+      "tag": "0031_phase2_offers_deal_engine",
+      "breakpoints": true
     }
   ]
 }
