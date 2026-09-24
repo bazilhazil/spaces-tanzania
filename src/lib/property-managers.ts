@@ -74,7 +74,7 @@ export async function updateManagerPermission(assignmentId: string, permission: 
 
 /** True when the signed-in user currently manages at least one property for someone. */
 export async function hasActiveManagement(userId: string): Promise<boolean> {
-  const { count } = await (db.from as (t: string) => ReturnType<typeof supabase.from>)("property_managers")
+  const { count } = await supabase.from("property_managers")
     .select("id", { count: "exact", head: true })
     .eq("manager_id", userId)
     .eq("status", "active");
