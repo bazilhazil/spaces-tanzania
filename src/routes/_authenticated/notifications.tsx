@@ -147,6 +147,11 @@ function useLive<T>(read: () => T, event: string): T {
   return v;
 }
 
+/** Categories the user chose to hide from the main list (Settings → Notifications, this device). */
+function mutedCategories(): string[] {
+  try { return JSON.parse(localStorage.getItem("spaces.notifMuted") ?? "[]"); } catch { return []; }
+}
+
 const CATEGORY_TABS = ["properties", "users", "leads", "viewings", "verification", "payments", "reports"] as const;
 
 function NotificationsPage() {
@@ -174,6 +179,7 @@ function NotificationsPage() {
       if (tab === "earlier" && bucket(n.createdAt) !== "earlier") return false;
       if (tab === "urgent" && !URGENT_KINDS.has(n.kind)) return false;
       if (CATEGORY_TABS.some((c) => c === tab) && categoryOf(n.kind) !== tab) return false;
+      if (tab === "all" && mutedCategories().includes(categoryOf(n.kind))) return false;
       if (!needle) return true;
       return (n.title + " " + n.body + " " + kindLabel(n.kind)).toLowerCase().includes(needle);
     });

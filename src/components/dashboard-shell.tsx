@@ -59,7 +59,8 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.safety"), to: "/dashboard/safety", icon: ShieldCheck },
       { label: t("dashboard.side.compare"), to: "/compare", icon: GitCompare },
       { label: t("dashboard.side.recent"), to: "/dashboard/recent", icon: Clock },
-      { label: t("nav.profile"), to: "/dashboard/settings", icon: UserIcon },
+      { label: t("nav.profile"), to: "/dashboard/profile", icon: UserIcon },
+      { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
     ],
     agent: [
       { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutDashboard },
@@ -73,7 +74,7 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.reviews"), to: "/reviews", icon: Star },
       { label: t("dashboard.side.notifications"), to: "/notifications", icon: Bell },
       { label: t("dashboard.side.safety"), to: "/dashboard/safety", icon: ShieldCheck },
-      { label: t("dashboard.side.performance"), to: "/dashboard/analytics", icon: BarChart3 },
+      { label: t("dashboard.side.performance"), to: "/dashboard/performance", icon: BarChart3 },
       { label: t("dashboard.side.agentPerformance"), to: "/dashboard/agent-performance", icon: Trophy },
       { label: t("dashboard.side.businessIntelligence"), to: "/business-intelligence", icon: BarChart3 },
       { label: t("dashboard.side.verification"), to: "/verification", icon: ShieldCheck },
