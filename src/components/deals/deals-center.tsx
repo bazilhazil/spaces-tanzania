@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
+import { DealEnginePanel } from "@/components/offers/deal-engine-panel";
+import { fetchCommissionSummary, fmtTZS } from "@/lib/offers-db";
+import { ShieldCheck } from "lucide-react";
 import { LOST_REASONS, type LostReason } from "@/lib/crm-workflow";
 
 const LOST_REASON_LABEL: Record<LostReason, string> = {
@@ -90,6 +93,10 @@ export function DealsCenter() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeDrag, setActiveDrag] = useState<Deal | null>(null);
   const [tab, setTab] = useState<"kanban" | "overview">("kanban");
+  const search = useSearch({ strict: false }) as { deal?: string };
+  const [commission, setCommission] = useState<{ protected: number; pending: number; paid: number; count: number } | null>(null);
+  useEffect(() => { if (search.deal) setSelectedId(search.deal); }, [search.deal]);
+  useEffect(() => { if (user) void fetchCommissionSummary().then(setCommission); }, [user, deals]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -186,6 +193,14 @@ export function DealsCenter() {
         <Kpi icon={DollarSign} label="Pipeline value" value={fmtMoney(stats.totalValue, deals[0]?.currency ?? "TZS")} tone="text-primary" small />
       </div>
 
+
+      {commission && commission.count > 0 && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Kpi icon={ShieldCheck} label="Commission protected" value={fmtTZS(commission.protected)} tone="text-primary" small />
+          <Kpi icon={Clock} label="Commission pending" value={fmtTZS(commission.pending)} tone="text-amber-600" small />
+          <Kpi icon={CheckCircle2} label="Commission paid" value={fmtTZS(commission.paid)} tone="text-emerald-600" small />
+        </div>
+      )}
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
@@ -563,6 +578,8 @@ function DealDetailSheet({
             )}
           </div>
         </SheetHeader>
+
+        <DealEnginePanel deal={deal} userId={currentUserId} onChanged={onChanged} />
 
         {/* Summary editable */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">

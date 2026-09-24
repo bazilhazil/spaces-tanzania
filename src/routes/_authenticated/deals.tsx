@@ -9,6 +9,7 @@ export const Route = createFileRoute("/_authenticated/deals")({
       { name: "description", content: "Follow every property deal from first message to completion on SPACES." },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>) => ({ deal: typeof s.deal === "string" ? s.deal : undefined }),
   component: DealsPage,
 });
 

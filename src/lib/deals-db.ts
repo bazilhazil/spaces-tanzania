@@ -2,50 +2,38 @@ import { supabase } from "@/integrations/supabase/client";
 import { notifyByEmail } from "./email-notify";
 
 export const DEAL_STAGES = [
-  "new_inquiry",
-  "contacted",
-  "viewing_scheduled",
-  "viewing_completed",
-  "negotiation",
-  "offer_made",
-  "offer_accepted",
-  "agreement_signed",
-  "completed",
-  "cancelled",
+  "new_inquiry", "contacted", "viewing_scheduled", "viewing_completed", "offer_made", "negotiation",
+  "offer_accepted", "agreement_signed", "verification", "payment", "completed", "cancelled",
 ] as const;
 export type DealStage = (typeof DEAL_STAGES)[number];
 
 /** Simple, universal wording shown to users (no CRM jargon). */
 export const STAGE_LABEL: Record<DealStage, string> = {
-  new_inquiry: "New",
+  new_inquiry: "Inquiry",
   contacted: "Contacted",
   viewing_scheduled: "Viewing",
   viewing_completed: "Viewed",
+  offer_made: "Offer",
   negotiation: "Negotiating",
-  offer_made: "Offer made",
-  offer_accepted: "Offer accepted",
+  offer_accepted: "Agreement",
   agreement_signed: "Agreement signed",
+  verification: "Verification",
+  payment: "Payment",
   completed: "Completed",
-  cancelled: "Closed",
+  cancelled: "Cancelled",
 };
 
 /** Columns users actually see in the pipeline. */
 export const PIPELINE_STAGES = [
-  "new_inquiry",
-  "contacted",
-  "viewing_scheduled",
-  "viewing_completed",
-  "negotiation",
-  "completed",
-  "cancelled",
+  "new_inquiry", "contacted", "viewing_scheduled", "offer_made", "negotiation",
+  "offer_accepted", "verification", "payment", "completed", "cancelled",
 ] as const;
 export type PipelineStage = (typeof PIPELINE_STAGES)[number];
 
 /** Maps every internal stage onto one of the visible pipeline columns. */
 export function pipelineColumnFor(stage: DealStage): PipelineStage {
-  if (stage === "offer_made" || stage === "offer_accepted" || stage === "agreement_signed") {
-    return "negotiation";
-  }
+  if (stage === "viewing_completed") return "viewing_scheduled";
+  if (stage === "agreement_signed") return "offer_accepted";
   return stage as PipelineStage;
 }
 
@@ -58,6 +46,8 @@ export const STAGE_TONE: Record<DealStage, string> = {
   offer_made: "bg-orange-500/10 text-orange-700 ring-orange-500/20",
   offer_accepted: "bg-lime-500/10 text-lime-700 ring-lime-500/20",
   agreement_signed: "bg-teal-500/10 text-teal-700 ring-teal-500/20",
+  verification: "bg-cyan-500/10 text-cyan-700 ring-cyan-500/20",
+  payment: "bg-blue-500/10 text-blue-700 ring-blue-500/20",
   completed: "bg-emerald-500/10 text-emerald-700 ring-emerald-500/20",
   cancelled: "bg-rose-500/10 text-rose-700 ring-rose-500/20",
 };
@@ -121,6 +111,16 @@ export type Deal = {
   cancel_reason: string | null;
   created_at: string;
   updated_at: string;
+  asking_price?: number | null;
+  agreed_price?: number | null;
+  estimated_spaces_fee?: number | null;
+  spaces_fee_tax?: number | null;
+  agent_commission?: number | null;
+  commission_rate?: number | null;
+  other_charges?: number | null;
+  transaction_type?: string | null;
+  buyer_confirmed_at?: string | null;
+  seller_confirmed_at?: string | null;
   property_title?: string | null;
   property_region?: string | null;
   property_district?: string | null;
