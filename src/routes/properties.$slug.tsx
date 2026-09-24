@@ -188,6 +188,12 @@ function PropertyDetailPage() {
 
 
 
+  useEffect(() => {
+    if (!property?.id) return;
+    void sbOffer.from("properties").select("availability").eq("id", property.id).maybeSingle()
+      .then(({ data }) => setAvailability(((data as any)?.availability as string) ?? "available"));
+    if (user) void fetchMyOpenOffer(property.id, user.id).then(setMyOffer);
+  }, [property?.id, user]);
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
@@ -230,12 +236,6 @@ function PropertyDetailPage() {
     : t("card.forLease");
 
   const unavailable = ["sold", "rented", "archived", "paused"].includes(status);
-  useEffect(() => {
-    if (!property?.id) return;
-    void sbOffer.from("properties").select("availability").eq("id", property.id).maybeSingle()
-      .then(({ data }) => setAvailability(((data as any)?.availability as string) ?? "available"));
-    if (user) void fetchMyOpenOffer(property.id, user.id).then(setMyOffer);
-  }, [property?.id, user]);
   const isRentOffer = property?.listingType === "rent";
   const isMine = !!user && (user.id === ownerId || user.id === agent?.id);
   const offerEligible = !!property && status === "live" && !isMine && !["reserved", "under_transaction", "sold", "rented"].includes(availability);
