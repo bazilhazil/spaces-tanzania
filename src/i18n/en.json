@@ -2195,6 +2195,11 @@
     "tryAgain": "Try again",
     "somethingWrong": "Something went wrong",
     "takingLong": "Taking a little longer than usual. Please check your connection.",
-    "couldntComplete": "Couldn't complete this action."
+    "couldntComplete": "Couldn't complete this action.",
+    "viewSpace": "View space",
+    "actions": "Notification actions",
+    "kind_viewing": "Viewing",
+    "kind_deal": "Deal",
+    "kind_review": "Review"
   }
 }

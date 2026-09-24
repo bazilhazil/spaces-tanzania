@@ -2195,6 +2195,11 @@
     "tryAgain": "Jaribu tena",
     "somethingWrong": "Kuna hitilafu imetokea",
     "takingLong": "Inachukua muda kidogo kuliko kawaida. Tafadhali angalia muunganisho wako.",
-    "couldntComplete": "Imeshindwa kukamilisha kitendo hiki."
+    "couldntComplete": "Imeshindwa kukamilisha kitendo hiki.",
+    "viewSpace": "Tazama nafasi",
+    "actions": "Vitendo vya arifa",
+    "kind_viewing": "Utazamaji",
+    "kind_deal": "Mpango",
+    "kind_review": "Tathmini"
   }
 }
