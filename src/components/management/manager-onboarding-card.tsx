@@ -51,7 +51,7 @@ export function ManagerOnboardingCard() {
             <div className="mt-3 space-y-2">
               {status === "rejected" && <p className="text-sm font-medium text-destructive">{t("pm.onboardRejected")}</p>}
               <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} rows={2}
-                placeholder="Company name, experience, areas you cover…" />
+                placeholder={t("modeUi.onboardPlaceholder")} />
               <Button onClick={submit} disabled={busy} className="rounded-full">{t("pm.onboardCta")}</Button>
             </div>
           )}

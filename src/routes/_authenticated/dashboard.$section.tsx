@@ -59,7 +59,8 @@ const REDIRECTS: Record<string, string> = {
 function SectionPage() {
   const { section } = Route.useParams();
   const navigate = useNavigate();
-  const meta = META[section] ?? { title: section, desc: "" };
+  const { t } = useI18n();
+  const meta = section === "mode" ? { title: t("modeUi.modeTitle"), desc: t("modeUi.modeDesc") } : META[section] ?? { title: section, desc: "" };
 
 
   useEffect(() => {
@@ -74,7 +75,7 @@ function SectionPage() {
       <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
         <header>
           <Link to="/dashboard" className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary">
-            <ChevronLeft className="h-3.5 w-3.5" /> Dashboard
+            <ChevronLeft className="h-3.5 w-3.5" /> {t("modeUi.dashboard")}
           </Link>
           <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{meta.title}</h1>
           <p className="mt-1 text-muted-foreground">{meta.desc}</p>
@@ -412,7 +413,7 @@ function SettingsIndex() {
   const { t, lang } = useI18n();
   const current = AVAILABLE_LANGS.find((l) => l.code === lang) ?? AVAILABLE_LANGS[0];
   const items: { icon: typeof Globe; label: string; section: string; value: string }[] = [
-    { icon: Sparkles, label: "My Mode", section: "mode", value: "Switch role" },
+    { icon: Sparkles, label: t("modeUi.modeTitle"), section: "mode", value: t("modeUi.modeSwitchRole") },
     { icon: Globe, label: t("settings.language"), section: "language", value: `${current.flag} ${current.label}` },
     { icon: Palette, label: t("settings.theme"), section: "settings", value: t("settings.themeDefault") },
     { icon: Bell, label: t("settings.notifications"), section: "settings", value: t("settings.notificationsOn") },
@@ -518,11 +519,9 @@ function LanguagePanel() {
 function ModePanel() {
   const { mode, setMode } = useMode();
   const navigate = useNavigate();
-  const options: { key: SpacesMode; emoji: string; title: string; desc: string; unlocks: string[] }[] = [
-    { key: "buyer", emoji: "🏠", title: "Buyer", desc: "Find your next home.", unlocks: ["Favorites", "Viewing Requests", "Saved Searches"] },
-    { key: "owner", emoji: "🏡", title: "Owner", desc: "List and manage your properties.", unlocks: ["Upload Property", "My Properties", "Analytics", "Bookings"] },
-    { key: "agent", emoji: "🤝", title: "Agent", desc: "Manage leads and listings.", unlocks: ["Active Leads", "Listings", "Commission", "Performance"] },
-  ];
+  const { t } = useI18n();
+  const mk = (key: SpacesMode, emoji: string, n: string) => ({ key, emoji, title: t(`modeUi.m${n}`), desc: t(`modeUi.m${n}Desc`), unlocks: t(`modeUi.m${n}U`).split("|") });
+  const options = [mk("buyer", "🏠", "Buyer"), mk("owner", "🏡", "Owner"), mk("agent", "🤝", "Agent")];
   return (
     <div className="grid gap-4 md:grid-cols-3">
       {options.map((o) => {
@@ -532,7 +531,7 @@ function ModePanel() {
             key={o.key}
             onClick={() => {
               setMode(o.key);
-              toast.success(`Switched to ${o.title} mode`);
+              toast.success(t("modeUi.modeSwitched", { mode: o.title }));
               navigate({ to: "/dashboard" });
             }}
             className={cn(
@@ -544,7 +543,7 @@ function ModePanel() {
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-3xl">{o.emoji}</div>
               {active && (
                 <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
-                  Current
+                  {t("modeUi.current")}
                 </span>
               )}
             </div>

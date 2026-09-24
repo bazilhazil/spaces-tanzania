@@ -2084,26 +2084,12 @@
     "onboardPlaceholder": "Company name, experience, areas you cover…",
     "mBuyer": "Buyer",
     "mBuyerDesc": "Find your next home.",
-    "mBuyerU": [
-      "Favorites",
-      "Viewing Requests",
-      "Saved Searches"
-    ],
+    "mBuyerU": "Favorites|Viewing Requests|Saved Searches",
     "mOwner": "Owner",
     "mOwnerDesc": "List and manage your properties.",
-    "mOwnerU": [
-      "Upload Property",
-      "My Properties",
-      "Analytics",
-      "Bookings"
-    ],
+    "mOwnerU": "Upload Property|My Properties|Analytics|Bookings",
     "mAgent": "Agent / Dalali",
     "mAgentDesc": "Manage leads and listings.",
-    "mAgentU": [
-      "Active Leads",
-      "Listings",
-      "Commission",
-      "Performance"
-    ]
+    "mAgentU": "Active Leads|Listings|Commission|Performance"
   }
 }

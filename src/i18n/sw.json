@@ -2084,26 +2084,12 @@
     "onboardPlaceholder": "Jina la kampuni, uzoefu, maeneo unayohudumia…",
     "mBuyer": "Mnunuzi",
     "mBuyerDesc": "Pata nyumba yako inayofuata.",
-    "mBuyerU": [
-      "Vipendwa",
-      "Maombi ya Kutembelea",
-      "Utafutaji Uliohifadhiwa"
-    ],
+    "mBuyerU": "Vipendwa|Maombi ya Kutembelea|Utafutaji Uliohifadhiwa",
     "mOwner": "Mmiliki",
     "mOwnerDesc": "Tangaza na simamia mali zako.",
-    "mOwnerU": [
-      "Pakia Mali",
-      "Mali Zangu",
-      "Takwimu",
-      "Miadi"
-    ],
+    "mOwnerU": "Pakia Mali|Mali Zangu|Takwimu|Miadi",
     "mAgent": "Wakala / Dalali",
     "mAgentDesc": "Simamia wateja na matangazo.",
-    "mAgentU": [
-      "Wateja Hai",
-      "Matangazo",
-      "Kamisheni",
-      "Utendaji"
-    ]
+    "mAgentU": "Wateja Hai|Matangazo|Kamisheni|Utendaji"
   }
 }
