@@ -225,6 +225,20 @@
       "when": 1790286871937,
       "tag": "0031_phase2_offers_deal_engine",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1790287880882,
+      "tag": "0032_phase2_finalize",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1790288110803,
+      "tag": "0033_commission_summary_payable",
+      "breakpoints": true
     }
   ]
 }

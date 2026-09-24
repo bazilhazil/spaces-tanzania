@@ -45,6 +45,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCompareRouteImport } from './routes/_authenticated/compare'
 import { Route as AuthenticatedBusinessIntelligenceRouteImport } from './routes/_authenticated/business-intelligence'
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
+import { Route as AuthenticatedAgencyRouteImport } from './routes/_authenticated/agency'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as ApiPublicSelcomWebhookRouteImport } from './routes/api/public/selcom-webhook'
@@ -248,6 +249,11 @@ const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAgencyRoute = AuthenticatedAgencyRouteImport.update({
+  id: '/agency',
+  path: '/agency',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -372,6 +378,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/trust-system': typeof TrustSystemRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/agency': typeof AuthenticatedAgencyRoute
   '/billing': typeof AuthenticatedBillingRouteWithChildren
   '/business-intelligence': typeof AuthenticatedBusinessIntelligenceRoute
   '/compare': typeof AuthenticatedCompareRoute
@@ -427,6 +434,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust-system': typeof TrustSystemRoute
+  '/agency': typeof AuthenticatedAgencyRoute
   '/billing': typeof AuthenticatedBillingRouteWithChildren
   '/business-intelligence': typeof AuthenticatedBusinessIntelligenceRoute
   '/compare': typeof AuthenticatedCompareRoute
@@ -485,6 +493,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/trust-system': typeof TrustSystemRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/agency': typeof AuthenticatedAgencyRoute
   '/_authenticated/billing': typeof AuthenticatedBillingRouteWithChildren
   '/_authenticated/business-intelligence': typeof AuthenticatedBusinessIntelligenceRoute
   '/_authenticated/compare': typeof AuthenticatedCompareRoute
@@ -543,6 +552,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/trust-system'
     | '/admin'
+    | '/agency'
     | '/billing'
     | '/business-intelligence'
     | '/compare'
@@ -598,6 +608,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/trust-system'
+    | '/agency'
     | '/billing'
     | '/business-intelligence'
     | '/compare'
@@ -655,6 +666,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/trust-system'
     | '/_authenticated/admin'
+    | '/_authenticated/agency'
     | '/_authenticated/billing'
     | '/_authenticated/business-intelligence'
     | '/_authenticated/compare'
@@ -977,6 +989,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBillingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/agency': {
+      id: '/_authenticated/agency'
+      path: '/agency'
+      fullPath: '/agency'
+      preLoaderRoute: typeof AuthenticatedAgencyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -1185,6 +1204,7 @@ const AuthenticatedDashboardRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedAgencyRoute: typeof AuthenticatedAgencyRoute
   AuthenticatedBillingRoute: typeof AuthenticatedBillingRouteWithChildren
   AuthenticatedBusinessIntelligenceRoute: typeof AuthenticatedBusinessIntelligenceRoute
   AuthenticatedCompareRoute: typeof AuthenticatedCompareRoute
@@ -1207,6 +1227,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedAgencyRoute: AuthenticatedAgencyRoute,
   AuthenticatedBillingRoute: AuthenticatedBillingRouteWithChildren,
   AuthenticatedBusinessIntelligenceRoute:
     AuthenticatedBusinessIntelligenceRoute,

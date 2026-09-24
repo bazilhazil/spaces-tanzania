@@ -122,9 +122,38 @@ export async function fetchMyOpenOffer(propertyId: string, userId: string) {
   return data as unknown as { id: string; deal_id: string; status: string; amount: number } | null;
 }
 
-export async function fetchCommissionSummary() {
+export type CommissionSummary = { protected: number; pending: number; payable: number; paid: number; count: number };
+export async function fetchCommissionSummary(): Promise<CommissionSummary> {
   const { data } = await (supabase.rpc as any)("my_commission_summary");
-  return (data ?? { protected: 0, pending: 0, paid: 0, count: 0 }) as { protected: number; pending: number; paid: number; count: number };
+  return (data ?? { protected: 0, pending: 0, payable: 0, paid: 0, count: 0 }) as CommissionSummary;
+}
+
+export async function simulateTestPayment(dealId: string) {
+  const { error } = await (supabase.rpc as any)("simulate_test_payment", { _deal_id: dealId });
+  if (error) throw new Error(error.message);
+}
+export async function isTestModeOn(): Promise<boolean> {
+  const { data } = await (supabase.rpc as any)("payment_test_mode_enabled");
+  return !!data;
+}
+
+/** Latest offer per deal, for dashboard cards. */
+export async function fetchLatestOffers(dealIds: string[]): Promise<Record<string, Offer>> {
+  if (!dealIds.length) return {};
+  const { data } = await supabase.from("offers" as any).select("*").in("deal_id", dealIds).order("created_at", { ascending: true });
+  const out: Record<string, Offer> = {};
+  for (const o of (data ?? []) as unknown as Offer[]) out[o.deal_id] = o;
+  return out;
+}
+export async function fetchOfferCounts(dealIds: string[]): Promise<Record<string, { count: number; max: number }>> {
+  if (!dealIds.length) return {};
+  const { data } = await supabase.from("offers" as any).select("deal_id,amount,property_id").in("deal_id", dealIds);
+  const out: Record<string, { count: number; max: number }> = {};
+  for (const o of (data ?? []) as any[]) {
+    const c = (out[o.property_id] ??= { count: 0, max: 0 });
+    c.count++; c.max = Math.max(c.max, Number(o.amount));
+  }
+  return out;
 }
 
 export async function fetchAdminDealSummary(from?: string | null) {

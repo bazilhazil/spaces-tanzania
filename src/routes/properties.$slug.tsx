@@ -639,11 +639,11 @@ function PropertyDetailPage() {
                     <>
                       {offerEligible && (
                         <Button size="lg" className="h-12 w-full text-base font-semibold" onClick={openOffer}>
-                          {myOffer ? "View my offer" : isRentOffer ? "Apply / Make Rental Offer" : "Make Offer"}
+                          {myOffer ? t("offer.viewMyOffer") : isRentOffer ? t("offer.makeRentOffer") : t("offer.makeOffer")}
                         </Button>
                       )}
                       {["reserved", "under_transaction"].includes(availability) && (
-                        <p className="rounded-lg bg-warning/10 p-2 text-center text-sm font-medium text-warning">Reserved — an offer has been accepted</p>
+                        <p className="rounded-lg bg-warning/15 p-2 text-center text-sm font-medium text-foreground" data-testid="public-availability">{t("offer.reserved")}</p>
                       )}
                       <Button className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => requireAuth(() => setInquiryOpen(true))}>
                         <Send className="h-4 w-4" /> {t("inquiry.message")}
@@ -722,7 +722,7 @@ function PropertyDetailPage() {
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-3 py-2 backdrop-blur md:hidden">
           {offerEligible && (
             <Button className="mb-2 h-11 w-full font-semibold" onClick={openOffer}>
-              {myOffer ? "View my offer" : isRentOffer ? "Apply / Make Rental Offer" : "Make Offer"}
+              {myOffer ? t("offer.viewMyOffer") : isRentOffer ? t("offer.makeRentOffer") : t("offer.makeOffer")}
             </Button>
           )}
           <div className="grid grid-cols-3 gap-2">
