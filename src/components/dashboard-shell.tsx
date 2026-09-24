@@ -80,7 +80,27 @@ function useRoleNav(): Record<SpacesMode, Item[]> {
       { label: t("dashboard.side.billing"), to: "/billing", icon: CreditCard },
       { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
     ],
+    manager: [
+      { label: t("pm.myManagement"), to: "/management", icon: Building2 },
+      { label: t("dashboard.side.messages"), to: "/messages", icon: MessageSquare },
+      { label: t("dashboard.side.notifications"), to: "/notifications", icon: Bell },
+      { label: t("dashboard.side.favorites"), to: "/dashboard/favorites", icon: Heart },
+      { label: t("dashboard.side.savedSearches"), to: "/dashboard/searches", icon: Search },
+      { label: t("dashboard.side.viewings"), to: "/viewings", icon: Calendar },
+      { label: t("dashboard.side.profile"), to: "/dashboard/profile", icon: UserIcon },
+      { label: t("nav.settings"), to: "/dashboard/settings", icon: Settings },
+      { label: t("dashboard.side.support"), to: "/dashboard/support", icon: LifeBuoy },
+    ],
   };
+}
+
+/** Buying/renting links stay reachable from every workspace (under "More"). */
+function useMarketplaceExtras(): Item[] {
+  const { t } = useI18n();
+  return [
+    { label: t("dashboard.side.favorites"), to: "/dashboard/favorites", icon: Heart },
+    { label: t("dashboard.side.savedSearches"), to: "/dashboard/searches", icon: Search },
+  ];
 }
 
 /**
@@ -91,6 +111,7 @@ const PRIMARY_PATHS: Record<SpacesMode, string[]> = {
   owner: ["/dashboard", "/dashboard/properties", "/management", "/upload", "/leads", "/viewings", "/messages", "/notifications"],
   buyer: ["/dashboard", "/dashboard/favorites", "/dashboard/searches", "/viewings", "/messages", "/notifications"],
   agent: ["/dashboard", "/leads", "/deals", "/dashboard/properties", "/management", "/viewings", "/messages", "/notifications"],
+  manager: ["/management", "/messages", "/notifications"],
 };
 
 export function DashboardShell({ children }: { children: ReactNode }) {
