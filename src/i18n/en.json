@@ -2073,5 +2073,37 @@
     "requestType": "Property Manager",
     "onboardRejected": "Your Property Manager request was not approved. You can send a new request with more details.",
     "onboardApproved": "Property Manager access approved."
+  },
+  "modeUi": {
+    "modeTitle": "My Mode",
+    "modeDesc": "Switch between Buyer, Owner and Agent anytime.",
+    "modeSwitchRole": "Switch role",
+    "modeSwitched": "Switched to {mode} mode",
+    "current": "Current",
+    "dashboard": "Dashboard",
+    "onboardPlaceholder": "Company name, experience, areas you cover…",
+    "mBuyer": "Buyer",
+    "mBuyerDesc": "Find your next home.",
+    "mBuyerU": [
+      "Favorites",
+      "Viewing Requests",
+      "Saved Searches"
+    ],
+    "mOwner": "Owner",
+    "mOwnerDesc": "List and manage your properties.",
+    "mOwnerU": [
+      "Upload Property",
+      "My Properties",
+      "Analytics",
+      "Bookings"
+    ],
+    "mAgent": "Agent / Dalali",
+    "mAgentDesc": "Manage leads and listings.",
+    "mAgentU": [
+      "Active Leads",
+      "Listings",
+      "Commission",
+      "Performance"
+    ]
   }
 }

@@ -2073,5 +2073,37 @@
     "requestType": "Msimamizi wa Mali",
     "onboardRejected": "Ombi lako la Msimamizi wa Mali halikukubaliwa. Unaweza kutuma ombi jipya lenye maelezo zaidi.",
     "onboardApproved": "Ufikiaji wa Msimamizi wa Mali umeidhinishwa."
+  },
+  "modeUi": {
+    "modeTitle": "Hali Yangu",
+    "modeDesc": "Badilisha kati ya Mnunuzi, Mmiliki na Dalali wakati wowote.",
+    "modeSwitchRole": "Badilisha jukumu",
+    "modeSwitched": "Umebadilisha kwenda hali ya {mode}",
+    "current": "Sasa",
+    "dashboard": "Dashibodi",
+    "onboardPlaceholder": "Jina la kampuni, uzoefu, maeneo unayohudumia…",
+    "mBuyer": "Mnunuzi",
+    "mBuyerDesc": "Pata nyumba yako inayofuata.",
+    "mBuyerU": [
+      "Vipendwa",
+      "Maombi ya Kutembelea",
+      "Utafutaji Uliohifadhiwa"
+    ],
+    "mOwner": "Mmiliki",
+    "mOwnerDesc": "Tangaza na simamia mali zako.",
+    "mOwnerU": [
+      "Pakia Mali",
+      "Mali Zangu",
+      "Takwimu",
+      "Miadi"
+    ],
+    "mAgent": "Wakala / Dalali",
+    "mAgentDesc": "Simamia wateja na matangazo.",
+    "mAgentU": [
+      "Wateja Hai",
+      "Matangazo",
+      "Kamisheni",
+      "Utendaji"
+    ]
   }
 }
