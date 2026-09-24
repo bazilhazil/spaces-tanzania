@@ -1,3 +1,4 @@
+import { fetchAdminDealSummary, fmtTZS } from "@/lib/offers-db";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
@@ -515,6 +516,7 @@ export function DealOpsPanel() {
 
   return (
     <>
+      <AdminDealSummary />
       <PageHeader kicker={t("admin.kicker.operations")} title={t("admin.ops.deals")} subtitle={t("admin.ops.dealsSub")} />
       <FilterBar
         value={filter}
@@ -674,5 +676,42 @@ export function ReasonDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+
+function AdminDealSummary() {
+  const [range, setRange] = useState<"all" | "30" | "7">("all");
+  const [s, setS] = useState<Record<string, number> | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => {
+    const from = range === "all" ? null : new Date(Date.now() - Number(range) * 86400000).toISOString();
+    fetchAdminDealSummary(from).then(setS).catch((e) => setErr(e.message));
+  }, [range]);
+  if (err) return <p className="mb-4 text-sm text-destructive">{err}</p>;
+  const tiles: [string, string][] = s ? [
+    ["Active deals", String(s.active)], ["Offers today", String(s.offers_today)], ["Negotiations", String(s.negotiation)],
+    ["Agreements", String(s.agreement)], ["Verification", String(s.verification)], ["Payments", String(s.payment)],
+    ["Completed", String(s.completed)], ["Cancelled", String(s.cancelled)],
+    ["Transaction value", fmtTZS(s.transaction_value)], ["Agent commissions", fmtTZS(s.agent_commissions)],
+    ["Estimated revenue", fmtTZS(s.estimated_revenue)], ["Pending revenue", fmtTZS(s.pending_revenue)], ["Collected revenue", fmtTZS(s.collected_revenue)],
+  ] : [];
+  return (
+    <section className="mb-6 rounded-2xl border border-border bg-card p-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-display text-lg font-semibold text-foreground">Offers & deal revenue</h2>
+        <select className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground" value={range} onChange={(e) => setRange(e.target.value as any)}>
+          <option value="all">All time</option><option value="30">Last 30 days</option><option value="7">Last 7 days</option>
+        </select>
+      </div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+        {tiles.map(([k, v]) => (
+          <div key={k} className="rounded-xl border border-border bg-background p-3">
+            <p className="text-xs text-muted-foreground">{k}</p><p className="font-display text-base font-semibold text-foreground">{v}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">Collected revenue counts only confirmed payments. Estimated fees are not counted as earned.</p>
+    </section>
   );
 }
