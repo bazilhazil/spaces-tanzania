@@ -1684,6 +1684,85 @@ export type Database = {
           },
         ]
       }
+      property_managers: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          end_reason: string | null
+          ended_at: string | null
+          ended_by: string | null
+          id: string
+          invited_at: string
+          invited_by: string | null
+          manager_id: string
+          owner_id: string
+          permission: string
+          property_id: string
+          responded_at: string | null
+          scopes: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          end_reason?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          invited_at?: string
+          invited_by?: string | null
+          manager_id: string
+          owner_id: string
+          permission?: string
+          property_id: string
+          responded_at?: string | null
+          scopes?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          end_reason?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          invited_at?: string
+          invited_by?: string | null
+          manager_id?: string
+          owner_id?: string
+          permission?: string
+          property_id?: string
+          responded_at?: string | null
+          scopes?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_managers_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_managers_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_listing_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_managers_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_media: {
         Row: {
           created_at: string
@@ -3355,6 +3434,10 @@ export type Database = {
         Args: { _status: string }
         Returns: Database["public"]["Enums"]["deal_stage"]
       }
+      end_property_manager: {
+        Args: { _assignment_id: string; _reason?: string }
+        Returns: undefined
+      }
       get_conversation_peers: {
         Args: never
         Returns: {
@@ -3381,8 +3464,29 @@ export type Database = {
         }
         Returns: boolean
       }
+      invite_property_manager: {
+        Args: {
+          _manager_id: string
+          _permission?: string
+          _property_id: string
+          _scopes?: Json
+        }
+        Returns: string
+      }
+      is_active_manager: {
+        Args: { _need_manage?: boolean; _property_id: string }
+        Returns: boolean
+      }
       is_blocked_with: { Args: { _other: string }; Returns: boolean }
       is_my_tenancy: { Args: { _tenant_id: string }; Returns: boolean }
+      log_management_action: {
+        Args: {
+          _action: string
+          _meta: Json
+          _row: Database["public"]["Tables"]["property_managers"]["Row"]
+        }
+        Returns: undefined
+      }
       moderate_review: {
         Args: { _reason?: string; _review_id: string; _status: string }
         Returns: undefined
@@ -3393,6 +3497,24 @@ export type Database = {
           reason: string
           status: Database["public"]["Enums"]["account_status"]
           until: string
+        }[]
+      }
+      my_management_assignments: {
+        Args: never
+        Returns: {
+          accepted_at: string
+          ended_at: string
+          id: string
+          invited_at: string
+          manager_id: string
+          manager_name: string
+          owner_id: string
+          owner_name: string
+          permission: string
+          property_id: string
+          property_title: string
+          scopes: Json
+          status: string
         }[]
       }
       my_plan_usage: {
@@ -3434,6 +3556,10 @@ export type Database = {
       }
       publish_property: { Args: { _property_id: string }; Returns: Json }
       recompute_deal_health: { Args: { _deal_id: string }; Returns: undefined }
+      respond_management_invite: {
+        Args: { _accept: boolean; _assignment_id: string }
+        Returns: undefined
+      }
       respond_to_review: {
         Args: { _response: string; _review_id: string }
         Returns: undefined
@@ -3466,8 +3592,22 @@ export type Database = {
           verified: boolean
         }[]
       }
+      search_property_managers: {
+        Args: { _q: string }
+        Returns: {
+          agency_name: string
+          avatar_url: string
+          full_name: string
+          id: string
+          is_manager: boolean
+        }[]
+      }
       set_lead_status: {
         Args: { _force?: boolean; _lead_id: string; _status: string }
+        Returns: undefined
+      }
+      update_manager_permission: {
+        Args: { _assignment_id: string; _permission: string; _scopes?: Json }
         Returns: undefined
       }
       user_rating: {
