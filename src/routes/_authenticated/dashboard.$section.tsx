@@ -560,6 +560,7 @@ function ModePanel() {
           </button>
         );
       })}
+      <div className="md:col-span-3"><ManagerOnboardingCard /></div>
     </div>
   );
 }
