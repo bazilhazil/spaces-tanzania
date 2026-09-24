@@ -3486,7 +3486,13 @@ export type Database = {
         | "manage_viewings"
         | "edit_listing"
         | "full_management"
-      app_role: "buyer" | "owner" | "agent" | "admin" | "super_admin"
+      app_role:
+        | "buyer"
+        | "owner"
+        | "agent"
+        | "admin"
+        | "super_admin"
+        | "property_manager"
       deal_activity_kind:
         | "lead_created"
         | "message_sent"
@@ -3695,7 +3701,14 @@ export const Constants = {
         "edit_listing",
         "full_management",
       ],
-      app_role: ["buyer", "owner", "agent", "admin", "super_admin"],
+      app_role: [
+        "buyer",
+        "owner",
+        "agent",
+        "admin",
+        "super_admin",
+        "property_manager",
+      ],
       deal_activity_kind: [
         "lead_created",
         "message_sent",
