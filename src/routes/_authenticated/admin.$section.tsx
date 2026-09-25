@@ -1,12 +1,12 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import {
   PropertiesPanel, UsersPanel, AgentsPanel, VerificationPanel,
-  BookingsPanel, MessagesPanel, PaymentsPanel, SubscriptionsPanel,
+  BookingsPanel, MessagesPanel, SubscriptionsPanel,
   AnalyticsPanel, MarketingPanel, NotificationsPanel, SettingsPanel,
   SuperAdminPanel,
 } from "@/components/admin/panels";
 import {
-  LeadOpsPanel, ViewingOpsPanel, DealOpsPanel, RevenueOpsPanel, ActivityLogPanel,
+  LeadOpsPanel, ViewingOpsPanel, DealOpsPanel, ActivityLogPanel,
 } from "@/components/admin/ops-panels";
 import { ReviewsPanel } from "@/components/admin/reviews-panel";
 import { SafetyPanel } from "@/components/admin/safety-panel";
@@ -16,6 +16,7 @@ import { SmsPanel } from "@/components/admin/sms-panel";
 import { LaunchPanel } from "@/components/admin/launch-panel";
 import { ProductionReviewPanel } from "@/components/admin/production-review-panel";
 import { MonetizationPanel } from "@/components/admin/monetization-panel";
+import { AdminRevenuePanel, AdminPaymentsPanel } from "@/components/finance/admin-finance";
 
 const PANELS: Record<string, React.ComponentType> = {
   launch: LaunchPanel,
@@ -31,11 +32,11 @@ const PANELS: Record<string, React.ComponentType> = {
   leads: LeadOpsPanel,
   viewings: ViewingOpsPanel,
   deals: DealOpsPanel,
-  revenue: RevenueOpsPanel,
+  revenue: AdminRevenuePanel,
   bookings: BookingsPanel,
   messages: MessagesPanel,
   support: SupportPanel,
-  payments: PaymentsPanel,
+  payments: AdminPaymentsPanel,
   subscriptions: SubscriptionsPanel,
   analytics: AnalyticsPanel,
   audit: ActivityLogPanel,

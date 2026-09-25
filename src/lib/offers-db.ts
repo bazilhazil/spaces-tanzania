@@ -37,6 +37,7 @@ export type ChecklistItem = {
 export type PaymentItem = {
   id: string; kind: string; label: string; payer: string; amount: number; currency: string;
   status: "pending" | "processing" | "paid" | "failed" | "refunded" | "cancelled"; paid_at: string | null;
+  payment_id?: string | null; is_test?: boolean;
 };
 export type Commission = {
   id: string; deal_id: string; agent_id: string; rate: number | null; amount: number; currency: string;
