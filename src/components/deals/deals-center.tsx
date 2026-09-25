@@ -627,7 +627,7 @@ function DealDetailSheet({
           <TabsList className="w-full justify-start">
             <TabsTrigger value="timeline"><Activity className="mr-1.5 h-3.5 w-3.5" />{dx("Timeline")}</TabsTrigger>
             <TabsTrigger value="notes"><StickyNote className="mr-1.5 h-3.5 w-3.5" />{dx("Notes")}</TabsTrigger>
-            <TabsTrigger value="documents"><FileText className="mr-1.5 h-3.5 w-3.5" />Documents ({docs.length})</TabsTrigger>
+            <TabsTrigger value="documents"><FileText className="mr-1.5 h-3.5 w-3.5" />{dx("Documents")} ({docs.length})</TabsTrigger>
             <TabsTrigger value="followup"><Calendar className="mr-1.5 h-3.5 w-3.5" />{dx("Follow-up")}</TabsTrigger>
           </TabsList>
 

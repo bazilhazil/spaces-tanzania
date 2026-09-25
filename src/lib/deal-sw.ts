@@ -34,6 +34,8 @@ const SW: Record<string, string> = {
   Timeline: "Mfuatano", To: "Hadi", Transaction: "Muamala", "Untitled property": "Mali isiyo na jina", "Update failed": "Imeshindikana kusasisha",
   "Upload failed": "Imeshindikana kupakia", Urgent: "Dharura", Value: "Thamani",
   "Stage (admin override)": "Hatua (ubadilishaji wa admin)", "Stage (updates automatically)": "Hatua (inajisasisha yenyewe)",
+  Documents: "Hati", "Completed deals": "Mikataba iliyokamilika",
+  "Commission tracking appears here once deals record an agreed commission.": "Ufuatiliaji wa kamisheni utaonekana hapa mikataba ikiwa na kamisheni iliyokubaliwa.",
   "Value (TZS)": "Thamani (TZS)", "Mark completed (admin override)": "Weka imekamilika (admin)", "Mark completed": "Weka imekamilika",
 };
 
