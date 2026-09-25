@@ -571,7 +571,7 @@ function DealDetailSheet({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {(!isEngineDeal(deal) || isAdmin) && (
-                    <DropdownMenuItem onClick={onComplete}><CheckCircle2 className="mr-2 h-4 w-4" /> {isEngineDeal(deal) ? "Admin override: mark completed" : "Mark completed"}</DropdownMenuItem>
+                    <DropdownMenuItem onClick={onComplete}><CheckCircle2 className="mr-2 h-4 w-4" /> {dx(isEngineDeal(deal) ? "Mark completed (admin override)" : "Mark completed")}</DropdownMenuItem>
                   )}
                   <DropdownMenuItem onClick={() => setCancelOpen(true)} className="text-destructive focus:text-destructive"><XCircle className="mr-2 h-4 w-4" /> {dx("Cancel deal")}</DropdownMenuItem>
                   <DropdownMenuSeparator />
