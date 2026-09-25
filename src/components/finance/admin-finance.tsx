@@ -180,7 +180,7 @@ function PaymentDetail({ payment, buyer, onClose, onChanged }: { payment: FinPay
     ["Status", payStatusLabel(payment.status)], ["Reference", payment.reference ?? "—"], ["Provider", payment.provider],
     ["Provider transaction ID", payment.provider_transaction_id ?? "—"], ["Created", new Date(payment.created_at).toLocaleString()],
     ["Paid", payment.paid_at ? new Date(payment.paid_at).toLocaleString() : "—"], ["Test mode", payment.is_test ? dx("Yes") : dx("No")],
-    ["Failure reason", payment.failure_reason ?? "—"], ["Refund status", rs ?? "—"], ["Receipt number", payment.receipt_number ?? "—"],
+    ["Failure reason", payment.failure_reason ?? "—"], ["Refund status", rs ? dx(`Refund ${rs}`) : "—"], ["Receipt number", payment.receipt_number ?? "—"],
   ];
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -203,7 +203,7 @@ function PaymentDetail({ payment, buyer, onClose, onChanged }: { payment: FinPay
         <div>
           <h4 className="text-sm font-semibold text-foreground">{dx("Audit history")}</h4>
           {audit.length === 0 ? <p className="text-xs text-muted-foreground">{dx("No audit entries.")}</p> : (
-            <ul className="mt-1 space-y-1 text-xs">{audit.map((a) => <li key={a.id} className="text-muted-foreground"><b className="text-foreground">{a.label}</b> · {new Date(a.created_at).toLocaleString()}</li>)}</ul>
+            <ul className="mt-1 space-y-1 text-xs">{audit.map((a) => <li key={a.id} className="text-muted-foreground"><b className="text-foreground">{auditLabel(a.label)}</b> · {new Date(a.created_at).toLocaleString()}</li>)}</ul>
           )}
         </div>
         {receipt && <ReceiptDialog payment={payment} deal={{ buyer_name: buyer }} onClose={() => setReceipt(false)} />}

@@ -104,6 +104,7 @@ const SW: Record<string, string> = {
   "My Commission": "Kamisheni Yangu", Protected: "Imelindwa", Payable: "Inalipwa", "Search property or deal…": "Tafuta mali au mkataba…",
   "Commission rate": "Kiwango cha kamisheni", "Commission amount": "Kiasi cha kamisheni",
   "Search users, spaces, inquiries…": "Tafuta watumiaji, mali, maulizo…", Status: "Hali",
+  "Payment created": "Malipo yameundwa", created: "imeundwa", "Payment status changed": "Hali ya malipo imebadilika", Close: "Funga",
 };
 
 export function dx(en: string): string {
