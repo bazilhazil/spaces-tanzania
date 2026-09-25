@@ -274,6 +274,13 @@
       "when": 1790353870823,
       "tag": "0038_phase3a_financial_engine",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1790355464297,
+      "tag": "0039_sprint1_payment_notifications",
+      "breakpoints": true
     }
   ]
 }
