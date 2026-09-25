@@ -1847,15 +1847,22 @@ export type Database = {
           channel: string | null
           created_at: string
           currency: string
+          deal_id: string | null
+          failure_reason: string | null
           gateway_url: string | null
           id: string
+          is_test: boolean
           metadata: Json
           paid_at: string | null
+          payment_type: string | null
           plan_id: string | null
           provider: string
           provider_reference: string | null
+          provider_transaction_id: string | null
           purpose: string
+          receipt_number: string | null
           reference: string | null
+          refund_status: string | null
           refunded_at: string | null
           status: string
           subscription_id: string | null
@@ -1868,15 +1875,22 @@ export type Database = {
           channel?: string | null
           created_at?: string
           currency?: string
+          deal_id?: string | null
+          failure_reason?: string | null
           gateway_url?: string | null
           id?: string
+          is_test?: boolean
           metadata?: Json
           paid_at?: string | null
+          payment_type?: string | null
           plan_id?: string | null
           provider: string
           provider_reference?: string | null
+          provider_transaction_id?: string | null
           purpose?: string
+          receipt_number?: string | null
           reference?: string | null
+          refund_status?: string | null
           refunded_at?: string | null
           status?: string
           subscription_id?: string | null
@@ -1889,15 +1903,22 @@ export type Database = {
           channel?: string | null
           created_at?: string
           currency?: string
+          deal_id?: string | null
+          failure_reason?: string | null
           gateway_url?: string | null
           id?: string
+          is_test?: boolean
           metadata?: Json
           paid_at?: string | null
+          payment_type?: string | null
           plan_id?: string | null
           provider?: string
           provider_reference?: string | null
+          provider_transaction_id?: string | null
           purpose?: string
+          receipt_number?: string | null
           reference?: string | null
+          refund_status?: string | null
           refunded_at?: string | null
           status?: string
           subscription_id?: string | null
@@ -1905,6 +1926,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "payments_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payments_plan_id_fkey"
             columns: ["plan_id"]
@@ -4136,6 +4164,11 @@ export type Database = {
       admin_deal_summary: {
         Args: { _from?: string; _to?: string }
         Returns: Json
+      }
+      admin_finance_summary: { Args: never; Returns: Json }
+      admin_refund_action: {
+        Args: { _action: string; _note?: string; _payment_id: string }
+        Returns: undefined
       }
       admin_search_deals: {
         Args: {

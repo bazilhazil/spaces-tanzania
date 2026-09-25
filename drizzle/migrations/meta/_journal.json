@@ -267,6 +267,13 @@
       "when": 1790350271192,
       "tag": "0037_phase2_expiry_cron_race_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1790353870823,
+      "tag": "0038_phase3a_financial_engine",
+      "breakpoints": true
     }
   ]
 }
