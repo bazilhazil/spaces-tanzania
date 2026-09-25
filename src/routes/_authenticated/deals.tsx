@@ -3,6 +3,8 @@ import { dx } from "@/lib/deal-sw";
 import { createFileRoute } from "@tanstack/react-router";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { DealsCenter } from "@/components/deals/deals-center";
+import { MyCommission } from "@/components/finance/my-commission";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/deals")({
   head: () => ({
@@ -17,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/deals")({
 
 function DealsPage() {
   useI18n(); // re-render when the language changes
+  const { user } = useAuth();
   return (
     <DashboardShell>
       <div className="mx-auto max-w-7xl space-y-6 animate-fade-in">
@@ -24,6 +27,7 @@ function DealsPage() {
           <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{dx("My Deals")}</h1>
           <p className="mt-1 text-muted-foreground">{dx("Follow each buyer from first message to completion — simply.")}</p>
         </header>
+        {user && <MyCommission userId={user.id} />}
         <DealsCenter />
       </div>
     </DashboardShell>
