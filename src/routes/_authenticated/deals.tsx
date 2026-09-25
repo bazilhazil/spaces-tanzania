@@ -1,3 +1,4 @@
+import { useI18n } from "@/hooks/use-i18n";
 import { dx } from "@/lib/deal-sw";
 import { createFileRoute } from "@tanstack/react-router";
 import { DashboardShell } from "@/components/dashboard-shell";
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/deals")({
 });
 
 function DealsPage() {
+  useI18n(); // re-render when the language changes
   return (
     <DashboardShell>
       <div className="mx-auto max-w-7xl space-y-6 animate-fade-in">

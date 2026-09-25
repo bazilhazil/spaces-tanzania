@@ -1,3 +1,4 @@
+import { useI18n } from "@/hooks/use-i18n";
 import { dx } from "@/lib/deal-sw";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearch } from "@tanstack/react-router";
@@ -82,6 +83,7 @@ function timeAgo(iso: string) {
 }
 
 export function DealsCenter() {
+  useI18n(); // re-render when the language changes
   const { user, primaryRole } = useAuth();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
