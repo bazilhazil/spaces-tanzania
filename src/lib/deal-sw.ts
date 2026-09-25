@@ -38,6 +38,9 @@ const SW: Record<string, string> = {
 };
 
 export function dx(en: string): string {
-  if (typeof document === "undefined" || document.documentElement.lang !== "sw") return en;
+  if (typeof document === "undefined") return en;
+  let lang = document.documentElement.lang;
+  try { lang = localStorage.getItem("spaces.lang") || lang; } catch { /* storage blocked */ }
+  if (lang !== "sw") return en;
   return SW[en] ?? en;
 }
