@@ -586,7 +586,7 @@ function DealDetailSheet({
 
         {/* Summary editable */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Field label={isEngineDeal(deal) ? (isAdmin ? "Stage (admin override)" : "Stage (updates automatically)") : "Stage"}>
+          <Field label={dx(isEngineDeal(deal) ? (isAdmin ? "Stage (admin override)" : "Stage (updates automatically)") : "Stage")}>
             <Select value={deal.stage} onValueChange={(v) => onStageChange(v as DealStage)} disabled={!canManage || (isEngineDeal(deal) && !isAdmin)}>
               <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
               <SelectContent>
