@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { dx } from "@/lib/deal-sw";
+import { useI18n } from "@/hooks/use-i18n";
 
 type Tab = "plans" | "boosts" | "transaction_fee" | "rental_fee" | "commission" | "tax_discount" | "methods" | "log";
 const TABS: { id: Tab; label: string }[] = [
@@ -25,19 +27,20 @@ const ROLES = ["owner", "agent", "property_manager", "developer", "buyer"];
 const tzs = (n: number) => new Intl.NumberFormat("en-TZ", { maximumFractionDigits: 2 }).format(n);
 
 export function MonetizationPanel() {
+  useI18n(); // re-render on language change
   const [tab, setTab] = useState<Tab>("plans");
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-semibold tracking-tight">Monetization & Deals</h1>
-        <p className="mt-1 text-muted-foreground">Set every price, limit, fee and tax here. Changes apply immediately and are logged.</p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">{dx("Monetization & Deals")}</h1>
+        <p className="mt-1 text-muted-foreground">{dx("Set every price, limit, fee and tax here. Changes apply immediately and are logged.")}</p>
       </header>
       <div className="-mx-1 flex gap-2 overflow-x-auto rounded-2xl border border-border/60 bg-background p-1.5 [scrollbar-width:none]">
         {TABS.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={cn("shrink-0 rounded-xl px-4 py-2 text-sm font-semibold",
               tab === t.id ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-accent")}>
-            {t.label}
+            {dx(t.label)}
           </button>
         ))}
       </div>
@@ -67,7 +70,7 @@ function RolePicker({ value, onChange }: { value: string[]; onChange: (v: string
           <button type="button" key={r} onClick={() => onChange(on ? value.filter((x) => x !== r) : [...value, r])}
             className={cn("rounded-full border px-2.5 py-1 text-xs capitalize",
               on ? "border-primary bg-primary/15 text-foreground" : "border-border text-muted-foreground")}>
-            {r.replace("_", " ")}
+            {dx(r.replace("_", " "))}
           </button>
         );
       })}
@@ -80,7 +83,7 @@ async function save(table: "billing_plans" | "promotion_products" | "pricing_rul
     : supabase.from(table).insert(values as never);
   const { error } = await q;
   if (error) { toast.error(error.message); return false; }
-  toast.success("Saved and logged");
+  toast.success(dx("Saved and logged"));
   return true;
 }
 
@@ -115,7 +118,7 @@ function PlanCard({ plan, onSaved }: { plan: Plan; onSaved: () => void }) {
   const set = (k: string, v: unknown) => setF((s) => ({ ...s, [k]: v }));
   async function submit() {
     if (f.active && Number(f.price_monthly) === 0 && plan.id !== "free" && f.billing_frequency !== "free") {
-      if (!confirm("This plan will be free. Activate anyway?")) return;
+      if (!confirm(dx("This plan will be free. Activate anyway?"))) return;
     }
     setBusy(true);
     const ok = await save("billing_plans", plan.id, {
@@ -131,26 +134,26 @@ function PlanCard({ plan, onSaved }: { plan: Plan; onSaved: () => void }) {
     <div className="ds-card space-y-3 p-5">
       <div className="flex items-center justify-between">
         <Badge variant="outline">{plan.id}</Badge>
-        <label className="flex items-center gap-2 text-sm">{f.active ? "Active" : "Hidden"}<Switch checked={f.active} onCheckedChange={(v) => set("active", v)} /></label>
+        <label className="flex items-center gap-2 text-sm">{f.active ? dx("Active") : dx("Hidden")}<Switch checked={f.active} onCheckedChange={(v) => set("active", v)} /></label>
       </div>
-      <F label="Name"><Input value={f.name} onChange={(e) => set("name", e.target.value)} /></F>
-      <F label="Description"><Input value={f.description} onChange={(e) => set("description", e.target.value)} /></F>
+      <F label={dx("Name")}><Input value={f.name} onChange={(e) => set("name", e.target.value)} /></F>
+      <F label={dx("Description")}><Input value={f.description} onChange={(e) => set("description", e.target.value)} /></F>
       <div className="grid grid-cols-2 gap-3">
-        <F label="Price / month (TZS)"><Input type="number" min={0} value={f.price_monthly} onChange={(e) => set("price_monthly", e.target.value)} /></F>
-        <F label="Price / year (TZS)"><Input type="number" min={0} value={f.price_annual} onChange={(e) => set("price_annual", e.target.value)} /></F>
-        <F label="Listing limit (blank = unlimited)"><Input type="number" min={0} value={f.listing_limit} onChange={(e) => set("listing_limit", e.target.value)} /></F>
-        <F label="Unit limit"><Input type="number" min={0} value={f.unit_limit} onChange={(e) => set("unit_limit", e.target.value)} /></F>
-        <F label="Team members"><Input type="number" min={0} value={f.team_limit} onChange={(e) => set("team_limit", e.target.value)} /></F>
-        <F label="Billing">
+        <F label={dx("Price / month (TZS)")}><Input type="number" min={0} value={f.price_monthly} onChange={(e) => set("price_monthly", e.target.value)} /></F>
+        <F label={dx("Price / year (TZS)")}><Input type="number" min={0} value={f.price_annual} onChange={(e) => set("price_annual", e.target.value)} /></F>
+        <F label={dx("Listing limit (blank = unlimited)")}><Input type="number" min={0} value={f.listing_limit} onChange={(e) => set("listing_limit", e.target.value)} /></F>
+        <F label={dx("Unit limit")}><Input type="number" min={0} value={f.unit_limit} onChange={(e) => set("unit_limit", e.target.value)} /></F>
+        <F label={dx("Team members")}><Input type="number" min={0} value={f.team_limit} onChange={(e) => set("team_limit", e.target.value)} /></F>
+        <F label={dx("Billing")}>
           <select className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm" value={f.billing_frequency} onChange={(e) => set("billing_frequency", e.target.value)}>
-            <option value="monthly">Monthly</option><option value="annual">Annual</option><option value="one_time">One-time</option><option value="free">Free</option>
+            <option value="monthly">{dx("Monthly")}</option><option value="annual">{dx("Annual")}</option><option value="one_time">{dx("One-time")}</option><option value="free">{dx("Free")}</option>
           </select>
         </F>
-        <F label="Tax %"><Input type="number" min={0} max={100} value={f.tax_rate} onChange={(e) => set("tax_rate", e.target.value)} /></F>
-        <F label="Effective from"><Input type="date" value={f.effective_from} onChange={(e) => set("effective_from", e.target.value)} /></F>
+        <F label={dx("Tax %")}><Input type="number" min={0} max={100} value={f.tax_rate} onChange={(e) => set("tax_rate", e.target.value)} /></F>
+        <F label={dx("Effective from")}><Input type="date" value={f.effective_from} onChange={(e) => set("effective_from", e.target.value)} /></F>
       </div>
-      <F label="For roles"><RolePicker value={f.target_roles} onChange={(v) => set("target_roles", v)} /></F>
-      <Button onClick={submit} disabled={busy} className="w-full">{busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save plan</Button>
+      <F label={dx("For roles")}><RolePicker value={f.target_roles} onChange={(v) => set("target_roles", v)} /></F>
+      <Button onClick={submit} disabled={busy} className="w-full">{busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{dx("Save plan")}</Button>
     </div>
   );
 }
@@ -177,7 +180,7 @@ function BoostCard({ b, onSaved }: { b: Boost; onSaved: () => void }) {
   const set = (k: string, v: unknown) => setF((s) => ({ ...s, [k]: v }));
   const [busy, setBusy] = useState(false);
   async function submit() {
-    if (Number(f.duration_days) < 1) return toast.error("Duration must be at least 1 day");
+    if (Number(f.duration_days) < 1) return toast.error(dx("Duration must be at least 1 day"));
     setBusy(true);
     const ok = await save("promotion_products", b.id, {
       name: f.name, description: f.description, price: Number(f.price), duration_days: Number(f.duration_days),
@@ -191,24 +194,24 @@ function BoostCard({ b, onSaved }: { b: Boost; onSaved: () => void }) {
     <div className="ds-card space-y-3 p-5">
       <div className="flex items-center justify-between">
         <Badge className="bg-primary/15 text-foreground">{f.badge_label}</Badge>
-        <label className="flex items-center gap-2 text-sm">{f.active ? "Active" : "Hidden"}<Switch checked={f.active} onCheckedChange={(v) => set("active", v)} /></label>
+        <label className="flex items-center gap-2 text-sm">{f.active ? dx("Active") : dx("Hidden")}<Switch checked={f.active} onCheckedChange={(v) => set("active", v)} /></label>
       </div>
-      <F label="Name"><Input value={f.name} onChange={(e) => set("name", e.target.value)} /></F>
-      <F label="Description"><Input value={f.description} onChange={(e) => set("description", e.target.value)} /></F>
+      <F label={dx("Name")}><Input value={f.name} onChange={(e) => set("name", e.target.value)} /></F>
+      <F label={dx("Description")}><Input value={f.description} onChange={(e) => set("description", e.target.value)} /></F>
       <div className="grid grid-cols-2 gap-3">
-        <F label="Price (TZS)"><Input type="number" min={0} value={f.price} onChange={(e) => set("price", e.target.value)} /></F>
-        <F label="Duration (days)"><Input type="number" min={1} value={f.duration_days} onChange={(e) => set("duration_days", e.target.value)} /></F>
-        <F label="Placement">
+        <F label={dx("Price (TZS)")}><Input type="number" min={0} value={f.price} onChange={(e) => set("price", e.target.value)} /></F>
+        <F label={dx("Duration (days)")}><Input type="number" min={1} value={f.duration_days} onChange={(e) => set("duration_days", e.target.value)} /></F>
+        <F label={dx("Placement")}>
           <select className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm" value={f.placement} onChange={(e) => set("placement", e.target.value)}>
-            <option value="search">Search results</option><option value="homepage">Homepage</option><option value="both">Both</option>
+            <option value="search">{dx("Search results")}</option><option value="homepage">{dx("Homepage")}</option><option value="both">{dx("Both")}</option>
           </select>
         </F>
-        <F label="Priority score"><Input type="number" min={0} value={f.priority_score} onChange={(e) => set("priority_score", e.target.value)} /></F>
-        <F label="Badge text"><Input value={f.badge_label} onChange={(e) => set("badge_label", e.target.value)} /></F>
-        <F label="Tax %"><Input type="number" min={0} value={f.tax_rate} onChange={(e) => set("tax_rate", e.target.value)} /></F>
+        <F label={dx("Priority score")}><Input type="number" min={0} value={f.priority_score} onChange={(e) => set("priority_score", e.target.value)} /></F>
+        <F label={dx("Badge text")}><Input value={f.badge_label} onChange={(e) => set("badge_label", e.target.value)} /></F>
+        <F label={dx("Tax %")}><Input type="number" min={0} value={f.tax_rate} onChange={(e) => set("tax_rate", e.target.value)} /></F>
       </div>
-      <F label="For roles"><RolePicker value={f.target_roles} onChange={(v) => set("target_roles", v)} /></F>
-      <Button onClick={submit} disabled={busy} className="w-full">Save boost</Button>
+      <F label={dx("For roles")}><RolePicker value={f.target_roles} onChange={(v) => set("target_roles", v)} /></F>
+      <Button onClick={submit} disabled={busy} className="w-full">{dx("Save boost")}</Button>
     </div>
   );
 }
@@ -230,11 +233,11 @@ function RulesTab({ types }: { types: string[] }) {
   const refresh = () => { setAdding(false); void qc.invalidateQueries({ queryKey: key }); };
   return (
     <div className="space-y-4">
-      <div className="flex justify-end"><Button variant="outline" onClick={() => setAdding(true)}><Plus className="mr-1 h-4 w-4" />Add rule</Button></div>
+      <div className="flex justify-end"><Button variant="outline" onClick={() => setAdding(true)}><Plus className="mr-1 h-4 w-4" />{dx("Add rule")}</Button></div>
       <div className="grid gap-4 md:grid-cols-2">
         {adding && <RuleCard rule={null} defaultType={types[0]} types={types} onSaved={refresh} />}
         {(data ?? []).map((r) => <RuleCard key={r.id} rule={r} defaultType={r.rule_type} types={types} onSaved={refresh} />)}
-        {!adding && (data ?? []).length === 0 && <p className="text-sm text-muted-foreground">No rules yet. Nothing is charged until you add one.</p>}
+        {!adding && (data ?? []).length === 0 && <p className="text-sm text-muted-foreground">{dx("No rules yet. Nothing is charged until you add one.")}</p>}
       </div>
     </div>
   );
@@ -256,8 +259,8 @@ function RuleCard({ rule, defaultType, types, onSaved }: { rule: Rule | null; de
     return { fee, tax: (fee * Number(f.tax_rate)) / 100 };
   })();
   async function submit() {
-    if (!f.name.trim()) return toast.error("Name is required");
-    if (f.min_amount && f.max_amount && Number(f.min_amount) > Number(f.max_amount)) return toast.error("Minimum cannot exceed maximum");
+    if (!f.name.trim()) return toast.error(dx("Name is required"));
+    if (f.min_amount && f.max_amount && Number(f.min_amount) > Number(f.max_amount)) return toast.error(dx("Minimum cannot exceed maximum"));
     const ok = await save("pricing_rules", rule?.id ?? null, {
       rule_type: f.rule_type, name: f.name.trim(), description: f.description, applies_to: f.applies_to, payer: f.payer,
       percentage: Number(f.percentage), fixed_amount: Number(f.fixed_amount), min_amount: num(f.min_amount), max_amount: num(f.max_amount),
@@ -270,28 +273,28 @@ function RuleCard({ rule, defaultType, types, onSaved }: { rule: Rule | null; de
     <div className="ds-card space-y-3 p-5">
       <div className="flex items-center justify-between">
         {types.length > 1
-          ? <select className={cn(sel, "w-auto")} value={f.rule_type} onChange={(e) => set("rule_type", e.target.value)}>{types.map((t) => <option key={t} value={t}>{t.replace("_", " ")}</option>)}</select>
-          : <Badge variant="outline" className="capitalize">{f.rule_type.replace("_", " ")}</Badge>}
-        <label className="flex items-center gap-2 text-sm">{f.active ? "Active" : "Off"}<Switch checked={f.active} onCheckedChange={(v) => set("active", v)} /></label>
+          ? <select className={cn(sel, "w-auto")} value={f.rule_type} onChange={(e) => set("rule_type", e.target.value)}>{types.map((t) => <option key={t} value={t}>{dx(t.replace("_", " "))}</option>)}</select>
+          : <Badge variant="outline" className="capitalize">{dx(f.rule_type.replace("_", " "))}</Badge>}
+        <label className="flex items-center gap-2 text-sm">{f.active ? dx("Active") : dx("Off")}<Switch checked={f.active} onCheckedChange={(v) => set("active", v)} /></label>
       </div>
-      <F label="Name"><Input value={f.name} onChange={(e) => set("name", e.target.value)} /></F>
-      <F label="Description"><Input value={f.description} onChange={(e) => set("description", e.target.value)} /></F>
+      <F label={dx("Name")}><Input value={f.name} onChange={(e) => set("name", e.target.value)} /></F>
+      <F label={dx("Description")}><Input value={f.description} onChange={(e) => set("description", e.target.value)} /></F>
       <div className="grid grid-cols-2 gap-3">
-        <F label="Transaction type"><select className={sel} value={f.applies_to} onChange={(e) => set("applies_to", e.target.value)}>
-          <option value="any">Any</option><option value="sale">Sale</option><option value="rent">Rent</option><option value="developer">Developer</option></select></F>
-        <F label="Paid by"><select className={sel} value={f.payer} onChange={(e) => set("payer", e.target.value)}>
-          {["buyer", "seller", "agent", "tenant", "landlord", "any"].map((p) => <option key={p} value={p}>{p}</option>)}</select></F>
-        <F label="Percentage %"><Input type="number" step="0.01" min={0} max={100} value={f.percentage} onChange={(e) => set("percentage", e.target.value)} /></F>
-        <F label="Fixed amount (TZS)"><Input type="number" min={0} value={f.fixed_amount} onChange={(e) => set("fixed_amount", e.target.value)} /></F>
-        <F label="Minimum (floor)"><Input type="number" min={0} value={f.min_amount} onChange={(e) => set("min_amount", e.target.value)} /></F>
-        <F label="Maximum (cap)"><Input type="number" min={0} value={f.max_amount} onChange={(e) => set("max_amount", e.target.value)} /></F>
-        <F label="Tax %"><Input type="number" min={0} max={100} value={f.tax_rate} onChange={(e) => set("tax_rate", e.target.value)} /></F>
-        <F label="Effective from"><Input type="date" value={f.effective_from} onChange={(e) => set("effective_from", e.target.value)} /></F>
+        <F label={dx("Transaction type")}><select className={sel} value={f.applies_to} onChange={(e) => set("applies_to", e.target.value)}>
+          <option value="any">{dx("Any")}</option><option value="sale">{dx("Sale")}</option><option value="rent">{dx("Rent")}</option><option value="developer">{dx("Developer")}</option></select></F>
+        <F label={dx("Paid by")}><select className={sel} value={f.payer} onChange={(e) => set("payer", e.target.value)}>
+          {["buyer", "seller", "agent", "tenant", "landlord", "any"].map((p) => <option key={p} value={p}>{dx(p)}</option>)}</select></F>
+        <F label={dx("Percentage %")}><Input type="number" step="0.01" min={0} max={100} value={f.percentage} onChange={(e) => set("percentage", e.target.value)} /></F>
+        <F label={dx("Fixed amount (TZS)")}><Input type="number" min={0} value={f.fixed_amount} onChange={(e) => set("fixed_amount", e.target.value)} /></F>
+        <F label={dx("Minimum (floor)")}><Input type="number" min={0} value={f.min_amount} onChange={(e) => set("min_amount", e.target.value)} /></F>
+        <F label={dx("Maximum (cap)")}><Input type="number" min={0} value={f.max_amount} onChange={(e) => set("max_amount", e.target.value)} /></F>
+        <F label={dx("Tax %")}><Input type="number" min={0} max={100} value={f.tax_rate} onChange={(e) => set("tax_rate", e.target.value)} /></F>
+        <F label={dx("Effective from")}><Input type="date" value={f.effective_from} onChange={(e) => set("effective_from", e.target.value)} /></F>
       </div>
       <p className="rounded-lg bg-muted/60 p-2 text-xs text-muted-foreground">
-        Example on 100,000,000 TZS: fee {tzs(example.fee)} TZS + tax {tzs(example.tax)} TZS
+        {dx("Example on 100,000,000 TZS")}: {dx("fee")} {tzs(example.fee)} TZS + {dx("tax")} {tzs(example.tax)} TZS
       </p>
-      <Button onClick={submit} className="w-full">{rule ? "Save rule" : "Create rule"}</Button>
+      <Button onClick={submit} className="w-full">{rule ? dx("Save rule") : dx("Create rule")}</Button>
     </div>
   );
 }
@@ -314,18 +317,18 @@ function MethodsTab() {
     const next = on ? [...(data ?? []), id] : (data ?? []).filter((x) => x !== id);
     const { error } = await supabase.from("admin_settings").upsert({ key: "payment_methods", value: { enabled: next } });
     if (error) return toast.error(error.message);
-    toast.success("Saved and logged");
+    toast.success(dx("Saved and logged"));
     void qc.invalidateQueries({ queryKey: ["admin-methods"] });
   }
   return (
     <div className="ds-card divide-y divide-border/60">
       {METHODS.map((m) => (
         <label key={m.id} className="flex items-center justify-between p-4">
-          <span className="font-medium">{m.name}</span>
+          <span className="font-medium">{dx(m.name)}</span>
           <Switch checked={(data ?? []).includes(m.id)} onCheckedChange={(v) => toggle(m.id, v)} />
         </label>
       ))}
-      <p className="p-4 text-xs text-muted-foreground">Online payments go live once the Selcom gateway credentials are connected. Until then, orders stay pending and are never marked paid automatically.</p>
+      <p className="p-4 text-xs text-muted-foreground">{dx("Online payments go live once the Selcom gateway credentials are connected. Until then, orders stay pending and are never marked paid automatically.")}</p>
     </div>
   );
 }
@@ -352,15 +355,15 @@ function LogTab() {
       return Object.fromEntries((p ?? []).map((x) => [x.id, x.full_name || x.email]));
     },
   });
-  if (!data?.length) return <p className="text-sm text-muted-foreground">No pricing changes yet.</p>;
+  if (!data?.length) return <p className="text-sm text-muted-foreground">{dx("No pricing changes yet.")}</p>;
   return (
     <div className="space-y-3">
       {data.map((l) => (
         <div key={l.id} className="ds-card p-4 text-sm">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">{l.action}</Badge>
-            <span className="font-medium">{l.table_name.replace("_", " ")} · {String((l.new_values ?? l.old_values)?.name ?? l.record_id)}</span>
-            <span className="ml-auto text-xs text-muted-foreground">{new Date(l.created_at).toLocaleString()} · {l.changed_by ? (names?.[l.changed_by] ?? "Admin") : "System"}</span>
+            <Badge variant="outline">{dx(l.action)}</Badge>
+            <span className="font-medium">{dx(l.table_name.replace("_", " "))} · {String((l.new_values ?? l.old_values)?.name ?? l.record_id)}</span>
+            <span className="ml-auto text-xs text-muted-foreground">{new Date(l.created_at).toLocaleString()} · {l.changed_by ? (names?.[l.changed_by] ?? dx("Admin")) : dx("System")}</span>
           </div>
           {l.action === "UPDATE" && (
             <ul className="mt-2 space-y-0.5 text-xs text-muted-foreground">
