@@ -177,6 +177,7 @@ export function DealsCenter() {
 
   const canManage = primaryRole === "owner" || primaryRole === "agent" ||
                     primaryRole === "admin" || primaryRole === "super_admin";
+  const isAdmin = primaryRole === "admin" || primaryRole === "super_admin";
 
   return (
     <div className="w-full max-w-full space-y-6 animate-fade-in">
@@ -282,6 +283,7 @@ export function DealsCenter() {
       <DealDetailSheet
         deal={selected}
         canManage={canManage}
+        isAdmin={isAdmin}
         currentUserId={user?.id ?? null}
         onClose={() => setSelectedId(null)}
         onChanged={load}
@@ -328,7 +330,7 @@ function StageColumn({
 }
 
 function DraggableCard({ deal, onOpen, canManage }: { deal: Deal; onOpen: (id: string) => void; canManage: boolean }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: deal.id, disabled: !canManage });
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: deal.id, disabled: !canManage || isEngineDeal(deal) });
   return (
     <div
       ref={setNodeRef}
@@ -442,11 +444,18 @@ function OverviewList({ deals, onOpen, loading }: { deals: Deal[]; onOpen: (id: 
 
 /* ------------------------------ Detail sheet ------------------------------ */
 
+const ENGINE_STAGES: DealStage[] = ["offer_made", "negotiation", "offer_accepted", "verification", "agreement_signed", "payment", "completed"];
+/** Deals driven by the offer engine move automatically; only admins may override. */
+function isEngineDeal(d: Deal) {
+  return ENGINE_STAGES.includes(d.stage) || d.agreed_price != null;
+}
+
 function DealDetailSheet({
-  deal, canManage, currentUserId, onClose, onChanged,
+  deal, canManage, isAdmin = false, currentUserId, onClose, onChanged,
 }: {
   deal: Deal | null;
   canManage: boolean;
+  isAdmin?: boolean;
   currentUserId: string | null;
   onClose: () => void;
   onChanged: () => void;
@@ -560,7 +569,9 @@ function DealDetailSheet({
                   <Button variant="outline" size="icon" className="rounded-lg"><MoreHorizontal className="h-4 w-4" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={onComplete}><CheckCircle2 className="mr-2 h-4 w-4" /> Mark completed</DropdownMenuItem>
+                  {(!isEngineDeal(deal) || isAdmin) && (
+                    <DropdownMenuItem onClick={onComplete}><CheckCircle2 className="mr-2 h-4 w-4" /> {isEngineDeal(deal) ? "Admin override: mark completed" : "Mark completed"}</DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => setCancelOpen(true)} className="text-destructive focus:text-destructive"><XCircle className="mr-2 h-4 w-4" /> Cancel deal</DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => assignAgent(deal.id, currentUserId).then(onChanged)}><UserIcon className="mr-2 h-4 w-4" /> Assign me as agent</DropdownMenuItem>
@@ -574,8 +585,8 @@ function DealDetailSheet({
 
         {/* Summary editable */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Field label="Stage">
-            <Select value={deal.stage} onValueChange={(v) => onStageChange(v as DealStage)} disabled={!canManage}>
+          <Field label={isEngineDeal(deal) ? (isAdmin ? "Stage (admin override)" : "Stage (updates automatically)") : "Stage"}>
+            <Select value={deal.stage} onValueChange={(v) => onStageChange(v as DealStage)} disabled={!canManage || (isEngineDeal(deal) && !isAdmin)}>
               <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {DEAL_STAGES.map((s) => <SelectItem key={s} value={s}>{STAGE_LABEL[s]}</SelectItem>)}

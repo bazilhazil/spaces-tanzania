@@ -166,7 +166,10 @@ function NotificationsPage() {
   }, [live.version]);
 
   const filtered = useMemo(
-    () => notifs.filter((n) => (tab === "unread" ? !n.read : true)),
+    () => {
+      const muted = mutedCategories();
+      return notifs.filter((n) => (tab === "unread" ? !n.read : true) && !muted.includes(categoryOf(n.kind)));
+    },
     [notifs, tab],
   );
   const unread = notifs.filter((n) => !n.read).length;

@@ -45,7 +45,7 @@ export function MyDealsOverview({ deals, userId, onOpen, onChanged }: {
     void fetchLatestOffers(ids).then(setOffers);
     void fetchOfferCounts(ids).then(setCounts);
     void fetchCommissionSummary().then(setComm);
-  }, [ids.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [deals]); // refetch whenever the deal list reloads (after accept/counter/etc.)
 
   if (!userId) return null;
   const asBuyer = deals.filter((d) => d.buyer_id === userId && groupOf(d, offers[d.id]));
