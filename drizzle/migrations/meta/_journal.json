@@ -239,6 +239,27 @@
       "when": 1790288110803,
       "tag": "0033_commission_summary_payable",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1790327820080,
+      "tag": "0034_guard_manual_deal_stage",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1790328094634,
+      "tag": "0035_notify_actor_on_milestones",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1790328269326,
+      "tag": "0036_offer_close_effects",
+      "breakpoints": true
     }
   ]
 }

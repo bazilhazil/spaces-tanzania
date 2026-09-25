@@ -69,11 +69,11 @@ async function propertyInfo(propertyId?: string | null) {
   const db = await admin();
   const { data } = await db
     .from("properties")
-    .select("id,title,city,region,slug,owner_id,status")
+    .select("id,title,district,region,slug,owner_id,status")
     .eq("id", propertyId)
     .maybeSingle();
   return data as
-    | { id: string; title: string | null; city: string | null; region: string | null; slug: string | null; owner_id: string; status: string }
+    | { id: string; title: string | null; district: string | null; region: string | null; slug: string | null; owner_id: string; status: string }
     | null;
 }
 
@@ -127,7 +127,7 @@ export async function sendEventEmail(
     const property = await propertyInfo(lead.property_id);
     return deliver("new-lead", await emailFor(lead.owner_id), `lead:${lead.id}`, {
       propertyTitle: property?.title ?? undefined,
-      propertyLocation: [property?.city, property?.region].filter(Boolean).join(", ") || undefined,
+      propertyLocation: [property?.district, property?.region].filter(Boolean).join(", ") || undefined,
       contactMethod: lead.contact_method,
       message: lead.message ?? undefined,
       buyerName: lead.visitor_name ?? undefined,
@@ -147,7 +147,7 @@ export async function sendEventEmail(
     } | null;
     if (!booking) return { ok: false, reason: "not_found" };
     const property = await propertyInfo(booking.property_id);
-    const location = [property?.city, property?.region].filter(Boolean).join(", ") || undefined;
+    const location = [property?.district, property?.region].filter(Boolean).join(", ") || undefined;
 
     if (event === "viewing_requested") {
       if (!isAdmin && actorId !== booking.buyer_id) return { ok: false, reason: "not_allowed" };
@@ -197,11 +197,11 @@ export async function sendEventEmail(
   if (!isAdmin) return { ok: false, reason: "not_allowed" };
   const { data } = await db
     .from("properties")
-    .select("id,title,city,region,slug,owner_id,status,under_review_reason,rejection_reason,updated_at")
+    .select("id,title,district,region,slug,owner_id,status,under_review_reason,rejection_reason,updated_at")
     .eq("id", recordId)
     .maybeSingle();
   const property = data as {
-    id: string; title: string | null; city: string | null; region: string | null; slug: string | null;
+    id: string; title: string | null; district: string | null; region: string | null; slug: string | null;
     owner_id: string; status: string; under_review_reason: string | null; rejection_reason: string | null;
   } | null;
   if (!property) return { ok: false, reason: "not_found" };
@@ -210,7 +210,7 @@ export async function sendEventEmail(
   if (event === "property_approved") {
     return deliver("property-approved", to, `prop-approved:${property.id}:${property.status}`, {
       propertyTitle: property.title ?? undefined,
-      propertyLocation: [property.city, property.region].filter(Boolean).join(", ") || undefined,
+      propertyLocation: [property.district, property.region].filter(Boolean).join(", ") || undefined,
       propertyUrl: property.slug ? `${SITE_URL}/properties/${property.slug}` : `${SITE_URL}/dashboard/properties`,
     });
   }

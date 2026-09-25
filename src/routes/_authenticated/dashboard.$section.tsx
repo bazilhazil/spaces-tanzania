@@ -438,7 +438,7 @@ function NotifPrefsPanel() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Choose which notifications show in your main list on this device. Hidden types are still kept and can be seen in their own tab on the Notifications page. Important account and security messages are always delivered.
+        Choose which notifications show in your main list on this device. Hidden types are still kept and still count on the bell. Important account and security messages are always delivered.
       </p>
       <div className="overflow-hidden rounded-2xl border border-border/60 bg-background">
         {NOTIF_CATS.map(([c, label], i) => (

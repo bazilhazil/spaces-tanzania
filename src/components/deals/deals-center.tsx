@@ -1,3 +1,5 @@
+import { useI18n } from "@/hooks/use-i18n";
+import { dx } from "@/lib/deal-sw";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearch } from "@tanstack/react-router";
 import { DealEnginePanel } from "@/components/offers/deal-engine-panel";
@@ -81,6 +83,7 @@ function timeAgo(iso: string) {
 }
 
 export function DealsCenter() {
+  useI18n(); // re-render when the language changes
   const { user, primaryRole } = useAuth();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,7 +104,7 @@ export function DealsCenter() {
       const rows = await fetchDeals();
       setDeals(rows.map((d) => ({ ...d, health: computeHealth(d) })));
     } catch (e: any) {
-      toast.error(e?.message ?? "Failed to load deals");
+      toast.error(e?.message ?? dx("Failed to load deals"));
     } finally {
       setLoading(false);
     }
@@ -164,9 +167,9 @@ export function DealsCenter() {
     setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, stage: nextStage } : d)));
     try {
       await moveDealStage(dealId, nextStage);
-      toast.success(`Moved to ${STAGE_LABEL[nextStage]}`);
+      toast.success(`Moved to ${dx(STAGE_LABEL[nextStage])}`);
     } catch (err: any) {
-      toast.error(err?.message ?? "Move failed");
+      toast.error(err?.message ?? dx("Move failed"));
       setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, stage: deal.stage } : d)));
     }
   }
@@ -177,6 +180,7 @@ export function DealsCenter() {
 
   const canManage = primaryRole === "owner" || primaryRole === "agent" ||
                     primaryRole === "admin" || primaryRole === "super_admin";
+  const isAdmin = primaryRole === "admin" || primaryRole === "super_admin";
 
   return (
     <div className="w-full max-w-full space-y-6 animate-fade-in">
@@ -184,12 +188,12 @@ export function DealsCenter() {
 
       {/* KPI grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-        <Kpi icon={Activity} label="Active" value={stats.active} tone="text-sky-600" />
-        <Kpi icon={Calendar} label="Closing this week" value={stats.closingWeek} tone="text-violet-600" />
-        <Kpi icon={CheckCircle2} label="Completed" value={stats.completed} tone="text-emerald-600" />
-        <Kpi icon={XCircle} label="Cancelled" value={stats.cancelled} tone="text-rose-600" />
-        <Kpi icon={Clock} label="Avg. close time" value={`${stats.avgDays}d`} tone="text-amber-600" />
-        <Kpi icon={DollarSign} label="Pipeline value" value={fmtMoney(stats.totalValue, deals[0]?.currency ?? "TZS")} tone="text-primary" small />
+        <Kpi icon={Activity} label={dx("Active")} value={stats.active} tone="text-sky-600" />
+        <Kpi icon={Calendar} label={dx("Closing this week")} value={stats.closingWeek} tone="text-violet-600" />
+        <Kpi icon={CheckCircle2} label={dx("Completed")} value={stats.completed} tone="text-emerald-600" />
+        <Kpi icon={XCircle} label={dx("Cancelled")} value={stats.cancelled} tone="text-rose-600" />
+        <Kpi icon={Clock} label={dx("Avg. close time")} value={`${stats.avgDays}d`} tone="text-amber-600" />
+        <Kpi icon={DollarSign} label={dx("Pipeline value")} value={fmtMoney(stats.totalValue, deals[0]?.currency ?? "TZS")} tone="text-primary" small />
       </div>
 
 
@@ -200,31 +204,31 @@ export function DealsCenter() {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search buyer, property or reference…"
+            placeholder={dx("Search buyer, property or reference…")}
             className="h-11 rounded-xl pl-9"
           />
         </div>
         <Select value={stageFilter} onValueChange={(v) => setStageFilter(v as DealStage | "all")}>
-          <SelectTrigger className="h-11 w-full rounded-xl sm:w-[170px]"><SelectValue placeholder="Stage" /></SelectTrigger>
+          <SelectTrigger className="h-11 w-full rounded-xl sm:w-[170px]"><SelectValue placeholder={dx("Stage")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All stages</SelectItem>
-            {DEAL_STAGES.map((s) => <SelectItem key={s} value={s}>{STAGE_LABEL[s]}</SelectItem>)}
+            <SelectItem value="all">{dx("All stages")}</SelectItem>
+            {DEAL_STAGES.map((s) => <SelectItem key={s} value={s}>{dx(STAGE_LABEL[s])}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={priorityFilter} onValueChange={(v) => setPriorityFilter(v as DealPriority | "all")}>
-          <SelectTrigger className="h-11 w-full rounded-xl sm:w-[140px]"><SelectValue placeholder="Priority" /></SelectTrigger>
+          <SelectTrigger className="h-11 w-full rounded-xl sm:w-[140px]"><SelectValue placeholder={dx("Priority")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All priorities</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="urgent">Urgent</SelectItem>
+            <SelectItem value="all">{dx("All priorities")}</SelectItem>
+            <SelectItem value="low">{dx("Low")}</SelectItem>
+            <SelectItem value="medium">{dx("Medium")}</SelectItem>
+            <SelectItem value="high">{dx("High")}</SelectItem>
+            <SelectItem value="urgent">{dx("Urgent")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={regionFilter} onValueChange={setRegionFilter}>
-          <SelectTrigger className="h-11 w-full rounded-xl sm:w-[150px]"><SelectValue placeholder="Region" /></SelectTrigger>
+          <SelectTrigger className="h-11 w-full rounded-xl sm:w-[150px]"><SelectValue placeholder={dx("Region")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All regions</SelectItem>
+            <SelectItem value="all">{dx("All regions")}</SelectItem>
             {regions.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -238,14 +242,14 @@ export function DealsCenter() {
         {(stageFilter !== "all" || priorityFilter !== "all" || regionFilter !== "all" || dateFrom) && (
           <Button variant="ghost" className="h-11 rounded-xl" onClick={() => {
             setStageFilter("all"); setPriorityFilter("all"); setRegionFilter("all"); setDateFrom("");
-          }}><X className="h-4 w-4" /> Clear</Button>
+          }}><X className="h-4 w-4" /> {dx("Clear")}</Button>
         )}
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as "kanban" | "overview")}>
         <TabsList>
-          <TabsTrigger value="kanban">Pipeline</TabsTrigger>
-          <TabsTrigger value="overview">Summary</TabsTrigger>
+          <TabsTrigger value="kanban">{dx("Pipeline")}</TabsTrigger>
+          <TabsTrigger value="overview">{dx("Summary")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="kanban" className="mt-4">
@@ -282,6 +286,7 @@ export function DealsCenter() {
       <DealDetailSheet
         deal={selected}
         canManage={canManage}
+        isAdmin={isAdmin}
         currentUserId={user?.id ?? null}
         onClose={() => setSelectedId(null)}
         onChanged={load}
@@ -309,7 +314,7 @@ function StageColumn({
       <div className="flex items-center justify-between px-2 py-2">
         <div className="flex items-center gap-2">
           <span className={cn("h-2.5 w-2.5 rounded-full", STAGE_TONE[stage].split(" ")[0])} />
-          <h3 className="text-sm font-semibold text-foreground">{STAGE_LABEL[stage]}</h3>
+          <h3 className="text-sm font-semibold text-foreground">{dx(STAGE_LABEL[stage])}</h3>
           <span className="text-xs text-muted-foreground">{deals.length}</span>
         </div>
         {sum > 0 && <span className="text-[10px] font-medium text-muted-foreground">{fmtMoney(sum)}</span>}
@@ -328,7 +333,7 @@ function StageColumn({
 }
 
 function DraggableCard({ deal, onOpen, canManage }: { deal: Deal; onOpen: (id: string) => void; canManage: boolean }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: deal.id, disabled: !canManage });
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: deal.id, disabled: !canManage || isEngineDeal(deal) });
   return (
     <div
       ref={setNodeRef}
@@ -351,17 +356,17 @@ function DealCard({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className={cn("h-2 w-2 rounded-full", HEALTH_DOT[deal.health])} title={HEALTH_LABEL[deal.health]} />
+            <span className={cn("h-2 w-2 rounded-full", HEALTH_DOT[deal.health])} title={dx(HEALTH_LABEL[deal.health])} />
             <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{deal.reference}</span>
           </div>
           <p className="mt-1 line-clamp-1 text-sm font-semibold text-foreground">
-            {deal.property_title ?? "Untitled property"}
+            {deal.property_title ?? dx("Untitled property")}
           </p>
         </div>
         {dragHandle && (
           <button
             {...dragHandle}
-            aria-label="Drag"
+            aria-label={dx("Drag")}
             onClick={(e) => e.stopPropagation()}
             className="rounded p-1 text-muted-foreground/50 opacity-0 group-hover:opacity-100 hover:bg-secondary hover:text-foreground"
           >
@@ -397,22 +402,22 @@ function DealCard({
 
 function OverviewList({ deals, onOpen, loading }: { deals: Deal[]; onOpen: (id: string) => void; loading: boolean }) {
   if (loading) {
-    return <div className="rounded-2xl border border-border/60 p-8 text-center text-sm text-muted-foreground">Loading…</div>;
+    return <div className="rounded-2xl border border-border/60 p-8 text-center text-sm text-muted-foreground">{dx("Loading…")}</div>;
   }
   if (!deals.length) {
     return (
       <div className="rounded-2xl border border-dashed border-border p-16 text-center">
         <TrendingUp className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-        <h3 className="font-display text-lg font-semibold">No deals yet</h3>
-        <p className="mt-1 text-sm text-muted-foreground">Deals appear here as soon as buyers inquire on your listings.</p>
+        <h3 className="font-display text-lg font-semibold">{dx("No deals yet")}</h3>
+        <p className="mt-1 text-sm text-muted-foreground">{dx("Deals appear here as soon as buyers inquire on your listings.")}</p>
       </div>
     );
   }
   return (
     <div className="overflow-hidden rounded-2xl border border-border/60 bg-background">
       <div className="hidden grid-cols-[1.4fr_1fr_1fr_140px_120px_100px_40px] gap-3 border-b border-border/60 bg-secondary/40 px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground md:grid">
-        <span>Deal</span><span>Buyer</span><span>Owner / Agent</span>
-        <span>Stage</span><span>Value</span><span>Health</span><span></span>
+        <span>{dx("Deal")}</span><span>{dx("Buyer")}</span><span>{dx("Owner / Agent")}</span>
+        <span>{dx("Stage")}</span><span>{dx("Value")}</span><span>{dx("Health")}</span><span></span>
       </div>
       {deals.map((d) => (
         <button
@@ -427,11 +432,11 @@ function OverviewList({ deals, onOpen, loading }: { deals: Deal[]; onOpen: (id: 
           <div className="min-w-0 text-sm">{d.buyer_name ?? "—"}</div>
           <div className="min-w-0 text-xs text-muted-foreground">{d.agent_name ?? d.owner_name ?? "—"}</div>
           <span className={cn("inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1", STAGE_TONE[d.stage])}>
-            {STAGE_LABEL[d.stage]}
+            {dx(STAGE_LABEL[d.stage])}
           </span>
           <span className="text-sm font-medium">{fmtMoney(d.value, d.currency)}</span>
           <span className="inline-flex items-center gap-1.5 text-xs">
-            <span className={cn("h-2 w-2 rounded-full", HEALTH_DOT[d.health])} /> {HEALTH_LABEL[d.health]}
+            <span className={cn("h-2 w-2 rounded-full", HEALTH_DOT[d.health])} /> {dx(HEALTH_LABEL[d.health])}
           </span>
           <ArrowRight className="hidden h-4 w-4 text-muted-foreground md:block" />
         </button>
@@ -442,11 +447,18 @@ function OverviewList({ deals, onOpen, loading }: { deals: Deal[]; onOpen: (id: 
 
 /* ------------------------------ Detail sheet ------------------------------ */
 
+const ENGINE_STAGES: DealStage[] = ["offer_made", "negotiation", "offer_accepted", "verification", "agreement_signed", "payment", "completed"];
+/** Deals driven by the offer engine move automatically; only admins may override. */
+function isEngineDeal(d: Deal) {
+  return ENGINE_STAGES.includes(d.stage) || d.agreed_price != null;
+}
+
 function DealDetailSheet({
-  deal, canManage, currentUserId, onClose, onChanged,
+  deal, canManage, isAdmin = false, currentUserId, onClose, onChanged,
 }: {
   deal: Deal | null;
   canManage: boolean;
+  isAdmin?: boolean;
   currentUserId: string | null;
   onClose: () => void;
   onChanged: () => void;
@@ -478,44 +490,44 @@ function DealDetailSheet({
   }
 
   async function onStageChange(s: DealStage) {
-    try { await moveDealStage(deal!.id, s); toast.success(`Moved to ${STAGE_LABEL[s]}`); onChanged(); await refresh(); }
-    catch (e: any) { toast.error(e?.message ?? "Update failed"); }
+    try { await moveDealStage(deal!.id, s); toast.success(`Moved to ${dx(STAGE_LABEL[s])}`); onChanged(); await refresh(); }
+    catch (e: any) { toast.error(e?.message ?? dx("Update failed")); }
   }
   async function onPriority(p: DealPriority) {
-    try { await updateDeal(deal!.id, { priority: p }); toast.success("Priority updated"); onChanged(); }
-    catch (e: any) { toast.error(e?.message ?? "Update failed"); }
+    try { await updateDeal(deal!.id, { priority: p }); toast.success(dx("Priority updated")); onChanged(); }
+    catch (e: any) { toast.error(e?.message ?? dx("Update failed")); }
   }
   async function onValue(v: string) {
     const n = Number(v);
     if (Number.isNaN(n)) return;
     try { await updateDeal(deal!.id, { value: n }); onChanged(); }
-    catch (e: any) { toast.error(e?.message ?? "Update failed"); }
+    catch (e: any) { toast.error(e?.message ?? dx("Update failed")); }
   }
   async function onExpected(v: string) {
     try { await updateDeal(deal!.id, { expected_close_at: v || null }); onChanged(); }
-    catch (e: any) { toast.error(e?.message ?? "Update failed"); }
+    catch (e: any) { toast.error(e?.message ?? dx("Update failed")); }
   }
   async function submitNote() {
     if (!noteText.trim()) return;
     try {
       await addNote(deal!.id, noteText.trim(), currentUserId);
-      setNoteText(""); toast.success("Note added"); await refresh(); onChanged();
-    } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+      setNoteText(""); toast.success(dx("Note added")); await refresh(); onChanged();
+    } catch (e: any) { toast.error(e?.message ?? dx("Failed")); }
   }
   async function submitFollowUp() {
     if (!followUp) return;
     try {
       await scheduleFollowUp(deal!.id, new Date(followUp).toISOString(), currentUserId);
-      setFollowUp(""); toast.success("Follow-up scheduled"); await refresh(); onChanged();
-    } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+      setFollowUp(""); toast.success(dx("Follow-up scheduled")); await refresh(); onChanged();
+    } catch (e: any) { toast.error(e?.message ?? dx("Failed")); }
   }
   async function onFile(f: File | null) {
     if (!f) return;
     setUploading(true);
     try {
       await uploadDocument(deal!.id, f, docKind, currentUserId);
-      toast.success("Document uploaded"); await refresh(); onChanged();
-    } catch (e: any) { toast.error(e?.message ?? "Upload failed"); }
+      toast.success(dx("Document uploaded")); await refresh(); onChanged();
+    } catch (e: any) { toast.error(e?.message ?? dx("Upload failed")); }
     finally { setUploading(false); if (fileRef.current) fileRef.current.value = ""; }
   }
   async function openDoc(d: DealDocument) {
@@ -524,20 +536,20 @@ function DealDetailSheet({
   }
   async function removeDoc(d: DealDocument) {
     if (!confirm(`Delete ${d.name}?`)) return;
-    try { await deleteDocument(d.id, d.storage_path); toast.success("Deleted"); await refresh(); }
-    catch (e: any) { toast.error(e?.message ?? "Failed"); }
+    try { await deleteDocument(d.id, d.storage_path); toast.success(dx("Deleted")); await refresh(); }
+    catch (e: any) { toast.error(e?.message ?? dx("Failed")); }
   }
   async function onComplete() {
-    try { await completeDeal(deal!.id); toast.success("Deal completed"); onChanged(); await refresh(); }
-    catch (e: any) { toast.error(e?.message ?? "Failed"); }
+    try { await completeDeal(deal!.id); toast.success(dx("Deal completed")); onChanged(); await refresh(); }
+    catch (e: any) { toast.error(e?.message ?? dx("Failed")); }
   }
   async function doCancel() {
     try {
       const detail = cancelReason.trim();
-      await cancelDeal(deal!.id, detail ? `${LOST_REASON_LABEL[lostReason]} — ${detail}` : LOST_REASON_LABEL[lostReason]);
+      await cancelDeal(deal!.id, detail ? `${dx(LOST_REASON_LABEL[lostReason])} — ${detail}` : dx(LOST_REASON_LABEL[lostReason]));
 
-      toast.success("Deal cancelled"); setCancelOpen(false); setCancelReason(""); onChanged(); await refresh();
-    } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+      toast.success(dx("Deal cancelled")); setCancelOpen(false); setCancelReason(""); onChanged(); await refresh();
+    } catch (e: any) { toast.error(e?.message ?? dx("Failed")); }
   }
 
   return (
@@ -548,10 +560,10 @@ function DealDetailSheet({
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">{deal.reference}</p>
-              <SheetTitle className="mt-1 line-clamp-2">{deal.property_title ?? "Untitled property"}</SheetTitle>
+              <SheetTitle className="mt-1 line-clamp-2">{deal.property_title ?? dx("Untitled property")}</SheetTitle>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{[deal.property_district, deal.property_region].filter(Boolean).join(", ") || "—"}</span>
-                <span className="inline-flex items-center gap-1"><span className={cn("h-2 w-2 rounded-full", HEALTH_DOT[deal.health])} />{HEALTH_LABEL[deal.health]}</span>
+                <span className="inline-flex items-center gap-1"><span className={cn("h-2 w-2 rounded-full", HEALTH_DOT[deal.health])} />{dx(HEALTH_LABEL[deal.health])}</span>
               </div>
             </div>
             {canManage && (
@@ -560,10 +572,12 @@ function DealDetailSheet({
                   <Button variant="outline" size="icon" className="rounded-lg"><MoreHorizontal className="h-4 w-4" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={onComplete}><CheckCircle2 className="mr-2 h-4 w-4" /> Mark completed</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setCancelOpen(true)} className="text-destructive focus:text-destructive"><XCircle className="mr-2 h-4 w-4" /> Cancel deal</DropdownMenuItem>
+                  {(!isEngineDeal(deal) || isAdmin) && (
+                    <DropdownMenuItem onClick={onComplete}><CheckCircle2 className="mr-2 h-4 w-4" /> {dx(isEngineDeal(deal) ? "Mark completed (admin override)" : "Mark completed")}</DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={() => setCancelOpen(true)} className="text-destructive focus:text-destructive"><XCircle className="mr-2 h-4 w-4" /> {dx("Cancel deal")}</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => assignAgent(deal.id, currentUserId).then(onChanged)}><UserIcon className="mr-2 h-4 w-4" /> Assign me as agent</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => assignAgent(deal.id, currentUserId).then(onChanged)}><UserIcon className="mr-2 h-4 w-4" /> {dx("Assign me as agent")}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -574,33 +588,33 @@ function DealDetailSheet({
 
         {/* Summary editable */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Field label="Stage">
-            <Select value={deal.stage} onValueChange={(v) => onStageChange(v as DealStage)} disabled={!canManage}>
+          <Field label={dx(isEngineDeal(deal) ? (isAdmin ? "Stage (admin override)" : "Stage (updates automatically)") : "Stage")}>
+            <Select value={deal.stage} onValueChange={(v) => onStageChange(v as DealStage)} disabled={!canManage || (isEngineDeal(deal) && !isAdmin)}>
               <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {DEAL_STAGES.map((s) => <SelectItem key={s} value={s}>{STAGE_LABEL[s]}</SelectItem>)}
+                {DEAL_STAGES.map((s) => <SelectItem key={s} value={s}>{dx(STAGE_LABEL[s])}</SelectItem>)}
               </SelectContent>
             </Select>
           </Field>
-          <Field label="Priority">
+          <Field label={dx("Priority")}>
             <Select value={deal.priority} onValueChange={(v) => onPriority(v as DealPriority)} disabled={!canManage}>
               <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">Low</SelectItem><SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem><SelectItem value="urgent">Urgent</SelectItem>
+                <SelectItem value="low">{dx("Low")}</SelectItem><SelectItem value="medium">{dx("Medium")}</SelectItem>
+                <SelectItem value="high">{dx("High")}</SelectItem><SelectItem value="urgent">{dx("Urgent")}</SelectItem>
               </SelectContent>
             </Select>
           </Field>
           <Field label={`Value (${deal.currency})`}>
             <Input type="number" defaultValue={deal.value ?? ""} onBlur={(e) => onValue(e.target.value)} disabled={!canManage} />
           </Field>
-          <Field label="Expected close">
+          <Field label={dx("Expected close")}>
             <Input type="date" defaultValue={deal.expected_close_at ?? ""} onBlur={(e) => onExpected(e.target.value)} disabled={!canManage} />
           </Field>
-          <Field label="Buyer"><div className="text-sm">{deal.buyer_name ?? "—"} <span className="text-muted-foreground">{deal.buyer_email ?? ""}</span></div></Field>
-          <Field label="Owner / Agent"><div className="text-sm">{deal.owner_name ?? "—"}{deal.agent_name ? ` · ${deal.agent_name}` : ""}</div></Field>
+          <Field label={dx("Buyer")}><div className="text-sm">{deal.buyer_name ?? "—"} <span className="text-muted-foreground">{deal.buyer_email ?? ""}</span></div></Field>
+          <Field label={dx("Owner / Agent")}><div className="text-sm">{deal.owner_name ?? "—"}{deal.agent_name ? ` · ${deal.agent_name}` : ""}</div></Field>
           {deal.lead_id && (
-            <Field label="Related Lead">
+            <Field label={dx("Related Lead")}>
               <Link to="/leads" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
                 View lead <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -611,15 +625,15 @@ function DealDetailSheet({
 
         <Tabs defaultValue="timeline" className="mt-6">
           <TabsList className="w-full justify-start">
-            <TabsTrigger value="timeline"><Activity className="mr-1.5 h-3.5 w-3.5" />Timeline</TabsTrigger>
-            <TabsTrigger value="notes"><StickyNote className="mr-1.5 h-3.5 w-3.5" />Notes</TabsTrigger>
-            <TabsTrigger value="documents"><FileText className="mr-1.5 h-3.5 w-3.5" />Documents ({docs.length})</TabsTrigger>
-            <TabsTrigger value="followup"><Calendar className="mr-1.5 h-3.5 w-3.5" />Follow-up</TabsTrigger>
+            <TabsTrigger value="timeline"><Activity className="mr-1.5 h-3.5 w-3.5" />{dx("Timeline")}</TabsTrigger>
+            <TabsTrigger value="notes"><StickyNote className="mr-1.5 h-3.5 w-3.5" />{dx("Notes")}</TabsTrigger>
+            <TabsTrigger value="documents"><FileText className="mr-1.5 h-3.5 w-3.5" />{dx("Documents")} ({docs.length})</TabsTrigger>
+            <TabsTrigger value="followup"><Calendar className="mr-1.5 h-3.5 w-3.5" />{dx("Follow-up")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="timeline" className="mt-4">
             {activities.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No activity yet.</p>
+              <p className="text-sm text-muted-foreground">{dx("No activity yet.")}</p>
             ) : (
               <ol className="relative border-l border-border/60 pl-5">
                 {activities.map((a) => (
@@ -637,8 +651,8 @@ function DealDetailSheet({
           <TabsContent value="notes" className="mt-4 space-y-3">
             {canManage && (
               <>
-                <Textarea placeholder="Add an internal note…" value={noteText} onChange={(e) => setNoteText(e.target.value)} rows={3} />
-                <Button onClick={submitNote} disabled={!noteText.trim()}><Plus className="mr-1 h-4 w-4" /> Add note</Button>
+                <Textarea placeholder={dx("Add an internal note…")} value={noteText} onChange={(e) => setNoteText(e.target.value)} rows={3} />
+                <Button onClick={submitNote} disabled={!noteText.trim()}><Plus className="mr-1 h-4 w-4" /> {dx("Add note")}</Button>
               </>
             )}
             <div className="space-y-2 pt-2">
@@ -649,7 +663,7 @@ function DealDetailSheet({
                 </div>
               ))}
               {activities.filter((a) => a.kind === "note_added").length === 0 && (
-                <p className="text-sm text-muted-foreground">No notes yet.</p>
+                <p className="text-sm text-muted-foreground">{dx("No notes yet.")}</p>
               )}
             </div>
           </TabsContent>
@@ -671,7 +685,7 @@ function DealDetailSheet({
               </div>
             )}
             {docs.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No documents uploaded.</p>
+              <p className="text-sm text-muted-foreground">{dx("No documents uploaded.")}</p>
             ) : (
               <div className="space-y-2">
                 {docs.map((d) => (
@@ -684,8 +698,8 @@ function DealDetailSheet({
                       </p>
                     </div>
                     <div className="flex gap-1">
-                      <Button size="icon" variant="ghost" onClick={() => openDoc(d)} aria-label="Open"><Download className="h-4 w-4" /></Button>
-                      {canManage && <Button size="icon" variant="ghost" onClick={() => removeDoc(d)} aria-label="Delete"><X className="h-4 w-4" /></Button>}
+                      <Button size="icon" variant="ghost" onClick={() => openDoc(d)} aria-label={dx("Open")}><Download className="h-4 w-4" /></Button>
+                      {canManage && <Button size="icon" variant="ghost" onClick={() => removeDoc(d)} aria-label={dx("Delete")}><X className="h-4 w-4" /></Button>}
                     </div>
                   </div>
                 ))}
@@ -695,12 +709,12 @@ function DealDetailSheet({
 
           <TabsContent value="followup" className="mt-4 space-y-3">
             {deal.next_follow_up_at && (
-              <p className="text-sm">Currently scheduled for <strong>{new Date(deal.next_follow_up_at).toLocaleString()}</strong></p>
+              <p className="text-sm">{dx("Currently scheduled for")} <strong>{new Date(deal.next_follow_up_at).toLocaleString()}</strong></p>
             )}
             {canManage && (
               <div className="flex flex-wrap items-center gap-2">
                 <Input type="datetime-local" value={followUp} onChange={(e) => setFollowUp(e.target.value)} className="w-64" />
-                <Button onClick={submitFollowUp} disabled={!followUp}><Calendar className="mr-1 h-4 w-4" /> Schedule</Button>
+                <Button onClick={submitFollowUp} disabled={!followUp}><Calendar className="mr-1 h-4 w-4" /> {dx("Schedule")}</Button>
               </div>
             )}
           </TabsContent>
@@ -711,25 +725,25 @@ function DealDetailSheet({
     <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Cancel this deal?</AlertDialogTitle>
+          <AlertDialogTitle>{dx("Cancel this deal?")}</AlertDialogTitle>
           <AlertDialogDescription>
             This moves <strong>{deal.reference}</strong> to Cancelled and notifies participants.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-2">
           <Select value={lostReason} onValueChange={(v) => setLostReason(v as LostReason)}>
-            <SelectTrigger className="h-10"><SelectValue placeholder="Reason" /></SelectTrigger>
+            <SelectTrigger className="h-10"><SelectValue placeholder={dx("Reason")} /></SelectTrigger>
             <SelectContent>
               {LOST_REASONS.map((r) => (
-                <SelectItem key={r} value={r}>{LOST_REASON_LABEL[r]}</SelectItem>
+                <SelectItem key={r} value={r}>{dx(LOST_REASON_LABEL[r])}</SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Textarea placeholder="More detail (optional)…" value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} rows={3} />
+          <Textarea placeholder={dx("More detail (optional)…")} value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} rows={3} />
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel>Keep deal</AlertDialogCancel>
+          <AlertDialogCancel>{dx("Keep deal")}</AlertDialogCancel>
           <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={doCancel}>
             Cancel deal
           </AlertDialogAction>

@@ -1,3 +1,5 @@
+import { useI18n } from "@/hooks/use-i18n";
+import { dx } from "@/lib/deal-sw";
 import { createFileRoute } from "@tanstack/react-router";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { DealsCenter } from "@/components/deals/deals-center";
@@ -14,12 +16,13 @@ export const Route = createFileRoute("/_authenticated/deals")({
 });
 
 function DealsPage() {
+  useI18n(); // re-render when the language changes
   return (
     <DashboardShell>
       <div className="mx-auto max-w-7xl space-y-6 animate-fade-in">
         <header>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">My Deals</h1>
-          <p className="mt-1 text-muted-foreground">Follow each buyer from first message to completion — simply.</p>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{dx("My Deals")}</h1>
+          <p className="mt-1 text-muted-foreground">{dx("Follow each buyer from first message to completion — simply.")}</p>
         </header>
         <DealsCenter />
       </div>

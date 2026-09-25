@@ -1,3 +1,4 @@
+import { dx } from "@/lib/deal-sw";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -297,7 +298,7 @@ function ActivitySummary() {
   const items = [
     { label: "Leads", value: data?.leads_count ?? 0, to: "/leads" },
     { label: "Open deals", value: data?.open_deals ?? 0, to: "/deals" },
-    { label: "Completed deals", value: data?.won_deals ?? 0, to: "/deals" },
+    { label: dx("Completed deals"), value: data?.won_deals ?? 0, to: "/deals" },
   ];
   return (
     <div className="grid grid-cols-3 gap-2 border-t border-border/60 pt-4 sm:col-span-3">
@@ -307,7 +308,7 @@ function ActivitySummary() {
           <div className="font-display text-xl font-semibold">{Number(i.value)}</div>
         </Link>
       ))}
-      <p className="col-span-3 text-xs text-muted-foreground">Commission tracking appears here once deals record an agreed commission.</p>
+      <p className="col-span-3 text-xs text-muted-foreground">{dx("Commission tracking appears here once deals record an agreed commission.")}</p>
     </div>
   );
 }
