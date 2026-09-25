@@ -144,8 +144,8 @@ export function AdminPaymentsPanel() {
                   <span className="block text-sm font-medium text-foreground">{payTypeLabel(p.payment_type ?? p.purpose)} · {names[p.user_id ?? ""] || "—"}</span>
                   <span className="block text-xs text-muted-foreground">{new Date(p.created_at).toLocaleString()}</span>
                 </span>
-                <span className="flex items-center gap-2">
-                  <b className="text-foreground">{fmtTZS(p.amount, p.currency)}</b>
+                <span className="flex flex-wrap items-center gap-2">
+                  <b className="whitespace-nowrap text-foreground">{fmtTZS(p.amount, p.currency)}</b>
                   <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-foreground">{payStatusLabel(p.status)}</span>
                   {p.is_test && <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-semibold text-warning">{dx("TEST")}</span>}
                   {p.refund_status && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[11px] font-semibold text-destructive">{dx(`Refund ${p.refund_status}`)}</span>}
@@ -180,7 +180,7 @@ function PaymentDetail({ payment, buyer, onClose, onChanged }: { payment: FinPay
     ["Status", payStatusLabel(payment.status)], ["Reference", payment.reference ?? "—"], ["Provider", payment.provider],
     ["Provider transaction ID", payment.provider_transaction_id ?? "—"], ["Created", new Date(payment.created_at).toLocaleString()],
     ["Paid", payment.paid_at ? new Date(payment.paid_at).toLocaleString() : "—"], ["Test mode", payment.is_test ? dx("Yes") : dx("No")],
-    ["Failure reason", payment.failure_reason ?? "—"], ["Refund status", rs ?? "—"], ["Receipt number", payment.receipt_number ?? "—"],
+    ["Failure reason", payment.failure_reason ?? "—"], ["Refund status", rs ? dx(`Refund ${rs}`) : "—"], ["Receipt number", payment.receipt_number ?? "—"],
   ];
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -203,11 +203,22 @@ function PaymentDetail({ payment, buyer, onClose, onChanged }: { payment: FinPay
         <div>
           <h4 className="text-sm font-semibold text-foreground">{dx("Audit history")}</h4>
           {audit.length === 0 ? <p className="text-xs text-muted-foreground">{dx("No audit entries.")}</p> : (
-            <ul className="mt-1 space-y-1 text-xs">{audit.map((a) => <li key={a.id} className="text-muted-foreground"><b className="text-foreground">{a.label}</b> · {new Date(a.created_at).toLocaleString()}</li>)}</ul>
+            <ul className="mt-1 space-y-1 text-xs">{audit.map((a) => <li key={a.id} className="text-muted-foreground"><b className="text-foreground">{auditLabel(a.label)}</b> · {new Date(a.created_at).toLocaleString()}</li>)}</ul>
           )}
         </div>
         {receipt && <ReceiptDialog payment={payment} deal={{ buyer_name: buyer }} onClose={() => setReceipt(false)} />}
       </DialogContent>
     </Dialog>
   );
+}
+
+const AUDIT_KIND: Record<string, string> = { Deposit: "deposit", Balance: "balance", "SPACES service fee": "spaces_fee", "Agent commission": "agent_commission" };
+function auditLabel(l: string): string {
+  let m = l.match(/^Payment created: (\w+)( \(TEST\))?$/);
+  if (m) return `${dx("Payment created")}: ${payTypeLabel(m[1])}${m[2] ? ` (${dx("TEST")})` : ""}`;
+  m = l.match(/^Refund: (\w+)$/);
+  if (m) return dx(`Refund ${m[1]}`);
+  m = l.match(/^(.+) created$/);
+  if (m && AUDIT_KIND[m[1]]) return `${payTypeLabel(AUDIT_KIND[m[1]])} — ${dx("created")}`;
+  return dx(l);
 }
