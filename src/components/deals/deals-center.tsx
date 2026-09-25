@@ -322,7 +322,7 @@ function StageColumn({
       <div className="flex-1 space-y-2 overflow-y-auto px-1 pb-1" style={{ maxHeight: "70vh" }}>
         {deals.length === 0 ? (
           <div className="mt-6 rounded-xl border border-dashed border-border/60 p-4 text-center text-xs text-muted-foreground">
-            Drop a deal here
+            {dx("Drop a deal here")}
           </div>
         ) : (
           deals.map((d) => <DraggableCard key={d.id} deal={d} onOpen={onOpen} canManage={canManage} />)
