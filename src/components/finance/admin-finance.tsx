@@ -211,3 +211,14 @@ function PaymentDetail({ payment, buyer, onClose, onChanged }: { payment: FinPay
     </Dialog>
   );
 }
+
+const AUDIT_KIND: Record<string, string> = { Deposit: "deposit", Balance: "balance", "SPACES service fee": "spaces_fee", "Agent commission": "agent_commission" };
+function auditLabel(l: string): string {
+  let m = l.match(/^Payment created: (\w+)( \(TEST\))?$/);
+  if (m) return `${dx("Payment created")}: ${payTypeLabel(m[1])}${m[2] ? ` (${dx("TEST")})` : ""}`;
+  m = l.match(/^Refund: (\w+)$/);
+  if (m) return dx(`Refund ${m[1]}`);
+  m = l.match(/^(.+) created$/);
+  if (m && AUDIT_KIND[m[1]]) return `${payTypeLabel(AUDIT_KIND[m[1]])} — ${dx("created")}`;
+  return dx(l);
+}
