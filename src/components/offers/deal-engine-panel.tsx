@@ -14,6 +14,7 @@ import {
   fetchDealEngine, respondOffer, setChecklistItem, confirmCompletion, fmtTZS, timeLeft,
   simulateTestPayment, isTestModeOn, type Offer,
 } from "@/lib/offers-db";
+import { DealFinance } from "@/components/finance/deal-finance";
 
 export type DealLite = {
   id: string; stage: string; buyer_id: string | null; owner_id: string | null; agent_id: string | null;
@@ -210,6 +211,8 @@ export function DealEnginePanel({ deal, userId, onChanged }: { deal: DealLite; u
           {deal.fees_locked_at && <p className="mt-2 flex items-start gap-1 text-xs text-muted-foreground"><Lock className="mt-0.5 h-3 w-3 shrink-0" />{t("offer.lockedNote")}</p>}
         </section>
       )}
+
+      <DealFinance deal={deal} items={data.payments} userId={userId} />
 
       {data.commission && (
         <section className="rounded-2xl border border-primary/40 bg-card p-4">
