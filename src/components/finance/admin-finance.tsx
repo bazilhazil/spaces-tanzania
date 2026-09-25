@@ -144,8 +144,8 @@ export function AdminPaymentsPanel() {
                   <span className="block text-sm font-medium text-foreground">{payTypeLabel(p.payment_type ?? p.purpose)} · {names[p.user_id ?? ""] || "—"}</span>
                   <span className="block text-xs text-muted-foreground">{new Date(p.created_at).toLocaleString()}</span>
                 </span>
-                <span className="flex items-center gap-2">
-                  <b className="text-foreground">{fmtTZS(p.amount, p.currency)}</b>
+                <span className="flex flex-wrap items-center gap-2">
+                  <b className="whitespace-nowrap text-foreground">{fmtTZS(p.amount, p.currency)}</b>
                   <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-foreground">{payStatusLabel(p.status)}</span>
                   {p.is_test && <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-semibold text-warning">{dx("TEST")}</span>}
                   {p.refund_status && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[11px] font-semibold text-destructive">{dx(`Refund ${p.refund_status}`)}</span>}
