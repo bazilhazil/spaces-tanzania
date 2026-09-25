@@ -12,6 +12,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { dx } from "@/lib/deal-sw";
+import { useI18n } from "@/hooks/use-i18n";
 import { AdminSearchDialog } from "@/components/admin/admin-search-dialog";
 import { avatarInitials, displayNameOr, publicEmail } from "@/lib/display-name";
 
@@ -86,6 +88,7 @@ function itemHref(item: Item) {
 }
 
 export function AdminShell({ children }: { children: ReactNode }) {
+  useI18n(); // re-render on language change
   const { profile, user, signOut, primaryRole, roles } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -175,7 +178,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               className="h-auto w-full justify-start gap-2 rounded-xl border border-border/60 bg-secondary/40 px-3 py-2 text-sm font-normal text-muted-foreground transition-colors hover:bg-secondary hover:text-muted-foreground"
             >
               <Search className="h-4 w-4" />
-              <span className="flex-1 text-left">Search users, spaces, inquiries…</span>
+              <span className="flex-1 text-left">{dx("Search users, spaces, inquiries…")}</span>
               <kbd className="hidden items-center gap-1 rounded border border-border/60 bg-background px-1.5 py-0.5 text-[10px] font-medium md:inline-flex">
                 <Command className="h-2.5 w-2.5" /> K
               </kbd>
@@ -185,7 +188,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <nav className="flex-1 space-y-4 overflow-y-auto p-3">
             {NAV.map((group) => (
               <div key={group.group}>
-                <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{group.group}</div>
+                <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{dx(group.group)}</div>
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
                     const href = itemHref(item);
@@ -207,7 +210,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                         )}
                       >
                         <Icon className="h-4 w-4" />
-                        <span className="flex-1">{item.label}</span>
+                        <span className="flex-1">{dx(item.label)}</span>
                         {(item.badge || (item.section === "verification" && pendingVerifications > 0)) && (
                           <span className={cn(
                             "rounded-full px-2 py-0.5 text-[10px] font-semibold",
@@ -226,7 +229,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
           <div className="border-t border-border/60 p-3">
             <Button variant="ghost" onClick={handleSignOut} className="w-full justify-start gap-3 text-foreground/75 hover:text-foreground">
-              <LogOut className="h-4 w-4" /> Logout
+              <LogOut className="h-4 w-4" /> {dx("Logout")}
             </Button>
           </div>
         </aside>

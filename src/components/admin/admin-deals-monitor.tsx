@@ -18,6 +18,7 @@ type Row = {
 };
 const EMPTY = { from: "", to: "", stage: "", region: "", ptype: "", agent: "", owner: "", buyer: "", ttype: "", pay: "", avail: "" };
 
+const PAY: Record<string, string> = { none: "No payments yet", pending: "Pending", failed: "Failed", paid: "Paid" };
 const sel = "h-10 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground";
 
 export function AdminDealsMonitor() {
@@ -79,14 +80,14 @@ export function AdminDealsMonitor() {
   }
 
   const set = (k: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF((p) => ({ ...p, [k]: e.target.value }));
-  const tiles: [string, string][] = s ? [
+  const tiles: [string, string][] = (s ? [
     ["Active deals", String(s.active)], ["Offers today", String(s.offers_today)], ["Negotiations", String(s.negotiation)],
     ["Agreements", String(s.agreement)], ["Verification", String(s.verification)], ["Payments", String(s.payment)],
     ["Completed", String(s.completed)], ["Cancelled", String(s.cancelled)],
     ["Transaction value", fmtTZS(s.transaction_value)], ["Agent commissions", fmtTZS(s.agent_commissions)],
     ["Estimated revenue", fmtTZS(s.estimated_revenue)], ["Pending revenue", fmtTZS(s.pending_revenue)],
     ["Collected revenue", fmtTZS(s.collected_revenue)], ["Test payments (not revenue)", fmtTZS(s.test_collected_revenue)],
-  ] : [];
+  ] : []).map(([k, v]) => [dx(k), v] as [string, string]);
 
   return (
     <section className="mb-6 space-y-4" data-testid="admin-deals-monitor">
@@ -132,21 +133,21 @@ export function AdminDealsMonitor() {
           <Button onClick={() => void run()}>{dx("Apply filters")}</Button>
           <Button variant="outline" onClick={() => { setF(EMPTY); void run(EMPTY); }}><X className="h-4 w-4" /> {dx("Clear Filters")}</Button>
           <Button variant="outline" onClick={exportCsv} disabled={!rows.length}><Download className="h-4 w-4" /> {dx("Export CSV")}</Button>
-          <span className="self-center text-sm text-muted-foreground" data-testid="admin-deal-count">{loading ? "…" : `${rows.length} deals`}</span>
+          <span className="self-center text-sm text-muted-foreground" data-testid="admin-deal-count">{loading ? "…" : `${rows.length} ${dx("deals")}`}</span>
         </div>
         <div className="mt-3 grid gap-2 md:hidden">
           {rows.map((r) => (
             <div key={r.id} className="rounded-xl border border-border bg-background p-3 text-sm">
               <p className="font-medium text-foreground">{r.property_title ?? "—"}</p>
               <p className="text-xs text-muted-foreground">{r.reference} · {dx(STAGE_LABEL[r.stage as DealStage]) ?? r.stage} · {r.region ?? "—"}</p>
-              <p className="mt-1 text-foreground">{fmtTZS(r.agreed_price ?? r.value)} · fee {fmtTZS(r.estimated_spaces_fee)}</p>
+              <p className="mt-1 text-foreground">{fmtTZS(r.agreed_price ?? r.value)} · {dx("SPACES fee")} {fmtTZS(r.estimated_spaces_fee)}</p>
             </div>
           ))}
         </div>
         <div className="mt-3 hidden overflow-x-auto md:block">
           <table className="w-full text-sm">
             <thead className="text-left text-xs text-muted-foreground"><tr>
-              {["Ref", "Property", "Location", "Status", "Property status", "Value", "SPACES fee", "Commission", "Owner", "Dalali", "Buyer", "Payment"].map((h) => <th key={h} className="px-2 py-2 font-medium">{h}</th>)}
+              {["Ref", "Property", "Location", "Status", "Property status", "Value", "SPACES fee", "Commission", "Owner", "Dalali", "Buyer", "Payment"].map((h) => <th key={h} className="px-2 py-2 font-medium">{dx(h)}</th>)}
             </tr></thead>
             <tbody>
               {rows.map((r) => (
@@ -162,7 +163,7 @@ export function AdminDealsMonitor() {
                   <td className="px-2 py-2">{r.owner_name ?? "—"}</td>
                   <td className="px-2 py-2">{r.agent_name ?? "—"}</td>
                   <td className="px-2 py-2">{r.buyer_name ?? "—"}</td>
-                  <td className="px-2 py-2 capitalize">{r.payment_status}</td>
+                  <td className="px-2 py-2 capitalize">{dx(PAY[r.payment_status] ?? r.payment_status)}</td>
                 </tr>
               ))}
             </tbody>
