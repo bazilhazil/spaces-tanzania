@@ -42,7 +42,7 @@ const SW: Record<string, string> = {
   Payments: "Malipo", "Transaction value": "Thamani ya miamala", "Agent commissions": "Kamisheni za madalali",
   "Estimated revenue": "Mapato yanayokadiriwa", "Pending revenue": "Mapato yanayosubiriwa", "Collected revenue": "Mapato yaliyokusanywa",
   "Test payments (not revenue)": "Malipo ya majaribio (si mapato)", Ref: "Namba", Property: "Mali", "SPACES fee": "Ada ya SPACES",
-  Commission: "Kamisheni", deals: "mikataba", Revenue: "Mapato", Subscriptions: "Usajili", "Data & Backup": "Data na Nakala Rudufu",
+  Commission: "Kamisheni", deals: "mikataba", Revenue: "Mapato",
   // admin monetization
   "Monetization & Deals": "Mapato na Mikataba",
   "Set every price, limit, fee and tax here. Changes apply immediately and are logged.": "Weka kila bei, kikomo, ada na kodi hapa. Mabadiliko yanaanza mara moja na yanahifadhiwa kwenye kumbukumbu.",
