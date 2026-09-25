@@ -78,7 +78,7 @@ export function AdminDealsMonitor() {
     const a = document.createElement("a"); a.href = url; a.download = `spaces-deals-${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(url);
   }
 
-  const set = (k: keyof typeof EMPTY) => {dx("(e: React.ChangeEvent")}<HTMLInputElement | HTMLSelectElement>) => setF((p) => ({ ...p, [k]: e.target.value }));
+  const set = (k: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF((p) => ({ ...p, [k]: e.target.value }));
   const tiles: [string, string][] = s ? [
     ["Active deals", String(s.active)], ["Offers today", String(s.offers_today)], ["Negotiations", String(s.negotiation)],
     ["Agreements", String(s.agreement)], ["Verification", String(s.verification)], ["Payments", String(s.payment)],
