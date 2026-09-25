@@ -18,7 +18,8 @@ export const PAY_TYPE: Record<string, string> = {
 export const PAY_STATUS: Record<string, string> = {
   pending: "PENDING", processing: "PROCESSING", paid: "PAID", succeeded: "PAID", failed: "FAILED", cancelled: "CANCELLED", refunded: "REFUNDED",
 };
-export const payTypeLabel = (k: string | null) => dx(PAY_TYPE[k ?? ""] ?? (k ?? "—"));
+const EXTRA: Record<string, string> = { subscription: "Subscription", promotion: "Boost", deal_test: "Test mode" };
+export const payTypeLabel = (k: string | null) => dx(PAY_TYPE[k ?? ""] ?? EXTRA[k ?? ""] ?? (k ?? "—"));
 export const payStatusLabel = (s: string) => dx(PAY_STATUS[s] ?? s.toUpperCase());
 
 export function DealFinance({ deal, items, userId }: { deal: DealLite; items: PaymentItem[]; userId: string | null }) {
