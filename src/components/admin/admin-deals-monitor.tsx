@@ -1,3 +1,4 @@
+import { dx } from "@/lib/deal-sw";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Download, X, FlaskConical } from "lucide-react";
@@ -77,7 +78,7 @@ export function AdminDealsMonitor() {
     const a = document.createElement("a"); a.href = url; a.download = `spaces-deals-${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(url);
   }
 
-  const set = (k: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF((p) => ({ ...p, [k]: e.target.value }));
+  const set = (k: keyof typeof EMPTY) => {dx("(e: React.ChangeEvent")}<HTMLInputElement | HTMLSelectElement>) => setF((p) => ({ ...p, [k]: e.target.value }));
   const tiles: [string, string][] = s ? [
     ["Active deals", String(s.active)], ["Offers today", String(s.offers_today)], ["Negotiations", String(s.negotiation)],
     ["Agreements", String(s.agreement)], ["Verification", String(s.verification)], ["Payments", String(s.payment)],
@@ -90,7 +91,7 @@ export function AdminDealsMonitor() {
   return (
     <section className="mb-6 space-y-4" data-testid="admin-deals-monitor">
       <div className="rounded-2xl border border-border bg-card p-4">
-        <h2 className="font-display text-lg font-semibold text-foreground">Offers & deal revenue</h2>
+        <h2 className="font-display text-lg font-semibold text-foreground">{dx("Offers & deal revenue")}</h2>
         {err && <p className="mt-2 text-sm text-destructive">{err}</p>}
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
           {tiles.map(([k, v]) => (
@@ -99,7 +100,7 @@ export function AdminDealsMonitor() {
             </div>
           ))}
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">Collected revenue counts only confirmed real payments. Estimated fees and test payments are never counted as earned.</p>
+        <p className="mt-2 text-xs text-muted-foreground">{dx("Collected revenue counts only confirmed real payments. Estimated fees and test payments are never counted as earned.")}</p>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-warning/50 bg-warning/10 p-4">
@@ -115,29 +116,29 @@ export function AdminDealsMonitor() {
 
       <div className="rounded-2xl border border-border bg-card p-4">
         <div className="grid grid-cols-2 gap-2 md:grid-cols-4 lg:grid-cols-6">
-          <label className="text-xs text-muted-foreground">From<Input type="date" value={f.from} onChange={set("from")} /></label>
-          <label className="text-xs text-muted-foreground">To<Input type="date" value={f.to} onChange={set("to")} /></label>
-          <label className="text-xs text-muted-foreground">Deal status<select className={sel} value={f.stage} onChange={set("stage")}><option value="">All</option>{(Object.keys(STAGE_LABEL) as DealStage[]).map((k) => <option key={k} value={k}>{STAGE_LABEL[k]}</option>)}</select></label>
-          <label className="text-xs text-muted-foreground">Location<select className={sel} value={f.region} onChange={set("region")}><option value="">All</option>{opts.regions.map((r) => <option key={r}>{r}</option>)}</select></label>
-          <label className="text-xs text-muted-foreground">Property type<select className={sel} value={f.ptype} onChange={set("ptype")}><option value="">All</option>{opts.ptypes.map((r) => <option key={r}>{r}</option>)}</select></label>
-          <label className="text-xs text-muted-foreground">Dalali<select className={sel} value={f.agent} onChange={set("agent")}><option value="">All</option>{opts.agents.map(([id, n]) => <option key={id} value={id}>{n}</option>)}</select></label>
-          <label className="text-xs text-muted-foreground">Owner<select className={sel} value={f.owner} onChange={set("owner")}><option value="">All</option>{opts.owners.map(([id, n]) => <option key={id} value={id}>{n}</option>)}</select></label>
-          <label className="text-xs text-muted-foreground">Buyer<select className={sel} value={f.buyer} onChange={set("buyer")}><option value="">All</option>{opts.buyers.map(([id, n]) => <option key={id} value={id}>{n}</option>)}</select></label>
-          <label className="text-xs text-muted-foreground">Transaction<select className={sel} value={f.ttype} onChange={set("ttype")}><option value="">All</option><option value="sale">Sale</option><option value="rent">Rent</option></select></label>
-          <label className="text-xs text-muted-foreground">Payment<select className={sel} value={f.pay} onChange={set("pay")}><option value="">All</option><option value="none">No payments yet</option><option value="pending">Pending</option><option value="failed">Failed</option><option value="paid">Paid</option></select></label>
-          <label className="text-xs text-muted-foreground">Property status<select className={sel} value={f.avail} onChange={set("avail")}><option value="">All</option>{["available", "offer_received", "negotiation", "reserved", "under_transaction", "sold", "rented"].map((a) => <option key={a} value={a}>{t(`offer.avail_${a}`)}</option>)}</select></label>
+          <label className="text-xs text-muted-foreground">{dx("From")}<Input type="date" value={f.from} onChange={set("from")} /></label>
+          <label className="text-xs text-muted-foreground">{dx("To")}<Input type="date" value={f.to} onChange={set("to")} /></label>
+          <label className="text-xs text-muted-foreground">{dx("Deal status")}<select className={sel} value={f.stage} onChange={set("stage")}><option value="">{dx("All")}</option>{(Object.keys(STAGE_LABEL) as DealStage[]).map((k) => <option key={k} value={k}>{dx(STAGE_LABEL[k])}</option>)}</select></label>
+          <label className="text-xs text-muted-foreground">{dx("Location")}<select className={sel} value={f.region} onChange={set("region")}><option value="">{dx("All")}</option>{opts.regions.map((r) => <option key={r}>{r}</option>)}</select></label>
+          <label className="text-xs text-muted-foreground">{dx("Property type")}<select className={sel} value={f.ptype} onChange={set("ptype")}><option value="">{dx("All")}</option>{opts.ptypes.map((r) => <option key={r}>{r}</option>)}</select></label>
+          <label className="text-xs text-muted-foreground">{dx("Dalali")}<select className={sel} value={f.agent} onChange={set("agent")}><option value="">{dx("All")}</option>{opts.agents.map(([id, n]) => <option key={id} value={id}>{n}</option>)}</select></label>
+          <label className="text-xs text-muted-foreground">{dx("Owner")}<select className={sel} value={f.owner} onChange={set("owner")}><option value="">{dx("All")}</option>{opts.owners.map(([id, n]) => <option key={id} value={id}>{n}</option>)}</select></label>
+          <label className="text-xs text-muted-foreground">{dx("Buyer")}<select className={sel} value={f.buyer} onChange={set("buyer")}><option value="">{dx("All")}</option>{opts.buyers.map(([id, n]) => <option key={id} value={id}>{n}</option>)}</select></label>
+          <label className="text-xs text-muted-foreground">{dx("Transaction")}<select className={sel} value={f.ttype} onChange={set("ttype")}><option value="">{dx("All")}</option><option value="sale">{dx("Sale")}</option><option value="rent">{dx("Rent")}</option></select></label>
+          <label className="text-xs text-muted-foreground">{dx("Payment")}<select className={sel} value={f.pay} onChange={set("pay")}><option value="">{dx("All")}</option><option value="none">{dx("No payments yet")}</option><option value="pending">{dx("Pending")}</option><option value="failed">{dx("Failed")}</option><option value="paid">{dx("Paid")}</option></select></label>
+          <label className="text-xs text-muted-foreground">{dx("Property status")}<select className={sel} value={f.avail} onChange={set("avail")}><option value="">{dx("All")}</option>{["available", "offer_received", "negotiation", "reserved", "under_transaction", "sold", "rented"].map((a) => <option key={a} value={a}>{t(`offer.avail_${a}`)}</option>)}</select></label>
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Button onClick={() => void run()}>Apply filters</Button>
-          <Button variant="outline" onClick={() => { setF(EMPTY); void run(EMPTY); }}><X className="h-4 w-4" /> Clear Filters</Button>
-          <Button variant="outline" onClick={exportCsv} disabled={!rows.length}><Download className="h-4 w-4" /> Export CSV</Button>
+          <Button onClick={() => void run()}>{dx("Apply filters")}</Button>
+          <Button variant="outline" onClick={() => { setF(EMPTY); void run(EMPTY); }}><X className="h-4 w-4" /> {dx("Clear Filters")}</Button>
+          <Button variant="outline" onClick={exportCsv} disabled={!rows.length}><Download className="h-4 w-4" /> {dx("Export CSV")}</Button>
           <span className="self-center text-sm text-muted-foreground" data-testid="admin-deal-count">{loading ? "…" : `${rows.length} deals`}</span>
         </div>
         <div className="mt-3 grid gap-2 md:hidden">
           {rows.map((r) => (
             <div key={r.id} className="rounded-xl border border-border bg-background p-3 text-sm">
               <p className="font-medium text-foreground">{r.property_title ?? "—"}</p>
-              <p className="text-xs text-muted-foreground">{r.reference} · {STAGE_LABEL[r.stage as DealStage] ?? r.stage} · {r.region ?? "—"}</p>
+              <p className="text-xs text-muted-foreground">{r.reference} · {dx(STAGE_LABEL[r.stage as DealStage]) ?? r.stage} · {r.region ?? "—"}</p>
               <p className="mt-1 text-foreground">{fmtTZS(r.agreed_price ?? r.value)} · fee {fmtTZS(r.estimated_spaces_fee)}</p>
             </div>
           ))}
@@ -153,7 +154,7 @@ export function AdminDealsMonitor() {
                   <td className="px-2 py-2 font-mono text-xs">{r.reference}</td>
                   <td className="max-w-[200px] truncate px-2 py-2">{r.property_title ?? "—"}</td>
                   <td className="px-2 py-2">{r.region ?? "—"}</td>
-                  <td className="px-2 py-2">{STAGE_LABEL[r.stage as DealStage] ?? r.stage}</td>
+                  <td className="px-2 py-2">{dx(STAGE_LABEL[r.stage as DealStage]) ?? r.stage}</td>
                   <td className="px-2 py-2">{r.availability ? t(`offer.avail_${r.availability}`) : "—"}</td>
                   <td className="px-2 py-2">{fmtTZS(r.agreed_price ?? r.value)}</td>
                   <td className="px-2 py-2">{fmtTZS(r.estimated_spaces_fee)}</td>
