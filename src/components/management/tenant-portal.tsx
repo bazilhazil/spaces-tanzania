@@ -68,7 +68,7 @@ export function TenantPortal() {
       <div className="ds-card space-y-3 p-5">
         <div className="space-y-1">
         <p className="ds-caption">{px("My property")}</p>
-        <p className="font-display text-xl font-semibold">{data.property?.title ?? "Your home"}</p>
+        <p className="font-display text-xl font-semibold">{data.property?.title ?? px("Your home")}</p>
         <p className="text-sm text-muted-foreground">
           {data.unit ? `${px("My unit")}: ${data.unit.name}` : px("Whole property")}
           {data.property?.district ? ` · ${data.property.district}` : ""}

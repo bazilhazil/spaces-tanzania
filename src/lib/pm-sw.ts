@@ -70,7 +70,7 @@ const SW: Record<string, string> = {
   Save: "Hifadhi", Cancel: "Ghairi", "Saving…": "Inahifadhi…", Select: "Chagua", Saved: "Imehifadhiwa", "Could not save": "Imeshindikana kuhifadhi",
   "Could not update": "Imeshindikana kusasisha", Updated: "Imesasishwa", Collection: "Ukusanyaji", "Property overview": "Muhtasari wa mali",
   "Open jobs": "Kazi zilizo wazi", Expected: "Inayotarajiwa", Collected: "Iliyokusanywa", "Occupancy rate": "Kiwango cha ukaaji",
-  "My property": "Mali yangu", Open: "Fungua", "No tenancy yet": "Bado huna upangaji",
+  "My property": "Mali yangu", "Your home": "Nyumba yako", "Your home, rent, lease and maintenance requests.": "Nyumba yako, kodi, mkataba na maombi ya matengenezo.", Open: "Fungua", "No tenancy yet": "Bado huna upangaji",
   "When your landlord or property manager adds you as a tenant on Spaces, your home, rent and lease appear here.": "Mwenye nyumba au msimamizi akikuongeza kama mpangaji kwenye Spaces, nyumba, kodi na mkataba wako vitaonekana hapa.",
   "Rent charges added by your landlord appear here.": "Madeni ya kodi yaliyoongezwa na mwenye nyumba yataonekana hapa.",
   "Previous payments": "Malipo yaliyopita", "No lease recorded": "Hakuna mkataba uliorekodiwa",
