@@ -5,7 +5,9 @@ import { VerificationBadge } from "./verification-badge";
 import { ReportSheet } from "@/components/safety/report-sheet";
 import { BlockUserDialog, useBlockState } from "@/components/safety/block-user-dialog";
 import { Ban } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useI18n } from "@/hooks/use-i18n";
 import { type PublicProfileData } from "@/lib/trust-engine";
 import { PersonReviews } from "@/components/reviews/person-reviews";
 import { cn } from "@/lib/utils";
@@ -71,6 +73,7 @@ export function PublicProfile({ profile, userId, className }: { profile: PublicP
           {profile.bio && (
             <p className="ds-body mt-5 max-w-2xl text-foreground/80">{profile.bio}</p>
           )}
+          {userId && <DalaliExtras userId={userId} />}
         </div>
       </div>
 
@@ -110,6 +113,22 @@ function Stat({ icon: Icon, label, value, sub }: { icon: React.ComponentType<{ c
       </div>
       <div className="mt-1.5 font-display text-xl font-semibold tracking-tight">{value}</div>
       {sub && <div className="mt-0.5 text-[11px] text-muted-foreground">{sub}</div>}
+    </div>
+  );
+}
+
+function DalaliExtras({ userId }: { userId: string }) {
+  const { t } = useI18n();
+  const [x, setX] = useState<{ areas_served: string[] | null; services: string[] | null; experience_years: number | null } | null>(null);
+  useEffect(() => {
+    supabase.rpc("public_dalali_extras", { _id: userId }).then(({ data }) => setX((data as any)?.[0] ?? null));
+  }, [userId]);
+  if (!x || (!x.areas_served?.length && !x.services?.length && !x.experience_years)) return null;
+  return (
+    <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+      {!!x.areas_served?.length && <span><MapPin className="mr-1 inline h-3.5 w-3.5" />{t("s3.areas")}: <span className="text-foreground">{x.areas_served.join(", ")}</span></span>}
+      {!!x.services?.length && <span>{x.services.map((s) => t(`s3.services.${s}`)).join(" · ")}</span>}
+      {!!x.experience_years && <span><Award className="mr-1 inline h-3.5 w-3.5" />{t("s3.experience")}: <span className="text-foreground">{x.experience_years}</span></span>}
     </div>
   );
 }
