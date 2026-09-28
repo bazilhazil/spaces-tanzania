@@ -4,6 +4,7 @@
  * and coarse filter values.
  */
 export type AnalyticsEvent =
+  | "become_dalali_clicked"
   | "property_viewed"
   | "search_performed"
   | "filter_used"
