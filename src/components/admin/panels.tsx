@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StatCard } from "@/components/ds/stat-card";
@@ -731,9 +732,12 @@ function PropertyAssignmentCard({ propertyId, propertyTitle }: { propertyId: str
 
 const ROLE_FILTERS = [
   { id: "all", label: "All roles" },
-  { id: "buyer", label: "Buyer / Tenant" },
+  { id: "buyer", label: "Buyer" },
   { id: "owner", label: "Owner" },
-  { id: "agent", label: "Agent" },
+  { id: "tenant", label: "Tenant" },
+  { id: "agent", label: "Dalali" },
+  { id: "agency", label: "Agency" },
+  { id: "property_manager", label: "Property Manager" },
   { id: "admin", label: "Admin" },
 ] as const;
 
@@ -746,6 +750,20 @@ const STATUS_FILTERS = [
 export function UsersPanel() {
   const { t } = useI18n();
   const { data: users, loading, reload } = useLive<AdminUser[]>(fetchAdminUsers, []);
+  const { data: groups } = useLive<{ tenants: Set<string>; agency: Set<string> }>(
+    async () => {
+      const [{ data: tn }, { data: ag }, { data: am }] = await Promise.all([
+        supabase.from("tenants").select("user_id").not("user_id", "is", null).limit(2000),
+        supabase.from("agencies").select("admin_id").limit(2000),
+        supabase.from("agency_members").select("user_id").eq("status", "active").limit(2000),
+      ]);
+      return {
+        tenants: new Set((tn ?? []).map((r) => r.user_id as string)),
+        agency: new Set([...(ag ?? []).map((r) => r.admin_id as string), ...(am ?? []).map((r) => r.user_id as string)]),
+      };
+    },
+    { tenants: new Set(), agency: new Set() },
+  );
   const [q, setQ] = useState("");
   const [role, setRole] = useState<(typeof ROLE_FILTERS)[number]["id"]>("all");
   const [status, setStatus] = useState<(typeof STATUS_FILTERS)[number]["id"]>("all");
@@ -757,15 +775,18 @@ export function UsersPanel() {
       users.filter((u) => {
         const text = `${u.name} ${u.email ?? ""} ${u.phone ?? ""}`.toLowerCase();
         if (q && !text.includes(q.toLowerCase())) return false;
-        if (role === "buyer" && u.roles.some((r) => r !== "buyer")) return false;
+        if (role === "buyer" && !(u.roles.includes("buyer") || u.roles.length === 0)) return false;
         if (role === "owner" && !u.roles.includes("owner")) return false;
+        if (role === "tenant" && !groups.tenants.has(u.id)) return false;
         if (role === "agent" && !u.roles.includes("agent")) return false;
+        if (role === "agency" && !groups.agency.has(u.id)) return false;
+        if (role === "property_manager" && !u.roles.includes("property_manager")) return false;
         if (role === "admin" && !u.roles.some((r) => r === "admin" || r === "super_admin")) return false;
         if (status === "active" && u.status !== "active") return false;
         if (status === "suspended" && u.status === "active") return false;
         return true;
       }),
-    [users, q, role, status],
+    [users, q, role, status, groups],
   );
 
   async function applyStatus(user: AdminUser, next: "suspended" | "active", reason: string) {
