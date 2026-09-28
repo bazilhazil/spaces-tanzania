@@ -6,6 +6,10 @@ import { Input } from "@/components/ui/input";
 import { StatCard, EmptyState, SkeletonCard } from "@/components/ds";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { px } from "@/lib/pm-sw";
+import { useI18n } from "@/hooks/use-i18n";
+import { signedDocumentUrl } from "@/lib/management-db";
+import { supabase } from "@/integrations/supabase/client";
 import { FormDialog, TextField, AreaField, SelectField, Field } from "./forms";
 import {
   createPayment, createTicket, fetchMyTenancy, formatTzs, labelize, uploadManagementDocument,
@@ -18,12 +22,20 @@ export function TenantPortal() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<MyTenancy | null>(null);
+  const [docs, setDocs] = useState<{ id: string; name: string; doc_type: string; storage_path: string; created_at: string }[]>([]);
+  useI18n();
 
   async function load() {
     if (!user) return;
     setLoading(true);
     try {
-      setData(await fetchMyTenancy(user.id));
+      const t = await fetchMyTenancy(user.id);
+      setData(t);
+      if (t) {
+        const { data: d } = await (supabase.from as unknown as (x: string) => { select: (q: string) => { eq: (c: string, v: string) => { order: (c: string, o: unknown) => Promise<{ data: unknown }> } } })("management_documents")
+          .select("id,name,doc_type,storage_path,created_at").eq("tenant_id", t.tenant.id).order("created_at", { ascending: false });
+        setDocs((d ?? []) as typeof docs);
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not load your tenancy");
     } finally {
@@ -38,8 +50,8 @@ export function TenantPortal() {
     return (
       <EmptyState
         icon={Home}
-        title="No tenancy yet"
-        description="When your landlord or property manager adds you as a tenant on Spaces, your home, rent and lease appear here."
+        title={px("No tenancy yet")}
+        description={px("When your landlord or property manager adds you as a tenant on Spaces, your home, rent and lease appear here.")}
       />
     );
   }
@@ -53,47 +65,50 @@ export function TenantPortal() {
   return (
     <div className="space-y-6">
       {/* MY HOME */}
-      <div className="ds-card space-y-1 p-5">
-        <p className="ds-caption">My home</p>
-        <p className="font-display text-xl font-semibold">{data.property?.title ?? "Your home"}</p>
+      <div className="ds-card space-y-3 p-5">
+        <div className="space-y-1">
+        <p className="ds-caption">{px("My property")}</p>
+        <p className="font-display text-xl font-semibold">{data.property?.title ?? px("Your home")}</p>
         <p className="text-sm text-muted-foreground">
-          {data.unit ? `Unit ${data.unit.name}` : "Whole property"}
+          {data.unit ? `${px("My unit")}: ${data.unit.name}` : px("Whole property")}
           {data.property?.district ? ` · ${data.property.district}` : ""}
           {data.property?.region ? `, ${data.property.region}` : ""}
         </p>
+        </div>
+        <ReportIssueForm tenancy={data} onDone={load} primary />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Current rent" value={formatTzs(data.lease?.monthly_rent ?? data.unit?.rent_amount)} icon={Wallet} />
-        <StatCard label="Amount due" value={formatTzs(outstanding)} icon={Wallet} tone={outstanding > 0 ? "danger" : "success"} />
-        <StatCard label="Next due date" value={nextDue?.due_date ?? "—"} icon={FileText} tone="muted" />
-        <StatCard label="Open requests" value={openTickets.length} icon={Wrench} tone="gold" />
+        <StatCard label={px("Monthly rent")} value={formatTzs(data.lease?.monthly_rent ?? data.unit?.rent_amount)} icon={Wallet} />
+        <StatCard label={px("Rent due")} value={formatTzs(outstanding)} icon={Wallet} tone={outstanding > 0 ? "danger" : "success"} />
+        <StatCard label={px("Rent paid")} value={formatTzs(data.charges.reduce((s, c) => s + Number(c.amount_paid || 0), 0))} icon={Wallet} tone="muted" />
+        <StatCard label={px("Open maintenance")} value={openTickets.length} icon={Wrench} tone="gold" />
       </div>
 
       {/* MY RENT */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-display text-xl font-semibold">My rent</h2>
+          <h2 className="font-display text-xl font-semibold">{px("Rent")}</h2>
           {nextDue && <ProofOfPaymentForm tenancy={data} chargeId={nextDue.id} onDone={load} />}
         </div>
         {!data.charges.length ? (
-          <EmptyState icon={Wallet} title="No rent records yet" description="Rent charges added by your landlord appear here." />
+          <EmptyState icon={Wallet} title={px("No rent records yet")} description={px("Rent charges added by your landlord appear here.")} />
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {data.charges.map((c) => (
               <div key={c.id} className="ds-card space-y-1 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="font-semibold">{formatTzs(c.amount_due)}</p>
-                  <Badge variant={c.status === "paid" ? "default" : "secondary"}>{labelize(c.status)}</Badge>
+                  <Badge variant={c.status === "paid" ? "default" : "secondary"}>{px(c.status === "paid" ? "Paid" : c.status === "partial" ? "Partial" : c.status === "overdue" ? "Overdue" : "Due")}</Badge>
                 </div>
-                <p className="text-sm text-muted-foreground">Due {c.due_date} · Paid {formatTzs(c.amount_paid)}</p>
+                <p className="text-sm text-muted-foreground">{px("Due date")} {c.due_date} · {px("Amount paid")} {formatTzs(c.amount_paid)} · {px("Outstanding")} {formatTzs(Math.max(Number(c.amount_due) - Number(c.amount_paid), 0))}</p>
               </div>
             ))}
           </div>
         )}
         {data.payments.length > 0 && (
           <div className="ds-card p-4">
-            <p className="ds-caption mb-2">Previous payments</p>
+            <p className="ds-caption mb-2">{px("Previous payments")}</p>
             <ul className="space-y-2">
               {data.payments.map((p) => (
                 <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
@@ -108,9 +123,9 @@ export function TenantPortal() {
 
       {/* MY LEASE */}
       <section className="space-y-3">
-        <h2 className="font-display text-xl font-semibold">My lease</h2>
+        <h2 className="font-display text-xl font-semibold">{px("Lease")}</h2>
         {!data.lease ? (
-          <EmptyState icon={FileText} title="No lease recorded" description="Your landlord has not added a lease for your tenancy yet." />
+          <EmptyState icon={FileText} title={px("No lease recorded")} description={px("Your landlord has not added a lease for your tenancy yet.")} />
         ) : (
           <div className="ds-card space-y-1 p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -118,11 +133,11 @@ export function TenantPortal() {
               <Badge variant="secondary">{labelize(data.lease.status)}</Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              {data.lease.start_date} → {data.lease.end_date ?? "open ended"} · Notice {data.lease.notice_period_days ?? 0} days
+              {data.lease.start_date} → {data.lease.end_date ?? px("open ended")} · {px("Notice")} {data.lease.notice_period_days ?? 0}
             </p>
             {data.lease.late_fee_type !== "none" && (
               <p className="text-sm text-muted-foreground">
-                Late payment: {data.lease.late_fee_type === "percent" ? `${data.lease.late_fee_value ?? 0}%` : formatTzs(data.lease.late_fee_value)}
+                {px("Late fee")}: {data.lease.late_fee_type === "percent" ? `${data.lease.late_fee_value ?? 0}%` : formatTzs(data.lease.late_fee_value)}
                 {data.lease.late_fee_grace_days ? ` after ${data.lease.late_fee_grace_days} days` : ""}
               </p>
             )}
@@ -134,11 +149,11 @@ export function TenantPortal() {
       {/* MAINTENANCE */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-display text-xl font-semibold">Maintenance</h2>
+          <h2 className="font-display text-xl font-semibold">{px("Maintenance")}</h2>
           <ReportIssueForm tenancy={data} onDone={load} />
         </div>
         {!data.tickets.length ? (
-          <EmptyState icon={Wrench} title="No requests yet" description="Report a problem and your landlord or manager will see it here." />
+          <EmptyState icon={Wrench} title={px("No maintenance requests")} description={px("Report a problem and your landlord or manager will see it here.")} />
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {data.tickets.map((t) => (
@@ -148,6 +163,28 @@ export function TenantPortal() {
                   <Badge variant="secondary">{labelize(t.status)}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">{t.description}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* DOCUMENTS */}
+      <section className="space-y-3">
+        <h2 className="font-display text-xl font-semibold">{px("Documents")}</h2>
+        {!docs.length ? (
+          <EmptyState icon={FileText} title={px("No documents yet")} description={px("Documents your landlord shares with you appear here.")} />
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2">
+            {docs.map((d) => (
+              <div key={d.id} className="ds-card flex items-center justify-between gap-2 p-4">
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">{d.name}</p>
+                  <p className="text-xs text-muted-foreground">{labelize(d.doc_type)} · {d.created_at.slice(0, 10)}</p>
+                </div>
+                <Button size="sm" variant="outline" className="shrink-0 rounded-full" onClick={async () => {
+                  const url = await signedDocumentUrl(d.storage_path); if (url) window.open(url, "_blank", "noopener");
+                }}>{px("Open")}</Button>
               </div>
             ))}
           </div>
@@ -172,7 +209,7 @@ function ProofOfPaymentForm({ tenancy, chargeId, onDone }: {
       open={open} onOpenChange={setOpen}
       title="Upload proof of payment"
       description="Your landlord or manager checks it and confirms. Nothing is confirmed automatically."
-      trigger={<Button className="w-full rounded-full sm:w-auto"><Upload className="mr-1 h-4 w-4" /> Upload proof of payment</Button>}
+      trigger={<Button className="w-full rounded-full sm:w-auto"><Upload className="mr-1 h-4 w-4" /> {px("Upload proof of payment")}</Button>}
       submitLabel="Send for verification"
       onSubmit={async () => {
         if (!user || !amount) { toast.error("Amount is required"); return; }
@@ -202,7 +239,7 @@ function ProofOfPaymentForm({ tenancy, chargeId, onDone }: {
   );
 }
 
-function ReportIssueForm({ tenancy, onDone }: { tenancy: MyTenancy; onDone: () => void }) {
+function ReportIssueForm({ tenancy, onDone, primary }: { tenancy: MyTenancy; onDone: () => void; primary?: boolean }) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState("plumbing");
@@ -213,11 +250,11 @@ function ReportIssueForm({ tenancy, onDone }: { tenancy: MyTenancy; onDone: () =
   return (
     <FormDialog
       open={open} onOpenChange={setOpen}
-      title="Report an issue"
-      trigger={<Button variant="outline" className="w-full rounded-full sm:w-auto">Report an issue</Button>}
+      title="Report maintenance"
+      trigger={<Button variant={primary ? "default" : "outline"} size={primary ? "lg" : "default"} className="w-full rounded-full sm:w-auto"><Wrench className="mr-1 h-4 w-4" /> {px("Report maintenance").toUpperCase()}</Button>}
       submitLabel="Send request"
       onSubmit={async () => {
-        if (!user || !description.trim()) { toast.error("Please describe the problem"); return; }
+        if (!user || !description.trim()) { toast.error(px("What is the problem?")); return; }
         const ticket = await createTicket({
           property_id: tenancy.tenant.property_id, unit_id: tenancy.tenant.unit_id,
           lease_id: tenancy.lease?.id ?? null, tenant_id: tenancy.tenant.id,
@@ -230,7 +267,7 @@ function ReportIssueForm({ tenancy, onDone }: { tenancy: MyTenancy; onDone: () =
             propertyId: tenancy.tenant.property_id, tenantId: tenancy.tenant.id, ticketId: ticket.id,
           });
         }
-        toast.success("Request sent"); setOpen(false); setDescription(""); setFile(null); onDone();
+        toast.success(px("Request sent")); setOpen(false); setDescription(""); setFile(null); onDone();
       }}
     >
       <SelectField label="Category" value={category} onChange={setCategory} options={opts(TICKET_CATEGORIES)} />

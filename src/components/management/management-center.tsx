@@ -1,8 +1,10 @@
 import { ManagerInvitations } from "@/components/management/manager-invitations";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import {
-  Building2, Users, FileText, Wallet, Wrench, HardHat, Plus, CheckCircle2, XCircle, Home,
+  Building2, Users, FileText, Wallet, Wrench, HardHat, Plus, CheckCircle2, XCircle, Home, Receipt, Handshake, ArrowRight,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { px } from "@/lib/pm-sw";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +18,8 @@ import {
   buildMetrics, createCharge, createContractor, createLease, createPayment, createTenant, createTicket,
   createUnit, fetchCharges, fetchContractors, fetchLeases, fetchManagedProperties, fetchPayments,
   fetchTenants, fetchTickets, fetchUnits, fetchDocuments, signedDocumentUrl, formatTzs, labelize,
+  fetchBuildings, fetchExpenses, createBuilding, createExpense, fetchActiveDealsCount, uploadPrivateFile,
+  EXPENSE_CATEGORIES, type Building, type Expense,
   reviewPayment, updateTicket, updateUnit, updateTenant, updateLease, uploadManagementDocument, type ManagementDocument,
   LEASE_STATUSES, OCCUPANCY_STATUSES, PAYMENT_METHODS, TICKET_CATEGORIES, TICKET_STATUSES,
   type Contractor, type Lease, type ManagedProperty, type MaintenanceTicket, type RentCharge,
@@ -37,6 +41,10 @@ export function ManagementCenter() {
   const [payments, setPayments] = useState<RentPayment[]>([]);
   const [tickets, setTickets] = useState<MaintenanceTicket[]>([]);
   const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [buildings, setBuildings] = useState<Building[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [activeDeals, setActiveDeals] = useState(0);
+  const [tab, setTab] = useState("units");
 
   async function load() {
     if (!user) return;
@@ -45,10 +53,12 @@ export function ManagementCenter() {
       const props = await fetchManagedProperties(user.id);
       setProperties(props);
       const ids = props.map((p) => p.id);
-      const [u, t, l, c, p, k, co, docs] = await Promise.all([
+      const [u, t, l, c, p, k, co, docs, b, ex, ad] = await Promise.all([
         fetchUnits(ids), fetchTenants(ids), fetchLeases(ids), fetchCharges(ids),
         fetchPayments(ids), fetchTickets(ids), fetchContractors(user.id), fetchDocuments(ids),
+        fetchBuildings(ids), fetchExpenses(ids), fetchActiveDealsCount(ids),
       ]);
+      setBuildings(b); setExpenses(ex); setActiveDeals(ad);
       setUnits(u); setTenants(t); setLeases(l); setCharges(c);
       setPayments(p); setTickets(k); setContractors(co); setDocuments(docs);
     } catch (e) {
@@ -70,6 +80,20 @@ export function ManagementCenter() {
   const propTitle = (id: string) => properties.find((p) => p.id === id)?.title ?? "Property";
   const unitName = (id?: string | null) => units.find((u) => u.id === id)?.name ?? "Whole property";
   const tenantName = (id?: string | null) => tenants.find((t) => t.id === id)?.full_name ?? "—";
+  const buildingName = (id?: string | null) => buildings.find((b) => b.id === id)?.name;
+  const monthKey = new Date().toISOString().slice(0, 7);
+  const rentDue = charges.filter((c) => c.status !== "paid").reduce((s, c) => s + Math.max(Number(c.amount_due) - Number(c.amount_paid), 0), 0);
+  const monthExpenses = expenses.filter((e) => e.expense_date.startsWith(monthKey)).reduce((s, e) => s + Number(e.amount || 0), 0);
+  const reserved = units.filter((u) => u.occupancy_status === "reserved").length;
+  const overdueCount = charges.filter((c) => c.status === "overdue").length;
+  const unassigned = tickets.filter((k) => k.status === "new").length;
+  const go = (t: string) => { setTab(t); setTimeout(() => document.getElementById("pm-tabs")?.scrollIntoView({ behavior: "smooth" }), 50); };
+  const nextActions = [
+    !units.length && { label: "Add your first unit", tab: "units" },
+    overdueCount > 0 && { label: "Collect overdue rent", tab: "rent", n: overdueCount },
+    unassigned > 0 && { label: "Assign maintenance", tab: "maintenance", n: unassigned },
+    metrics.vacant > 0 && { label: "Fill vacant units", tab: "units", n: metrics.vacant },
+  ].filter(Boolean) as { label: string; tab: string; n?: number }[];
 
   if (loading) {
     return <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[0, 1, 2, 3].map((i) => <SkeletonCard key={i} />)}</div>;
@@ -92,34 +116,111 @@ export function ManagementCenter() {
   return (
     <div className="space-y-6">
       <ManagerInvitations onChange={() => void load()} />
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-        <StatCard label={tr("mgmt.properties")} value={metrics.properties} icon={Building2} />
-        <StatCard label={tr("mgmt.unitsShort")} value={metrics.units} icon={Home} tone="muted" />
-        <StatCard label={tr("mgmt.occupied")} value={metrics.occupied} icon={Users} tone="success" />
-        <StatCard label={tr("mgmt.vacant")} value={metrics.vacant} icon={Home} tone="gold" />
-        <StatCard label={tr("mgmt.expectedRent")} value={formatTzs(metrics.expectedRent)} icon={Wallet} />
-        <StatCard label={tr("mgmt.collectedRent")} value={formatTzs(metrics.collectedRent)} icon={Wallet} tone="success" />
-        <StatCard label={tr("mgmt.outstandingRent")} value={formatTzs(metrics.outstandingRent)} icon={Wallet} tone="danger" />
-        <StatCard label={tr("mgmt.openMaintenance")} value={metrics.openMaintenance} icon={Wrench} tone="muted" />
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <KpiButton label={px("Total properties")} value={metrics.properties} icon={Building2} onClick={() => go("units")} />
+        <KpiButton label={px("Total buildings")} value={buildings.length} icon={Building2} onClick={() => go("buildings")} />
+        <KpiButton label={px("Total units")} value={metrics.units} icon={Home} onClick={() => go("units")} />
+        <KpiButton label={px("Occupied units")} value={metrics.occupied} icon={Users} onClick={() => go("tenants")} />
+        <KpiButton label={px("Vacant units")} value={metrics.vacant} icon={Home} onClick={() => go("units")} />
+        <KpiButton label={px("Reserved units")} value={reserved} icon={Home} onClick={() => go("units")} />
+        <KpiButton label={px("Rent due")} value={formatTzs(rentDue)} icon={Wallet} onClick={() => go("rent")} />
+        <KpiButton label={px("Rent collected")} value={formatTzs(metrics.collectedRent)} icon={Wallet} onClick={() => go("rent")} />
+        <KpiButton label={px("Outstanding rent")} value={formatTzs(metrics.outstandingRent)} icon={Wallet} onClick={() => go("rent")} />
+        <KpiButton label={px("Open maintenance")} value={metrics.openMaintenance} icon={Wrench} onClick={() => go("maintenance")} />
+        <KpiButton label={px("Monthly expenses")} value={formatTzs(monthExpenses)} icon={Receipt} onClick={() => go("expenses")} />
+        <Link to="/deals" className="ds-card flex min-w-0 flex-col gap-1 p-3 text-left transition-colors hover:border-primary sm:p-4">
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Handshake className="h-3.5 w-3.5" />{px("Active deals")}</span>
+          <span className="truncate text-lg font-semibold sm:text-xl">{activeDeals}</span>
+        </Link>
       </div>
 
-      <Tabs defaultValue="units">
+      <div className="ds-card space-y-2 p-4">
+        <h3 className="font-semibold">{px("Next actions")}</h3>
+        {nextActions.length ? (
+          <div className="flex flex-wrap gap-2">
+            {nextActions.map((a) => (
+              <Button key={a.label} size="sm" className="rounded-full" onClick={() => go(a.tab)}>
+                {px(a.label)}{a.n ? ` (${a.n})` : ""} <ArrowRight className="ml-1 h-3.5 w-3.5" />
+              </Button>
+            ))}
+          </div>
+        ) : <p className="text-sm text-muted-foreground">{px("Nothing urgent — everything is up to date.")}</p>}
+      </div>
+
+      <Tabs value={tab} onValueChange={setTab} id="pm-tabs">
         <div className="-mx-1 overflow-x-auto px-1">
           <TabsList className="w-max">
+            <TabsTrigger value="buildings">{px("Buildings")}</TabsTrigger>
             <TabsTrigger value="units">{tr("mgmt.unitsShort")}</TabsTrigger>
             <TabsTrigger value="tenants">{tr("mgmt.tenants")}</TabsTrigger>
             <TabsTrigger value="leases">{tr("mgmt.leases")}</TabsTrigger>
             <TabsTrigger value="rent">{tr("mgmt.rent")}</TabsTrigger>
             <TabsTrigger value="maintenance">{tr("mgmt.maintenance")}</TabsTrigger>
+            <TabsTrigger value="expenses">{px("Expenses")}</TabsTrigger>
             <TabsTrigger value="contractors">{tr("mgmt.contractors")}</TabsTrigger>
             <TabsTrigger value="documents">{tr("mgmt.documents")}</TabsTrigger>
             <TabsTrigger value="reports">{tr("mgmt.reports")}</TabsTrigger>
           </TabsList>
         </div>
 
+        {/* BUILDINGS */}
+        <TabsContent value="buildings" className="mt-4 space-y-4">
+          <BuildingForm properties={propOptions} ownerFor={ownerFor} onDone={load} />
+          {!buildings.length ? (
+            <EmptyState icon={Building2} title={px("No buildings yet")} description={px("Group units into buildings (e.g. Block A) — optional.")} />
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {buildings.map((b) => {
+                const bu = units.filter((u) => u.building_id === b.id);
+                return (
+                  <div key={b.id} className="ds-card space-y-1 p-4">
+                    <p className="truncate font-semibold">{b.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{propTitle(b.property_id)}{b.floors ? ` · ${b.floors} ${px("Floors").toLowerCase()}` : ""}</p>
+                    <p className="text-sm">{bu.length} {px("Units").toLowerCase()} · {bu.filter((u) => u.occupancy_status === "occupied").length} {px("Occupied").toLowerCase()} · {bu.filter((u) => u.occupancy_status === "vacant").length} {px("Vacant").toLowerCase()}</p>
+                    {b.description && <p className="text-xs text-muted-foreground">{b.description}</p>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* EXPENSES */}
+        <TabsContent value="expenses" className="mt-4 space-y-4">
+          <ExpenseForm properties={propOptions} ownerFor={ownerFor} buildings={buildings} units={units} onDone={load} />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <StatCard label={px("Total income")} value={formatTzs(metrics.collectedRent)} icon={Wallet} tone="success" />
+            <StatCard label={px("Total expenses")} value={formatTzs(expenses.reduce((s, e) => s + Number(e.amount || 0), 0))} icon={Receipt} tone="danger" />
+            <StatCard label={px("Net property cash flow")} value={formatTzs(metrics.collectedRent - expenses.reduce((s, e) => s + Number(e.amount || 0), 0))} icon={Wallet} />
+          </div>
+          {!expenses.length ? (
+            <EmptyState icon={Receipt} title={px("No expenses yet")} description={px("Record costs such as repairs, security or utilities to see your net cash flow.")} />
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2">
+              {[...expenses].reverse().map((e) => (
+                <div key={e.id} className="ds-card space-y-1 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="min-w-0 truncate font-semibold">{labelize(e.category)} · {formatTzs(e.amount)}</p>
+                    <span className="text-xs text-muted-foreground">{e.expense_date}</span>
+                  </div>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {[propTitle(e.property_id), buildingName(e.building_id), e.unit_id ? unitName(e.unit_id) : null, e.supplier].filter(Boolean).join(" · ")}
+                  </p>
+                  {e.description && <p className="text-sm">{e.description}</p>}
+                  {e.receipt_path && (
+                    <Button size="sm" variant="outline" className="rounded-full" onClick={async () => {
+                      const url = await signedDocumentUrl(e.receipt_path!); if (url) window.open(url, "_blank", "noopener");
+                    }}>{px("Receipt")}</Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
         {/* UNITS ---------------------------------------------------------- */}
         <TabsContent value="units" className="mt-4 space-y-4">
-          <UnitForm properties={propOptions} ownerFor={ownerFor} onDone={load} />
+          <UnitForm properties={propOptions} ownerFor={ownerFor} buildings={buildings} onDone={load} />
           {!units.length ? (
             <EmptyState icon={Home} title={tr("modeUi.noUnits")} description={tr("modeUi.noUnitsBody")} />
           ) : (
@@ -129,17 +230,17 @@ export function ManagementCenter() {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
                       <p className="truncate font-semibold">{u.name}</p>
-                      <p className="truncate text-xs text-muted-foreground">{propTitle(u.property_id)}</p>
+                      <p className="truncate text-xs text-muted-foreground">{[propTitle(u.property_id), buildingName(u.building_id), u.floor ? `${px("Floor")} ${u.floor}` : null].filter(Boolean).join(" · ")}</p>
                     </div>
                     <Badge variant="secondary">{labelize(u.occupancy_status)}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {u.bedrooms ?? 0} bed · {u.bathrooms ?? 0} bath · {formatTzs(u.rent_amount)}/month
+                    {u.bedrooms ?? 0} {px("bed")} · {u.bathrooms ?? 0} {px("bath")}{u.size_sqm ? ` · ${u.size_sqm} m²` : ""} · {formatTzs(u.rent_amount)}/{px("month")}
                   </p>
                   <SelectField
-                    label="Occupancy"
+                    label="Status"
                     value={u.occupancy_status}
-                    options={opts(OCCUPANCY_STATUSES)}
+                    options={opts(OCCUPANCY_STATUSES.includes(u.occupancy_status) ? OCCUPANCY_STATUSES : [...OCCUPANCY_STATUSES, u.occupancy_status])}
                     onChange={async (v) => {
                       try {
                         await updateUnit(u.id, { occupancy_status: v });
@@ -149,7 +250,7 @@ export function ManagementCenter() {
                     }}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Tenant: {tenants.filter((t) => t.unit_id === u.id && t.status !== "past").map((t) => t.full_name).join(", ") || "None"}
+                    {px("Tenant")}: {tenants.filter((t) => t.unit_id === u.id && t.status !== "past").map((t) => t.full_name).join(", ") || px("None")}
                   </p>
                   <UnitEditForm unit={u} propTitle={propTitle(u.property_id)} onDone={load} />
                   {u.occupancy_status === "available" && (
@@ -167,7 +268,7 @@ export function ManagementCenter() {
         <TabsContent value="tenants" className="mt-4 space-y-4">
           <TenantForm properties={propOptions} units={units} ownerFor={ownerFor} onDone={load} />
           {!tenants.length ? (
-            <EmptyState icon={Users} title="No tenants yet" description="Add your first tenant to start tracking rent, leases and maintenance." />
+            <EmptyState icon={Users} title={px("No tenants yet")} description={px("Add your first tenant to start tracking rent, leases and maintenance.")} />
           ) : (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {tenants.map((t) => (
@@ -208,7 +309,7 @@ export function ManagementCenter() {
           <LeaseForm properties={propOptions} units={units} tenants={tenants} ownerFor={ownerFor} onDone={load} />
           {!tenants.length && <p className="text-sm text-muted-foreground">Add a tenant first (Tenants tab) — a lease is always linked to a tenant.</p>}
           {!leases.length ? (
-            <EmptyState icon={FileText} title="No leases yet" description="Record a lease to track rent, renewal dates and late-payment terms." />
+            <EmptyState icon={FileText} title={px("No leases yet")} description={px("Record a lease to track rent, renewal dates and late-payment terms.")} />
           ) : (
             <div className="grid gap-3 md:grid-cols-2">
               {leases.map((l) => (
@@ -255,7 +356,7 @@ export function ManagementCenter() {
 
           {payments.some((p) => p.status === "pending_verification") && (
             <div className="space-y-3">
-              <h3 className="font-semibold">Payments awaiting verification</h3>
+              <h3 className="font-semibold">{px("Payments awaiting verification")}</h3>
               {payments.filter((p) => p.status === "pending_verification").map((p) => (
                 <div key={p.id} className="ds-card flex flex-wrap items-center justify-between gap-3 p-4">
                   <div className="min-w-0">
@@ -267,41 +368,53 @@ export function ManagementCenter() {
                   <div className="flex flex-wrap gap-2">
                     <Button size="sm" className="rounded-full" onClick={async () => {
                       try { await reviewPayment(p.id, true); toast.success("Payment approved"); void load(); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not update"); }
-                    }}><CheckCircle2 className="mr-1 h-4 w-4" /> Approve</Button>
+                    }}><CheckCircle2 className="mr-1 h-4 w-4" /> {px("Approve")}</Button>
                     <Button size="sm" variant="outline" className="rounded-full" onClick={async () => {
                       try { await reviewPayment(p.id, false); toast.success("Payment rejected"); void load(); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not update"); }
-                    }}><XCircle className="mr-1 h-4 w-4" /> Reject</Button>
+                    }}><XCircle className="mr-1 h-4 w-4" /> {px("Reject")}</Button>
                   </div>
                 </div>
               ))}
             </div>
           )}
 
+          <p className="rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">{px("Online rent payment will be available after the payment provider is connected. Record Mobile Money, bank or cash payments manually for now.")}</p>
           {!charges.length ? (
-            <EmptyState icon={Wallet} title="No rent records yet" description="Create a rent charge for a lease to start tracking what is due, paid and outstanding." />
+            <EmptyState icon={Wallet} title={px("No rent records yet")} description="Create a rent charge for a lease to start tracking what is due, paid and outstanding." />
           ) : (
-            <div className="grid gap-3 md:grid-cols-2">
-              {charges.map((c) => (
-                <div key={c.id} className="ds-card space-y-1 p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="min-w-0 truncate font-semibold">{tenantName(c.tenant_id)}</p>
-                    <Badge variant={c.status === "paid" ? "default" : "secondary"}>{labelize(c.status)}</Badge>
+            <div className="space-y-5">
+              {([
+                ["This month", charges.filter((c) => c.due_date.startsWith(monthKey))],
+                ["Outstanding", charges.filter((c) => !c.due_date.startsWith(monthKey) && c.status !== "paid")],
+                ["Previous months", charges.filter((c) => !c.due_date.startsWith(monthKey) && c.status === "paid")],
+              ] as [string, RentCharge[]][]).map(([title, list]) => list.length ? (
+                <div key={title} className="space-y-2">
+                  <h3 className="font-semibold">{px(title)} <span className="text-sm font-normal text-muted-foreground">({list.length})</span></h3>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {list.map((c) => (
+                      <div key={c.id} className="ds-card space-y-1 p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="min-w-0 truncate font-semibold">{tenantName(c.tenant_id)}</p>
+                          <Badge variant={c.status === "paid" ? "default" : c.status === "overdue" ? "destructive" : "secondary"}>{px(rentLabel(c.status))}</Badge>
+                        </div>
+                        <p className="text-sm">{px("Monthly rent")}: {formatTzs(c.amount_due)} · {px("Due date")}: {c.due_date}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {propTitle(c.property_id)} · {unitName(c.unit_id)} · {px("Amount paid")} {formatTzs(c.amount_paid)} · {px("Outstanding")} {formatTzs(Math.max(Number(c.amount_due) - Number(c.amount_paid), 0))}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-sm">{formatTzs(c.amount_due)} due {c.due_date}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {propTitle(c.property_id)} · {unitName(c.unit_id)} · Paid {formatTzs(c.amount_paid)} · Outstanding {formatTzs(Math.max(Number(c.amount_due) - Number(c.amount_paid), 0))}
-                  </p>
                 </div>
-              ))}
+              ) : null)}
             </div>
           )}
         </TabsContent>
 
         {/* MAINTENANCE ---------------------------------------------------- */}
         <TabsContent value="maintenance" className="mt-4 space-y-4">
-          <TicketForm properties={propOptions} units={units} tenants={tenants} ownerFor={ownerFor} onDone={load} />
+          <TicketForm properties={propOptions} units={units} tenants={tenants} buildings={buildings} ownerFor={ownerFor} onDone={load} />
           {!tickets.length ? (
-            <EmptyState icon={Wrench} title="No maintenance requests" description="Requests raised by you or by a tenant appear here." />
+            <EmptyState icon={Wrench} title={px("No maintenance requests")} description={px("Requests raised by you or by a tenant appear here.")} />
           ) : (
             <div className="grid gap-3 md:grid-cols-2">
               {tickets.map((k) => (
@@ -311,23 +424,32 @@ export function ManagementCenter() {
                     <Badge variant="secondary">{labelize(k.status)}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{k.description}</p>
-                  <p className="text-xs text-muted-foreground">{unitName(k.unit_id)} · Tenant: {tenantName(k.tenant_id)} · Opened {k.created_at.slice(0, 10)}</p>
+                  <p className="text-xs text-muted-foreground">{[buildingName(k.building_id), unitName(k.unit_id)].filter(Boolean).join(" · ")} · {px("Tenant")}: {tenantName(k.tenant_id)} · {px("Opened")} {k.created_at.slice(0, 10)}</p>
+                  {!!k.photos?.length && (
+                    <div className="flex flex-wrap gap-2">
+                      {k.photos.map((ph, i) => (
+                        <Button key={ph} size="sm" variant="outline" className="rounded-full" onClick={async () => {
+                          const url = await signedDocumentUrl(ph); if (url) window.open(url, "_blank", "noopener");
+                        }}>{px("Photos")} {i + 1}</Button>
+                      ))}
+                    </div>
+                  )}
                   <p className="text-xs text-muted-foreground">
-                    Priority {labelize(k.priority)} · Estimated {formatTzs(k.estimated_cost)} · Approved {formatTzs(k.approved_cost)} · Actual {formatTzs(k.actual_cost)}
+                    {px("Priority")} {labelize(k.priority)} · {px("Estimated")} {formatTzs(k.estimated_cost)} · {px("Actual")} {formatTzs(k.actual_cost)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Contractor: {contractors.find((c) => c.id === k.contractor_id)?.name ?? "Not assigned"}
+                    {px("Assigned to")}: {contractors.find((c) => c.id === k.contractor_id)?.name ?? px("Not assigned")}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <SelectField
-                      label="Status" value={k.status} options={opts(TICKET_STATUSES)}
+                      label="Status" value={k.status} options={opts(TICKET_STATUSES.includes(k.status) ? TICKET_STATUSES : [...TICKET_STATUSES, k.status])}
                       onChange={async (v) => {
                         try { await updateTicket(k.id, { status: v, closed_at: v === "closed" ? new Date().toISOString() : null });
                         toast.success("Ticket updated"); void load(); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not update"); }
                       }}
                     />
                     <SelectField
-                      label="Contractor" value={k.contractor_id ?? "none"}
+                      label="Assigned to" value={k.contractor_id ?? "none"}
                       options={[{ value: "none", label: "Not assigned" }, ...contractors.map((c) => ({ value: c.id, label: c.name }))]}
                       onChange={async (v) => {
                         await updateTicket(k.id, {
@@ -349,7 +471,7 @@ export function ManagementCenter() {
         <TabsContent value="contractors" className="mt-4 space-y-4">
           <ContractorForm onDone={load} />
           {!contractors.length ? (
-            <EmptyState icon={HardHat} title="No contractors yet" description="Add the plumbers, electricians and handymen you work with so you can assign them to jobs." />
+            <EmptyState icon={HardHat} title={px("No contractors yet")} description={px("Add the plumbers, electricians and handymen you work with so you can assign them to jobs.")} />
           ) : (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {contractors.map((c) => (
@@ -431,7 +553,7 @@ export function ManagementCenter() {
             <StatCard label="Maintenance cost (actual)" value={formatTzs(tickets.reduce((s, k) => s + Number(k.actual_cost || 0), 0))} icon={Wrench} tone="muted" />
           </div>
           <div className="ds-card overflow-x-auto p-4">
-            <h3 className="mb-3 font-semibold">Property overview</h3>
+            <h3 className="mb-3 font-semibold">{px("Property overview")}</h3>
             <table className="w-full min-w-[560px] text-sm">
               <thead className="text-left text-xs text-muted-foreground">
                 <tr><th className="py-1">Property</th><th>Units</th><th>Occupied</th><th>Tenants</th><th>Expected</th><th>Collected</th><th>Open jobs</th></tr>
@@ -466,12 +588,13 @@ export function ManagementCenter() {
 
 const AddButton = forwardRef<HTMLButtonElement, { label: string } & React.ButtonHTMLAttributes<HTMLButtonElement>>(
   function AddButton({ label, ...rest }, ref) {
-    return <Button ref={ref} {...rest} className="w-full rounded-full sm:w-auto"><Plus className="mr-1 h-4 w-4" /> {label}</Button>;
+    return <Button ref={ref} {...rest} className="w-full rounded-full sm:w-auto"><Plus className="mr-1 h-4 w-4" /> {px(label)}</Button>;
   },
 );
 
-function UnitForm({ properties, ownerFor, onDone }: {
+function UnitForm({ properties, ownerFor, buildings, onDone }: {
   properties: { value: string; label: string }[];
+  buildings: Building[];
   ownerFor: (id: string) => string;
   onDone: () => void;
 }) {
@@ -485,6 +608,10 @@ function UnitForm({ properties, ownerFor, onDone }: {
   const [rent, setRent] = useState("");
   const [deposit, setDeposit] = useState("");
   const [service, setService] = useState("");
+  const [buildingId, setBuildingId] = useState("none");
+  const [floor, setFloor] = useState("");
+  const [size, setSize] = useState("");
+  const [status, setStatus] = useState("vacant");
 
   return (
     <FormDialog
@@ -498,11 +625,15 @@ function UnitForm({ properties, ownerFor, onDone }: {
           bedrooms: bedrooms ? Number(bedrooms) : null, bathrooms: bathrooms ? Number(bathrooms) : null,
           rent_amount: rent ? Number(rent) : null, deposit_amount: deposit ? Number(deposit) : null,
           service_charge: service ? Number(service) : null,
+          building_id: buildingId === "none" ? null : buildingId, floor: floor.trim() || null,
+          size_sqm: size ? Number(size) : null, occupancy_status: status,
         });
-        toast.success("Unit added"); setOpen(false); setName(""); onDone();
+        toast.success(px("Saved")); setOpen(false); setName(""); onDone();
       }}
     >
-      <SelectField label="Property" value={propertyId} onChange={setPropertyId} options={properties} />
+      <SelectField label="Property" value={propertyId} onChange={(v) => { setPropertyId(v); setBuildingId("none"); }} options={properties} />
+      <SelectField label="Building" value={buildingId} onChange={setBuildingId}
+        options={[{ value: "none", label: "No building" }, ...buildings.filter((b) => b.property_id === propertyId).map((b) => ({ value: b.id, label: b.name }))]} />
       <TextField label="Unit name or number" value={name} onChange={setName} placeholder="A01" />
       <SelectField label="Unit type" value={unitType} onChange={setUnitType}
         options={opts(["apartment", "house", "room", "office", "shop", "warehouse", "other"])} />
@@ -510,6 +641,11 @@ function UnitForm({ properties, ownerFor, onDone }: {
         <TextField label="Bedrooms" value={bedrooms} onChange={setBedrooms} type="number" />
         <TextField label="Bathrooms" value={bathrooms} onChange={setBathrooms} type="number" />
       </div>
+      <div className="grid grid-cols-2 gap-3">
+        <TextField label="Floor" value={floor} onChange={setFloor} />
+        <TextField label="Size (m²)" value={size} onChange={setSize} type="number" />
+      </div>
+      <SelectField label="Status" value={status} onChange={setStatus} options={opts(OCCUPANCY_STATUSES)} />
       <TextField label="Rent per month (TZS)" value={rent} onChange={setRent} type="number" />
       <div className="grid grid-cols-2 gap-3">
         <TextField label="Deposit (TZS)" value={deposit} onChange={setDeposit} type="number" />
@@ -677,7 +813,7 @@ function PaymentForm({ charges, leases, onDone }: { charges: RentCharge[]; lease
     <FormDialog
       open={open} onOpenChange={setOpen}
       title="Record a payment" description="Recorded by you and marked as received — no automatic bank checking."
-      trigger={<Button variant="outline" className="w-full rounded-full sm:w-auto">Record payment</Button>}
+      trigger={<Button variant="outline" className="w-full rounded-full sm:w-auto">{px("Record payment")}</Button>}
       submitLabel="Record payment"
       onSubmit={async () => {
         if (!charge || !amount) { toast.error("Charge and amount are required"); return; }
@@ -700,9 +836,9 @@ function PaymentForm({ charges, leases, onDone }: { charges: RentCharge[]; lease
   );
 }
 
-function TicketForm({ properties, units, tenants, ownerFor, onDone }: {
+function TicketForm({ properties, units, tenants, buildings, ownerFor, onDone }: {
   properties: { value: string; label: string }[];
-  units: Unit[]; tenants: Tenant[];
+  units: Unit[]; tenants: Tenant[]; buildings: Building[];
   ownerFor: (id: string) => string;
   onDone: () => void;
 }) {
@@ -714,6 +850,9 @@ function TicketForm({ properties, units, tenants, ownerFor, onDone }: {
   const [category, setCategory] = useState("plumbing");
   const [priority, setPriority] = useState("normal");
   const [description, setDescription] = useState("");
+  const [buildingId, setBuildingId] = useState("none");
+  const [estimate, setEstimate] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
 
   return (
     <FormDialog
@@ -725,11 +864,15 @@ function TicketForm({ properties, units, tenants, ownerFor, onDone }: {
           property_id: propertyId, owner_id: ownerFor(propertyId),
           unit_id: unitId === "none" ? null : unitId, tenant_id: tenantId === "none" ? null : tenantId,
           category, priority, description: description.trim(), reported_by: user?.id ?? null,
+          building_id: buildingId === "none" ? null : buildingId, estimated_cost: estimate ? Number(estimate) : null,
+          photos: user ? await Promise.all(files.slice(0, 5).map((f) => uploadPrivateFile(user.id, f, { ownerId: ownerFor(propertyId), propertyId, docType: "maintenance", tenantId: tenantId === "none" ? null : tenantId }))) : [],
         });
-        toast.success("Request created"); setOpen(false); setDescription(""); onDone();
+        toast.success(px("Saved")); setOpen(false); setDescription(""); setFiles([]); onDone();
       }}
     >
       <SelectField label="Property" value={propertyId} onChange={(v) => { setPropertyId(v); setUnitId("none"); setTenantId("none"); }} options={properties} />
+      <SelectField label="Building" value={buildingId} onChange={setBuildingId}
+        options={[{ value: "none", label: "No building" }, ...buildings.filter((b) => b.property_id === propertyId).map((b) => ({ value: b.id, label: b.name }))]} />
       <SelectField label="Unit" value={unitId} onChange={setUnitId}
         options={[{ value: "none", label: "Whole property" }, ...units.filter((u) => u.property_id === propertyId).map((u) => ({ value: u.id, label: u.name }))]} />
       <SelectField label="Tenant" value={tenantId} onChange={setTenantId}
@@ -739,6 +882,9 @@ function TicketForm({ properties, units, tenants, ownerFor, onDone }: {
         <SelectField label="Priority" value={priority} onChange={setPriority} options={opts(["low", "normal", "high", "urgent"])} />
       </div>
       <AreaField label="Description" value={description} onChange={setDescription} />
+      <TextField label="Estimated cost (TZS)" value={estimate} onChange={setEstimate} type="number" />
+      <Input type="file" multiple accept="image/*" aria-label={px("Photos")} className="h-auto min-h-11 py-1.5"
+        onChange={(e) => setFiles(Array.from(e.target.files ?? []))} />
     </FormDialog>
   );
 }
@@ -754,7 +900,7 @@ function TicketCostForm({ ticket, onDone }: { ticket: MaintenanceTicket; onDone:
     <FormDialog
       open={open} onOpenChange={setOpen}
       title="Costs and notes"
-      trigger={<Button variant="outline" size="sm" className="w-full rounded-full">Costs and notes</Button>}
+      trigger={<Button variant="outline" size="sm" className="w-full rounded-full">{px("Costs and notes")}</Button>}
       onSubmit={async () => {
         await updateTicket(ticket.id, {
           estimated_cost: estimated ? Number(estimated) : null,
@@ -818,7 +964,7 @@ function UnitEditForm({ unit, propTitle, onDone }: { unit: Unit; propTitle: stri
   return (
     <FormDialog
       open={open} onOpenChange={setOpen} title={`Edit unit · ${unit.name}`} description={propTitle}
-      trigger={<Button variant="outline" size="sm" className="w-full rounded-full">View / edit unit</Button>}
+      trigger={<Button variant="outline" size="sm" className="w-full rounded-full">{px("View / edit unit")}</Button>}
       onSubmit={async () => {
         if (!name.trim()) { toast.error("Unit name is required"); return; }
         await updateUnit(unit.id, {
@@ -878,6 +1024,95 @@ function DocumentUploadForm({ properties, ownerFor, leases, tenantName, onDone }
         options={opts(["lease", "receipt", "identification", "maintenance", "notice", "other"])} />
       <Input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx" aria-label="File"
         onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="h-auto min-h-11 py-1.5" />
+    </FormDialog>
+  );
+}
+
+function rentLabel(status: string) {
+  return status === "paid" ? "Paid" : status === "partial" ? "Partial" : status === "overdue" ? "Overdue" : "Due";
+}
+
+function KpiButton({ label, value, icon: Icon, onClick }: { label: string; value: string | number; icon: React.ComponentType<{ className?: string }>; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="ds-card flex min-w-0 flex-col gap-1 p-3 text-left transition-colors hover:border-primary sm:p-4">
+      <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Icon className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{label}</span></span>
+      <span className="truncate text-lg font-semibold sm:text-xl">{value}</span>
+    </button>
+  );
+}
+
+function BuildingForm({ properties, ownerFor, onDone }: {
+  properties: { value: string; label: string }[]; ownerFor: (id: string) => string; onDone: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [propertyId, setPropertyId] = useState(properties[0]?.value ?? "");
+  const [name, setName] = useState("");
+  const [floors, setFloors] = useState("");
+  const [description, setDescription] = useState("");
+  return (
+    <FormDialog open={open} onOpenChange={setOpen} title="Add building" submitLabel="Add building"
+      trigger={<AddButton label={px("Add building")} />}
+      onSubmit={async () => {
+        if (!propertyId || !name.trim()) { toast.error(px("Building name")); return; }
+        await createBuilding({ property_id: propertyId, owner_id: ownerFor(propertyId), name: name.trim(),
+          floors: floors ? Number(floors) : null, description: description.trim() || null });
+        toast.success(px("Saved")); setOpen(false); setName(""); setFloors(""); setDescription(""); onDone();
+      }}>
+      <SelectField label="Property" value={propertyId} onChange={setPropertyId} options={properties} />
+      <TextField label="Building name" value={name} onChange={setName} placeholder="Block A" />
+      <TextField label="Floors" value={floors} onChange={setFloors} type="number" />
+      <AreaField label="Description" value={description} onChange={setDescription} />
+    </FormDialog>
+  );
+}
+
+function ExpenseForm({ properties, ownerFor, buildings, units, onDone }: {
+  properties: { value: string; label: string }[]; ownerFor: (id: string) => string;
+  buildings: Building[]; units: Unit[]; onDone: () => void;
+}) {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [propertyId, setPropertyId] = useState(properties[0]?.value ?? "");
+  const [buildingId, setBuildingId] = useState("none");
+  const [unitId, setUnitId] = useState("none");
+  const [category, setCategory] = useState("maintenance");
+  const [supplier, setSupplier] = useState("");
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [notes, setNotes] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  return (
+    <FormDialog open={open} onOpenChange={setOpen} title="Add expense" submitLabel="Add expense"
+      trigger={<AddButton label={px("Add expense")} />}
+      onSubmit={async () => {
+        if (!user || !propertyId || !amount || Number(amount) < 0) { toast.error(`${px("Property")} / ${px("Amount")}`); return; }
+        const receipt = file ? await uploadPrivateFile(user.id, file, { ownerId: ownerFor(propertyId), propertyId, docType: "receipt" }) : null;
+        await createExpense({ property_id: propertyId, owner_id: ownerFor(propertyId),
+          building_id: buildingId === "none" ? null : buildingId, unit_id: unitId === "none" ? null : unitId,
+          category, supplier: supplier.trim() || null, description: description.trim() || null,
+          amount: Number(amount), expense_date: date, receipt_path: receipt, notes: notes.trim() || null });
+        toast.success(px("Saved")); setOpen(false); setAmount(""); setDescription(""); setSupplier(""); setFile(null); onDone();
+      }}>
+      <SelectField label="Property" value={propertyId} onChange={(v) => { setPropertyId(v); setBuildingId("none"); setUnitId("none"); }} options={properties} />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <SelectField label="Building" value={buildingId} onChange={setBuildingId}
+          options={[{ value: "none", label: "No building" }, ...buildings.filter((b) => b.property_id === propertyId).map((b) => ({ value: b.id, label: b.name }))]} />
+        <SelectField label="Unit" value={unitId} onChange={setUnitId}
+          options={[{ value: "none", label: "Whole property" }, ...units.filter((u) => u.property_id === propertyId).map((u) => ({ value: u.id, label: u.name }))]} />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <SelectField label="Category" value={category} onChange={setCategory} options={opts(EXPENSE_CATEGORIES)} />
+        <TextField label="Supplier" value={supplier} onChange={setSupplier} />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <TextField label="Amount (TZS)" value={amount} onChange={setAmount} type="number" />
+        <TextField label="Date" value={date} onChange={setDate} type="date" />
+      </div>
+      <TextField label="Description" value={description} onChange={setDescription} />
+      <AreaField label="Notes" value={notes} onChange={setNotes} />
+      <Input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" aria-label={px("Receipt")} className="h-auto min-h-11 py-1.5"
+        onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
     </FormDialog>
   );
 }

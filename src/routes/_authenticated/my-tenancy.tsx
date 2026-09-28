@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { TenantPortal } from "@/components/management/tenant-portal";
 import { useI18n } from "@/hooks/use-i18n";
+import { px } from "@/lib/pm-sw";
 
 export const Route = createFileRoute("/_authenticated/my-tenancy")({
   head: () => ({
@@ -26,7 +27,7 @@ function TenancyPage() {
           <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
             {t("mgmt.myTenancy")}
           </h1>
-          <p className="mt-1 text-muted-foreground">Your home, rent, lease and maintenance requests.</p>
+          <p className="mt-1 text-muted-foreground">{px("Your home, rent, lease and maintenance requests.")}</p>
         </header>
         <TenantPortal />
       </div>

@@ -281,6 +281,27 @@
       "when": 1790355464297,
       "tag": "0039_sprint1_payment_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1790606164097,
+      "tag": "0040_sprint2_property_operations",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1790606187296,
+      "tag": "0041_sprint2_rent_reminders",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1790606690120,
+      "tag": "0042_sprint2_agent_visibility_fix",
+      "breakpoints": true
     }
   ]
 }
