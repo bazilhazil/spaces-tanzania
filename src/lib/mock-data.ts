@@ -49,6 +49,8 @@ export interface Property {
   latitude?: number | null;
   longitude?: number | null;
   landmark?: string | null;
+  /** available | reserved | sold | rented */
+  availability?: string;
 }
 
 export interface Agent {
