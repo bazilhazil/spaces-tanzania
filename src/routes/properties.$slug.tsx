@@ -630,6 +630,9 @@ function PropertyDetailPage() {
                 <div className="mt-4 grid gap-2">
                   {unavailable ? (
                     <div className="rounded-xl border border-border bg-secondary/50 p-4 text-center">
+                      {(status === "sold" || status === "rented") && (
+                        <p className="mb-2 inline-block rounded-full bg-destructive px-3 py-1 text-xs font-semibold uppercase text-destructive-foreground">{t(`s3.avail.${status}`)}</p>
+                      )}
                       <p className="text-sm font-medium text-foreground">{t("inquiry.unavailable")}</p>
                       <Button variant="outline" className="mt-3 w-full" asChild>
                         <Link to="/properties">{t("inquiry.viewSimilar")}</Link>
