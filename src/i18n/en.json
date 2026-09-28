@@ -2678,6 +2678,61 @@
         "commercial": "Commercial",
         "land": "Land",
         "management": "Management"
+      },
+      "forTitle": "Built for everyone in property",
+      "for": {
+        "buyers": {
+          "title": "For buyers & tenants",
+          "body": "Search, save, book viewings and make offers."
+        },
+        "owners": {
+          "title": "For owners",
+          "body": "List for free, receive inquiries and track every deal."
+        },
+        "dalalis": {
+          "title": "For Dalalis",
+          "body": "Get leads, close deals and keep your commission protected."
+        },
+        "managers": {
+          "title": "For property managers",
+          "body": "Units, tenants, rent and maintenance in one place."
+        },
+        "agencies": {
+          "title": "For agencies",
+          "body": "Manage your team, listings and deals together."
+        },
+        "developers": {
+          "title": "For developers",
+          "body": "Showcase projects and reach serious buyers."
+        }
+      },
+      "back": "Back",
+      "next": "Next",
+      "saving": "Saving…",
+      "recommended": "Recommended for you",
+      "recommendedSub": "Based on your searches, saved homes and budget.",
+      "why": {
+        "search": "Matches your saved search",
+        "area": "In an area you like",
+        "type": "Type you viewed",
+        "budget": "Within your budget",
+        "popular": "Popular now"
+      },
+      "avail": {
+        "available": "Available",
+        "reserved": "Reserved",
+        "sold": "Sold",
+        "rented": "Rented"
+      },
+      "share": "Share",
+      "linkCopied": "Link copied",
+      "unverified": "Unverified",
+      "closeMatches": "No exact matches — showing close matches.",
+      "ref": {
+        "title": "Invite and grow",
+        "body": "Your referral code:",
+        "count": "{n} referred",
+        "copy": "Copy invite link"
       }
     },
     "steps": {
