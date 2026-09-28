@@ -281,6 +281,13 @@
       "when": 1790355464297,
       "tag": "0039_sprint1_payment_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1790606164097,
+      "tag": "0040_sprint2_property_operations",
+      "breakpoints": true
     }
   ]
 }
