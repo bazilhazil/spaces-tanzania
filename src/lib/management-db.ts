@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { px } from "@/lib/pm-sw";
 
 /**
  * Property management data layer (units, tenants, leases, rent, maintenance).
@@ -99,7 +100,7 @@ export function formatTzs(amount?: number | null): string {
 
 export function labelize(value?: string | null): string {
   if (!value) return "—";
-  return value.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+  return px(value.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase()));
 }
 
 /**

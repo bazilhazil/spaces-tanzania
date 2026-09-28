@@ -10,6 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { px } from "@/lib/pm-sw";
 
 /** Small reusable form dialog used across the property management screens. */
 export function FormDialog({
@@ -30,14 +31,14 @@ export function FormDialog({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-h-[85vh] w-[calc(100vw-2rem)] max-w-lg overflow-y-auto rounded-2xl">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
+          <DialogTitle>{px(title)}</DialogTitle>
+          {description && <DialogDescription>{px(description)}</DialogDescription>}
         </DialogHeader>
         <div className="space-y-4">{children}</div>
         <DialogFooter className="gap-2 sm:gap-2">
           <Button variant="outline" className="w-full rounded-full sm:w-auto" disabled={busy}
             onClick={() => onOpenChange?.(false)}>
-            Cancel
+            {px("Cancel")}
           </Button>
           <Button
             className="w-full rounded-full sm:w-auto"
@@ -47,13 +48,13 @@ export function FormDialog({
               try {
                 await onSubmit();
               } catch (e) {
-                toast.error(e instanceof Error ? e.message : "Could not save");
+                toast.error(e instanceof Error ? e.message : px("Could not save"));
               } finally {
                 setBusy(false);
               }
             }}
           >
-            {busy ? "Saving…" : submitLabel}
+            {busy ? px("Saving…") : px(submitLabel)}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -64,7 +65,7 @@ export function FormDialog({
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</Label>
+      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{px(label)}</Label>
       {children}
     </div>
   );
@@ -96,9 +97,9 @@ export function SelectField({
   return (
     <Field label={label}>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+        <SelectTrigger><SelectValue placeholder={px("Select")} /></SelectTrigger>
         <SelectContent>
-          {options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+          {options.map((o) => <SelectItem key={o.value} value={o.value}>{px(o.label)}</SelectItem>)}
         </SelectContent>
       </Select>
     </Field>
@@ -110,10 +111,10 @@ export function DetailsDialog({ title, triggerLabel, children }: { title: string
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full rounded-full">{triggerLabel}</Button>
+        <Button variant="outline" size="sm" className="w-full rounded-full">{px(triggerLabel)}</Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] w-[calc(100vw-2rem)] max-w-lg overflow-y-auto rounded-2xl">
-        <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{px(title)}</DialogTitle></DialogHeader>
         <div className="space-y-3">{children}</div>
       </DialogContent>
     </Dialog>
@@ -123,7 +124,7 @@ export function DetailsDialog({ title, triggerLabel, children }: { title: string
 export function DetailRow({ label, value }: { label: string; value?: string | null }) {
   return (
     <div>
-      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-xs text-muted-foreground">{px(label)}</p>
       <p className="text-sm font-medium break-words">{value || "—"}</p>
     </div>
   );
