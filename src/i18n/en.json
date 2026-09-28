@@ -2504,5 +2504,9 @@
     "leave": "Leave agency",
     "memberOf": "You are a member of {name}.",
     "onlyAdmin": "Only the agency admin sees the team overview."
+  },
+  "inquiriesPage": {
+    "title": "Inquiries",
+    "subtitle": "Everyone who asked about your properties — messages, calls and viewings in one place."
   }
 }

@@ -302,6 +302,13 @@
       "when": 1790606690120,
       "tag": "0042_sprint2_agent_visibility_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1790610192424,
+      "tag": "0043_sprint2_auto_link_assigned_dalali",
+      "breakpoints": true
     }
   ]
 }

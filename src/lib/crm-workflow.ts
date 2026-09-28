@@ -176,7 +176,9 @@ export async function fetchCrmLeads(opts?: { all?: boolean }): Promise<CrmLead[]
   if (!uid) return [];
 
   let q = supabase.from("leads").select("*").order("created_at", { ascending: false }).limit(300);
-  if (!opts?.all) q = q.eq("owner_id", uid);
+  // Security rules already limit rows to the owner or an authorised assigned Dalali;
+  // exclude inquiries the user sent themselves as a buyer.
+  if (!opts?.all) q = q.or(`visitor_id.is.null,visitor_id.neq.${uid}`);
   const { data } = await q;
   const rows = ((data as Raw[]) ?? []);
   if (!rows.length) return [];
@@ -418,11 +420,12 @@ export async function createDealFromLead(
 export function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m`;
+  const sw = typeof window !== "undefined" && window.localStorage?.getItem("spaces.lang") === "sw";
+  if (m < 1) return sw ? "sasa hivi" : "just now";
+  if (m < 60) return sw ? `dak ${m}` : `${m}m`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
+  if (h < 24) return sw ? `saa ${h}` : `${h}h`;
   const d = Math.floor(h / 24);
-  if (d < 30) return `${d}d`;
+  if (d < 30) return sw ? `siku ${d}` : `${d}d`;
   return new Date(iso).toLocaleDateString();
 }
