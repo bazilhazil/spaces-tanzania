@@ -330,8 +330,8 @@ export function PropertiesPanel() {
       const { data: profs } = agentIds.length
         ? await supabase.from("profiles").select("id,full_name").in("id", agentIds)
         : { data: [] as { id: string; full_name: string | null }[] };
-      const boosted = new Set((promos ?? []).filter((p) => p.status === "active" && (!p.ends_at || p.ends_at > now)).map((p) => p.property_id));
-      const featured = new Set((feat ?? []).filter((p) => p.featured).map((p) => p.id));
+      const boosted = new Set<string>((promos ?? []).filter((p) => p.status === "active" && (!p.ends_at || p.ends_at > now)).map((p) => p.property_id));
+      const featured = new Set<string>((feat ?? []).filter((p) => p.featured).map((p) => p.id));
       return { agents, boosted, featured, names: new Map((profs ?? []).map((p) => [p.id, p.full_name ?? "Dalali"])) };
     },
     { agents: new Map(), boosted: new Set(), featured: new Set(), names: new Map() },
