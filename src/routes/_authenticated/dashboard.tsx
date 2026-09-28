@@ -59,7 +59,7 @@ function DashboardPage() {
         <ProfileCompletionCard />
 
         {activeMode === "buyer"
-          ? <><BuyerHome /><RecommendedForYou /></>
+          ? <><BuyerHome /><RecommendedForYou /><ReferralCard /></>
           : <><ReferralCard /><OwnerAgentHome mode={activeMode} /></>}
       </div>
     </DashboardShell>

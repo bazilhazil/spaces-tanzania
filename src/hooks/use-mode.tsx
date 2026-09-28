@@ -44,9 +44,12 @@ export function ModeProvider({ children }: { children: ReactNode }) {
     [user?.id, hasAgent],
   );
 
+  // Returning accounts (e.g. on a new device) skip the first-time setup screen:
+  // their workspace is inferred from roles they already hold.
+  const inferred: SpacesMode | null = hasAgent ? "agent" : roles.includes("owner") ? "owner" : null;
   // A stored "agent" preference without the Agent role falls back safely.
   const mode: SpacesMode | null =
-    stored === "agent" && !hasAgent ? (roles.includes("owner") ? "owner" : "buyer") : stored;
+    stored === "agent" && !hasAgent ? (roles.includes("owner") ? "owner" : "buyer") : (stored ?? inferred);
 
   return <ModeContext.Provider value={{ mode, setMode, ready, hasAgent }}>{children}</ModeContext.Provider>;
 }

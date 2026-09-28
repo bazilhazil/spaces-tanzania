@@ -4521,6 +4521,13 @@ export type Database = {
       }
       is_blocked_with: { Args: { _other: string }; Returns: boolean }
       is_my_tenancy: { Args: { _tenant_id: string }; Returns: boolean }
+      listing_sources: {
+        Args: { _ids: string[] }
+        Returns: {
+          property_id: string
+          source: string
+        }[]
+      }
       log_management_action: {
         Args: {
           _action: string

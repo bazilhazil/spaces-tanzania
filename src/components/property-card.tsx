@@ -13,6 +13,7 @@ import { AuthGateDialog } from "@/components/auth-gate-dialog";
 import { ListingBadgeStrip } from "@/components/trust/listing-badge";
 import { QualityScorePill } from "@/components/trust/quality-score";
 import type { ListingBadgeKind } from "@/lib/trust-engine";
+import { useListingSource } from "@/lib/listing-source";
 
 interface PropertyCardProps {
   property: Property;
@@ -27,6 +28,7 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
   const { isFavorite, toggleFavorite, isComparing, toggleCompare } = useFavorites();
   const { user } = useAuth();
   const [authGate, setAuthGate] = useState(false);
+  const source = useListingSource(property.id);
   const favorited = isFavorite(property.id);
   const comparing = isComparing(property.id);
   const listingLabel =
@@ -160,6 +162,11 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
           </div>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="h-3 w-3" /> {[property.ward, property.city].filter(Boolean).join(", ")}
+            {source && (
+              <span className="ml-auto rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-secondary-foreground">
+                {t(`s3.source.${source}`)}
+              </span>
+            )}
           </p>
         </div>
         <div className="mt-auto flex items-center gap-4 border-t border-border/60 pt-3 text-xs text-muted-foreground">

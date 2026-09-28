@@ -2678,6 +2678,61 @@
         "commercial": "Biashara",
         "land": "Viwanja",
         "management": "Usimamizi"
+      },
+      "forTitle": "Kwa kila mtu katika sekta ya mali",
+      "for": {
+        "buyers": {
+          "title": "Kwa wanunuzi na wapangaji",
+          "body": "Tafuta, hifadhi, panga kutembelea na toa ofa."
+        },
+        "owners": {
+          "title": "Kwa wamiliki",
+          "body": "Tangaza bure, pokea maulizo na fuatilia kila dili."
+        },
+        "dalalis": {
+          "title": "Kwa madalali",
+          "body": "Pata wateja, funga dili na kamisheni yako inalindwa."
+        },
+        "managers": {
+          "title": "Kwa wasimamizi wa mali",
+          "body": "Vyumba, wapangaji, kodi na matengenezo sehemu moja."
+        },
+        "agencies": {
+          "title": "Kwa mawakala",
+          "body": "Simamia timu, matangazo na dili kwa pamoja."
+        },
+        "developers": {
+          "title": "Kwa waendelezaji",
+          "body": "Onyesha miradi na wafikie wanunuzi makini."
+        }
+      },
+      "back": "Rudi",
+      "next": "Endelea",
+      "saving": "Inahifadhi…",
+      "recommended": "Zinazopendekezwa kwako",
+      "recommendedSub": "Kulingana na utafutaji, ulizohifadhi na bajeti yako.",
+      "why": {
+        "search": "Inalingana na utafutaji uliohifadhi",
+        "area": "Katika eneo unalopenda",
+        "type": "Aina uliyotazama",
+        "budget": "Ndani ya bajeti yako",
+        "popular": "Maarufu sasa"
+      },
+      "avail": {
+        "available": "Inapatikana",
+        "reserved": "Imehifadhiwa",
+        "sold": "Imeuzwa",
+        "rented": "Imepangishwa"
+      },
+      "share": "Shiriki",
+      "linkCopied": "Kiungo kimenakiliwa",
+      "unverified": "Haijathibitishwa",
+      "closeMatches": "Hakuna zinazolingana kabisa — tunaonyesha zinazokaribiana.",
+      "ref": {
+        "title": "Alika na ukue",
+        "body": "Msimbo wako wa rufaa:",
+        "count": "{n} wamealikwa",
+        "copy": "Nakili kiungo"
       }
     },
     "steps": {
@@ -2739,6 +2794,12 @@
       "body": "Msimbo wako wa rufaa:",
       "count": "{n} wamealikwa",
       "copy": "Nakili kiungo"
+    },
+    "source": {
+      "owner": "Mmiliki",
+      "dalali": "Dalali",
+      "agency": "Wakala",
+      "developer": "Mwendelezaji"
     }
   }
 }
