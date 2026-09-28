@@ -41,6 +41,8 @@ function BecomeDalali() {
   const [done, setDone] = useState(false);
   const [f, setF] = useState({ name: "", phone: "", areas: "", experience: "", services: [] as string[], bio: "", ref: ref ?? "" });
 
+  // Remember the referral code so it is claimed after sign-up.
+  useEffect(() => { if (ref) localStorage.setItem("spaces.ref", ref); }, [ref]);
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("full_name,phone").eq("id", user.id).maybeSingle().then(({ data }) => {
@@ -107,8 +109,8 @@ function BecomeDalali() {
               <div className="space-y-4 text-center">
                 <p className="font-semibold text-foreground">{t("s3.dalali.startTitle")}</p>
                 <p className="text-sm text-muted-foreground">{t("s3.dalali.startBody")}</p>
-                <Button asChild className="w-full"><Link to="/register" search={{ redirect: `/become-dalali${ref ? `?ref=${ref}` : ""}` } as never}>{t("s3.dalali.createAccount")}</Link></Button>
-                <Button asChild variant="outline" className="w-full"><Link to="/login" search={{ redirect: "/become-dalali" } as never}>{t("s3.dalali.haveAccount")}</Link></Button>
+                <Button asChild className="w-full"><Link to="/register">{t("s3.dalali.createAccount")}</Link></Button>
+                <Button asChild variant="outline" className="w-full"><Link to="/login">{t("s3.dalali.haveAccount")}</Link></Button>
               </div>
             ) : done ? (
               <div className="space-y-3 text-center">
