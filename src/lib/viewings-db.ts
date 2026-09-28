@@ -314,7 +314,8 @@ export async function fetchIncomingViewings(): Promise<ViewingRequest[]> {
   const { data } = await supabase
     .from("bookings")
     .select("*")
-    .or(`recipient_id.eq.${uid},owner_id.eq.${uid},agent_id.eq.${uid}`)
+    // Security rules limit rows to owner/recipient/agent or an assigned Dalali with viewing rights.
+    .neq("buyer_id", uid)
     .order("scheduled_at", { ascending: true });
   return hydrate(((data as Raw[]) ?? []).filter((r) => r.buyer_id !== uid));
 }

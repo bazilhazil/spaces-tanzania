@@ -176,7 +176,9 @@ export async function fetchCrmLeads(opts?: { all?: boolean }): Promise<CrmLead[]
   if (!uid) return [];
 
   let q = supabase.from("leads").select("*").order("created_at", { ascending: false }).limit(300);
-  if (!opts?.all) q = q.eq("owner_id", uid);
+  // Security rules already limit rows to the owner or an authorised assigned Dalali;
+  // exclude inquiries the user sent themselves as a buyer.
+  if (!opts?.all) q = q.or(`visitor_id.is.null,visitor_id.neq.${uid}`);
   const { data } = await q;
   const rows = ((data as Raw[]) ?? []);
   if (!rows.length) return [];

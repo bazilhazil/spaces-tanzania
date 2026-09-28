@@ -2504,5 +2504,9 @@
     "leave": "Toka kwenye wakala",
     "memberOf": "Wewe ni mwanachama wa {name}.",
     "onlyAdmin": "Admin wa wakala pekee ndiye anaona muhtasari wa timu."
+  },
+  "inquiriesPage": {
+    "title": "Maulizo",
+    "subtitle": "Kila aliyeuliza kuhusu mali zako — ujumbe, simu na miadi ya kutazama mahali pamoja."
   }
 }
