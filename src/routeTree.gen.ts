@@ -19,6 +19,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as DesignSystemRouteImport } from './routes/design-system'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as BecomeDalaliRouteImport } from './routes/become-dalali'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AboutRouteImport } from './routes/about'
@@ -114,6 +115,11 @@ const DesignSystemRoute = DesignSystemRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BecomeDalaliRoute = BecomeDalaliRouteImport.update({
+  id: '/become-dalali',
+  path: '/become-dalali',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -367,6 +373,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/become-dalali': typeof BecomeDalaliRoute
   '/contact': typeof ContactRoute
   '/design-system': typeof DesignSystemRoute
   '/help': typeof HelpRoute
@@ -424,6 +431,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/become-dalali': typeof BecomeDalaliRoute
   '/contact': typeof ContactRoute
   '/design-system': typeof DesignSystemRoute
   '/help': typeof HelpRoute
@@ -482,6 +490,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
+  '/become-dalali': typeof BecomeDalaliRoute
   '/contact': typeof ContactRoute
   '/design-system': typeof DesignSystemRoute
   '/help': typeof HelpRoute
@@ -541,6 +550,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/agents'
     | '/auth'
+    | '/become-dalali'
     | '/contact'
     | '/design-system'
     | '/help'
@@ -598,6 +608,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/agents'
     | '/auth'
+    | '/become-dalali'
     | '/contact'
     | '/design-system'
     | '/help'
@@ -655,6 +666,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/agents'
     | '/auth'
+    | '/become-dalali'
     | '/contact'
     | '/design-system'
     | '/help'
@@ -714,6 +726,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AgentsRoute: typeof AgentsRoute
   AuthRoute: typeof AuthRoute
+  BecomeDalaliRoute: typeof BecomeDalaliRoute
   ContactRoute: typeof ContactRoute
   DesignSystemRoute: typeof DesignSystemRoute
   HelpRoute: typeof HelpRoute
@@ -805,6 +818,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/become-dalali': {
+      id: '/become-dalali'
+      path: '/become-dalali'
+      fullPath: '/become-dalali'
+      preLoaderRoute: typeof BecomeDalaliRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -1258,6 +1278,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AgentsRoute: AgentsRoute,
   AuthRoute: AuthRoute,
+  BecomeDalaliRoute: BecomeDalaliRoute,
   ContactRoute: ContactRoute,
   DesignSystemRoute: DesignSystemRoute,
   HelpRoute: HelpRoute,
