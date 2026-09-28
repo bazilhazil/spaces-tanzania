@@ -188,12 +188,13 @@ export async function fetchActiveDealsCount(ids: string[]): Promise<number> {
 }
 
 /** Upload a file (maintenance photo / expense receipt) to the private bucket, returning its path. */
-export async function uploadPrivateFile(userId: string, file: File): Promise<string> {
-  const ext = file.name.split(".").pop() ?? "dat";
-  const path = `${userId}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false });
-  if (error) throw error;
-  return path;
+export async function uploadPrivateFile(
+  userId: string, file: File,
+  ctx: { ownerId: string; propertyId: string; docType: "maintenance" | "receipt"; tenantId?: string | null },
+): Promise<string> {
+  // Registered as a management document so the existing storage access rules apply.
+  return uploadManagementDocument({ file, userId, ownerId: ctx.ownerId, docType: ctx.docType,
+    propertyId: ctx.propertyId, tenantId: ctx.tenantId ?? null });
 }
 
 export type ManagementDocument = {

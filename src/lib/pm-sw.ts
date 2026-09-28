@@ -70,7 +70,17 @@ const SW: Record<string, string> = {
   Save: "Hifadhi", Cancel: "Ghairi", "Saving…": "Inahifadhi…", Select: "Chagua", Saved: "Imehifadhiwa", "Could not save": "Imeshindikana kuhifadhi",
   "Could not update": "Imeshindikana kusasisha", Updated: "Imesasishwa", Collection: "Ukusanyaji", "Property overview": "Muhtasari wa mali",
   "Open jobs": "Kazi zilizo wazi", Expected: "Inayotarajiwa", Collected: "Iliyokusanywa", "Occupancy rate": "Kiwango cha ukaaji",
-  "My property": "Mali yangu", "My unit": "Kitengo changu", "Rent paid": "Kodi iliyolipwa",
+  "My property": "Mali yangu", Open: "Fungua", "No tenancy yet": "Bado huna upangaji",
+  "When your landlord or property manager adds you as a tenant on Spaces, your home, rent and lease appear here.": "Mwenye nyumba au msimamizi akikuongeza kama mpangaji kwenye Spaces, nyumba, kodi na mkataba wako vitaonekana hapa.",
+  "Rent charges added by your landlord appear here.": "Madeni ya kodi yaliyoongezwa na mwenye nyumba yataonekana hapa.",
+  "Previous payments": "Malipo yaliyopita", "No lease recorded": "Hakuna mkataba uliorekodiwa",
+  "Your landlord has not added a lease for your tenancy yet.": "Mwenye nyumba bado hajaongeza mkataba wa upangaji wako.",
+  "Report a problem and your landlord or manager will see it here.": "Ripoti tatizo na mwenye nyumba au msimamizi ataliona hapa.",
+  "No documents yet": "Hakuna nyaraka bado", "Documents your landlord shares with you appear here.": "Nyaraka anazokushirikisha mwenye nyumba zitaonekana hapa.",
+  "Upload proof of payment": "Pakia uthibitisho wa malipo", "Send for verification": "Tuma kwa uthibitisho", "Send request": "Tuma ombi",
+  "Request sent": "Ombi limetumwa", "What is the problem?": "Tatizo ni nini?", "Photo or video (optional)": "Picha au video (si lazima)",
+  "Amount paid (TZS)": "Kiasi kilicholipwa (TZS)", "Payment method": "Njia ya malipo", "Proof (photo or PDF)": "Uthibitisho (picha au PDF)",
+  "Your landlord or manager checks it and confirms. Nothing is confirmed automatically.": "Mwenye nyumba au msimamizi ataikagua na kuthibitisha. Hakuna kinachothibitishwa kiotomatiki.", "My unit": "Kitengo changu", "Rent paid": "Kodi iliyolipwa",
 };
 
 export function px(en: string): string {

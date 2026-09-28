@@ -865,7 +865,7 @@ function TicketForm({ properties, units, tenants, buildings, ownerFor, onDone }:
           unit_id: unitId === "none" ? null : unitId, tenant_id: tenantId === "none" ? null : tenantId,
           category, priority, description: description.trim(), reported_by: user?.id ?? null,
           building_id: buildingId === "none" ? null : buildingId, estimated_cost: estimate ? Number(estimate) : null,
-          photos: user ? await Promise.all(files.slice(0, 5).map((f) => uploadPrivateFile(user.id, f))) : [],
+          photos: user ? await Promise.all(files.slice(0, 5).map((f) => uploadPrivateFile(user.id, f, { ownerId: ownerFor(propertyId), propertyId, docType: "maintenance", tenantId: tenantId === "none" ? null : tenantId }))) : [],
         });
         toast.success(px("Saved")); setOpen(false); setDescription(""); setFiles([]); onDone();
       }}
@@ -1087,7 +1087,7 @@ function ExpenseForm({ properties, ownerFor, buildings, units, onDone }: {
       trigger={<AddButton label={px("Add expense")} />}
       onSubmit={async () => {
         if (!user || !propertyId || !amount || Number(amount) < 0) { toast.error(`${px("Property")} / ${px("Amount")}`); return; }
-        const receipt = file ? await uploadPrivateFile(user.id, file) : null;
+        const receipt = file ? await uploadPrivateFile(user.id, file, { ownerId: ownerFor(propertyId), propertyId, docType: "receipt" }) : null;
         await createExpense({ property_id: propertyId, owner_id: ownerFor(propertyId),
           building_id: buildingId === "none" ? null : buildingId, unit_id: unitId === "none" ? null : unitId,
           category, supplier: supplier.trim() || null, description: description.trim() || null,
