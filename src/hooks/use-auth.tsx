@@ -124,6 +124,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Defer to avoid Supabase deadlock inside the callback.
         setTimeout(() => {
           if (!cancelled) void loadUserData(s.user);
+          // Claim a stored referral code once (captured from ?ref= links).
+          const code = typeof window !== "undefined" ? window.localStorage.getItem("spaces.ref") : null;
+          if (code) {
+            window.localStorage.removeItem("spaces.ref");
+            void supabase.rpc("claim_referral" as never, { _code: code, _source: "referral_link" } as never);
+          }
         }, 0);
       } else {
         setProfile(null);
