@@ -2516,7 +2516,8 @@
       "find": "Find a property",
       "list": "List your property",
       "dalali": "Become a Dalali",
-      "commissionBadge": "Dalali commission protected"
+      "commissionBadge": "Dalali commission protected",
+      "forTitle": "Built for everyone in property"
     },
     "forTitle": "Built for everyone in property",
     "for": {
@@ -2592,7 +2593,25 @@
           "title": "How SPACES protects you",
           "body": "Deals and commissions are recorded and can't be removed."
         }
-      }
+      },
+      "areas": "Areas served",
+      "areasHint": "Separate with commas, e.g. Mikocheni, Mbezi",
+      "bio": "About you",
+      "createAccount": "Create account",
+      "doneBody": "Our team will review your details. We'll notify you when you're verified.",
+      "doneTitle": "Application submitted",
+      "error": "Something went wrong. Please try again.",
+      "experience": "Years of experience",
+      "goDashboard": "Go to dashboard",
+      "haveAccount": "I already have an account",
+      "name": "Full name",
+      "phone": "Phone",
+      "referral": "Referral code (optional)",
+      "referralHint": "If someone invited you, enter their code.",
+      "startBody": "It's free and takes a minute.",
+      "startTitle": "Create an account to start",
+      "step": "Step {n} of {total}",
+      "submit": "Submit application"
     },
     "steps": {
       "personal": "Personal details",

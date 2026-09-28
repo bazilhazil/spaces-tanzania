@@ -2516,7 +2516,8 @@
       "find": "Tafuta mali",
       "list": "Tangaza mali yako",
       "dalali": "Kuwa Dalali",
-      "commissionBadge": "Kamisheni ya Dalali inalindwa"
+      "commissionBadge": "Kamisheni ya Dalali inalindwa",
+      "forTitle": "Kwa kila mtu katika sekta ya mali"
     },
     "forTitle": "Kwa kila mtu katika sekta ya mali",
     "for": {
@@ -2592,7 +2593,25 @@
           "title": "Jinsi SPACES inavyokulinda",
           "body": "Dili na kamisheni zinarekodiwa na haziwezi kufutwa."
         }
-      }
+      },
+      "areas": "Maeneo unayohudumia",
+      "areasHint": "Tenganisha kwa koma, mf. Mikocheni, Mbezi",
+      "bio": "Kuhusu wewe",
+      "createAccount": "Fungua akaunti",
+      "doneBody": "Timu yetu itakagua taarifa zako. Tutakujulisha ukithibitishwa.",
+      "doneTitle": "Ombi limetumwa",
+      "error": "Kuna tatizo. Tafadhali jaribu tena.",
+      "experience": "Miaka ya uzoefu",
+      "goDashboard": "Nenda dashibodi",
+      "haveAccount": "Nina akaunti tayari",
+      "name": "Jina kamili",
+      "phone": "Simu",
+      "referral": "Msimbo wa rufaa (hiari)",
+      "referralHint": "Kama mtu amekualika, weka msimbo wake.",
+      "startBody": "Ni bure na inachukua dakika moja.",
+      "startTitle": "Fungua akaunti kuanza",
+      "step": "Hatua {n} kati ya {total}",
+      "submit": "Tuma ombi"
     },
     "steps": {
       "personal": "Taarifa binafsi",
