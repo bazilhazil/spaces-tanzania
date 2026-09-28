@@ -268,7 +268,7 @@ export function ManagementCenter() {
         <TabsContent value="tenants" className="mt-4 space-y-4">
           <TenantForm properties={propOptions} units={units} ownerFor={ownerFor} onDone={load} />
           {!tenants.length ? (
-            <EmptyState icon={Users} title="No tenants yet" description="Add your first tenant to start tracking rent, leases and maintenance." />
+            <EmptyState icon={Users} title={px("No tenants yet")} description={px("Add your first tenant to start tracking rent, leases and maintenance.")} />
           ) : (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {tenants.map((t) => (
@@ -309,7 +309,7 @@ export function ManagementCenter() {
           <LeaseForm properties={propOptions} units={units} tenants={tenants} ownerFor={ownerFor} onDone={load} />
           {!tenants.length && <p className="text-sm text-muted-foreground">Add a tenant first (Tenants tab) — a lease is always linked to a tenant.</p>}
           {!leases.length ? (
-            <EmptyState icon={FileText} title="No leases yet" description="Record a lease to track rent, renewal dates and late-payment terms." />
+            <EmptyState icon={FileText} title={px("No leases yet")} description={px("Record a lease to track rent, renewal dates and late-payment terms.")} />
           ) : (
             <div className="grid gap-3 md:grid-cols-2">
               {leases.map((l) => (
@@ -356,7 +356,7 @@ export function ManagementCenter() {
 
           {payments.some((p) => p.status === "pending_verification") && (
             <div className="space-y-3">
-              <h3 className="font-semibold">Payments awaiting verification</h3>
+              <h3 className="font-semibold">{px("Payments awaiting verification")}</h3>
               {payments.filter((p) => p.status === "pending_verification").map((p) => (
                 <div key={p.id} className="ds-card flex flex-wrap items-center justify-between gap-3 p-4">
                   <div className="min-w-0">
@@ -368,10 +368,10 @@ export function ManagementCenter() {
                   <div className="flex flex-wrap gap-2">
                     <Button size="sm" className="rounded-full" onClick={async () => {
                       try { await reviewPayment(p.id, true); toast.success("Payment approved"); void load(); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not update"); }
-                    }}><CheckCircle2 className="mr-1 h-4 w-4" /> Approve</Button>
+                    }}><CheckCircle2 className="mr-1 h-4 w-4" /> {px("Approve")}</Button>
                     <Button size="sm" variant="outline" className="rounded-full" onClick={async () => {
                       try { await reviewPayment(p.id, false); toast.success("Payment rejected"); void load(); } catch (e) { toast.error(e instanceof Error ? e.message : "Could not update"); }
-                    }}><XCircle className="mr-1 h-4 w-4" /> Reject</Button>
+                    }}><XCircle className="mr-1 h-4 w-4" /> {px("Reject")}</Button>
                   </div>
                 </div>
               ))}
@@ -471,7 +471,7 @@ export function ManagementCenter() {
         <TabsContent value="contractors" className="mt-4 space-y-4">
           <ContractorForm onDone={load} />
           {!contractors.length ? (
-            <EmptyState icon={HardHat} title="No contractors yet" description="Add the plumbers, electricians and handymen you work with so you can assign them to jobs." />
+            <EmptyState icon={HardHat} title={px("No contractors yet")} description={px("Add the plumbers, electricians and handymen you work with so you can assign them to jobs.")} />
           ) : (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {contractors.map((c) => (
@@ -553,7 +553,7 @@ export function ManagementCenter() {
             <StatCard label="Maintenance cost (actual)" value={formatTzs(tickets.reduce((s, k) => s + Number(k.actual_cost || 0), 0))} icon={Wrench} tone="muted" />
           </div>
           <div className="ds-card overflow-x-auto p-4">
-            <h3 className="mb-3 font-semibold">Property overview</h3>
+            <h3 className="mb-3 font-semibold">{px("Property overview")}</h3>
             <table className="w-full min-w-[560px] text-sm">
               <thead className="text-left text-xs text-muted-foreground">
                 <tr><th className="py-1">Property</th><th>Units</th><th>Occupied</th><th>Tenants</th><th>Expected</th><th>Collected</th><th>Open jobs</th></tr>
@@ -588,7 +588,7 @@ export function ManagementCenter() {
 
 const AddButton = forwardRef<HTMLButtonElement, { label: string } & React.ButtonHTMLAttributes<HTMLButtonElement>>(
   function AddButton({ label, ...rest }, ref) {
-    return <Button ref={ref} {...rest} className="w-full rounded-full sm:w-auto"><Plus className="mr-1 h-4 w-4" /> {label}</Button>;
+    return <Button ref={ref} {...rest} className="w-full rounded-full sm:w-auto"><Plus className="mr-1 h-4 w-4" /> {px(label)}</Button>;
   },
 );
 
@@ -813,7 +813,7 @@ function PaymentForm({ charges, leases, onDone }: { charges: RentCharge[]; lease
     <FormDialog
       open={open} onOpenChange={setOpen}
       title="Record a payment" description="Recorded by you and marked as received — no automatic bank checking."
-      trigger={<Button variant="outline" className="w-full rounded-full sm:w-auto">Record payment</Button>}
+      trigger={<Button variant="outline" className="w-full rounded-full sm:w-auto">{px("Record payment")}</Button>}
       submitLabel="Record payment"
       onSubmit={async () => {
         if (!charge || !amount) { toast.error("Charge and amount are required"); return; }
@@ -900,7 +900,7 @@ function TicketCostForm({ ticket, onDone }: { ticket: MaintenanceTicket; onDone:
     <FormDialog
       open={open} onOpenChange={setOpen}
       title="Costs and notes"
-      trigger={<Button variant="outline" size="sm" className="w-full rounded-full">Costs and notes</Button>}
+      trigger={<Button variant="outline" size="sm" className="w-full rounded-full">{px("Costs and notes")}</Button>}
       onSubmit={async () => {
         await updateTicket(ticket.id, {
           estimated_cost: estimated ? Number(estimated) : null,
@@ -964,7 +964,7 @@ function UnitEditForm({ unit, propTitle, onDone }: { unit: Unit; propTitle: stri
   return (
     <FormDialog
       open={open} onOpenChange={setOpen} title={`Edit unit · ${unit.name}`} description={propTitle}
-      trigger={<Button variant="outline" size="sm" className="w-full rounded-full">View / edit unit</Button>}
+      trigger={<Button variant="outline" size="sm" className="w-full rounded-full">{px("View / edit unit")}</Button>}
       onSubmit={async () => {
         if (!name.trim()) { toast.error("Unit name is required"); return; }
         await updateUnit(unit.id, {
