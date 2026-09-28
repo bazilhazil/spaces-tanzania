@@ -78,8 +78,11 @@ export type Database = {
         Row: {
           admin_id: string
           created_at: string
+          description: string | null
           email: string | null
           id: string
+          location: string | null
+          logo_url: string | null
           name: string
           phone: string | null
           region: string | null
@@ -88,8 +91,11 @@ export type Database = {
         Insert: {
           admin_id: string
           created_at?: string
+          description?: string | null
           email?: string | null
           id?: string
+          location?: string | null
+          logo_url?: string | null
           name: string
           phone?: string | null
           region?: string | null
@@ -98,8 +104,11 @@ export type Database = {
         Update: {
           admin_id?: string
           created_at?: string
+          description?: string | null
           email?: string | null
           id?: string
+          location?: string | null
+          logo_url?: string | null
           name?: string
           phone?: string | null
           region?: string | null
@@ -2098,16 +2107,20 @@ export type Database = {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"]
           agency_name: string | null
+          areas_served: string[]
           avatar_url: string | null
           bio: string | null
           business_name: string | null
           created_at: string
           email: string | null
+          experience_years: number | null
           full_name: string | null
           id: string
           location: string | null
           national_id: string | null
           phone: string | null
+          ref_code: string | null
+          services: string[]
           suspended_until: string | null
           suspension_reason: string | null
           updated_at: string
@@ -2119,16 +2132,20 @@ export type Database = {
         Insert: {
           account_status?: Database["public"]["Enums"]["account_status"]
           agency_name?: string | null
+          areas_served?: string[]
           avatar_url?: string | null
           bio?: string | null
           business_name?: string | null
           created_at?: string
           email?: string | null
+          experience_years?: number | null
           full_name?: string | null
           id: string
           location?: string | null
           national_id?: string | null
           phone?: string | null
+          ref_code?: string | null
+          services?: string[]
           suspended_until?: string | null
           suspension_reason?: string | null
           updated_at?: string
@@ -2140,16 +2157,20 @@ export type Database = {
         Update: {
           account_status?: Database["public"]["Enums"]["account_status"]
           agency_name?: string | null
+          areas_served?: string[]
           avatar_url?: string | null
           bio?: string | null
           business_name?: string | null
           created_at?: string
           email?: string | null
+          experience_years?: number | null
           full_name?: string | null
           id?: string
           location?: string | null
           national_id?: string | null
           phone?: string | null
+          ref_code?: string | null
+          services?: string[]
           suspended_until?: string | null
           suspension_reason?: string | null
           updated_at?: string
@@ -3002,6 +3023,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      referrals: {
+        Row: {
+          campaign: string | null
+          code: string
+          created_at: string
+          id: string
+          referred_user_id: string
+          referrer_id: string
+          source: string
+          status: string
+        }
+        Insert: {
+          campaign?: string | null
+          code: string
+          created_at?: string
+          id?: string
+          referred_user_id: string
+          referrer_id: string
+          source?: string
+          status?: string
+        }
+        Update: {
+          campaign?: string | null
+          code?: string
+          created_at?: string
+          id?: string
+          referred_user_id?: string
+          referrer_id?: string
+          source?: string
+          status?: string
+        }
+        Relationships: []
       }
       rent_charges: {
         Row: {
@@ -4343,6 +4397,7 @@ export type Database = {
         Returns: Json
       }
       admin_finance_summary: { Args: never; Returns: Json }
+      admin_marketplace_overview: { Args: { _days?: number }; Returns: Json }
       admin_refund_action: {
         Args: { _action: string; _note?: string; _payment_id: string }
         Returns: undefined
@@ -4402,6 +4457,10 @@ export type Database = {
       calc_deal_fees: { Args: { _deal_id: string }; Returns: Json }
       can_manage_property: { Args: { _property_id: string }; Returns: boolean }
       check_my_subscription_expiry: { Args: never; Returns: undefined }
+      claim_referral: {
+        Args: { _campaign?: string; _code: string; _source?: string }
+        Returns: boolean
+      }
       confirm_deal_completion: { Args: { _deal_id: string }; Returns: string }
       crm_lead_status_for_stage: {
         Args: { _stage: Database["public"]["Enums"]["deal_stage"] }
@@ -4523,6 +4582,7 @@ export type Database = {
           status: string
         }[]
       }
+      my_ref_code: { Args: never; Returns: string }
       my_review_opportunities: {
         Args: never
         Returns: {
