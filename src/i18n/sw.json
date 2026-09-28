@@ -2517,7 +2517,60 @@
       "list": "Tangaza mali yako",
       "dalali": "Kuwa Dalali",
       "commissionBadge": "Kamisheni ya Dalali inalindwa",
-      "forTitle": "Kwa kila mtu katika sekta ya mali"
+      "forTitle": "Kwa kila mtu katika sekta ya mali",
+      "for": {
+        "buyers": {
+          "title": "Kwa wanunuzi na wapangaji",
+          "body": "Tafuta, hifadhi, panga kutembelea na toa ofa."
+        },
+        "owners": {
+          "title": "Kwa wamiliki",
+          "body": "Tangaza bure, pokea maulizo na fuatilia kila dili."
+        },
+        "dalalis": {
+          "title": "Kwa madalali",
+          "body": "Pata wateja, funga dili na kamisheni yako inalindwa."
+        },
+        "managers": {
+          "title": "Kwa wasimamizi wa mali",
+          "body": "Vyumba, wapangaji, kodi na matengenezo sehemu moja."
+        },
+        "agencies": {
+          "title": "Kwa mawakala",
+          "body": "Simamia timu, matangazo na dili kwa pamoja."
+        },
+        "developers": {
+          "title": "Kwa waendelezaji",
+          "body": "Onyesha miradi na wafikie wanunuzi makini."
+        }
+      },
+      "trust": {
+        "title": "Kwa nini watu wanaiamini SPACES",
+        "verified": {
+          "title": "Matangazo yaliyothibitishwa",
+          "body": "Tafuta alama ya Imethibitishwa kwenye mali zilizokaguliwa."
+        },
+        "deal": {
+          "title": "Mchakato salama wa dili",
+          "body": "Ofa, makubaliano na malipo hufuata hatua wazi."
+        },
+        "fees": {
+          "title": "Ada wazi",
+          "body": "Ada huonyeshwa kabla hujakubali."
+        },
+        "commission": {
+          "title": "Ulinzi wa kamisheni ya Dalali",
+          "body": "Kila kamisheni inarekodiwa kwenye dili."
+        },
+        "management": {
+          "title": "Zana za usimamizi wa mali",
+          "body": "Kodi, wapangaji na matengenezo vinafuatiliwa."
+        },
+        "tracking": {
+          "title": "Ufuatiliaji wa malipo na nyaraka",
+          "body": "Risiti na nyaraka hubaki na dili."
+        }
+      }
     },
     "forTitle": "Kwa kila mtu katika sekta ya mali",
     "for": {
@@ -2611,7 +2664,21 @@
       "startBody": "Ni bure na inachukua dakika moja.",
       "startTitle": "Fungua akaunti kuanza",
       "step": "Hatua {n} kati ya {total}",
-      "submit": "Tuma ombi"
+      "submit": "Tuma ombi",
+      "steps": {
+        "personal": "Taarifa binafsi",
+        "area": "Eneo la kazi",
+        "experience": "Uzoefu",
+        "services": "Huduma",
+        "referral": "Rufaa"
+      },
+      "services": {
+        "sales": "Mauzo",
+        "rentals": "Upangishaji",
+        "commercial": "Biashara",
+        "land": "Viwanja",
+        "management": "Usimamizi"
+      }
     },
     "steps": {
       "personal": "Taarifa binafsi",

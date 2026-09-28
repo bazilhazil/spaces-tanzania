@@ -2517,7 +2517,60 @@
       "list": "List your property",
       "dalali": "Become a Dalali",
       "commissionBadge": "Dalali commission protected",
-      "forTitle": "Built for everyone in property"
+      "forTitle": "Built for everyone in property",
+      "for": {
+        "buyers": {
+          "title": "For buyers & tenants",
+          "body": "Search, save, book viewings and make offers."
+        },
+        "owners": {
+          "title": "For owners",
+          "body": "List for free, receive inquiries and track every deal."
+        },
+        "dalalis": {
+          "title": "For Dalalis",
+          "body": "Get leads, close deals and keep your commission protected."
+        },
+        "managers": {
+          "title": "For property managers",
+          "body": "Units, tenants, rent and maintenance in one place."
+        },
+        "agencies": {
+          "title": "For agencies",
+          "body": "Manage your team, listings and deals together."
+        },
+        "developers": {
+          "title": "For developers",
+          "body": "Showcase projects and reach serious buyers."
+        }
+      },
+      "trust": {
+        "title": "Why people trust SPACES",
+        "verified": {
+          "title": "Verified listings",
+          "body": "Look for the Verified badge on checked properties."
+        },
+        "deal": {
+          "title": "Secure deal process",
+          "body": "Offers, agreements and payments follow clear steps."
+        },
+        "fees": {
+          "title": "Transparent fees",
+          "body": "Fees are shown before you commit."
+        },
+        "commission": {
+          "title": "Dalali commission protection",
+          "body": "Every commission is recorded on the deal."
+        },
+        "management": {
+          "title": "Property management tools",
+          "body": "Rent, tenants and maintenance tracked."
+        },
+        "tracking": {
+          "title": "Payment & document tracking",
+          "body": "Receipts and documents stay with the deal."
+        }
+      }
     },
     "forTitle": "Built for everyone in property",
     "for": {
@@ -2611,7 +2664,21 @@
       "startBody": "It's free and takes a minute.",
       "startTitle": "Create an account to start",
       "step": "Step {n} of {total}",
-      "submit": "Submit application"
+      "submit": "Submit application",
+      "steps": {
+        "personal": "Personal details",
+        "area": "Area of operation",
+        "experience": "Experience",
+        "services": "Services",
+        "referral": "Referral"
+      },
+      "services": {
+        "sales": "Sales",
+        "rentals": "Rentals",
+        "commercial": "Commercial",
+        "land": "Land",
+        "management": "Management"
+      }
     },
     "steps": {
       "personal": "Personal details",
