@@ -738,8 +738,12 @@ function LeaseForm({ properties, units, tenants, ownerFor, onDone }: {
           payment_frequency: frequency, status,
           late_fee_type: lateType, late_fee_value: lateType === "none" ? null : Number(lateValue || 0),
           late_fee_grace_days: Number(graceDays || 0), special_terms: terms.trim() || null,
-        });
-        toast.success("Lease created"); setOpen(false); onDone();
+         });
+         // An active lease on a unit means the unit is occupied.
+         if (status === "active" && tenant.unit_id) {
+           try { await updateUnit(tenant.unit_id, { occupancy_status: "occupied" }); } catch { /* unit status can still be set manually */ }
+         }
+         toast.success("Lease created"); setOpen(false); onDone();
       }}
     >
       <SelectField label="Tenant" value={tenantId} onChange={setTenantId}
