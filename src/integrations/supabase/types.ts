@@ -4610,6 +4610,14 @@ export type Database = {
           total: number
         }[]
       }
+      public_dalali_extras: {
+        Args: { _id: string }
+        Returns: {
+          areas_served: string[]
+          experience_years: number
+          services: string[]
+        }[]
+      }
       publish_property: { Args: { _property_id: string }; Returns: Json }
       recompute_deal_health: { Args: { _deal_id: string }; Returns: undefined }
       remove_agency_member: { Args: { _member_id: string }; Returns: undefined }
