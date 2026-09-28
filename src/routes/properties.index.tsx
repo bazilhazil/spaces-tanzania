@@ -412,6 +412,11 @@ function PropertiesPage() {
                 </div>
               </div>
 
+              {!loading && closeMatches && closeMatches.length > 0 && (
+                <p className="mb-4 rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+                  {t("s3.closeMatches")}
+                </p>
+              )}
               {loading ? (
                 <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {[0, 1, 2, 3, 4, 5].map((i) => <SkeletonCard key={i} />)}
