@@ -142,7 +142,7 @@ export function LeadsCenter() {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
-        <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:inline-flex sm:grid-cols-4">
+        <TabsList className="grid h-auto w-full grid-cols-2 sm:w-auto sm:inline-flex sm:grid-cols-4">
           <TabsTrigger value="active">{t("crm.tabs.active")}</TabsTrigger>
           <TabsTrigger value="followup" className="gap-1">
             {t("crm.tabs.followUp")}
