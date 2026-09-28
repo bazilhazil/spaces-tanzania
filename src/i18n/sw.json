@@ -1682,7 +1682,7 @@
       "notCompleted": "Malipo hayakukamilika. Hujakatwa fedha na SPACES.",
       "tryAgain": "Jaribu Tena",
       "couldNotStart": "Malipo hayakuweza kukamilika. Tafadhali jaribu tena.",
-      "unconfigured": "Malipo mtandaoni bado hayajapatikana. Agizo lako limehifadhiwa na timu yetu itawasiliana nawe.",
+      "unconfigured": "Malipo ya mtandaoni yanakuja hivi karibuni. Oda yako imerekodiwa na timu yetu itawasiliana nawe.",
       "checkStatus": "Angalia hali ya malipo"
     }
   },
@@ -2508,5 +2508,151 @@
   "inquiriesPage": {
     "title": "Maulizo",
     "subtitle": "Kila aliyeuliza kuhusu mali zako — ujumbe, simu na miadi ya kutazama mahali pamoja."
+  },
+  "s3": {
+    "home": {
+      "tagline": "Tafuta. Tangaza. Fanya Dili. Simamia.",
+      "subtitle": "Soko la nyumba na mali Tanzania kwa wanunuzi, wapangaji, wamiliki, madalali, mawakala na wasimamizi wa mali.",
+      "find": "Tafuta mali",
+      "list": "Tangaza mali yako",
+      "dalali": "Kuwa Dalali",
+      "commissionBadge": "Kamisheni ya Dalali inalindwa"
+    },
+    "forTitle": "Kwa kila mtu katika sekta ya mali",
+    "for": {
+      "buyers": {
+        "title": "Kwa wanunuzi na wapangaji",
+        "body": "Tafuta, hifadhi, panga kutembelea na toa ofa."
+      },
+      "owners": {
+        "title": "Kwa wamiliki",
+        "body": "Tangaza bure, pokea maulizo na fuatilia kila dili."
+      },
+      "dalalis": {
+        "title": "Kwa madalali",
+        "body": "Pata wateja, funga dili na kamisheni yako inalindwa."
+      },
+      "managers": {
+        "title": "Kwa wasimamizi wa mali",
+        "body": "Vyumba, wapangaji, kodi na matengenezo sehemu moja."
+      },
+      "agencies": {
+        "title": "Kwa mawakala",
+        "body": "Simamia timu, matangazo na dili kwa pamoja."
+      },
+      "developers": {
+        "title": "Kwa waendelezaji",
+        "body": "Onyesha miradi na wafikie wanunuzi makini."
+      }
+    },
+    "trust": {
+      "title": "Kwa nini watu wanaiamini SPACES",
+      "verified": {
+        "title": "Matangazo yaliyothibitishwa",
+        "body": "Tafuta alama ya Imethibitishwa kwenye mali zilizokaguliwa."
+      },
+      "deal": {
+        "title": "Mchakato salama wa dili",
+        "body": "Ofa, makubaliano na malipo hufuata hatua wazi."
+      },
+      "fees": {
+        "title": "Ada wazi",
+        "body": "Ada huonyeshwa kabla hujakubali."
+      },
+      "commission": {
+        "title": "Ulinzi wa kamisheni ya Dalali",
+        "body": "Kila kamisheni inarekodiwa kwenye dili."
+      },
+      "management": {
+        "title": "Zana za usimamizi wa mali",
+        "body": "Kodi, wapangaji na matengenezo vinafuatiliwa."
+      },
+      "tracking": {
+        "title": "Ufuatiliaji wa malipo na nyaraka",
+        "body": "Risiti na nyaraka hubaki na dili."
+      }
+    },
+    "dalali": {
+      "title": "Kuwa Dalali kwenye SPACES",
+      "subtitle": "Kuza biashara yako kwa wateja halisi na kamisheni inayolindwa.",
+      "how": {
+        "leads": {
+          "title": "Jinsi wateja wanavyopatikana",
+          "body": "Wanunuzi wanaowasiliana na matangazo yako wanakuwa wateja wako."
+        },
+        "deals": {
+          "title": "Jinsi dili zinavyofanya kazi",
+          "body": "Kila ulizo linasonga hatua kwa hatua hadi kukamilika."
+        },
+        "commission": {
+          "title": "Jinsi kamisheni inavyofanya kazi",
+          "body": "Kamisheni yako inawekwa ofa inapokubaliwa."
+        },
+        "protect": {
+          "title": "Jinsi SPACES inavyokulinda",
+          "body": "Dili na kamisheni zinarekodiwa na haziwezi kufutwa."
+        }
+      }
+    },
+    "steps": {
+      "personal": "Taarifa binafsi",
+      "area": "Eneo la kazi",
+      "experience": "Uzoefu",
+      "services": "Huduma",
+      "referral": "Rufaa"
+    },
+    "name": "Jina kamili",
+    "phone": "Simu",
+    "areas": "Maeneo unayohudumia",
+    "areasHint": "Tenganisha kwa koma, mf. Mikocheni, Mbezi",
+    "experience": "Miaka ya uzoefu",
+    "bio": "Kuhusu wewe",
+    "services": {
+      "sales": "Mauzo",
+      "rentals": "Upangishaji",
+      "commercial": "Biashara",
+      "land": "Viwanja",
+      "management": "Usimamizi"
+    },
+    "referral": "Msimbo wa rufaa (hiari)",
+    "referralHint": "Kama mtu amekualika, weka msimbo wake.",
+    "startTitle": "Fungua akaunti kuanza",
+    "startBody": "Ni bure na inachukua dakika moja.",
+    "createAccount": "Fungua akaunti",
+    "haveAccount": "Nina akaunti tayari",
+    "doneTitle": "Ombi limetumwa",
+    "doneBody": "Timu yetu itakagua taarifa zako. Tutakujulisha ukithibitishwa.",
+    "goDashboard": "Nenda dashibodi",
+    "submit": "Tuma ombi",
+    "error": "Kuna tatizo. Tafadhali jaribu tena.",
+    "step": "Hatua {n} kati ya {total}",
+    "back": "Rudi",
+    "next": "Endelea",
+    "saving": "Inahifadhi…",
+    "recommended": "Zinazopendekezwa kwako",
+    "recommendedSub": "Kulingana na utafutaji, ulizohifadhi na bajeti yako.",
+    "why": {
+      "search": "Inalingana na utafutaji uliohifadhi",
+      "area": "Katika eneo unalopenda",
+      "type": "Aina uliyotazama",
+      "budget": "Ndani ya bajeti yako",
+      "popular": "Maarufu sasa"
+    },
+    "avail": {
+      "available": "Inapatikana",
+      "reserved": "Imehifadhiwa",
+      "sold": "Imeuzwa",
+      "rented": "Imepangishwa"
+    },
+    "share": "Shiriki",
+    "linkCopied": "Kiungo kimenakiliwa",
+    "unverified": "Haijathibitishwa",
+    "closeMatches": "Hakuna zinazolingana kabisa — tunaonyesha zinazokaribiana.",
+    "ref": {
+      "title": "Alika na ukue",
+      "body": "Msimbo wako wa rufaa:",
+      "count": "{n} wamealikwa",
+      "copy": "Nakili kiungo"
+    }
   }
 }
