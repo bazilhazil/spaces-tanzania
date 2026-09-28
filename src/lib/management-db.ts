@@ -12,11 +12,9 @@ import { px } from "@/lib/pm-sw";
 export const BUCKET = "management-docs";
 
 export type OccupancyStatus =
-  | "vacant" | "occupied" | "notice_given" | "maintenance" | "ready" | "available";
+  | "vacant" | "occupied" | "reserved" | "notice_given" | "maintenance" | "ready" | "available";
 
-export const OCCUPANCY_STATUSES: OccupancyStatus[] = [
-  "vacant", "occupied", "notice_given", "maintenance", "ready", "available",
-];
+export const OCCUPANCY_STATUSES: OccupancyStatus[] = ["vacant", "occupied", "reserved", "maintenance"];
 
 export type LeaseStatus = "draft" | "active" | "expiring" | "expired" | "terminated" | "renewed";
 export const LEASE_STATUSES: LeaseStatus[] = [
@@ -29,10 +27,8 @@ export const PAYMENT_METHODS: PaymentMethod[] = ["mobile_money", "bank_transfer"
 export type PaymentStatus = "pending_verification" | "approved" | "rejected";
 
 export type TicketStatus =
-  | "new" | "reviewing" | "approved" | "assigned" | "in_progress" | "completed" | "closed" | "rejected";
-export const TICKET_STATUSES: TicketStatus[] = [
-  "new", "reviewing", "approved", "assigned", "in_progress", "completed", "closed", "rejected",
-];
+  | "new" | "reviewing" | "approved" | "assigned" | "in_progress" | "completed" | "closed" | "rejected" | "cancelled";
+export const TICKET_STATUSES: TicketStatus[] = ["new", "assigned", "in_progress", "completed", "cancelled"];
 export const TICKET_CATEGORIES = [
   "plumbing", "electrical", "structural", "appliance", "security", "cleaning", "other",
 ] as const;
@@ -44,6 +40,21 @@ export type Unit = {
   bedrooms: number | null; bathrooms: number | null; rent_amount: number | null;
   deposit_amount: number | null; service_charge: number | null; currency: string;
   occupancy_status: OccupancyStatus; notes: string | null; created_at: string;
+  building_id?: string | null; floor?: string | null; size_sqm?: number | null;
+};
+
+export type Building = {
+  id: string; property_id: string; owner_id: string; name: string; floors: number | null;
+  description: string | null; created_at: string;
+};
+
+export const EXPENSE_CATEGORIES = [
+  "maintenance", "utilities", "security", "cleaning", "management", "repairs", "taxes", "other",
+] as const;
+export type Expense = {
+  id: string; property_id: string; building_id: string | null; unit_id: string | null; owner_id: string;
+  category: string; supplier: string | null; description: string | null; amount: number; currency: string;
+  expense_date: string; receipt_path: string | null; notes: string | null; created_at: string;
 };
 
 export type Tenant = {
@@ -90,7 +101,7 @@ export type MaintenanceTicket = {
   category: string; description: string; priority: "low" | "normal" | "high" | "urgent";
   status: TicketStatus; estimated_cost: number | null; approved_cost: number | null;
   actual_cost: number | null; currency: string; notes: string | null; closed_at: string | null;
-  created_at: string;
+  created_at: string; building_id?: string | null; photos?: string[];
 };
 
 export function formatTzs(amount?: number | null): string {
@@ -162,6 +173,28 @@ export async function fetchLeases(propertyIds: string[]) { return rows<Lease>("l
 export async function fetchCharges(propertyIds: string[]) { return rows<RentCharge>("rent_charges", propertyIds, "due_date"); }
 export async function fetchPayments(propertyIds: string[]) { return rows<RentPayment>("rent_payments", propertyIds); }
 export async function fetchTickets(propertyIds: string[]) { return rows<MaintenanceTicket>("maintenance_tickets", propertyIds); }
+
+export async function fetchBuildings(ids: string[]) { return rows<Building>("property_buildings", ids, "name"); }
+export async function fetchExpenses(ids: string[]) { return rows<Expense>("property_expenses", ids, "expense_date"); }
+export const createBuilding = (p: Record<string, unknown>) => insert<Building>("property_buildings", p);
+export const createExpense = (p: Record<string, unknown>) => insert<Expense>("property_expenses", p);
+
+/** Active (not completed/cancelled) deals on the given properties — reuses the deals table. */
+export async function fetchActiveDealsCount(ids: string[]): Promise<number> {
+  if (!ids.length) return 0;
+  const { count } = await supabase.from("deals").select("id", { count: "exact", head: true })
+    .in("property_id", ids).not("stage", "in", "(completed,cancelled)");
+  return count ?? 0;
+}
+
+/** Upload a file (maintenance photo / expense receipt) to the private bucket, returning its path. */
+export async function uploadPrivateFile(userId: string, file: File): Promise<string> {
+  const ext = file.name.split(".").pop() ?? "dat";
+  const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false });
+  if (error) throw error;
+  return path;
+}
 
 export type ManagementDocument = {
   id: string;
