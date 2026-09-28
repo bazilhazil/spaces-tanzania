@@ -31,6 +31,7 @@ const NAV: { group: string; items: Item[] }[] = [
       { label: "Dashboard", icon: LayoutDashboard },
       { label: "Launch & Operations", section: "launch", icon: Rocket },
 
+      { label: "Marketplace", section: "marketplace", icon: BarChart3 },
       { label: "Analytics", section: "analytics", icon: BarChart3 },
       { label: "Audit Logs", section: "audit", icon: FileClock },
     ],
