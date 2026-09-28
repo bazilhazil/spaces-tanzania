@@ -4542,6 +4542,7 @@ export type Database = {
       owner_of_property: { Args: { _property_id: string }; Returns: string }
       payment_test_mode_enabled: { Args: never; Returns: boolean }
       plan_id_for_user: { Args: { _user_id: string }; Returns: string }
+      process_rent_reminders: { Args: never; Returns: number }
       property_rating: {
         Args: { _property_id: string }
         Returns: {
