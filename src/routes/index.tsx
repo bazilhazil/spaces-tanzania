@@ -42,13 +42,13 @@ export const Route = createFileRoute("/")({
   component: HomePage,
   head: () => ({
     meta: [
-      { title: "SPACES — Verified Property for Rent & Sale in Tanzania" },
+      { title: "SPACES — Find. List. Deal. Manage. Property in Tanzania" },
       {
         name: "description",
         content:
           "Find verified houses, apartments, offices, shops, warehouses and land for rent or sale across Dar es Salaam, Zanzibar, Arusha and all of Tanzania.",
       },
-      { property: "og:title", content: "SPACES — Verified Property for Rent & Sale in Tanzania" },
+      { property: "og:title", content: "SPACES — Find. List. Deal. Manage." },
       {
         property: "og:description",
         content:
@@ -109,6 +109,7 @@ function HomePage() {
       <main className="flex-1">
         <Hero />
         <Stats />
+        <ForEveryone />
         <Categories />
         <FeaturedSection
           eyebrow={t("home.featuredEyebrow")}
@@ -125,6 +126,7 @@ function HomePage() {
           tone="muted"
         />
         <WhyChooseUs />
+        <TrustStrip />
         <Verified verified={verified} />
         <Agents />
         <Testimonials />
@@ -155,15 +157,15 @@ function Hero() {
           <Sparkles className="h-3.5 w-3.5 text-gold" /> {t("home.hero.badge")}
         </span>
         <h1 className="mt-5 max-w-3xl font-display text-4xl font-semibold leading-tight text-white sm:text-5xl md:text-6xl">
-          {t("home.hero.titleLead")} <span className="text-gold">{t("home.hero.titleAccent")}</span> {t("home.hero.titleTail")}
+          SPACES — <span className="text-gold">{t("s3.home.tagline")}</span>
         </h1>
         <p className="mt-4 max-w-xl text-base text-white/85 md:text-lg">
-          {t("home.hero.subtitle")}
+          {t("s3.home.subtitle")}
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Link to="/properties" onClick={() => track("find_space_clicked", { source: "hero" })}>
             <Button size="lg" className="h-12 w-full gap-2 bg-gold text-gold-foreground hover:bg-gold/90 sm:w-auto">
-              <SearchIcon className="h-4 w-4" /> {t("convert.findSpace")}
+              <SearchIcon className="h-4 w-4" /> {t("s3.home.find")}
             </Button>
           </Link>
           <Link to="/upload" onClick={() => track("list_space_clicked", { source: "hero" })}>
@@ -172,7 +174,16 @@ function Hero() {
               variant="outline"
               className="h-12 w-full gap-2 border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white sm:w-auto"
             >
-              <Upload className="h-4 w-4" /> {t("convert.listSpace")}
+              <Upload className="h-4 w-4" /> {t("s3.home.list")}
+            </Button>
+          </Link>
+          <Link to="/become-dalali" onClick={() => track("become_dalali_clicked", { source: "hero" })}>
+            <Button
+              size="lg"
+              variant="ghost"
+              className="h-12 w-full gap-2 text-white hover:bg-white/10 hover:text-white sm:w-auto"
+            >
+              <Users className="h-4 w-4" /> {t("s3.home.dalali")}
             </Button>
           </Link>
         </div>
@@ -187,7 +198,7 @@ function Hero() {
             <BadgeCheck className="h-4 w-4 text-gold" /> {t("home.hero.trustedBadge")}
           </span>
           <span className="inline-flex items-center gap-2">
-            <Star className="h-4 w-4 text-gold" /> {t("home.hero.ratingBadge")}
+            <Star className="h-4 w-4 text-gold" /> {t("s3.home.commissionBadge")}
           </span>
         </div>
       </div>
@@ -624,6 +635,60 @@ function WhyChooseUs() {
               </div>
               <h3 className="mt-5 font-display text-lg font-semibold text-foreground">{t(`home.whyItems.${w.key}.title`)}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t(`home.whyItems.${w.key}.body`)}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
+const AUDIENCES = [
+  { key: "buyers", icon: SearchIcon, to: "/properties" },
+  { key: "owners", icon: HomeIcon, to: "/upload" },
+  { key: "dalalis", icon: Users, to: "/become-dalali" },
+  { key: "managers", icon: Building2, to: "/management" },
+  { key: "agencies", icon: Landmark, to: "/agency" },
+  { key: "developers", icon: Warehouse, to: "/contact" },
+] as const;
+
+function ForEveryone() {
+  const { t } = useI18n();
+  return (
+    <section className="container-page py-12 md:py-16">
+      <h2 className="font-display text-2xl font-semibold text-foreground md:text-3xl">{t("s3.home.forTitle")}</h2>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {AUDIENCES.map(({ key, icon: Icon, to }) => (
+          <Link key={key} to={to} className="group flex gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-primary/50">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" /></span>
+            <span>
+              <span className="block font-semibold text-foreground">{t(`s3.home.for.${key}.title`)}</span>
+              <span className="block text-sm text-muted-foreground">{t(`s3.home.for.${key}.body`)}</span>
+            </span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+const TRUST = ["verified", "deal", "fees", "commission", "management", "tracking"] as const;
+
+function TrustStrip() {
+  const { t } = useI18n();
+  return (
+    <section className="bg-secondary/40 py-12">
+      <div className="container-page">
+        <h2 className="font-display text-2xl font-semibold text-foreground">{t("s3.trust.title")}</h2>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {TRUST.map((k) => (
+            <div key={k} className="flex gap-3">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+              <div>
+                <p className="font-semibold text-foreground">{t(`s3.trust.${k}.title`)}</p>
+                <p className="text-sm text-muted-foreground">{t(`s3.trust.${k}.body`)}</p>
+              </div>
             </div>
           ))}
         </div>
