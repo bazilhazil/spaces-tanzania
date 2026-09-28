@@ -2794,6 +2794,12 @@
       "body": "Msimbo wako wa rufaa:",
       "count": "{n} wamealikwa",
       "copy": "Nakili kiungo"
+    },
+    "source": {
+      "owner": "Mmiliki",
+      "dalali": "Dalali",
+      "agency": "Wakala",
+      "developer": "Mwendelezaji"
     }
   }
 }

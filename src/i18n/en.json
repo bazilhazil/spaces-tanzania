@@ -2794,6 +2794,12 @@
       "body": "Your referral code:",
       "count": "{n} referred",
       "copy": "Copy invite link"
+    },
+    "source": {
+      "owner": "Owner",
+      "dalali": "Dalali",
+      "agency": "Agency",
+      "developer": "Developer"
     }
   }
 }
