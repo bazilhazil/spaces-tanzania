@@ -1,3 +1,4 @@
+import { ReferralCard } from "@/components/referral-card";
 import { RecommendedForYou } from "@/components/recommended-for-you";
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { DashboardShell } from "@/components/dashboard-shell";
@@ -59,7 +60,7 @@ function DashboardPage() {
 
         {activeMode === "buyer"
           ? <><BuyerHome /><RecommendedForYou /></>
-          : <OwnerAgentHome mode={activeMode} />}
+          : <><ReferralCard /><OwnerAgentHome mode={activeMode} /></>}
       </div>
     </DashboardShell>
   );
