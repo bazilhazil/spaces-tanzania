@@ -1,3 +1,4 @@
+import { parseSearch, looseMatch } from "@/lib/search-parse";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -68,6 +69,18 @@ const PAGE_SIZE = 24;
 
 /** Categories covered by the "Commercial" shortcut in the header and hero search. */
 const COMMERCIAL_CATEGORIES = ["Office", "Shop", "Warehouse", "Commercial Building"];
+
+function matchesQuery(p: Property, q: string, strict: boolean) {
+  const ps = parseSearch(q);
+  const hay = [p.title, p.description, p.ward, p.district, p.city, p.street, p.landmark ?? "", p.category, p.listingType]
+    .join(" ").toLowerCase();
+  const typeOk = !ps.type || p.category === ps.type || hay.includes(ps.type);
+  const placeOk = !ps.places.length || ps.places.some((w) => looseMatch(hay, w));
+  if (!strict) return (ps.type ? typeOk : false) || (ps.places.length ? placeOk : false);
+  if (ps.minBeds && p.bedrooms < ps.minBeds) return false;
+  if (ps.listing && p.listingType !== ps.listing) return false;
+  return typeOk && placeOk;
+}
 
 export const Route = createFileRoute("/properties/")({
   validateSearch: zodValidator(searchSchema),
@@ -196,22 +209,15 @@ function PropertiesPage() {
     }
     if (search.verified && !p.verified) return false;
     if (selectedAmenities.length && !selectedAmenities.every((a) => p.amenities.includes(a))) return false;
-    if (search.q) {
-      const terms = search.q.toLowerCase().split(/\s+/).filter(Boolean);
-      const hay = [
-        p.title, p.description, p.ward, p.district, p.city, p.street,
-        p.landmark ?? "", p.category, p.listingType,
-      ].join(" ").toLowerCase();
-      // Bedroom hints like "2 bedroom" are matched against the field too.
-      const bedHint = /(\d+)\s*(bed|bedroom|chumba|vyumba)/.exec(search.q.toLowerCase());
-      if (bedHint && p.bedrooms < Number(bedHint[1])) return false;
-      const meaningful = terms.filter((x) => x.length > 2 && !["bed", "bedroom", "in", "for", "the"].includes(x) && !/^\d+$/.test(x));
-      if (meaningful.length && !meaningful.some((x) => hay.includes(x))) return false;
-    }
+    if (search.q && !matchesQuery(p, search.q, true)) return false;
     return true;
   }), [properties, search, selectedAmenities.join(",")]);
 
-  const sorted = useMemo(() => [...filtered].sort((a, b) => {
+  // When nothing matches exactly, show close matches (same type OR a similar place name).
+  const closeMatches = search.q && filtered.length === 0
+    ? properties.filter((p) => matchesQuery(p, search.q!, false))
+    : null;
+  const sorted = useMemo(() => [...(closeMatches ?? filtered)].sort((a, b) => {
     switch (search.sort) {
       case "price-asc": return a.price - b.price;
       case "price-desc": return b.price - a.price;
@@ -224,7 +230,7 @@ function PropertiesPage() {
           (a.createdAt < b.createdAt ? 1 : -1);
       }
     }
-  }), [filtered, search.sort]);
+  }), [filtered, closeMatches, search.sort]);
 
   const mapped = sorted.filter((p) => p.latitude != null && p.longitude != null);
   const mapView = search.view === "map";
@@ -406,6 +412,11 @@ function PropertiesPage() {
                 </div>
               </div>
 
+              {!loading && closeMatches && closeMatches.length > 0 && (
+                <p className="mb-4 rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+                  {t("s3.closeMatches")}
+                </p>
+              )}
               {loading ? (
                 <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {[0, 1, 2, 3, 4, 5].map((i) => <SkeletonCard key={i} />)}

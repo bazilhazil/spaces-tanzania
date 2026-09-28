@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Bath, BedDouble, Car, Eye, GitCompare, Heart, MapPin, Ruler } from "lucide-react";
+import { Bath, BedDouble, Car, Eye, GitCompare, Heart, MapPin, Ruler, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice, type Property } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
@@ -69,11 +69,30 @@ export function PropertyCard({ property, className, qualityScore }: PropertyCard
             {badges.length > 0 && <ListingBadgeStrip kinds={badges} size="xs" max={3} />}
             {!property.verified && (
               <span className="rounded-full bg-background/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
-                Unverified
+                {t("s3.unverified")}
+              </span>
+            )}
+            {property.availability && property.availability !== "available" && (
+              <span className="rounded-full bg-destructive px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-destructive-foreground">
+                {t(`s3.avail.${property.availability}`)}
               </span>
             )}
           </div>
           <div className="flex items-center gap-1.5">
+            <button
+              aria-label={t("s3.share")}
+              onClick={async (e) => {
+                e.preventDefault();
+                const url = `${window.location.origin}/properties/${propertySlug(property)}`;
+                try {
+                  if (navigator.share) await navigator.share({ title: property.title, url });
+                  else { await navigator.clipboard.writeText(url); toast.success(t("s3.linkCopied")); }
+                } catch { /* share dismissed */ }
+              }}
+              className="grid h-9 w-9 place-items-center rounded-full bg-background/85 text-foreground/70 backdrop-blur transition hover:text-primary"
+            >
+              <Share2 className="h-4 w-4" />
+            </button>
             <button
               aria-label={comparing ? "Remove from compare" : "Add to compare"}
               onClick={(e) => {

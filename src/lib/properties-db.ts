@@ -79,6 +79,9 @@ function mapRow(row: Row, images: string[]): Property {
     latitude: row.latitude ?? null,
     longitude: row.longitude ?? null,
     landmark: row.landmark ?? null,
+    availability:
+      row.status === "sold" ? "sold" : row.status === "rented" ? "rented"
+      : (row.availability as string | undefined) ?? "available",
   };
 }
 

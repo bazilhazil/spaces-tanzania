@@ -15,10 +15,12 @@ import { DataBackupPanel } from "@/components/admin/data-backup-panel";
 import { SmsPanel } from "@/components/admin/sms-panel";
 import { LaunchPanel } from "@/components/admin/launch-panel";
 import { ProductionReviewPanel } from "@/components/admin/production-review-panel";
+import { MarketplacePanel } from "@/components/admin/marketplace-panel";
 import { MonetizationPanel } from "@/components/admin/monetization-panel";
 import { AdminRevenuePanel, AdminPaymentsPanel } from "@/components/finance/admin-finance";
 
 const PANELS: Record<string, React.ComponentType> = {
+  marketplace: MarketplacePanel,
   launch: LaunchPanel,
   monetization: MonetizationPanel,
   properties: PropertiesPanel,

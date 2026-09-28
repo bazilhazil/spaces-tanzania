@@ -1,3 +1,5 @@
+import { ReferralCard } from "@/components/referral-card";
+import { RecommendedForYou } from "@/components/recommended-for-you";
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ProfileCompletionCard } from "@/components/profile-completion-card";
@@ -57,8 +59,8 @@ function DashboardPage() {
         <ProfileCompletionCard />
 
         {activeMode === "buyer"
-          ? <BuyerHome />
-          : <OwnerAgentHome mode={activeMode} />}
+          ? <><BuyerHome /><RecommendedForYou /></>
+          : <><ReferralCard /><OwnerAgentHome mode={activeMode} /></>}
       </div>
     </DashboardShell>
   );
