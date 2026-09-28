@@ -305,11 +305,48 @@ export function PropertiesPanel() {
   const [region, setRegion] = useState("all");
   const [verified, setVerified] = useState<"all" | "verified" | "unverified">("all");
   const [availability, setAvailability] = useState<"all" | "available" | "unavailable">("all");
-  const { data: items, loading, reload } = useLive<AdminQueueItem[]>(
+  const [dalali, setDalali] = useState("all");
+  const [promo, setPromo] = useState<"all" | "featured" | "boosted" | "standard">("all");
+  const { data: allItems, loading, reload } = useLive<AdminQueueItem[]>(
     () => fetchModerationQueue(filter, { q, propertyType, region, verified, availability }),
     [],
     [filter, q, propertyType, region, verified, availability],
   );
+  const itemKey = allItems.map((i) => i.id).join(",");
+  const { data: extras } = useLive<{ agents: Map<string, string[]>; boosted: Set<string>; featured: Set<string>; names: Map<string, string> }>(
+    async () => {
+      const ids = allItems.map((i) => i.id);
+      if (!ids.length) return { agents: new Map(), boosted: new Set(), featured: new Set(), names: new Map() };
+      const now = new Date().toISOString();
+      const [{ data: pa }, { data: promos }, { data: feat }] = await Promise.all([
+        supabase.from("property_agents").select("property_id,agent_id").in("property_id", ids),
+        supabase.from("property_promotions").select("property_id,status,ends_at").in("property_id", ids),
+        supabase.from("properties").select("id,featured").in("id", ids),
+      ]);
+      const agents = new Map<string, string[]>();
+      for (const r of pa ?? []) agents.set(r.property_id, [...(agents.get(r.property_id) ?? []), r.agent_id]);
+      const agentIds = [...new Set((pa ?? []).map((r) => r.agent_id))];
+      const { data: profs } = agentIds.length
+        ? await supabase.from("profiles").select("id,full_name").in("id", agentIds)
+        : { data: [] as { id: string; full_name: string | null }[] };
+      const boosted = new Set((promos ?? []).filter((p) => p.status === "active" && (!p.ends_at || p.ends_at > now)).map((p) => p.property_id));
+      const featured = new Set((feat ?? []).filter((p) => p.featured).map((p) => p.id));
+      return { agents, boosted, featured, names: new Map((profs ?? []).map((p) => [p.id, p.full_name ?? "Dalali"])) };
+    },
+    { agents: new Map(), boosted: new Set(), featured: new Set(), names: new Map() },
+    [itemKey],
+  );
+  const items = allItems.filter((i) => {
+    const ag = extras.agents.get(i.id) ?? [];
+    if (dalali === "none" && ag.length) return false;
+    if (dalali === "any" && !ag.length) return false;
+    if (!["all", "none", "any"].includes(dalali) && !ag.includes(dalali)) return false;
+    const isF = extras.featured.has(i.id), isB = extras.boosted.has(i.id);
+    if (promo === "featured" && !isF) return false;
+    if (promo === "boosted" && !isB) return false;
+    if (promo === "standard" && (isF || isB)) return false;
+    return true;
+  });
   const { data: regionMix } = useLive<{ name: string; count: number; pct: number }[]>(fetchRegionMix, []);
   const [selected, setSelected] = useState<string | null>(null);
   const item = items.find((m) => m.id === selected) ?? items[0] ?? null;
@@ -385,6 +422,20 @@ export function PropertiesPanel() {
             <option value="unavailable">Unavailable</option>
           </select>
         </div>
+        <select aria-label="Dalali" value={dalali} onChange={(e) => setDalali(e.target.value)}
+          className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm">
+          <option value="all">Any Dalali</option>
+          <option value="any">Has a Dalali</option>
+          <option value="none">No Dalali</option>
+          {[...extras.names.entries()].map(([id, n]) => <option key={id} value={id}>{n}</option>)}
+        </select>
+        <select aria-label="Promotion" value={promo} onChange={(e) => setPromo(e.target.value as typeof promo)}
+          className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm">
+          <option value="all">Any promotion</option>
+          <option value="featured">Featured</option>
+          <option value="boosted">Boosted</option>
+          <option value="standard">Standard</option>
+        </select>
       </div>
 
       {loading ? (
