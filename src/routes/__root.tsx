@@ -155,6 +155,11 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
+  // Capture ?ref= referral codes on any page; claimed after sign-in.
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    if (ref && /^[A-Za-z0-9]{4,20}$/.test(ref)) window.localStorage.setItem("spaces.ref", ref.toUpperCase());
+  }, []);
   const { queryClient } = Route.useRouteContext();
 
   return (
